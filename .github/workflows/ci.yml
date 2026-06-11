@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: ${{ matrix.php-version == '8.2' && 'xdebug' || 'none' }}
+          extensions: curl, fileinfo, intl, mbstring
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build CSS
+        run: npm run build:css
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --debug
+
+      - name: Code style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Security audit
+        run: composer audit --abandoned=ignore
+
+      - name: Lint JS (all files under public/assets/js, audit B8.2)
+        run: npm run lint:all
+
+      - name: Language file parity (EN/ES, audit B8.3)
+        run: composer i18n-check
+
+      - name: Run test suite
+        run: vendor/bin/phpunit ${{ matrix.php-version == '8.2' && '' || '--no-coverage' }}
+
+      # Audit B9.4: enforce a coverage floor on the PHP 8.2 run (where
+      # xdebug is enabled). Soft-fail for now — the threshold (70%) needs
+      # one CI run with the actual measurement to decide whether to keep
+      # it as a hard gate or ratchet down. Flip `continue-on-error` to
+      # `false` once the baseline is confirmed.
+      - name: Coverage gate (>= 70% line coverage)
+        if: matrix.php-version == '8.2'
+        continue-on-error: true
+        run: composer coverage:check
