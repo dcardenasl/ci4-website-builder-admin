@@ -1,6 +1,6 @@
 # CI4 Admin Starter
 
-An opinionated **CodeIgniter 4 administrative dashboard template** designed to consume and interact with the [ci4-api-starter](https://github.com/dcardenasl/ci4-api-starter) backend API.
+An opinionated **CodeIgniter 4 administrative dashboard template** designed to consume and interact with the [ci4-website-builder-api](https://github.com/yourusername/ci4-website-builder-api) backend API.
 
 ## 🎯 Purpose
 
@@ -11,9 +11,9 @@ This is a **server-rendered frontend** (SRF) that provides a complete administra
 ```mermaid
 flowchart LR
     Browser["Browser"]
-    Admin["CI4 Admin Starter<br/>(this repo) :8082"]
+    Admin["CI4 Admin Starter<br/>(this repo) :8182"]
     Session[("PHP Session<br/>access_token<br/>refresh_token<br/>user.permissions[]")]
-    API["ci4-api-starter<br/>(backend) :8080"]
+    API["ci4-website-builder-api<br/>(backend) :8080"]
 
     Browser -->|"HTML / form POST<br/>CSRF protected"| Admin
     Admin --- Session
@@ -24,7 +24,7 @@ Tokens live **only** in the server-side PHP session — never in cookies, `local
 
 ## 📋 Key Principles
 
-1. **Decoupled Architecture:** Business logic and persistence live in the backend (`ci4-api-starter`). This frontend is stateless except for session JWT storage.
+1. **Decoupled Architecture:** Business logic and persistence live in the backend (`ci4-website-builder-api`). This frontend is stateless except for session JWT storage.
 2. **Server-Rendered Views:** Uses PHP views with Tailwind CSS and Alpine.js for interactivity. No frontend build pipeline required for production.
 3. **Centralized API Communication:** All HTTP requests go through `app/Libraries/ApiClient.php`, which handles token refresh, error handling, and response normalization.
 4. **Service Layer Pattern:** Controllers call Services, which use the ApiClient. Keeps code organized and testable.
@@ -40,11 +40,11 @@ For first-time setup, see **[QUICK-START.md](./docs/QUICK-START.md)** for step-b
 bash install.sh
 
 # 2. Start development servers (two terminals)
-php spark serve --port 8082    # Terminal 1
+php spark serve --port 8182    # Terminal 1
 npm run dev:css                # Terminal 2
 
 # 3. Open in browser
-# http://localhost:8082
+# http://localhost:8182
 ```
 
 ## 📚 Documentation
@@ -64,7 +64,7 @@ Complete documentation is available in the **[Documentation Hub](./docs/INDEX.md
 
 ## 🔐 API Contract & Backend Integration
 
-This template is designed to work seamlessly with [ci4-api-starter](https://github.com/dcardenasl/ci4-api-starter). The backend contract is mandatory:
+This template is designed to work seamlessly with [ci4-website-builder-api](https://github.com/yourusername/ci4-website-builder-api). The backend contract is mandatory:
 
 - **API Prefix:** `/api/v1`
 - **Authentication:** Bearer JWT with automatic refresh token handling
@@ -175,10 +175,10 @@ Edit `.env` with your configuration:
 ```dotenv
 # Application
 CI_ENVIRONMENT = development
-app.baseURL = 'http://localhost:8082/'
+app.baseURL = 'http://localhost:8182/'
 
 # Backend API
-apiClient.baseUrl = 'http://localhost:8080'
+apiClient.baseUrl = 'http://localhost:8180'
 apiClient.apiPrefix = '/api/v1'
 
 # Optional: Google OAuth (for "Login with Google" button)
@@ -200,8 +200,8 @@ Start both servers in separate terminal windows:
 
 **Terminal 1 — PHP Development Server:**
 ```bash
-php spark serve --port 8082
-# Application available at http://localhost:8082
+php spark serve --port 8182
+# Application available at http://localhost:8182
 ```
 
 **Terminal 2 — Tailwind CSS Watcher:**
@@ -317,7 +317,7 @@ To create a new project from this template:
 ## 🔗 External Resources
 
 - **[CodeIgniter 4 Documentation](https://codeigniter.com/user_guide/)** — Framework reference
-- **[ci4-api-starter](https://github.com/dcardenasl/ci4-api-starter)** — Backend API template
+- **[ci4-website-builder-api](https://github.com/yourusername/ci4-website-builder-api)** — Backend API template
 - **[Tailwind CSS Docs](https://tailwindcss.com/)** — Utility-first CSS framework
 - **[Alpine.js Docs](https://alpinejs.dev/)** — Lightweight JavaScript framework
 - **[Lucide Icons](https://lucide.dev/)** — Icon library

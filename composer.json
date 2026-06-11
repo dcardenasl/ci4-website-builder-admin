@@ -109,6 +109,6 @@
             "@test",
             "@quality"
         ],
-        "sync-swagger": "cp ../ci4-api-starter/public/swagger.json swagger_contract.json"
+        "sync-swagger": "cp ../ci4-website-builder-api/public/swagger.json swagger_contract.json"
     }
 }

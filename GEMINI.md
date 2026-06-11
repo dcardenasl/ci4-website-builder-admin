@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**CI4 Admin Starter** is a PHP 8.1+ web application built with **CodeIgniter 4**. It serves as a server-rendered administrative frontend designed to consume an external REST API (specifically `ci4-api-starter`). 
+**CI4 Admin Starter** is a PHP 8.1+ web application built with **CodeIgniter 4**. It serves as a server-rendered administrative frontend designed to consume an external REST API (specifically `ci4-website-builder-api`). 
 
 The project follows a decoupled architecture where the frontend handles UI, session management, and request orchestration, while business logic and data persistence reside in the backend API.
 
@@ -16,7 +16,7 @@ The project follows a decoupled architecture where the frontend handles UI, sess
 - **HTTP Client:** Custom `ApiClient` with automatic token refresh
 
 ### Architecture Flow
-`Browser -> CI4 Admin Starter (this repo) -> Backend API (ci4-api-starter)`
+`Browser -> CI4 Admin Starter (this repo) -> Backend API (ci4-website-builder-api)`
 
 ## 📚 Documentation Hub
 
@@ -42,15 +42,15 @@ cp env .env
 
 **Required `.env` settings:**
 - `CI_ENVIRONMENT = development`
-- `app.baseURL = 'http://localhost:8082/'`
-- `apiClient.baseUrl = 'http://localhost:8080'` (Address of the backend API)
+- `app.baseURL = 'http://localhost:8182/'`
+- `apiClient.baseUrl = 'http://localhost:8180'` (Address of the backend API)
 
 ### Running the Project
 ```bash
 # Start development server
-php spark serve --port 8082
+php spark serve --port 8182
 ```
-The application will be available at `http://localhost:8082`.
+The application will be available at `http://localhost:8182`.
 
 ---
 

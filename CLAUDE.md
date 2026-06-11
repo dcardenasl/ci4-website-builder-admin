@@ -16,11 +16,11 @@ For cross-repo context (current milestone, blocked tasks), read `../TASKS.md`.
 
 ## Project Overview
 
-**CI4 Admin Starter** is a CodeIgniter 4 web application (server-rendered frontend) designed to consume the external API from [`ci4-api-starter`](https://github.com/dcardenasl/ci4-api-starter). It provides an administrative panel interface for authentication, user management, file management, audit logs, and metrics.
+**CI4 Admin Starter** is a CodeIgniter 4 web application (server-rendered frontend) designed to consume the external API from [`ci4-website-builder-api`](https://github.com/yourusername/ci4-website-builder-api). It provides an administrative panel interface for authentication, user management, file management, audit logs, and metrics.
 
 **Architecture flow:**
 ```
-Browser → CI4 Admin Starter (port 8082) → ci4-api-starter API (port 8080)
+Browser → CI4 Admin Starter (port 8182) → ci4-website-builder-api API (port 8080)
 ```
 
 **Current state:** Fully implemented. All modules are active: authentication, dashboard, profile, file management, and admin panel (users, audit logs, API keys, metrics). See `docs/INDEX.md` for detailed architectural documentation.
@@ -65,8 +65,8 @@ cp env .env
 
 # Edit .env to configure:
 # - CI_ENVIRONMENT = development
-# - app.baseURL = 'http://localhost:8082/'
-# - apiClient.baseUrl = 'http://localhost:8080'
+# - app.baseURL = 'http://localhost:8182/'
+# - apiClient.baseUrl = 'http://localhost:8180'
 # - apiClient.appKey = apk_... (optional, see API App Key section)
 ```
 
@@ -75,7 +75,7 @@ cp env .env
 **Terminal 1: Start PHP development server**
 ```bash
 # Start on specific port (recommended for this project)
-php spark serve --port 8082
+php spark serve --port 8182
 ```
 
 **Terminal 2: Watch and rebuild CSS**
@@ -84,7 +84,7 @@ php spark serve --port 8082
 npm run dev:css
 ```
 
-Application will be available at: `http://localhost:8082`
+Application will be available at: `http://localhost:8182`
 
 **Notes:**
 - Both terminal sessions should run in parallel during development
@@ -160,7 +160,7 @@ The `app/Libraries/ApiClient.php` class is the heart of all API communication. I
 
 ### DomainApiClient: Secondary client for domain-starter backends
 
-When the admin drives both a hub (`ci4-api-starter`) and a domain app (`ci4-domain-starter`) in parallel — e.g. SubscriptionKit, where hub owns auth/users/IAM and a domain app owns projects/subscribers — wire the domain modules to `App\Libraries\DomainApiClient` instead of `ApiClient`.
+When the admin drives both a hub (`ci4-website-builder-api`) and a domain app (`ci4-domain-starter`) in parallel — e.g. SubscriptionKit, where hub owns auth/users/IAM and a domain app owns projects/subscribers — wire the domain modules to `App\Libraries\DomainApiClient` instead of `ApiClient`.
 
 - **Config:** `app/Config/DomainApiClient.php` reads `domainApiClient.*` / `DOMAIN_API_*` env vars (default base URL `http://localhost:8090`). Extends `Config\ApiClient`, so the contract and PHPStan types stay aligned.
 - **Library:** `App\Libraries\DomainApiClient extends ApiClient implements DomainApiClientInterface`. Inherits all refresh / header / upload logic from `ApiClient`.
@@ -279,7 +279,7 @@ app/Views/
   --color-brand-50 through --color-brand-900: /* Brand color palette */
   --font-sans: 'Inter', system-ui, ...
   --font-mono: 'JetBrains Mono', ...
-  --app-name: 'API Client'
+  --app-name: 'CI4 Website Builder Admin'
 }
 ```
 
@@ -398,11 +398,11 @@ The project uses a **modular architecture** where each feature is self-contained
 
 ## External API Reference
 
-This app consumes **ci4-api-starter** (https://github.com/dcardenasl/ci4-api-starter) which provides:
+This app consumes **ci4-website-builder-api** (https://github.com/yourusername/ci4-website-builder-api) which provides:
 - REST API endpoints for auth, users, files, audit logs, metrics, and API keys
 - JWT-based authentication (access + refresh tokens)
 - Optional `X-App-Key` header for app-level rate limiting (600 req/min vs 60 req/min)
-- Runs on `http://localhost:8080` by default
+- Runs on `http://localhost:8180` by default
 
 ## Testing Strategy
 
@@ -427,7 +427,7 @@ This app consumes **ci4-api-starter** (https://github.com/dcardenasl/ci4-api-sta
 - `writable/` directory must be writable by the web server user
 - Session configuration required for JWT token storage
 - CORS may need configuration if API and frontend are on different origins
-- Ensure both ci4-api-starter and ci4-admin-starter are running on different ports during development
+- Ensure both ci4-website-builder-api and ci4-admin-starter are running on different ports during development
 - Configuring an invalid `apiClient.appKey` causes every API request to return `401` — omit the key rather than use a wrong value
 
 ## References
@@ -441,4 +441,4 @@ This app consumes **ci4-api-starter** (https://github.com/dcardenasl/ci4-api-sta
 - **Deployment Guide:** `docs/DEPLOYMENT.md` — Production checklist and server configuration
 - **How-To Guides:** `docs/HOW-TO.md` — Step-by-step instructions for common tasks
 - [CodeIgniter 4 User Guide](https://codeigniter.com/user_guide/)
-- [CI4 API Starter Repository](https://github.com/dcardenasl/ci4-api-starter)
+- [CI4 API Starter Repository](https://github.com/yourusername/ci4-website-builder-api)

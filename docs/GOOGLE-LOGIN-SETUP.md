@@ -3,7 +3,7 @@
 Official guide to enable Google login using the flow implemented in this project:
 
 - `ci4-admin-starter`: renders Google button and sends `id_token`.
-- `ci4-api-starter`: validates `id_token` with `GOOGLE_CLIENT_ID` and resolves login/signup pending.
+- `ci4-website-builder-api`: validates `id_token` with `GOOGLE_CLIENT_ID` and resolves login/signup pending.
 
 ## 1) Key Requirement of the Current Flow
 
@@ -24,7 +24,7 @@ Therefore:
 5. Create credential: **OAuth Client ID**.
 6. Application type: **Web application**.
 7. Add to **Authorized JavaScript origins**:
-   - Local admin: `http://localhost:8082`
+   - Local admin: `http://localhost:8182`
    - Production admin: `https://admin.yourdomain.com` (adjust to your real domain)
 8. Save and copy the **Client ID** (`...apps.googleusercontent.com`).
 
@@ -34,8 +34,8 @@ In the admin's `.env`:
 
 ```dotenv
 GOOGLE_CLIENT_ID='your-client-id.apps.googleusercontent.com'
-app.baseURL='http://localhost:8082/'
-apiClient.baseUrl='http://localhost:8080'
+app.baseURL='http://localhost:8182/'
+apiClient.baseUrl='http://localhost:8180'
 ```
 
 Notes:
@@ -43,7 +43,7 @@ Notes:
 - The Google button only appears if `GOOGLE_CLIENT_ID` has a value.
 - The admin's Google login makes a POST to `/login/google` (internal web route).
 
-## 4) Configure `ci4-api-starter`
+## 4) Configure `ci4-website-builder-api`
 
 In the API's `.env`:
 
@@ -56,16 +56,16 @@ It must be **exactly the same Client ID** used by the admin.
 Also, ensure CORS for the admin's origin:
 
 ```dotenv
-CORS_ALLOWED_ORIGINS='http://localhost:8082,https://admin.yourdomain.com'
+CORS_ALLOWED_ORIGINS='http://localhost:8182,https://admin.yourdomain.com'
 ```
 
 ## 5) Local Checklist
 
-1. Admin running on `http://localhost:8082`.
-2. API running on `http://localhost:8080`.
+1. Admin running on `http://localhost:8182`.
+2. API running on `http://localhost:8180`.
 3. Same `GOOGLE_CLIENT_ID` in both `.env` files.
-4. Origin `http://localhost:8082` loaded in Google Cloud.
-5. API CORS allows `http://localhost:8082`.
+4. Origin `http://localhost:8182` loaded in Google Cloud.
+5. API CORS allows `http://localhost:8182`.
 6. Google button appears on `/login`.
 7. When authenticating:
    - `200`: creates session and enters dashboard.
@@ -89,7 +89,7 @@ CORS_ALLOWED_ORIGINS='http://localhost:8082,https://admin.yourdomain.com'
 - **Google button doesn't appear**:
   - `GOOGLE_CLIENT_ID` is empty or not loaded in admin.
 - **Unauthorized origin error**:
-  - Missing `http://localhost:8082` or final domain in `Authorized JavaScript origins`.
+  - Missing `http://localhost:8182` or final domain in `Authorized JavaScript origins`.
 - **API rejects Google token**:
   - `GOOGLE_CLIENT_ID` is different between admin and API.
 - **CORS failure in production**:

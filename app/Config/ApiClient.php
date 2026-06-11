@@ -8,7 +8,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class ApiClient extends BaseConfig
 {
-    public string $baseUrl = 'http://localhost:8080';
+    public string $baseUrl = 'http://localhost:8180';
 
     public int $timeout = 15;
 
@@ -16,7 +16,7 @@ class ApiClient extends BaseConfig
 
     public string $apiPrefix = '/api/v1';
 
-    public string $appName = 'API Client';
+    public string $appName = 'CI4 Website Builder Admin';
 
     public string $appKey = '';
 

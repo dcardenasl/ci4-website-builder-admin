@@ -73,8 +73,8 @@
 # API CLIENT
 #--------------------------------------------------------------------
 
-# apiClient.baseUrl = 'http://localhost:8080'
-# apiClient.appName = 'API Client'
+# apiClient.baseUrl = 'http://localhost:8180'
+# apiClient.appName = 'CI4 Website Builder Admin'
 # apiClient.apiPrefix = '/api/v1'
 # apiClient.logRequests = false
 #
