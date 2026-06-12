@@ -6,13 +6,6 @@ $allPermissions        = $allPermissions ?? [];
 $assignedPermissionIds = $assignedPermissionIds ?? [];
 $oldPermIds            = (array) old('permission_ids', $assignedPermissionIds);
 $oldPermIdsStr         = array_map('strval', $oldPermIds);
-
-if (! is_superadmin()) {
-    $allPermissions = array_values(array_filter(
-        $allPermissions,
-        static fn (array $p): bool => actor_owns_permission((string) ($p['code'] ?? ''))
-    ));
-}
 ?>
 <div class="mb-4">
     <a href="<?= route_to('admin.iam.roles') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
@@ -67,17 +60,20 @@ if (! is_superadmin()) {
             <p class="text-xs text-gray-500 mt-1"><?= esc(lang('Iam.permissions_help_create')) ?></p>
 
             <?php if ($allPermissions === []): ?>
-                <p class="mt-2 text-sm text-gray-500 italic"><?= esc(lang('Iam.permissions_none_grantable')) ?></p>
+                <p class="mt-2 text-sm text-gray-500 italic"><?= esc(lang('Iam.permissions_none_available')) ?></p>
             <?php else: ?>
                 <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
                     <?php foreach ($allPermissions as $perm): ?>
                         <?php $pid = (string) ($perm['id'] ?? ''); ?>
-                        <label class="inline-flex items-start gap-2 text-sm rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50">
+                        <?php $grantable = is_superadmin() || actor_owns_permission((string) ($perm['code'] ?? '')); ?>
+                        <label class="inline-flex items-start gap-2 text-sm rounded-lg border border-gray-200 px-3 py-2 <?= $grantable ? 'hover:bg-gray-50' : 'bg-gray-50 opacity-70' ?>" title="<?= $grantable ? '' : esc(lang('Iam.permissions_locked_tooltip')) ?>">
                             <input type="checkbox" name="permission_ids[]" value="<?= esc($pid) ?>"
                                 <?= in_array($pid, $oldPermIdsStr, true) ? 'checked' : '' ?>
+                                <?= $grantable ? '' : 'disabled' ?>
                                 class="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                             <span>
                                 <code class="font-medium text-gray-900"><?= esc((string) ($perm['code'] ?? '-')) ?></code>
+                                <?php if (! $grantable): ?><span class="ml-1 text-xs text-amber-600" aria-hidden="true">locked</span><?php endif; ?>
                                 <?php if (! empty($perm['description'])): ?>
                                     <span class="block text-xs text-gray-500"><?= esc((string) $perm['description']) ?></span>
                                 <?php endif; ?>

@@ -10,6 +10,7 @@ use App\Libraries\BffApiClient;
 use App\Libraries\BffApiClientInterface;
 use App\Libraries\DomainApiClient;
 use App\Libraries\DomainApiClientInterface;
+use App\Libraries\PermissionsSessionRefresher;
 use App\Modules\ApiKeys\Services\ApiKeyApiService;
 use App\Modules\ApiKeys\Services\ApiKeyApiServiceInterface;
 use App\Modules\Audit\Services\AuditApiService;
@@ -30,6 +31,8 @@ use App\Modules\Iam\Services\PermissionApiService;
 use App\Modules\Iam\Services\PermissionApiServiceInterface;
 use App\Modules\Iam\Services\RoleApiService;
 use App\Modules\Iam\Services\RoleApiServiceInterface;
+use App\Modules\Iam\Services\RoleMatrixApiService;
+use App\Modules\Iam\Services\RoleMatrixApiServiceInterface;
 use App\Modules\Metrics\Services\MetricsApiService;
 use App\Modules\Metrics\Services\MetricsApiServiceInterface;
 use App\Modules\Profile\Services\ProfileApiService;
@@ -113,6 +116,15 @@ class Services extends BaseService
         }
 
         return new AuthApiService(static::apiClient());
+    }
+
+    public static function permissionsSessionRefresher(bool $getShared = true): PermissionsSessionRefresher
+    {
+        if ($getShared) {
+            return static::getSharedInstance('permissionsSessionRefresher');
+        }
+
+        return new PermissionsSessionRefresher(static::authApiService());
     }
 
     public static function fileApiService(bool $getShared = true): FileApiServiceInterface
@@ -213,6 +225,15 @@ class Services extends BaseService
         }
 
         return new RoleApiService(static::apiClient());
+    }
+    public static function roleMatrixApiService(bool $getShared = true): RoleMatrixApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var RoleMatrixApiService */
+            return static::getSharedInstance('roleMatrixApiService');
+        }
+
+        return new RoleMatrixApiService(static::apiClient());
     }
     public static function permissionApiService(bool $getShared = true): PermissionApiServiceInterface
     {

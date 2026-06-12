@@ -11,18 +11,10 @@ $selectedApp           = $selectedApp === null ? '' : (string) $selectedApp;
 $oldPermIds    = (array) old('permission_ids', $assignedPermissionIds);
 $oldPermIdsStr = array_map('strval', $oldPermIds);
 
-$grantableItems = $allPermissions;
-if (! is_superadmin()) {
-    $grantableItems = array_values(array_filter(
-        $allPermissions,
-        static fn (array $p): bool => actor_owns_permission((string) ($p['code'] ?? ''))
-    ));
-}
-
-// Permissions already assigned that the actor cannot grant. They must remain
-// attached on submit (we re-emit them as hidden inputs) — otherwise this form
-// would silently strip them. Mirrors the "locked roles" pattern from users/edit.php.
-$grantableIds       = array_map(static fn (array $p): string => (string) ($p['id'] ?? ''), $grantableItems);
+$grantableIds       = array_map(
+    static fn (array $p): string => (is_superadmin() || actor_owns_permission((string) ($p['code'] ?? ''))) ? (string) ($p['id'] ?? '') : '',
+    $allPermissions
+);
 $assignedIdsStr     = array_map('strval', $assignedPermissionIds);
 $lockedAssignedIds  = array_values(array_diff($assignedIdsStr, $grantableIds));
 ?>
@@ -88,18 +80,21 @@ $lockedAssignedIds  = array_values(array_diff($assignedIdsStr, $grantableIds));
             <span class="block text-sm font-medium text-gray-700"><?= esc(lang('Iam.permissions_assigned')) ?></span>
             <p class="text-xs text-gray-500 mt-1"><?= esc(lang('Iam.permissions_help_edit')) ?></p>
 
-            <?php if ($grantableItems === []): ?>
-                <p class="mt-2 text-sm text-gray-500 italic"><?= esc(lang('Iam.permissions_none_grantable')) ?></p>
+            <?php if ($allPermissions === []): ?>
+                <p class="mt-2 text-sm text-gray-500 italic"><?= esc(lang('Iam.permissions_none_available')) ?></p>
             <?php else: ?>
                 <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-                    <?php foreach ($grantableItems as $perm): ?>
+                    <?php foreach ($allPermissions as $perm): ?>
                         <?php $pid = (string) ($perm['id'] ?? ''); ?>
-                        <label class="inline-flex items-start gap-2 text-sm rounded-lg border border-gray-200 px-3 py-2 hover:bg-gray-50">
+                        <?php $grantable = is_superadmin() || actor_owns_permission((string) ($perm['code'] ?? '')); ?>
+                        <label class="inline-flex items-start gap-2 text-sm rounded-lg border border-gray-200 px-3 py-2 <?= $grantable ? 'hover:bg-gray-50' : 'bg-gray-50 opacity-70' ?>" title="<?= $grantable ? '' : esc(lang('Iam.permissions_locked_tooltip')) ?>">
                             <input type="checkbox" name="permission_ids[]" value="<?= esc($pid) ?>"
                                 <?= in_array($pid, $oldPermIdsStr, true) ? 'checked' : '' ?>
+                                <?= $grantable ? '' : 'disabled' ?>
                                 class="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                             <span>
                                 <code class="font-medium text-gray-900"><?= esc((string) ($perm['code'] ?? '-')) ?></code>
+                                <?php if (! $grantable): ?><span class="ml-1 text-xs text-amber-600" aria-hidden="true">locked</span><?php endif; ?>
                                 <?php if (! empty($perm['description'])): ?>
                                     <span class="block text-xs text-gray-500"><?= esc((string) $perm['description']) ?></span>
                                 <?php endif; ?>
