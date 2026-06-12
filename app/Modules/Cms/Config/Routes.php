@@ -24,4 +24,14 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('languages/reorder', '\\App\\Modules\\Cms\\Controllers\\LanguageController::saveOrder', ['as' => 'admin.cms.languages.save_order', 'filter' => 'permission:cms.languages.write']);
 
 
+
+    // Setting
+    $routes->get('settings', '\App\Modules\Cms\Controllers\SettingController::index', ['as' => 'admin.cms.settings', 'filter' => 'permission:cms.settings.read']);
+    $routes->get('settings/data', '\App\Modules\Cms\Controllers\SettingController::data', ['as' => 'admin.cms.settings.data', 'filter' => 'permission:cms.settings.read']);
+    $routes->get('settings/create', '\App\Modules\Cms\Controllers\SettingController::create', ['as' => 'admin.cms.settings.create', 'filter' => 'permission:cms.settings.write']);
+    $routes->post('settings', '\App\Modules\Cms\Controllers\SettingController::store', ['as' => 'admin.cms.settings.store', 'filter' => 'permission:cms.settings.write']);
+    $routes->get('settings/(:segment)', '\App\Modules\Cms\Controllers\SettingController::show/$1', ['as' => 'admin.cms.settings.show', 'filter' => 'permission:cms.settings.read']);
+    $routes->get('settings/(:segment)/edit', '\App\Modules\Cms\Controllers\SettingController::edit/$1', ['as' => 'admin.cms.settings.edit', 'filter' => 'permission:cms.settings.write']);
+    $routes->post('settings/(:segment)', '\App\Modules\Cms\Controllers\SettingController::update/$1', ['as' => 'admin.cms.settings.update', 'filter' => 'permission:cms.settings.write']);
+    $routes->post('settings/(:segment)/delete', '\App\Modules\Cms\Controllers\SettingController::delete/$1', ['as' => 'admin.cms.settings.delete', 'filter' => 'permission:cms.settings.write']);
 });

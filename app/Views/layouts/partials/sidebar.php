@@ -88,6 +88,12 @@
                     <span><?= lang('Cms.languages_title') ?></span>
                 </a>
             <?php endif; ?>
+            <?php if (has_permission('cms.settings.read')): ?>
+                <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
+                    <?= ui_icon('settings') ?>
+                    <span><?= lang('Cms.settings_title') ?></span>
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
     </nav>
