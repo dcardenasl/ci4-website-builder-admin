@@ -88,6 +88,8 @@ class PermissionController extends BaseWebController
             return $this->failApi($response, lang('Iam.permissions_create_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_create_success'));
     }
 
@@ -120,6 +122,8 @@ class PermissionController extends BaseWebController
             return $this->failApi($response, lang('Iam.permissions_update_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_update_success'));
     }
 
@@ -130,6 +134,8 @@ class PermissionController extends BaseWebController
         if (! $response['ok']) {
             return $this->failApi($response, lang('Iam.permissions_delete_failed'), route_to('admin.iam.permissions'), false);
         }
+
+        service('permissionsSessionRefresher')->forceRefresh();
 
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_delete_success'));
     }
