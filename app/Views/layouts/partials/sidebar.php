@@ -68,6 +68,27 @@
                 <span><?= lang('Iam.applications_title') ?></span>
             </a>
         <?php endif; ?>
+        <?php
+            $hasCmsItem = has_permission('cms.languages.read')
+                || has_permission('cms.settings.read')
+                || has_permission('cms.pages.read')
+                || has_permission('cms.menus.read')
+                || has_permission('cms.blocks.read')
+                || has_permission('cms.collections.read')
+                || has_permission('cms.entries.read')
+                || has_permission('cms.categories.read')
+                || has_permission('cms.tags.read')
+                || has_permission('cms.redirects.read');
+        ?>
+        <?php if ($hasCmsItem): ?>
+            <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500 tracking-wider px-3">CMS</div>
+            <?php if (has_permission('cms.languages.read')): ?>
+                <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
+                    <?= ui_icon('cms-language') ?>
+                    <span><?= lang('Cms.languages_title') ?></span>
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
     </nav>
 </aside>

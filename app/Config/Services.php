@@ -16,6 +16,8 @@ use App\Modules\Audit\Services\AuditApiService;
 use App\Modules\Audit\Services\AuditApiServiceInterface;
 use App\Modules\Auth\Services\AuthApiService;
 use App\Modules\Auth\Services\AuthApiServiceInterface;
+use App\Modules\Cms\Services\LanguageApiService;
+use App\Modules\Cms\Services\LanguageApiServiceInterface;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Dashboard\Services\HealthApiServiceInterface;
 use App\Modules\Files\Services\FileApiService;
@@ -227,5 +229,13 @@ class Services extends BaseService
         }
 
         return new ApplicationApiService(static::apiClient());
+    }
+    public static function languageApiService(bool $getShared = true): LanguageApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var LanguageApiService */
+            return static::getSharedInstance('languageApiService');
+        }
+        return new LanguageApiService(static::domainApiClient());
     }
 }

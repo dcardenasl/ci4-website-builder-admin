@@ -3,7 +3,8 @@
 > Fuente de verdad para trabajo en este repo.
 > Historial de completadas: ver `TASKS_ARCHIVE.md`.
 > Cross-repo: ver `../TASKS.md`.
-> Última actualización: 2026-06-10 (ADM-010 ✅ completado · CSV export/import scaffold opcional; ADM-009 ✅ relation-aware)
+> Plan detallado CMS admin: ver [`../docs/cms_integration_plan.md`](../docs/cms_integration_plan.md).
+> Última actualización: 2026-06-12 (CMS Integration admin modules planificados — Fases A/B/C post-domain)
 
 ---
 
@@ -16,6 +17,298 @@
 ## 🟡 Próximo (ordenado por prioridad)
 
 *(vacío)*
+
+---
+
+## 🟡 CMS Integration — Admin Modules
+
+> Tareas gateadas por fase del domain. No iniciar una fase hasta que su CMS-0XX esté ✅ en `../TASKS.md`.
+> Todos los módulos usan `--service=domain` (apuntan a `DomainApiClient` → puerto 8090).
+> Los comandos se corren desde la raíz del repo `ci4-website-builder-admin/`.
+>
+> **Prerequisito transversal (una vez, antes del primer módulo):**
+> - Añadir iconos al mapa en `app/Helpers/ui_helper.php`: `'cms-page' => 'file-text'`, `'cms-menu' => 'navigation'`, `'cms-block-type' => 'layout-template'`, `'cms-entry' => 'newspaper'`, `'cms-language' => 'globe'`, `'cms-redirect' => 'corner-up-right'`.
+> - Crear bloque CMS en `app/Views/layouts/partials/sidebar.php` antes del anchor `<!-- [DYNAMIC_MODULES_ANCHOR] -->` con guard `$hasCmsItem`.
+>
+> **Pasos post-scaffold comunes a todos los módulos:**
+> 1. Registrar factory en `app/Config/Services.php` usando `domainApiClient()`.
+> 2. Añadir link de navegación bajo el bloque CMS gateado con `has_permission('cms.{resource}.read')`.
+> 3. Verificar prefijo `cms.` en filtros de ruta (el scaffold puede generar `permission:languages.read` sin prefijo).
+> 4. Pulir language strings `en/es`.
+> 5. `vendor/bin/phpunit tests/unit` y `tests/feature` antes de marcar ✅.
+
+---
+
+### Fase A — Disponible al terminar CMS-005 (Menus API)
+
+---
+
+#### [CMS-019] Admin module: Language
+**Bloqueante:** CMS-002 ✅ — disponible ahora.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Language Cms /cms/languages \
+  'code:string:required,name:string:required,native_name:string,is_default:boolean,is_active:boolean,sort_order:int' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **`fallback_language_id`** (auto-relación, no entra en scaffold): añadir `<select>` en create/edit que cargue `GET /cms/languages`; el controller pasa `$languages` a la vista y excluye el idioma actual al editar.
+- **Acción "Set as Default"**: añadir manualmente `POST /{id}/set-default` en controller y routes → envía `PUT /cms/languages/{id}` con `{"is_default": true}`.
+
+**Criterio de done:**
+- [x] Index lista idiomas con code, name, is_default, is_active.
+- [x] Select de `fallback_language_id` funciona y excluye el idioma actual al editar.
+- [x] Botón "Set Default" actualiza con flash success.
+- [x] Sidebar link gateado con `cms.languages.read`.
+- [x] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-020] Admin module: Setting
+**Bloqueante:** CMS-002 ✅ — disponible ahora.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Setting Cms /cms/settings \
+  'setting_key:string:required,setting_value:text,setting_type:enum:string|int|bool|json|file_id,setting_group:string,is_translatable:boolean,sort_order:int,description:text' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **`setting_value` dinámico**: usar Alpine `x-show` para alternar entre `<input type="text">`, `<input type="number">`, checkbox y `<textarea class="font-mono">` según `setting_type` seleccionado.
+- **Filtro por `setting_group`**: añadir select en el panel de filtros del index.
+- **Traducciones (v1 read-only)**: settings con `is_translatable=true` muestran tabla de traducciones en `show`; edición per-idioma es trabajo futuro.
+
+**Criterio de done:**
+- [ ] Index filtrable por `setting_group`.
+- [ ] Campo value cambia de componente según `setting_type`.
+- [ ] Settings translatable muestran traducciones en show (read-only).
+- [ ] Sidebar link gateado con `cms.settings.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-012] Admin module: Page
+**Bloqueante:** CMS-004 ✅ — disponible ahora.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Page Cms /cms/pages \
+  'page_type:enum:home|generic|contact|privacy|terms|404|500|maintenance,status:enum:draft|published|archived,parent_id:relation:pages,sort_order:int,is_in_sitemap:boolean,sitemap_priority:string,published_at:datetime,scheduled_at:datetime' \
+  --service=domain \
+  --action=publish \
+  --action=archive
+```
+
+**Trabajo manual específico:**
+- **Status badge**: añadir `cms_status_badge(string $status): string` en `app/Helpers/ui_helper.php` (reutilizado en Entries). Draft → gris, published → verde, archived → naranja.
+- **Traducciones**: fieldset por idioma activo (cargar vía `GET /cms/languages`) con `slug`, `title`, `excerpt`, `meta_title`, `meta_description`. Enviar como `translations[{n}][language_id]`, `translations[{n}][slug]`, etc. SEO avanzado (`og_image_file_id`, `og_type`, `canonical_url`, `schema_data`) → TODO v2.
+- **`parent_id`**: el option loader excluye la página actual al editar. El select muestra `title` del idioma por defecto.
+- **Filtros de index**: `status` (select) y `page_type` (select) — mapear a `?status=&page_type=`.
+- **Acciones publish/archive**: verificar que el service envía `PUT /cms/pages/{id}` con `{"status":"published"}` / `{"status":"archived"}`.
+
+**Criterio de done:**
+- [ ] Index con status badge y filtros por status y page_type.
+- [ ] Create/Edit envía traducciones del idioma por defecto (slug, title obligatorios).
+- [ ] `parent_id` excluye la página actual al editar.
+- [ ] Publish y Archive cambian status y muestran flash.
+- [ ] Sidebar link gateado con `cms.pages.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-013] Admin module: Menu
+**Bloqueante:** CMS-005 — esperar ✅ en `../TASKS.md`.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Menu Cms /cms/menus \
+  'menu_key:string:required,is_active:boolean' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **Sub-recurso MenuItem**: añadir manualmente en `app/Modules/Cms/Config/Routes.php`:
+  ```
+  GET  admin/cms/menus/(:num)/items/create       → MenuController::createItem/$1
+  POST admin/cms/menus/(:num)/items              → MenuController::storeItem/$1
+  GET  admin/cms/menus/(:num)/items/(:num)/edit  → MenuController::editItem/$1/$2
+  POST admin/cms/menus/(:num)/items/(:num)       → MenuController::updateItem/$1/$2
+  POST admin/cms/menus/(:num)/items/(:num)/delete → MenuController::deleteItem/$1/$2
+  ```
+  + métodos en controller. La vista `show` llama `GET /cms/menus/{id}/items` y recibe `$items`.
+- **Lista anidada en show**: renderizar items indentados por `parent_id` (árbol simple, sin drag-drop).
+- **Exclusión mutua `page_id` / `url_override`**: Alpine en form + validación server en Request.
+- **`sort_order`**: campo numérico editable; drag-drop queda como TODO v2.
+- **Traducciones**: tabla read-only en show (v1).
+
+**Criterio de done:**
+- [ ] Index lista menús con `menu_key`, is_active, conteo de items.
+- [ ] CRUD básico de items funciona (sin drag-drop).
+- [ ] Vista show muestra árbol de items anidados.
+- [ ] Validación `page_id` / `url_override` mutuamente excluyentes.
+- [ ] Sidebar link gateado con `cms.menus.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+### Fase B — Disponible al terminar CMS-006 (Block system)
+
+---
+
+#### [CMS-014] Admin module: BlockType
+**Bloqueante:** CMS-006 — esperar ✅ en `../TASKS.md`.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh BlockType Cms /cms/block-types block-types \
+  'type_key:string:required,name:string:required,description:text,icon:string,is_active:boolean' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **Campo `block_schema` (JSON)**: añadir `<textarea class="font-mono text-xs">` en create/edit con validación `json_decode($value) !== null`. Renderizar en show como `<pre><code>` con `json_encode(..., JSON_PRETTY_PRINT)`.
+- **Permiso correcto**: rutas deben usar `cms.blocks.read/write`, no `blocks.read` (sin prefijo).
+- **Seeds read-only**: anotar en show que `rich_text`, `image`, `cta` son tipos del sistema.
+
+**Criterio de done:**
+- [ ] Index lista block types con `type_key`, `name`, `is_active`.
+- [ ] Campo JSON válida y renderiza como pretty-print en show.
+- [ ] Permisos `cms.blocks.*` correctos en rutas.
+- [ ] Sidebar link gateado con `cms.blocks.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+### Fase C — Disponible al terminar CMS-007 + CMS-008 + CMS-009
+
+---
+
+#### [CMS-015] Admin module: Collection
+**Bloqueante:** CMS-007 — esperar ✅ en `../TASKS.md`.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Collection Cms /cms/collections \
+  'collection_key:string:required,is_active:boolean' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **Traducciones (name, description)**: fieldset por idioma activo en create/edit → `translations[{n}][language_id]`, `translations[{n}][name]`, `translations[{n}][description]`.
+- **Link a Entries**: en show, añadir botón "Ver entries" → `/admin/cms/entries?collection_id={id}` (añadir al finalizar CMS-016).
+
+**Criterio de done:**
+- [ ] Index con `collection_key`, is_active.
+- [ ] Create/Edit envía traducción del idioma por defecto.
+- [ ] Sidebar link gateado con `cms.collections.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-016] Admin module: Entry
+**Bloqueante:** CMS-008 ✅ + CMS-015 ✅ — esperar ambos.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Entry Cms /cms/entries \
+  'collection_id:relation:collections,status:enum:draft|published|archived,sort_order:int,published_at:datetime,scheduled_at:datetime' \
+  --service=domain \
+  --action=publish \
+  --action=archive
+```
+
+**Trabajo manual específico:**
+- **Filtro por `collection_id`** en index: select de colecciones activas — esencial para usabilidad.
+- **Relation loader `collection_id`**: `GET /cms/collections?is_active=true`, mostrar `collection_key` como label.
+- **Traducciones**: fieldset por idioma con `slug`, `title`, `excerpt`, `meta_title`, `meta_description`.
+- **Block instances en show**: lista read-only (tipo + id). Edición de blocks → TODO v2.
+- **Taxonomy en show**: tags y categorías asignados como badges read-only. Edición → tras CMS-017/018.
+- **Status badge**: reutilizar `cms_status_badge()` de CMS-012.
+
+**Criterio de done:**
+- [ ] Index filtrable por `collection_id` y `status`.
+- [ ] Publish y Archive funcionan con flash.
+- [ ] Block instances y taxonomías visibles en show (read-only).
+- [ ] Sidebar link gateado con `cms.entries.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-017] Admin module: Category
+**Bloqueante:** CMS-009 ✅ + CMS-015 ✅ — esperar ambos.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Category Cms /cms/categories \
+  'collection_id:relation:collections,parent_id:relation:categories,sort_order:int,is_active:boolean' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **Scope por `collection_id`**: filtro prominente en index. Option loader de `parent_id` carga `GET /cms/categories?collection_id={id}` (misma colección).
+- **Auto-referencia `parent_id`**: excluir la categoría actual al editar.
+- **Traducciones (name, slug)**: fieldset por idioma.
+
+**Criterio de done:**
+- [ ] Index filtrable por `collection_id`.
+- [ ] `parent_id` scoped a la misma colección, excluye la actual al editar.
+- [ ] Create/Edit envía traducción del idioma por defecto.
+- [ ] Sidebar link gateado con `cms.categories.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+#### [CMS-018] Admin module: Tag
+**Bloqueante:** CMS-009 — esperar ✅ en `../TASKS.md`.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Tag Cms /cms/tags \
+  'is_active:boolean' \
+  --service=domain
+```
+
+**Trabajo manual específico:**
+- **Traducciones (name, slug)**: fieldset por idioma — tags son globales, sin scope de colección.
+- **Link a Entries desde show**: `GET /admin/cms/entries?tag_id={id}` — añadir tras finalizar CMS-016.
+
+**Criterio de done:**
+- [ ] Index lista tags con name (idioma por defecto), slug, is_active.
+- [ ] Create/Edit envía traducción del idioma por defecto.
+- [ ] Sidebar link gateado con `cms.tags.read`.
+- [ ] Tests pasan + `composer quality` limpio.
+
+---
+
+### Bonus — Al terminar CMS-010 (Redirects)
+
+---
+
+#### [CMS-020b] Admin module: Redirect
+**Bloqueante:** CMS-010 — esperar ✅ en `../TASKS.md`.
+
+**Scaffold:**
+```bash
+bash bin/make-module.sh Redirect Cms /cms/redirects \
+  'from_path:string:required,to_path:string:required,status_code:enum:301|302,is_active:boolean' \
+  --service=domain \
+  --csv
+```
+
+**Trabajo manual específico:**
+- Validar en Request que `from_path` empiece con `/`.
+- Manejar conflicto 409 (from_path duplicado) con flash error descriptivo.
+- Validar `status_code` `301|302` por fila en import CSV.
+- Añadir `'cms-redirect' => 'corner-up-right'` al mapa de iconos (parte del prerequisito transversal).
+
+**Criterio de done:**
+- [ ] CRUD completo con import/export CSV funcionales.
+- [ ] Conflicto `from_path` duplicado muestra error claro.
+- [ ] Sidebar link gateado con `cms.redirects.read`.
+- [ ] Tests pasan + `composer quality` limpio.
 
 ---
 

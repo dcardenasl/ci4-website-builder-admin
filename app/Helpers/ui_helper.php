@@ -287,6 +287,12 @@ if (! function_exists('ui_icon')) {
             'tag'             => 'tag',
             'ticket'          => 'ticket',
             'store'           => 'store',
+            'cms-page'        => 'file-text',
+            'cms-menu'        => 'navigation',
+            'cms-block-type'  => 'layout-template',
+            'cms-entry'       => 'newspaper',
+            'cms-language'    => 'globe',
+            'cms-redirect'    => 'corner-up-right',
         ];
 
         if (! isset($icons[$name])) {
@@ -298,5 +304,16 @@ if (! function_exists('ui_icon')) {
         }
 
         return '<i data-lucide="' . esc($icon) . '" class="' . esc($class) . '" aria-hidden="true"></i>';
+    }
+}
+
+if (! function_exists('cms_status_badge')) {
+    function cms_status_badge(string $status): string
+    {
+        return match ($status) {
+            'published' => '<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">published</span>',
+            'archived'  => '<span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">archived</span>',
+            default     => '<span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">draft</span>',
+        };
     }
 }
