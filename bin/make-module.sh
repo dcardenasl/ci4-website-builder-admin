@@ -928,11 +928,11 @@ for f in fields:
                 'isHtml' => true
             ]) ?>"""
     elif ftype == 'relation':
-        rel_lookup = f"(${rel_table}[(string) (${resource_camel}['{name}'] ?? '')] ?? (${resource_camel}['{name}'] ?? '—'))"
+        val_expr = f"(${rel_table}[(string) (${resource_camel}['{name}'] ?? '')] ?? (${resource_camel}['{name}'] ?? '—'))"
         show_row = """            <?= view('components/display/field_row', [
                 'label' => '{module}.field_{name}',
                 'value' => {val_expr}
-            ]) ?>""".replace('{module}', module).replace('{name}', name).replace('{val_expr}', rel_lookup)
+            ]) ?>"""
     else:
         val_expr = "${RESOURCE_CAMEL}['{name}'] ?? '—'".replace('{RESOURCE_CAMEL}', resource_camel).replace('{name}', name)
         show_row = """            <?= view('components/display/field_row', [

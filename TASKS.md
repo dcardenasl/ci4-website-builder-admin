@@ -229,11 +229,11 @@ bash bin/make-module.sh Entry Cms /cms/entries \
 - **Status badge**: reutilizar `cms_status_badge()` de CMS-012.
 
 **Criterio de done:**
-- [ ] Index filtrable por `collection_id` y `status`.
-- [ ] Publish y Archive funcionan con flash.
-- [ ] Block instances y taxonomías visibles en show (read-only).
-- [ ] Sidebar link gateado con `cms.entries.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index filtrable por `collection_id` y `status`.
+- [x] Publish y Archive funcionan con flash.
+- [x] Block instances y taxonomías visibles en show (read-only).
+- [x] Sidebar link gateado con `cms.entries.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

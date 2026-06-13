@@ -85,4 +85,18 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('collections/(:segment)/edit', '\App\Modules\Cms\Controllers\CollectionController::edit/$1', ['as' => 'admin.cms.collections.edit', 'filter' => 'permission:cms.collections.write']);
     $routes->post('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::update/$1', ['as' => 'admin.cms.collections.update', 'filter' => 'permission:cms.collections.write']);
     $routes->post('collections/(:segment)/delete', '\App\Modules\Cms\Controllers\CollectionController::delete/$1', ['as' => 'admin.cms.collections.delete', 'filter' => 'permission:cms.collections.write']);
+
+    // Entry
+    $routes->get('entries', '\App\Modules\Cms\Controllers\EntryController::index', ['as' => 'admin.cms.entries', 'filter' => 'permission:cms.entries.read']);
+    $routes->get('entries/data', '\App\Modules\Cms\Controllers\EntryController::data', ['as' => 'admin.cms.entries.data', 'filter' => 'permission:cms.entries.read']);
+    $routes->get('entries/create', '\App\Modules\Cms\Controllers\EntryController::create', ['as' => 'admin.cms.entries.create', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries', '\App\Modules\Cms\Controllers\EntryController::store', ['as' => 'admin.cms.entries.store', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('entries/(:segment)', '\App\Modules\Cms\Controllers\EntryController::show/$1', ['as' => 'admin.cms.entries.show', 'filter' => 'permission:cms.entries.read']);
+    $routes->get('entries/(:segment)/edit', '\App\Modules\Cms\Controllers\EntryController::edit/$1', ['as' => 'admin.cms.entries.edit', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:segment)', '\App\Modules\Cms\Controllers\EntryController::update/$1', ['as' => 'admin.cms.entries.update', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:segment)/delete', '\App\Modules\Cms\Controllers\EntryController::delete/$1', ['as' => 'admin.cms.entries.delete', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:segment)/publish', '\App\Modules\Cms\Controllers\EntryController::publish/$1', ['as' => 'admin.cms.entries.publish', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:segment)/archive', '\App\Modules\Cms\Controllers\EntryController::archive/$1', ['as' => 'admin.cms.entries.archive', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::reorder', ['as' => 'admin.cms.entries.reorder', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::saveOrder', ['as' => 'admin.cms.entries.save_order', 'filter' => 'permission:cms.entries.write']);
 });

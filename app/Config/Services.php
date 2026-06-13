@@ -21,6 +21,8 @@ use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\BlockTypeApiServiceInterface;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
+use App\Modules\Cms\Services\EntryApiService;
+use App\Modules\Cms\Services\EntryApiServiceInterface;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\LanguageApiServiceInterface;
 use App\Modules\Cms\Services\MenuApiService;
@@ -308,5 +310,13 @@ class Services extends BaseService
             return static::getSharedInstance('collectionApiService');
         }
         return new CollectionApiService(static::domainApiClient());
+    }
+    public static function entryApiService(bool $getShared = true): EntryApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var EntryApiService */
+            return static::getSharedInstance('entryApiService');
+        }
+        return new EntryApiService(static::domainApiClient());
     }
 }
