@@ -47,6 +47,11 @@ npm run dev:css                # Terminal 2
 # http://localhost:8182
 ```
 
+Open the admin with `http://localhost:8182`, matching `app.baseURL`.
+Do not use `http://127.0.0.1:8182` for the browser session: CodeIgniter CSRF/session
+state is host-sensitive, and mixing `127.0.0.1` with `localhost` can produce
+`SecurityException #403` on login.
+
 ## 📚 Documentation
 
 Complete documentation is available in the **[Documentation Hub](./docs/INDEX.md)**. Key topics:
@@ -203,6 +208,10 @@ Start both servers in separate terminal windows:
 php spark serve --port 8182
 # Application available at http://localhost:8182
 ```
+
+Use that exact `localhost` URL in the browser. `127.0.0.1` is fine for database
+connections, but the admin frontend should use the same host configured in
+`app.baseURL`.
 
 **Terminal 2 — Tailwind CSS Watcher:**
 ```bash
