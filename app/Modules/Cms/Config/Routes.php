@@ -34,4 +34,18 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('settings/(:segment)/edit', '\App\Modules\Cms\Controllers\SettingController::edit/$1', ['as' => 'admin.cms.settings.edit', 'filter' => 'permission:cms.settings.write']);
     $routes->post('settings/(:segment)', '\App\Modules\Cms\Controllers\SettingController::update/$1', ['as' => 'admin.cms.settings.update', 'filter' => 'permission:cms.settings.write']);
     $routes->post('settings/(:segment)/delete', '\App\Modules\Cms\Controllers\SettingController::delete/$1', ['as' => 'admin.cms.settings.delete', 'filter' => 'permission:cms.settings.write']);
+
+    // Page
+    $routes->get('pages', '\App\Modules\Cms\Controllers\PageController::index', ['as' => 'admin.cms.pages', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('pages/data', '\App\Modules\Cms\Controllers\PageController::data', ['as' => 'admin.cms.pages.data', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('pages/create', '\App\Modules\Cms\Controllers\PageController::create', ['as' => 'admin.cms.pages.create', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages', '\App\Modules\Cms\Controllers\PageController::store', ['as' => 'admin.cms.pages.store', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('pages/(:segment)', '\App\Modules\Cms\Controllers\PageController::show/$1', ['as' => 'admin.cms.pages.show', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('pages/(:segment)/edit', '\App\Modules\Cms\Controllers\PageController::edit/$1', ['as' => 'admin.cms.pages.edit', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:segment)', '\App\Modules\Cms\Controllers\PageController::update/$1', ['as' => 'admin.cms.pages.update', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:segment)/delete', '\App\Modules\Cms\Controllers\PageController::delete/$1', ['as' => 'admin.cms.pages.delete', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:segment)/publish', '\App\Modules\Cms\Controllers\PageController::publish/$1', ['as' => 'admin.cms.pages.publish', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:segment)/archive', '\App\Modules\Cms\Controllers\PageController::archive/$1', ['as' => 'admin.cms.pages.archive', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('pages/reorder', '\App\Modules\Cms\Controllers\PageController::reorder', ['as' => 'admin.cms.pages.reorder', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/reorder', '\App\Modules\Cms\Controllers\PageController::saveOrder', ['as' => 'admin.cms.pages.save_order', 'filter' => 'permission:cms.pages.write']);
 });

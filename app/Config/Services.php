@@ -19,6 +19,8 @@ use App\Modules\Auth\Services\AuthApiService;
 use App\Modules\Auth\Services\AuthApiServiceInterface;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\PageApiServiceInterface;
 use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\SettingApiServiceInterface;
 use App\Modules\Dashboard\Services\HealthApiService;
@@ -268,5 +270,13 @@ class Services extends BaseService
             return static::getSharedInstance('settingApiService');
         }
         return new SettingApiService(static::domainApiClient());
+    }
+    public static function pageApiService(bool $getShared = true): PageApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var PageApiService */
+            return static::getSharedInstance('pageApiService');
+        }
+        return new PageApiService(static::domainApiClient());
     }
 }

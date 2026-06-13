@@ -98,6 +98,12 @@
                     <span><?= lang('Cms.settings_title') ?></span>
                 </a>
             <?php endif; ?>
+            <?php if (has_permission('cms.pages.read')): ?>
+                <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
+                    <?= ui_icon('cms-page') ?>
+                    <span><?= lang('Cms.pages_title') ?></span>
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
     </nav>

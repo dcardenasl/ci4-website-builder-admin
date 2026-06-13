@@ -110,12 +110,12 @@ bash bin/make-module.sh Page Cms /cms/pages \
 - **Acciones publish/archive**: verificar que el service envía `PUT /cms/pages/{id}` con `{"status":"published"}` / `{"status":"archived"}`.
 
 **Criterio de done:**
-- [ ] Index con status badge y filtros por status y page_type.
-- [ ] Create/Edit envía traducciones del idioma por defecto (slug, title obligatorios).
-- [ ] `parent_id` excluye la página actual al editar.
-- [ ] Publish y Archive cambian status y muestran flash.
-- [ ] Sidebar link gateado con `cms.pages.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index con status badge y filtros por status y page_type.
+- [x] Create/Edit envía traducciones del idioma por defecto (slug, title obligatorios).
+- [x] `parent_id` excluye la página actual al editar.
+- [x] Publish y Archive cambian status y muestran flash.
+- [x] Sidebar link gateado con `cms.pages.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

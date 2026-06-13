@@ -38,6 +38,7 @@ class AdminAccess extends BaseConfig
         'iam.admin-access',
         'cms.languages.read',
         'cms.settings.read',
+        'cms.pages.read',
     ];
 
     public function __construct()
