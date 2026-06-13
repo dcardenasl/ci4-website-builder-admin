@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [CMS-015] Collection admin module to manage translatable system collections and metadata settings.
 - [CMS-016] Entry admin module to manage entries with multi-language translation support, custom block instances, categories/tags badges, status filtering, and scheduled publishing options.
 - [CMS-017] Category admin module to manage hierarchical, translatable categories scoped by collection.
+- [CMS-018] Tag admin module to manage global, translatable tags.
 - [CMS-019] Language admin module to list, create, edit, delete, and set default languages.
 - [CMS-020] Setting admin module to manage translatable system configuration variables.
 - Transversal CMS sidebar section header and Lucide icons in navigation.

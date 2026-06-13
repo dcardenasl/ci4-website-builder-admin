@@ -276,10 +276,10 @@ bash bin/make-module.sh Tag Cms /cms/tags \
 - **Link a Entries desde show**: `GET /admin/cms/entries?tag_id={id}` — añadir tras finalizar CMS-016.
 
 **Criterio de done:**
-- [ ] Index lista tags con name (idioma por defecto), slug, is_active.
-- [ ] Create/Edit envía traducción del idioma por defecto.
-- [ ] Sidebar link gateado con `cms.tags.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index lista tags con name (idioma por defecto), slug, is_active.
+- [x] Create/Edit envía traducción del idioma por defecto.
+- [x] Sidebar link gateado con `cms.tags.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

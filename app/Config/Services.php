@@ -33,6 +33,8 @@ use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Services\PageApiServiceInterface;
 use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\SettingApiServiceInterface;
+use App\Modules\Cms\Services\TagApiService;
+use App\Modules\Cms\Services\TagApiServiceInterface;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Dashboard\Services\HealthApiServiceInterface;
 use App\Modules\Files\Services\FileApiService;
@@ -328,5 +330,13 @@ class Services extends BaseService
             return static::getSharedInstance('categoryApiService');
         }
         return new CategoryApiService(static::domainApiClient());
+    }
+    public static function tagApiService(bool $getShared = true): TagApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var TagApiService */
+            return static::getSharedInstance('tagApiService');
+        }
+        return new TagApiService(static::domainApiClient());
     }
 }

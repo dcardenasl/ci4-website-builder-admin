@@ -111,4 +111,14 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('categories/(:segment)/delete', '\App\Modules\Cms\Controllers\CategoryController::delete/$1', ['as' => 'admin.cms.categories.delete', 'filter' => 'permission:cms.categories.write']);
     $routes->get('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::reorder', ['as' => 'admin.cms.categories.reorder', 'filter' => 'permission:cms.categories.write']);
     $routes->post('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::saveOrder', ['as' => 'admin.cms.categories.save_order', 'filter' => 'permission:cms.categories.write']);
+
+    // Tag
+    $routes->get('tags', '\App\Modules\Cms\Controllers\TagController::index', ['as' => 'admin.cms.tags', 'filter' => 'permission:cms.tags.read']);
+    $routes->get('tags/data', '\App\Modules\Cms\Controllers\TagController::data', ['as' => 'admin.cms.tags.data', 'filter' => 'permission:cms.tags.read']);
+    $routes->get('tags/create', '\App\Modules\Cms\Controllers\TagController::create', ['as' => 'admin.cms.tags.create', 'filter' => 'permission:cms.tags.write']);
+    $routes->post('tags', '\App\Modules\Cms\Controllers\TagController::store', ['as' => 'admin.cms.tags.store', 'filter' => 'permission:cms.tags.write']);
+    $routes->get('tags/(:segment)', '\App\Modules\Cms\Controllers\TagController::show/$1', ['as' => 'admin.cms.tags.show', 'filter' => 'permission:cms.tags.read']);
+    $routes->get('tags/(:segment)/edit', '\App\Modules\Cms\Controllers\TagController::edit/$1', ['as' => 'admin.cms.tags.edit', 'filter' => 'permission:cms.tags.write']);
+    $routes->post('tags/(:segment)', '\App\Modules\Cms\Controllers\TagController::update/$1', ['as' => 'admin.cms.tags.update', 'filter' => 'permission:cms.tags.write']);
+    $routes->post('tags/(:segment)/delete', '\App\Modules\Cms\Controllers\TagController::delete/$1', ['as' => 'admin.cms.tags.delete', 'filter' => 'permission:cms.tags.write']);
 });

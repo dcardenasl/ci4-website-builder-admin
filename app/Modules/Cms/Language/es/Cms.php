@@ -118,4 +118,22 @@ return [
     'field_slug' => 'Slug',
     'field_slug_placeholder' => 'Ingresar Slug',
     'field_slug_help' => 'Ingresa el slug.',
+
+    // Tag — list & actions
+    'tags_title'              => 'Tags',
+    'tags_new'                => 'Nuevo Tag',
+    'tags_create'             => 'Nuevo Tag',
+    'tags_edit'               => 'Editar Tag',
+    'tags_details'            => 'Detalle de Tag',
+    'tags_not_found'          => 'Tag no encontrado.',
+    'tags_create_success'     => 'Tag creado correctamente.',
+    'tags_create_failed'      => 'No se pudo crear el tag.',
+    'tags_update_success'     => 'Tag actualizado correctamente.',
+    'tags_update_failed'      => 'No se pudo actualizar el tag.',
+    'tags_delete_success'     => 'Tag eliminado correctamente.',
+    'tags_delete_failed'      => 'No se pudo eliminar el tag.',
+    'tags_empty'              => 'Aún no hay tags registrados.',
+    'tags_search_placeholder' => 'Buscar por nombre...',
+    'tags_loading'            => 'Cargando tags...',
+    'tags_no_results'         => 'No se encontraron tags.',
 ];
