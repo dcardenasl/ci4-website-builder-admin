@@ -40,6 +40,12 @@ class AdminAccess extends BaseConfig
         'cms.settings.read',
         'cms.pages.read',
         'cms.menus.read',
+        'cms.blocks.read',
+        'cms.collections.read',
+        'cms.entries.read',
+        'cms.categories.read',
+        'cms.tags.read',
+        'cms.redirects.read',
     ];
 
     public function __construct()
