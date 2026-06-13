@@ -19,6 +19,8 @@ use App\Modules\Auth\Services\AuthApiService;
 use App\Modules\Auth\Services\AuthApiServiceInterface;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\MenuApiService;
+use App\Modules\Cms\Services\MenuApiServiceInterface;
 use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Services\PageApiServiceInterface;
 use App\Modules\Cms\Services\SettingApiService;
@@ -278,5 +280,13 @@ class Services extends BaseService
             return static::getSharedInstance('pageApiService');
         }
         return new PageApiService(static::domainApiClient());
+    }
+    public static function menuApiService(bool $getShared = true): MenuApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var MenuApiService */
+            return static::getSharedInstance('menuApiService');
+        }
+        return new MenuApiService(static::domainApiClient());
     }
 }

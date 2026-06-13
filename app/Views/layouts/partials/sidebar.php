@@ -104,6 +104,12 @@
                     <span><?= lang('Cms.pages_title') ?></span>
                 </a>
             <?php endif; ?>
+            <?php if (has_permission('cms.menus.read')): ?>
+                <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
+                    <?= ui_icon('cms-menu') ?>
+                    <span><?= lang('Cms.menus_title') ?></span>
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
     </nav>

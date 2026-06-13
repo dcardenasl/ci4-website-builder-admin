@@ -1,0 +1,334 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Cms\Controllers;
+
+use App\Controllers\BaseWebController;
+use App\Modules\Cms\Requests\MenuItemStoreRequest;
+use App\Modules\Cms\Requests\MenuItemUpdateRequest;
+use App\Modules\Cms\Requests\MenuStoreRequest;
+use App\Modules\Cms\Requests\MenuUpdateRequest;
+use App\Modules\Cms\Services\MenuApiServiceInterface;
+use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+
+class MenuController extends BaseWebController
+{
+    protected MenuApiServiceInterface $menuService;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
+    {
+        parent::initController($request, $response, $logger);
+        $this->menuService = service('menuApiService');
+    }
+
+    public function index(): string
+    {
+        return $this->render('cms/menus/index', [
+            'title'        => lang('Cms.menus_title'),
+            'limitOptions' => [10, 25, 50, 100],
+        ]);
+    }
+
+    public function data(): ResponseInterface
+    {
+        return $this->tableDataResponse(
+            [],
+            ['menu_key', 'created_at'],
+            function (array $params) {
+                $response = $this->menuService->list($params);
+                if (isset($response['ok']) && $response['ok'] && isset($response['data']['items'])) {
+                    // Fetch all items to count them
+                    $itemsResponse = $this->menuService->listItems(['limit' => 1000]);
+                    $items = [];
+                    if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
+                        $items = $itemsResponse['data']['items'];
+                    }
+
+                    // Group/count items by menu_id
+                    $counts = [];
+                    foreach ($items as $item) {
+                        $mId = $item['menu_id'] ?? null;
+                        if ($mId !== null) {
+                            $counts[$mId] = ($counts[$mId] ?? 0) + 1;
+                        }
+                    }
+
+                    // Inject count into each menu item
+                    foreach ($response['data']['items'] as &$menu) {
+                        $menu['items_count'] = $counts[$menu['id']] ?? 0;
+                    }
+                }
+                return $response;
+            }
+        );
+    }
+
+    public function show(string $id): string
+    {
+        $response = $this->safeApiCall(fn () => $this->menuService->get($id));
+
+        if (! $response['ok']) {
+            return $this->render('cms/menus/show', [
+                'title' => lang('Cms.menus_details'),
+                'menu' => [],
+                'error' => $this->firstMessage($response, lang('Cms.menus_not_found')),
+            ]);
+        }
+
+        $itemsResponse = $this->menuService->listItems(['menu_id' => $id, 'limit' => 1000, 'sort' => 'sort_order']);
+        $items = [];
+        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
+            $items = $itemsResponse['data']['items'];
+        }
+
+        return $this->render('cms/menus/show', [
+            'title' => lang('Cms.menus_details'),
+            'menu' => $this->extractData($response),
+            'items' => $items,
+            'languages' => $this->getLanguages(),
+        ]);
+    }
+
+    public function create(): string
+    {
+        return $this->render('cms/menus/create', [
+            'title' => lang('Cms.menus_create'),
+            'languages' => $this->getLanguages(),
+        ]);
+    }
+
+    public function store(): RedirectResponse
+    {
+        /** @var MenuStoreRequest $request */
+        $request = service('formRequest', MenuStoreRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->menuService->create($request->payload()));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_create_failed'));
+        }
+
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_create_success'));
+    }
+
+    public function edit(string $id): string|RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->menuService->get($id));
+        if (! $response['ok']) {
+            return $this->withError(lang('Cms.menus_not_found'), route_to('admin.cms.menus'));
+        }
+
+        return $this->render('cms/menus/edit', [
+            'title' => lang('Cms.menus_edit'),
+            'item'  => $this->extractData($response),
+            'languages' => $this->getLanguages(),
+        ]);
+    }
+
+    public function update(string $id): RedirectResponse
+    {
+        /** @var MenuUpdateRequest $request */
+        $request = service('formRequest', MenuUpdateRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->menuService->update($id, $request->payload()));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_update_failed'));
+        }
+
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_update_success'));
+    }
+
+    public function delete(string $id): RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->menuService->delete($id));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_delete_failed'), route_to('admin.cms.menus'), false);
+        }
+
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_delete_success'));
+    }
+
+    // MenuItem operations
+    public function createItem(string $menuId): string
+    {
+        $menuResponse = $this->safeApiCall(fn () => $this->menuService->get($menuId));
+
+        $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
+        $items = [];
+        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
+            $items = $itemsResponse['data']['items'];
+        }
+
+        return $this->render('cms/menus/items/create', [
+            'title'     => lang('Cms.menus_items_create') ?? 'Add Menu Item',
+            'menuId'    => $menuId,
+            'menu'      => $this->extractData($menuResponse),
+            'items'     => $items,
+            'pages'     => $this->pagesOptions(),
+            'languages' => $this->getLanguages(),
+        ]);
+    }
+
+    public function storeItem(string $menuId): RedirectResponse
+    {
+        /** @var MenuItemStoreRequest $request */
+        $request = service('formRequest', MenuItemStoreRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $payload = $request->payload();
+
+        // Manual validation: exclusion mutua page_id vs custom_url in link_type
+        if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
+            return redirect()->back()->withInput()->with('error', lang('Cms.field_page_id_required') ?? 'Page selection is required for Page link type.');
+        }
+        if ($payload['link_type'] === 'custom_url') {
+            $hasUrl = false;
+            foreach ($payload['translations'] as $t) {
+                if (!empty($t['custom_url'])) {
+                    $hasUrl = true;
+                    break;
+                }
+            }
+            if (!$hasUrl) {
+                return redirect()->back()->withInput()->with('error', lang('Cms.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
+            }
+        }
+
+        $response = $this->safeApiCall(fn () => $this->menuService->createItem($payload));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_items_create_failed') ?? 'Failed to create menu item.', route_to('admin.cms.menus.show', $menuId));
+        }
+
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_create_success') ?? 'Menu item created successfully.');
+    }
+
+    public function editItem(string $menuId, string $itemId): string|RedirectResponse
+    {
+        $menuResponse = $this->safeApiCall(fn () => $this->menuService->get($menuId));
+        $itemResponse = $this->safeApiCall(fn () => $this->menuService->getItem($itemId));
+        if (! $itemResponse['ok']) {
+            return $this->withError(lang('Cms.menus_items_not_found') ?? 'Menu item not found.', route_to('admin.cms.menus.show', $menuId));
+        }
+
+        $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
+        $items = [];
+        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
+            $items = $itemsResponse['data']['items'];
+        }
+
+        return $this->render('cms/menus/items/edit', [
+            'title'     => lang('Cms.menus_items_edit') ?? 'Edit Menu Item',
+            'menuId'    => $menuId,
+            'itemId'    => $itemId,
+            'menu'      => $this->extractData($menuResponse),
+            'item'      => $this->extractData($itemResponse),
+            'items'     => $items,
+            'pages'     => $this->pagesOptions(),
+            'languages' => $this->getLanguages(),
+        ]);
+    }
+
+    public function updateItem(string $menuId, string $itemId): RedirectResponse
+    {
+        /** @var MenuItemUpdateRequest $request */
+        $request = service('formRequest', MenuItemUpdateRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $payload = $request->payload();
+
+        // Manual validation: exclusion mutua page_id vs custom_url in link_type
+        if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
+            return redirect()->back()->withInput()->with('error', lang('Cms.field_page_id_required') ?? 'Page selection is required for Page link type.');
+        }
+        if ($payload['link_type'] === 'custom_url') {
+            $hasUrl = false;
+            foreach ($payload['translations'] as $t) {
+                if (!empty($t['custom_url'])) {
+                    $hasUrl = true;
+                    break;
+                }
+            }
+            if (!$hasUrl) {
+                return redirect()->back()->withInput()->with('error', lang('Cms.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
+            }
+        }
+
+        $response = $this->safeApiCall(fn () => $this->menuService->updateItem($itemId, $payload));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_items_update_failed') ?? 'Failed to update menu item.', route_to('admin.cms.menus.show', $menuId));
+        }
+
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_update_success') ?? 'Menu item updated successfully.');
+    }
+
+    public function deleteItem(string $menuId, string $itemId): RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->menuService->deleteItem($itemId));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.menus_items_delete_failed') ?? 'Failed to delete menu item.', route_to('admin.cms.menus.show', $menuId), false);
+        }
+
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_delete_success') ?? 'Menu item deleted successfully.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getLanguages(): array
+    {
+        $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        return $this->extractItems($response);
+    }
+
+    /** @return array<string, string> */
+    private function pagesOptions(?string $excludeId = null): array
+    {
+        $response = $this->safeApiCall(fn () => service('pageApiService')->pages(['limit' => 250]));
+        $options = [];
+
+        foreach ($this->extractItems($response) as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+            if ($excludeId !== null && (string)$item['id'] === (string)$excludeId) {
+                continue;
+            }
+            $title = null;
+            if (! empty($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $t) {
+                    if (is_array($t) && ! empty($t['title'])) {
+                        $title = $t['title'];
+                        break;
+                    }
+                }
+            }
+            $label = $title ?? $item['name'] ?? $item['title'] ?? $item['label'] ?? $item['email'] ?? $item['id'];
+            $options[(string) $item['id']] = (string) $label;
+        }
+
+        return $options;
+    }
+}

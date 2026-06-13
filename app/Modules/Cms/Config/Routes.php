@@ -48,4 +48,21 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('pages/(:segment)/archive', '\App\Modules\Cms\Controllers\PageController::archive/$1', ['as' => 'admin.cms.pages.archive', 'filter' => 'permission:cms.pages.write']);
     $routes->get('pages/reorder', '\App\Modules\Cms\Controllers\PageController::reorder', ['as' => 'admin.cms.pages.reorder', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/reorder', '\App\Modules\Cms\Controllers\PageController::saveOrder', ['as' => 'admin.cms.pages.save_order', 'filter' => 'permission:cms.pages.write']);
+
+    // Menu
+    $routes->get('menus', '\App\Modules\Cms\Controllers\MenuController::index', ['as' => 'admin.cms.menus', 'filter' => 'permission:cms.menus.read']);
+    $routes->get('menus/data', '\App\Modules\Cms\Controllers\MenuController::data', ['as' => 'admin.cms.menus.data', 'filter' => 'permission:cms.menus.read']);
+    $routes->get('menus/create', '\App\Modules\Cms\Controllers\MenuController::create', ['as' => 'admin.cms.menus.create', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus', '\App\Modules\Cms\Controllers\MenuController::store', ['as' => 'admin.cms.menus.store', 'filter' => 'permission:cms.menus.write']);
+    $routes->get('menus/(:segment)', '\App\Modules\Cms\Controllers\MenuController::show/$1', ['as' => 'admin.cms.menus.show', 'filter' => 'permission:cms.menus.read']);
+    $routes->get('menus/(:segment)/edit', '\App\Modules\Cms\Controllers\MenuController::edit/$1', ['as' => 'admin.cms.menus.edit', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:segment)', '\App\Modules\Cms\Controllers\MenuController::update/$1', ['as' => 'admin.cms.menus.update', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:segment)/delete', '\App\Modules\Cms\Controllers\MenuController::delete/$1', ['as' => 'admin.cms.menus.delete', 'filter' => 'permission:cms.menus.write']);
+
+    // MenuItem
+    $routes->get('menus/(:num)/items/create', '\App\Modules\Cms\Controllers\MenuController::createItem/$1', ['as' => 'admin.cms.menus.items.create', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:num)/items', '\App\Modules\Cms\Controllers\MenuController::storeItem/$1', ['as' => 'admin.cms.menus.items.store', 'filter' => 'permission:cms.menus.write']);
+    $routes->get('menus/(:num)/items/(:num)/edit', '\App\Modules\Cms\Controllers\MenuController::editItem/$1/$2', ['as' => 'admin.cms.menus.items.edit', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:num)/items/(:num)', '\App\Modules\Cms\Controllers\MenuController::updateItem/$1/$2', ['as' => 'admin.cms.menus.items.update', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:num)/items/(:num)/delete', '\App\Modules\Cms\Controllers\MenuController::deleteItem/$1/$2', ['as' => 'admin.cms.menus.items.delete', 'filter' => 'permission:cms.menus.write']);
 });

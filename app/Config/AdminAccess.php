@@ -39,6 +39,7 @@ class AdminAccess extends BaseConfig
         'cms.languages.read',
         'cms.settings.read',
         'cms.pages.read',
+        'cms.menus.read',
     ];
 
     public function __construct()
