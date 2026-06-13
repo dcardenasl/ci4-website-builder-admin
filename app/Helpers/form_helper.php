@@ -108,3 +108,30 @@ if (! function_exists('render_field_error')) {
             . '</p>';
     }
 }
+
+if (! function_exists('render_extra_attrs')) {
+    /**
+     * Render additional HTML attributes passed by form components.
+     *
+     * @param array<string, scalar|null> $attributes
+     */
+    function render_extra_attrs(array $attributes = []): string
+    {
+        $rendered = [];
+
+        foreach ($attributes as $name => $value) {
+            if ($value === null || $value === false) {
+                continue;
+            }
+
+            if ($value === true) {
+                $rendered[] = esc((string) $name, 'attr');
+                continue;
+            }
+
+            $rendered[] = esc((string) $name, 'attr') . '="' . esc((string) $value, 'attr') . '"';
+        }
+
+        return implode(' ', $rendered);
+    }
+}

@@ -7,6 +7,7 @@
  * @var int|null $rows
  * @var string|null $placeholder
  * @var string|null $help
+ * @var array<string, scalar|null>|null $attributes
  */
 
 helper('form');
@@ -16,6 +17,7 @@ $value = old($name, $value ?? '');
 $placeholder = $placeholder ?? '';
 $help = $help ?? '';
 $rows = $rows ?? 4;
+$attributes = is_array($attributes ?? null) ? $attributes : [];
 ?>
 <div>
     <label class="block text-sm font-medium text-gray-700" for="<?= esc($name, 'attr') ?>">
@@ -32,6 +34,7 @@ $rows = $rows ?? 4;
         placeholder="<?= esc($placeholder, 'attr') ?>"
         <?= $required ? 'required' : '' ?>
         <?= field_aria_attrs($name, $required) ?>
+        <?= render_extra_attrs($attributes) ?>
     ><?= esc($value) ?></textarea>
     <?php if ($help): ?>
         <p class="mt-1 text-xs text-gray-500"><?= lang($help) ?></p>

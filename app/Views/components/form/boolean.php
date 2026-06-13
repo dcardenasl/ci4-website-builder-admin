@@ -7,6 +7,7 @@
  * @var string|null $help
  * @var string|null $on_label
  * @var string|null $off_label
+ * @var array<string, scalar|null>|null $attributes
  */
 
 declare(strict_types=1);
@@ -18,6 +19,7 @@ $value = old($name, $value ?? false);
 $help = $help ?? '';
 $on_label = $on_label ?? 'App.yes';
 $off_label = $off_label ?? 'App.no';
+$attributes = is_array($attributes ?? null) ? $attributes : [];
 $checked = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
 
 if ($checked === null) {
@@ -42,8 +44,8 @@ if ($checked === null) {
             value="1"
             class="peer sr-only"
             <?= $checked ? 'checked' : '' ?>
-            <?= $required ? 'required' : '' ?>
             <?= field_aria_attrs($name, $required) ?>
+            <?= render_extra_attrs($attributes) ?>
         >
         <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-gray-200 transition-colors peer-checked:bg-brand-600 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-2">
             <span class="inline-block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></span>

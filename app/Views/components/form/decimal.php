@@ -9,6 +9,7 @@
  * @var float|int|null $max
  * @var string|null $placeholder
  * @var string|null $help
+ * @var array<string, scalar|null>|null $attributes
  */
 
 helper('form');
@@ -20,6 +21,7 @@ $help = $help ?? '';
 $step = isset($step) ? 'step="' . esc($step, 'attr') . '"' : 'step="0.01"';
 $min = isset($min) ? 'min="' . esc($min, 'attr') . '"' : '';
 $max = isset($max) ? 'max="' . esc($max, 'attr') . '"' : '';
+$attributes = is_array($attributes ?? null) ? $attributes : [];
 ?>
 <div>
     <label class="block text-sm font-medium text-gray-700" for="<?= esc($name, 'attr') ?>">
@@ -41,6 +43,7 @@ $max = isset($max) ? 'max="' . esc($max, 'attr') . '"' : '';
             <?= $max ?>
             <?= $required ? 'required' : '' ?>
             <?= field_aria_attrs($name, $required) ?>
+            <?= render_extra_attrs($attributes) ?>
         >
     </div>
     <?php if ($help): ?>
