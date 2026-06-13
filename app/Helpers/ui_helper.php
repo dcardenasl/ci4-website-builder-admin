@@ -269,6 +269,7 @@ if (! function_exists('ui_icon')) {
             'image'           => 'image',
             'layers'          => 'layers',
             'help-circle'     => 'circle-help',
+            'info'            => 'info',
             'alert-circle'    => 'circle-alert',
             'triangle-alert'  => 'triangle-alert',
             'cart'            => 'shopping-cart',
