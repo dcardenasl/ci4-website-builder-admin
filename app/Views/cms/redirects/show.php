@@ -28,17 +28,21 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_from_path',
-                'value' => $redirect['from_path'] ?? '—'
+                'label' => 'Cms.field_old_path',
+                'value' => $redirect['old_path'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_to_path',
-                'value' => $redirect['to_path'] ?? '—'
+                'label' => 'Cms.field_new_url',
+                'value' => $redirect['new_url'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_status_code',
-                'value' => ! empty($redirect['status_code']) ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($redirect['status_code']) . '</span>' : '—',
+                'label' => 'Cms.field_redirect_type',
+                'value' => ! empty($redirect['redirect_type']) ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($redirect['redirect_type']) . '</span>' : '—',
                 'isHtml' => true
+            ]) ?>
+            <?= view('components/display/field_row', [
+                'label' => 'Cms.field_note',
+                'value' => $redirect['note'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
                 'label' => 'Cms.field_is_active',

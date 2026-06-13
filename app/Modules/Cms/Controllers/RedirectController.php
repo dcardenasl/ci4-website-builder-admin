@@ -141,7 +141,7 @@ class RedirectController extends BaseWebController
         }
 
         $rows = $this->extractItems($response);
-        $columns = ['from_path', 'to_path', 'status_code', 'is_active'];
+        $columns = ['old_path', 'new_url', 'redirect_type', 'is_active', 'note'];
         $stream = fopen('php://temp', 'w+');
         if ($stream === false) {
             return $this->response->setStatusCode(500)->setBody(lang('Cms.redirects_csv_export_failed'));
@@ -190,7 +190,7 @@ class RedirectController extends BaseWebController
             return $this->withError(lang('Cms.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
         }
 
-        $columns = ['from_path', 'to_path', 'status_code', 'is_active'];
+        $columns = ['old_path', 'new_url', 'redirect_type', 'is_active', 'note'];
         $rows = [];
 
         while (($row = fgetcsv($handle)) !== false) {
@@ -203,18 +203,18 @@ class RedirectController extends BaseWebController
                 $assoc[$columns[$index]] = $row[$index] ?? '';
             }
 
-            if (isset($assoc['from_path']) && isset($assoc['to_path']) && isset($assoc['status_code'])) {
+            if (isset($assoc['old_path']) && isset($assoc['new_url']) && isset($assoc['redirect_type'])) {
                 // Validate fields
-                $fromPath = trim((string)$assoc['from_path']);
-                if (strpos($fromPath, '/') !== 0) {
+                $oldPath = trim((string)$assoc['old_path']);
+                if (strpos($oldPath, '/') !== 0) {
                     fclose($handle);
-                    return $this->withError('From Path must start with a slash (/)', route_to('admin.cms.redirects'));
+                    return $this->withError(lang('Cms.redirects_old_path_slash'), route_to('admin.cms.redirects'));
                 }
 
-                $statusCode = trim((string)$assoc['status_code']);
-                if ($statusCode !== '301' && $statusCode !== '302') {
+                $redirectType = trim((string)$assoc['redirect_type']);
+                if ($redirectType !== '301' && $redirectType !== '302') {
                     fclose($handle);
-                    return $this->withError('Invalid status code. Must be 301 or 302.', route_to('admin.cms.redirects'));
+                    return $this->withError(lang('Cms.redirects_invalid_type'), route_to('admin.cms.redirects'));
                 }
 
                 $assoc['is_active'] = filter_var($assoc['is_active'] ?? false, FILTER_VALIDATE_BOOLEAN);

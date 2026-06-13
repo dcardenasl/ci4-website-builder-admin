@@ -50,22 +50,22 @@
             <table class="<?= esc(table_class()) ?>">
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
-                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('from_path')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('from_path')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_from_path')])) ?>">
-                                <span><?= lang('Cms.field_from_path') ?></span>
-                                <span aria-hidden="true" x-text="sortIcon('from_path')"></span>
+                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('old_path')">
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('old_path')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_old_path')])) ?>">
+                                <span><?= lang('Cms.field_old_path') ?></span>
+                                <span aria-hidden="true" x-text="sortIcon('old_path')"></span>
                             </button>
                         </th>
-                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('to_path')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('to_path')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_to_path')])) ?>">
-                                <span><?= lang('Cms.field_to_path') ?></span>
-                                <span aria-hidden="true" x-text="sortIcon('to_path')"></span>
+                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('new_url')">
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('new_url')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_new_url')])) ?>">
+                                <span><?= lang('Cms.field_new_url') ?></span>
+                                <span aria-hidden="true" x-text="sortIcon('new_url')"></span>
                             </button>
                         </th>
-                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('status_code')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('status_code')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_status_code')])) ?>">
-                                <span><?= lang('Cms.field_status_code') ?></span>
-                                <span aria-hidden="true" x-text="sortIcon('status_code')"></span>
+                        <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('redirect_type')">
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('redirect_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_redirect_type')])) ?>">
+                                <span><?= lang('Cms.field_redirect_type') ?></span>
+                                <span aria-hidden="true" x-text="sortIcon('redirect_type')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
@@ -86,10 +86,10 @@
                 <tbody class="<?= esc(table_body_class()) ?>">
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.from_path ?? '-')"></td>
-                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.to_path ?? '-')"></td>
+                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.old_path ?? '-')"></td>
+                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.new_url ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10" x-text="String(row.status_code ?? '-')"></span>
+                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10" x-text="String(row.redirect_type ?? '-')"></span>
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span class="inline-flex items-center">

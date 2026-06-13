@@ -9,36 +9,46 @@
         <?= csrf_field() ?>
 
         <?= view('components/form/text', [
-            'name' => 'from_path',
-            'label' => 'Cms.field_from_path',
+            'name' => 'old_path',
+            'label' => 'Cms.field_old_path',
             'required' => true,
-            'value' => $item['from_path'] ?? '',
-            'placeholder' => 'Cms.field_from_path_placeholder',
-            'help' => 'Cms.field_from_path_help',
+            'value' => $item['old_path'] ?? '',
+            'placeholder' => 'Cms.field_old_path_placeholder',
+            'help' => 'Cms.field_old_path_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
-            'name' => 'to_path',
-            'label' => 'Cms.field_to_path',
+            'name' => 'new_url',
+            'label' => 'Cms.field_new_url',
             'required' => true,
-            'value' => $item['to_path'] ?? '',
-            'placeholder' => 'Cms.field_to_path_placeholder',
-            'help' => 'Cms.field_to_path_help',
+            'value' => $item['new_url'] ?? '',
+            'placeholder' => 'Cms.field_new_url_placeholder',
+            'help' => 'Cms.field_new_url_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
-            'name' => 'status_code',
-            'label' => 'Cms.field_status_code',
+            'name' => 'redirect_type',
+            'label' => 'Cms.field_redirect_type',
             'required' => false,
-            'placeholder' => 'Cms.field_status_code_placeholder',
-            'help' => 'Cms.field_status_code_help',
+            'placeholder' => 'Cms.field_redirect_type_placeholder',
+            'help' => 'Cms.field_redirect_type_help',
             'options' => [
                 '301' => '301',
                 '302' => '302'
             ],
-            'value' => $item['status_code'] ?? '',
+            'value' => $item['redirect_type'] ?? '301',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/textarea', [
+            'name' => 'note',
+            'label' => 'Cms.field_note',
+            'required' => false,
+            'value' => $item['note'] ?? '',
+            'placeholder' => 'Cms.field_note_placeholder',
+            'help' => 'Cms.field_note_help',
             'errors' => $errors ?? []
         ]) ?>
 
