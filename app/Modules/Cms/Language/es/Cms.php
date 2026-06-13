@@ -89,4 +89,33 @@ return [
     'field_title' => 'Título',
     'field_title_placeholder' => 'Ingresar Título',
     'field_title_help' => 'Ingresa el título.',
+
+    // Category — list & actions
+    'categories_title'              => 'Categorías',
+    'categories_new'                => 'Nueva Categoría',
+    'categories_create'             => 'Nueva Categoría',
+    'categories_edit'               => 'Editar Categoría',
+    'categories_details'            => 'Detalle de Categoría',
+    'categories_not_found'          => 'Categoría no encontrada.',
+    'categories_create_success'     => 'Categoría creada correctamente.',
+    'categories_create_failed'      => 'No se pudo crear la categoría.',
+    'categories_update_success'     => 'Categoría actualizada correctamente.',
+    'categories_update_failed'      => 'No se pudo actualizar la categoría.',
+    'categories_delete_success'     => 'Categoría eliminada correctamente.',
+    'categories_delete_failed'      => 'No se pudo eliminar la categoría.',
+    'categories_empty'              => 'Aún no hay categorías registradas.',
+    'categories_search_placeholder' => 'Buscar categorías...',
+    'categories_loading'            => 'Cargando categorías...',
+    'categories_no_results'         => 'No se encontraron categorías.',
+
+    // Category — form fields
+    'field_parent_id' => 'Categoría Padre',
+    'field_parent_id_placeholder' => 'Seleccionar Categoría Padre',
+    'field_parent_id_help' => 'Selecciona la categoría padre dentro de la misma colección.',
+    'field_name' => 'Nombre',
+    'field_name_placeholder' => 'Ingresar Nombre',
+    'field_name_help' => 'Ingresa el nombre.',
+    'field_slug' => 'Slug',
+    'field_slug_placeholder' => 'Ingresar Slug',
+    'field_slug_help' => 'Ingresa el slug.',
 ];

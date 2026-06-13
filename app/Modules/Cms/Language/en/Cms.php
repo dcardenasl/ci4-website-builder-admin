@@ -88,4 +88,33 @@ return [
     'field_title' => 'Title',
     'field_title_placeholder' => 'Enter Title',
     'field_title_help' => 'Enter title.',
+
+    // Category — list & actions
+    'categories_title'              => 'Categories',
+    'categories_new'                => 'New Category',
+    'categories_create'             => 'New Category',
+    'categories_edit'               => 'Edit Category',
+    'categories_details'            => 'Category details',
+    'categories_not_found'          => 'Category not found.',
+    'categories_create_success'     => 'Category created successfully.',
+    'categories_create_failed'      => 'Could not create the category.',
+    'categories_update_success'     => 'Category updated successfully.',
+    'categories_update_failed'      => 'Could not update the category.',
+    'categories_delete_success'     => 'Category deleted successfully.',
+    'categories_delete_failed'      => 'Could not delete the category.',
+    'categories_empty'              => 'No categories registered yet.',
+    'categories_search_placeholder' => 'Search categories...',
+    'categories_loading'            => 'Loading categories...',
+    'categories_no_results'         => 'No categories found.',
+
+    // Category — form fields
+    'field_parent_id' => 'Parent Category',
+    'field_parent_id_placeholder' => 'Select Parent Category',
+    'field_parent_id_help' => 'Select parent category under the same collection.',
+    'field_name' => 'Name',
+    'field_name_placeholder' => 'Enter Name',
+    'field_name_help' => 'Enter name.',
+    'field_slug' => 'Slug',
+    'field_slug_placeholder' => 'Enter Slug',
+    'field_slug_help' => 'Enter slug.',
 ];

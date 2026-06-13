@@ -19,6 +19,8 @@ use App\Modules\Auth\Services\AuthApiService;
 use App\Modules\Auth\Services\AuthApiServiceInterface;
 use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\BlockTypeApiServiceInterface;
+use App\Modules\Cms\Services\CategoryApiService;
+use App\Modules\Cms\Services\CategoryApiServiceInterface;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use App\Modules\Cms\Services\EntryApiService;
@@ -318,5 +320,13 @@ class Services extends BaseService
             return static::getSharedInstance('entryApiService');
         }
         return new EntryApiService(static::domainApiClient());
+    }
+    public static function categoryApiService(bool $getShared = true): CategoryApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var CategoryApiService */
+            return static::getSharedInstance('categoryApiService');
+        }
+        return new CategoryApiService(static::domainApiClient());
     }
 }

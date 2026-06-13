@@ -253,11 +253,11 @@ bash bin/make-module.sh Category Cms /cms/categories \
 - **Traducciones (name, slug)**: fieldset por idioma.
 
 **Criterio de done:**
-- [ ] Index filtrable por `collection_id`.
-- [ ] `parent_id` scoped a la misma colección, excluye la actual al editar.
-- [ ] Create/Edit envía traducción del idioma por defecto.
-- [ ] Sidebar link gateado con `cms.categories.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index filtrable por `collection_id`.
+- [x] `parent_id` scoped a la misma colección, excluye la actual al editar.
+- [x] Create/Edit envía traducción del idioma por defecto.
+- [x] Sidebar link gateado con `cms.categories.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

@@ -99,4 +99,16 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('entries/(:segment)/archive', '\App\Modules\Cms\Controllers\EntryController::archive/$1', ['as' => 'admin.cms.entries.archive', 'filter' => 'permission:cms.entries.write']);
     $routes->get('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::reorder', ['as' => 'admin.cms.entries.reorder', 'filter' => 'permission:cms.entries.write']);
     $routes->post('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::saveOrder', ['as' => 'admin.cms.entries.save_order', 'filter' => 'permission:cms.entries.write']);
+
+    // Category
+    $routes->get('categories', '\App\Modules\Cms\Controllers\CategoryController::index', ['as' => 'admin.cms.categories', 'filter' => 'permission:cms.categories.read']);
+    $routes->get('categories/data', '\App\Modules\Cms\Controllers\CategoryController::data', ['as' => 'admin.cms.categories.data', 'filter' => 'permission:cms.categories.read']);
+    $routes->get('categories/create', '\App\Modules\Cms\Controllers\CategoryController::create', ['as' => 'admin.cms.categories.create', 'filter' => 'permission:cms.categories.write']);
+    $routes->post('categories', '\App\Modules\Cms\Controllers\CategoryController::store', ['as' => 'admin.cms.categories.store', 'filter' => 'permission:cms.categories.write']);
+    $routes->get('categories/(:segment)', '\App\Modules\Cms\Controllers\CategoryController::show/$1', ['as' => 'admin.cms.categories.show', 'filter' => 'permission:cms.categories.read']);
+    $routes->get('categories/(:segment)/edit', '\App\Modules\Cms\Controllers\CategoryController::edit/$1', ['as' => 'admin.cms.categories.edit', 'filter' => 'permission:cms.categories.write']);
+    $routes->post('categories/(:segment)', '\App\Modules\Cms\Controllers\CategoryController::update/$1', ['as' => 'admin.cms.categories.update', 'filter' => 'permission:cms.categories.write']);
+    $routes->post('categories/(:segment)/delete', '\App\Modules\Cms\Controllers\CategoryController::delete/$1', ['as' => 'admin.cms.categories.delete', 'filter' => 'permission:cms.categories.write']);
+    $routes->get('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::reorder', ['as' => 'admin.cms.categories.reorder', 'filter' => 'permission:cms.categories.write']);
+    $routes->post('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::saveOrder', ['as' => 'admin.cms.categories.save_order', 'filter' => 'permission:cms.categories.write']);
 });

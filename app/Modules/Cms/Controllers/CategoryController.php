@@ -1,0 +1,257 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Cms\Controllers;
+
+use App\Controllers\BaseWebController;
+use App\Modules\Cms\Requests\CategoryStoreRequest;
+use App\Modules\Cms\Requests\CategoryUpdateRequest;
+use App\Modules\Cms\Services\CategoryApiServiceInterface;
+use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+
+class CategoryController extends BaseWebController
+{
+    protected CategoryApiServiceInterface $categoryService;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
+    {
+        parent::initController($request, $response, $logger);
+        $this->categoryService = service('categoryApiService');
+    }
+
+    public function index(): string
+    {
+        return $this->render('cms/categories/index', [
+            'title'        => lang('Cms.categories_title'),
+            'limitOptions' => [10, 25, 50, 100],
+            'collections' => $this->collectionsOptions(),
+            'categories' => $this->categoriesOptions(),
+        ]);
+    }
+
+    public function data(): ResponseInterface
+    {
+        return $this->tableDataResponse(
+            ['collection_id', 'parent_id'],
+            ['name', 'created_at'],
+            fn (array $params) => $this->categoryService->list($params),
+        );
+    }
+
+    public function show(string $id): string
+    {
+        $response = $this->safeApiCall(fn () => $this->categoryService->get($id));
+
+        if (! $response['ok']) {
+            return $this->render('cms/categories/show', [
+                'title' => lang('Cms.categories_details'),
+                'category' => [],
+                'error' => $this->firstMessage($response, lang('Cms.categories_not_found')),
+            'collections' => $this->collectionsOptions(),
+            'categories' => $this->categoriesOptions(),
+            ]);
+        }
+
+        return $this->render('cms/categories/show', [
+            'title' => lang('Cms.categories_details'),
+            'category' => $this->extractData($response),
+            'collections' => $this->collectionsOptions(),
+            'categories' => $this->categoriesOptions(),
+        ]);
+    }
+
+    public function create(): string
+    {
+        return $this->render('cms/categories/create', [
+            'title'       => lang('Cms.categories_create'),
+            'collections' => $this->collectionsOptions(),
+            'categories'  => $this->categoriesOptions(),
+            'languages'   => $this->getLanguages(),
+        ]);
+    }
+
+    public function store(): RedirectResponse
+    {
+        /** @var CategoryStoreRequest $request */
+        $request = service('formRequest', CategoryStoreRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->categoryService->create($request->payload()));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.categories_create_failed'));
+        }
+
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_create_success'));
+    }
+
+    public function edit(string $id): string|RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->categoryService->get($id));
+        if (! $response['ok']) {
+            return $this->withError(lang('Cms.categories_not_found'), route_to('admin.cms.categories'));
+        }
+
+        return $this->render('cms/categories/edit', [
+            'title'       => lang('Cms.categories_edit'),
+            'item'        => $this->extractData($response),
+            'collections' => $this->collectionsOptions(),
+            'categories'  => $this->categoriesOptions($id),
+            'languages'   => $this->getLanguages(),
+        ]);
+    }
+
+    public function update(string $id): RedirectResponse
+    {
+        /** @var CategoryUpdateRequest $request */
+        $request = service('formRequest', CategoryUpdateRequest::class, false);
+        $invalid = $this->validateRequest($request);
+        if ($invalid !== null) {
+            return $invalid;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->categoryService->update($id, $request->payload()));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.categories_update_failed'));
+        }
+
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_update_success'));
+    }
+
+    public function delete(string $id): RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->categoryService->delete($id));
+
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Cms.categories_delete_failed'), route_to('admin.cms.categories'), false);
+        }
+
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_delete_success'));
+    }
+
+
+
+    public function reorder(): string|RedirectResponse
+    {
+        $deny = $this->requireWrite();
+        if ($deny !== null) {
+            return $deny;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->categoryService->list(['limit' => 250, 'sort' => 'sort_order']));
+        $items = $this->extractItems($response);
+
+        return $this->render('cms/categories/reorder', [
+            'title' => lang('Cms.categories_title') . ' - ' . lang('Cms.field_sort_order'),
+            'items' => $items,
+        ]);
+    }
+
+    public function saveOrder(): ResponseInterface
+    {
+        $deny = $this->requireWrite();
+        if ($deny !== null) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => lang('App.access_denied'),
+            ])->setStatusCode(403);
+        }
+
+        $request = $this->request;
+        if (! $request instanceof \CodeIgniter\HTTP\IncomingRequest) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid request type',
+            ])->setStatusCode(400);
+        }
+
+        $json = $request->getJSON(true);
+        $jsonArray = is_array($json) ? $json : [];
+        $items = $jsonArray['items'] ?? [];
+
+        if (! is_array($items)) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid payload structure',
+            ])->setStatusCode(400);
+        }
+
+        foreach ($items as $item) {
+            $id = (string) ($item['id'] ?? '');
+            $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
+
+            if ($id !== '') {
+                $this->categoryService->update($id, ['sort_order' => $value]);
+            }
+        }
+
+        return $this->response->setJSON([
+            'ok' => true,
+            'message' => lang('Files.gallery_save_success') ?? 'Order saved.',
+        ]);
+    }
+
+
+
+    /** @return array<string, string> */
+    private function collectionsOptions(): array
+    {
+        $response = $this->safeApiCall(fn () => $this->categoryService->collections(['limit' => 100, 'is_active' => true]));
+        $options = [];
+
+        foreach ($this->extractItems($response) as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+            $label = $item['collection_key'] ?? $item['name'] ?? $item['title'] ?? $item['label'] ?? $item['id'];
+            $options[(string) $item['id']] = (string) $label;
+        }
+
+        return $options;
+    }
+
+    /** @return array<string, string> */
+    private function categoriesOptions(?string $excludeId = null): array
+    {
+        $response = $this->safeApiCall(fn () => $this->categoryService->categories(['limit' => 100]));
+        $options = [];
+
+        foreach ($this->extractItems($response) as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+            if ($excludeId !== null && (string) $item['id'] === $excludeId) {
+                continue;
+            }
+            $label = $item['name'] ?? $item['title'] ?? $item['label'] ?? $item['id'];
+            $options[(string) $item['id']] = (string) $label;
+        }
+
+        return $options;
+    }
+
+    private function requireWrite(): ?RedirectResponse
+    {
+        if (! has_permission('cms.categories.write')) {
+            return redirect()->to(route_to('admin.cms.categories'))->with('error', lang('App.access_denied'));
+        }
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getLanguages(): array
+    {
+        $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        return $this->extractItems($response);
+    }
+}
