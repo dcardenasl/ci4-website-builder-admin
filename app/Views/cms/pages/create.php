@@ -11,7 +11,7 @@
         <?= view('components/form/select', [
             'name' => 'page_type',
             'label' => 'Cms.field_page_type',
-            'required' => false,
+            'required' => true,
             'placeholder' => 'Cms.field_page_type_placeholder',
             'help' => 'Cms.field_page_type_help',
             'options' => [
@@ -24,14 +24,14 @@
                 '500' => '500',
                 'maintenance' => 'Maintenance'
             ],
-            'value' => $item['page_type'] ?? '',
+            'value' => $item['page_type'] ?? 'generic',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'status',
             'label' => 'Cms.field_status',
-            'required' => false,
+            'required' => true,
             'placeholder' => 'Cms.field_status_placeholder',
             'help' => 'Cms.field_status_help',
             'options' => [
@@ -39,7 +39,7 @@
                 'published' => 'Published',
                 'archived' => 'Archived'
             ],
-            'value' => $item['status'] ?? '',
+            'value' => $item['status'] ?? 'draft',
             'errors' => $errors ?? []
         ]) ?>
 
@@ -51,6 +51,16 @@
             'placeholder' => 'Cms.field_parent_id_placeholder',
             'help' => 'Cms.field_parent_id_help',
             'value' => $item['parent_id'] ?? '',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/number', [
+            'name' => 'sort_order',
+            'label' => 'Cms.field_sort_order',
+            'required' => false,
+            'value' => $item['sort_order'] ?? 0,
+            'placeholder' => 'Cms.field_sort_order_placeholder',
+            'help' => 'Cms.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
@@ -71,6 +81,25 @@
             'value' => $item['sitemap_priority'] ?? '',
             'placeholder' => 'Cms.field_sitemap_priority_placeholder',
             'help' => 'Cms.field_sitemap_priority_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/select', [
+            'name' => 'sitemap_changefreq',
+            'label' => 'Cms.field_sitemap_changefreq',
+            'required' => false,
+            'placeholder' => 'Cms.field_sitemap_changefreq_placeholder',
+            'help' => 'Cms.field_sitemap_changefreq_help',
+            'options' => [
+                'always' => 'Always',
+                'hourly' => 'Hourly',
+                'daily' => 'Daily',
+                'weekly' => 'Weekly',
+                'monthly' => 'Monthly',
+                'yearly' => 'Yearly',
+                'never' => 'Never',
+            ],
+            'value' => $item['sitemap_changefreq'] ?? 'weekly',
             'errors' => $errors ?? []
         ]) ?>
 

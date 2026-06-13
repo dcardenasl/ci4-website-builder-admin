@@ -10,13 +10,14 @@ class MenuStoreRequest extends BaseFormRequest
 {
     protected function fields(): array
     {
-        return ['menu_key', 'is_active'];
+        return ['menu_key', 'location', 'is_active'];
     }
 
     public function rules(): array
     {
         return [
             'menu_key' => 'required|min_length[2]|max_length[255]',
+            'location' => 'required|min_length[2]|max_length[50]',
             'is_active' => 'permit_empty',
         ];
     }
@@ -25,6 +26,7 @@ class MenuStoreRequest extends BaseFormRequest
     {
         return [
             'menu_key' => $this->postString('menu_key'),
+            'location' => $this->postString('location'),
             'is_active' => $this->postBool('is_active'),
         ];
     }

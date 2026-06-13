@@ -16,7 +16,7 @@ class CategoryStoreRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'collection_id' => 'permit_empty',
+            'collection_id' => 'required|integer',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',
             'is_active' => 'permit_empty',
@@ -42,7 +42,7 @@ class CategoryStoreRequest extends BaseFormRequest
 
         return [
             'collection_id' => $this->postInt('collection_id'),
-            'parent_id' => $this->postInt('parent_id'),
+            'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),
             'is_active' => $this->postBool('is_active'),
             'translations' => $translations,

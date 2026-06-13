@@ -19,7 +19,7 @@
         <?= view('components/form/relation', [
             'name' => 'collection_id',
             'label' => 'Cms.field_collection_id',
-            'required' => false,
+            'required' => true,
             'options' => $collections ?? [],
             'placeholder' => 'Cms.field_collection_id_placeholder',
             'help' => 'Cms.field_collection_id_help',
@@ -30,7 +30,7 @@
         <?= view('components/form/select', [
             'name' => 'status',
             'label' => 'Cms.field_status',
-            'required' => false,
+            'required' => true,
             'placeholder' => 'Cms.field_status_placeholder',
             'help' => 'Cms.field_status_help',
             'options' => [
@@ -38,7 +38,76 @@
                 'published' => 'Published',
                 'archived' => 'Archived'
             ],
-            'value' => $item['status'] ?? '',
+            'value' => $item['status'] ?? $item['workflow_status'] ?? 'draft',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/boolean', [
+            'name' => 'is_featured',
+            'label' => 'Cms.field_is_featured',
+            'value' => $item['is_featured'] ?? false,
+            'on_label' => 'Cms.field_is_featured_on',
+            'off_label' => 'Cms.field_is_featured_off',
+            'help' => 'Cms.field_is_featured_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/number', [
+            'name' => 'view_count',
+            'label' => 'Cms.field_view_count',
+            'required' => false,
+            'value' => $item['view_count'] ?? 0,
+            'placeholder' => 'Cms.field_view_count_placeholder',
+            'help' => 'Cms.field_view_count_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/number', [
+            'name' => 'sort_order',
+            'label' => 'Cms.field_sort_order',
+            'required' => false,
+            'value' => $item['sort_order'] ?? 0,
+            'placeholder' => 'Cms.field_sort_order_placeholder',
+            'help' => 'Cms.field_sort_order_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/boolean', [
+            'name' => 'is_in_sitemap',
+            'label' => 'Cms.field_is_in_sitemap',
+            'value' => $item['is_in_sitemap'] ?? false,
+            'on_label' => 'Cms.field_is_in_sitemap_on',
+            'off_label' => 'Cms.field_is_in_sitemap_off',
+            'help' => 'Cms.field_is_in_sitemap_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/text', [
+            'name' => 'sitemap_priority',
+            'label' => 'Cms.field_sitemap_priority',
+            'required' => false,
+            'value' => $item['sitemap_priority'] ?? '',
+            'placeholder' => 'Cms.field_sitemap_priority_placeholder',
+            'help' => 'Cms.field_sitemap_priority_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/select', [
+            'name' => 'sitemap_changefreq',
+            'label' => 'Cms.field_sitemap_changefreq',
+            'required' => false,
+            'placeholder' => 'Cms.field_sitemap_changefreq_placeholder',
+            'help' => 'Cms.field_sitemap_changefreq_help',
+            'options' => [
+                'always' => 'Always',
+                'hourly' => 'Hourly',
+                'daily' => 'Daily',
+                'weekly' => 'Weekly',
+                'monthly' => 'Monthly',
+                'yearly' => 'Yearly',
+                'never' => 'Never',
+            ],
+            'value' => $item['sitemap_changefreq'] ?? 'weekly',
             'errors' => $errors ?? []
         ]) ?>
 

@@ -26,6 +26,55 @@
             'errors' => $errors ?? []
         ]) ?>
 
+        <?= view('components/form/text', [
+            'name' => 'url_prefix',
+            'label' => 'Cms.field_url_prefix',
+            'required' => true,
+            'value' => $item['url_prefix'] ?? '',
+            'placeholder' => 'Cms.field_url_prefix_placeholder',
+            'help' => 'Cms.field_url_prefix_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/decimal', [
+            'name' => 'default_sitemap_priority',
+            'label' => 'Cms.field_default_sitemap_priority',
+            'required' => false,
+            'value' => $item['default_sitemap_priority'] ?? '0.5',
+            'placeholder' => 'Cms.field_default_sitemap_priority_placeholder',
+            'help' => 'Cms.field_default_sitemap_priority_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/select', [
+            'name' => 'default_changefreq',
+            'label' => 'Cms.field_default_changefreq',
+            'required' => false,
+            'placeholder' => 'Cms.field_default_changefreq_placeholder',
+            'help' => 'Cms.field_default_changefreq_help',
+            'options' => [
+                'always' => 'Always',
+                'hourly' => 'Hourly',
+                'daily' => 'Daily',
+                'weekly' => 'Weekly',
+                'monthly' => 'Monthly',
+                'yearly' => 'Yearly',
+                'never' => 'Never',
+            ],
+            'value' => $item['default_changefreq'] ?? 'weekly',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/number', [
+            'name' => 'sort_order',
+            'label' => 'Cms.field_sort_order',
+            'required' => false,
+            'value' => $item['sort_order'] ?? 0,
+            'placeholder' => 'Cms.field_sort_order_placeholder',
+            'help' => 'Cms.field_sort_order_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
         <?= view('components/form/boolean', [
             'name' => 'is_active',
             'label' => 'Cms.field_is_active',

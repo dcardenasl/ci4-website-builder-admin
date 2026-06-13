@@ -10,18 +10,29 @@ class PageStoreRequest extends BaseFormRequest
 {
     protected function fields(): array
     {
-        return ['page_type', 'status', 'parent_id', 'sort_order', 'is_in_sitemap', 'sitemap_priority', 'published_at', 'scheduled_at'];
+        return [
+            'page_type',
+            'status',
+            'parent_id',
+            'sort_order',
+            'is_in_sitemap',
+            'sitemap_priority',
+            'sitemap_changefreq',
+            'published_at',
+            'scheduled_at',
+        ];
     }
 
     public function rules(): array
     {
         return [
-            'page_type' => 'permit_empty|in_list[home,generic,contact,privacy,terms,404,500,maintenance]',
-            'status' => 'permit_empty|in_list[draft,published,archived]',
+            'page_type' => 'required|in_list[home,generic,contact,privacy,terms,404,500,maintenance]',
+            'status' => 'required|in_list[draft,published,archived]',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',
             'is_in_sitemap' => 'permit_empty',
             'sitemap_priority' => 'permit_empty|string|max_length[255]',
+            'sitemap_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
             'published_at' => 'permit_empty|valid_date',
             'scheduled_at' => 'permit_empty|valid_date',
             'translations' => 'permit_empty',
@@ -48,12 +59,13 @@ class PageStoreRequest extends BaseFormRequest
         }
 
         return [
-            'page_type' => $this->postString('page_type'),
-            'status' => $this->postString('status'),
-            'parent_id' => $this->postInt('parent_id'),
+            'page_type' => $this->postString('page_type') ?: 'generic',
+            'status' => $this->postString('status') ?: 'draft',
+            'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),
             'is_in_sitemap' => $this->postBool('is_in_sitemap'),
             'sitemap_priority' => $this->postString('sitemap_priority'),
+            'sitemap_changefreq' => $this->postString('sitemap_changefreq') ?: 'weekly',
             'published_at' => $this->postString('published_at'),
             'scheduled_at' => $this->postString('scheduled_at'),
             'translations' => $translations,

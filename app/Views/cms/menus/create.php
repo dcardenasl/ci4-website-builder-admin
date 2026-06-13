@@ -18,6 +18,16 @@
             'errors' => $errors ?? []
         ]) ?>
 
+        <?= view('components/form/text', [
+            'name' => 'location',
+            'label' => 'Cms.field_location',
+            'required' => true,
+            'value' => $item['location'] ?? '',
+            'placeholder' => 'Cms.field_location_placeholder',
+            'help' => 'Cms.field_location_help',
+            'errors' => $errors ?? []
+        ]) ?>
+
         <?= view('components/form/boolean', [
             'name' => 'is_active',
             'label' => 'Cms.field_is_active',

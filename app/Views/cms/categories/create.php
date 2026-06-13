@@ -11,7 +11,7 @@
         <?= view('components/form/relation', [
             'name' => 'collection_id',
             'label' => 'Cms.field_collection_id',
-            'required' => false,
+            'required' => true,
             'options' => $collections ?? [],
             'placeholder' => 'Cms.field_collection_id_placeholder',
             'help' => 'Cms.field_collection_id_help',
@@ -27,6 +27,16 @@
             'placeholder' => 'Cms.field_parent_id_placeholder',
             'help' => 'Cms.field_parent_id_help',
             'value' => $item['parent_id'] ?? '',
+            'errors' => $errors ?? []
+        ]) ?>
+
+        <?= view('components/form/number', [
+            'name' => 'sort_order',
+            'label' => 'Cms.field_sort_order',
+            'required' => false,
+            'value' => $item['sort_order'] ?? 0,
+            'placeholder' => 'Cms.field_sort_order_placeholder',
+            'help' => 'Cms.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
