@@ -121,4 +121,16 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('tags/(:segment)/edit', '\App\Modules\Cms\Controllers\TagController::edit/$1', ['as' => 'admin.cms.tags.edit', 'filter' => 'permission:cms.tags.write']);
     $routes->post('tags/(:segment)', '\App\Modules\Cms\Controllers\TagController::update/$1', ['as' => 'admin.cms.tags.update', 'filter' => 'permission:cms.tags.write']);
     $routes->post('tags/(:segment)/delete', '\App\Modules\Cms\Controllers\TagController::delete/$1', ['as' => 'admin.cms.tags.delete', 'filter' => 'permission:cms.tags.write']);
+
+    // Redirect
+    $routes->get('redirects', '\App\Modules\Cms\Controllers\RedirectController::index', ['as' => 'admin.cms.redirects', 'filter' => 'permission:cms.redirects.read']);
+    $routes->get('redirects/data', '\App\Modules\Cms\Controllers\RedirectController::data', ['as' => 'admin.cms.redirects.data', 'filter' => 'permission:cms.redirects.read']);
+    $routes->get('redirects/create', '\App\Modules\Cms\Controllers\RedirectController::create', ['as' => 'admin.cms.redirects.create', 'filter' => 'permission:cms.redirects.write']);
+    $routes->post('redirects', '\App\Modules\Cms\Controllers\RedirectController::store', ['as' => 'admin.cms.redirects.store', 'filter' => 'permission:cms.redirects.write']);
+    $routes->get('redirects/(:segment)', '\App\Modules\Cms\Controllers\RedirectController::show/$1', ['as' => 'admin.cms.redirects.show', 'filter' => 'permission:cms.redirects.read']);
+    $routes->get('redirects/(:segment)/edit', '\App\Modules\Cms\Controllers\RedirectController::edit/$1', ['as' => 'admin.cms.redirects.edit', 'filter' => 'permission:cms.redirects.write']);
+    $routes->post('redirects/(:segment)', '\App\Modules\Cms\Controllers\RedirectController::update/$1', ['as' => 'admin.cms.redirects.update', 'filter' => 'permission:cms.redirects.write']);
+    $routes->post('redirects/(:segment)/delete', '\App\Modules\Cms\Controllers\RedirectController::delete/$1', ['as' => 'admin.cms.redirects.delete', 'filter' => 'permission:cms.redirects.write']);
+    $routes->get('redirects/export', '\App\Modules\Cms\Controllers\RedirectController::exportCsv', ['as' => 'admin.cms.redirects.export_csv', 'filter' => 'permission:cms.redirects.read']);
+    $routes->post('redirects/import', '\App\Modules\Cms\Controllers\RedirectController::importCsv', ['as' => 'admin.cms.redirects.import_csv', 'filter' => 'permission:cms.redirects.write']);
 });

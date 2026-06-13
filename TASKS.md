@@ -305,10 +305,10 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 - Añadir `'cms-redirect' => 'corner-up-right'` al mapa de iconos (parte del prerequisito transversal).
 
 **Criterio de done:**
-- [ ] CRUD completo con import/export CSV funcionales.
-- [ ] Conflicto `from_path` duplicado muestra error claro.
-- [ ] Sidebar link gateado con `cms.redirects.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] CRUD completo con import/export CSV funcionales.
+- [x] Conflicto `from_path` duplicado muestra error claro.
+- [x] Sidebar link gateado with `cms.redirects.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

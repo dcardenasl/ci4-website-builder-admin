@@ -136,4 +136,41 @@ return [
     'tags_search_placeholder' => 'Buscar por nombre...',
     'tags_loading'            => 'Cargando tags...',
     'tags_no_results'         => 'No se encontraron tags.',
+
+    // Redirect — list & actions
+    'redirects_title'              => 'Redirecciones',
+    'redirects_new'                => 'Nueva Redirección',
+    'redirects_create'             => 'Nueva Redirección',
+    'redirects_edit'               => 'Editar Redirección',
+    'redirects_details'            => 'Detalle de Redirección',
+    'redirects_not_found'          => 'Redirección no encontrada.',
+    'redirects_create_success'     => 'Redirección creada correctamente.',
+    'redirects_create_failed'      => 'No se pudo crear la redirección.',
+    'redirects_update_success'     => 'Redirección actualizada correctamente.',
+    'redirects_update_failed'      => 'No se pudo actualizar la redirección.',
+    'redirects_delete_success'     => 'Redirección eliminada correctamente.',
+    'redirects_delete_failed'      => 'No se pudo eliminar la redirección.',
+    'redirects_empty'              => 'Aún no hay redirecciones registradas.',
+    'redirects_search_placeholder' => 'Buscar por ruta...',
+    'redirects_loading'            => 'Cargando redirecciones...',
+    'redirects_no_results'         => 'No se encontraron redirecciones.',
+
+    // Redirect — form fields
+    'field_from_path'              => 'Ruta Origen',
+    'field_from_path_placeholder'  => 'Ingresar Ruta Origen (ej. /old-path)',
+    'field_from_path_help'         => 'Ingresa la ruta origen.',
+    'field_to_path'                => 'Ruta Destino',
+    'field_to_path_placeholder'    => 'Ingresar Ruta Destino (ej. /new-path)',
+    'field_to_path_help'           => 'Ingresa la ruta destino.',
+    'field_status_code'            => 'Código de Estado',
+    'field_status_code_placeholder' => 'Seleccionar Código de Estado',
+    'field_status_code_help'       => 'Selecciona 301 (Permanente) o 302 (Temporal).',
+
+    // Redirect — CSV
+    'redirects_export_csv'         => 'Exportar CSV de Redirecciones',
+    'redirects_import_csv'         => 'Importar CSV de Redirecciones',
+    'redirects_csv_import_success' => 'El CSV de Redirecciones se importó correctamente.',
+    'redirects_csv_import_failed'  => 'No se pudo importar el CSV de redirecciones.',
+    'redirects_csv_export_failed'  => 'No se pudo exportar el CSV de redirecciones.',
+    'redirects_csv_invalid_file'   => 'Sube un archivo CSV válido.',
 ];

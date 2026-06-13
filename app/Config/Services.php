@@ -31,6 +31,8 @@ use App\Modules\Cms\Services\MenuApiService;
 use App\Modules\Cms\Services\MenuApiServiceInterface;
 use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Services\PageApiServiceInterface;
+use App\Modules\Cms\Services\RedirectApiService;
+use App\Modules\Cms\Services\RedirectApiServiceInterface;
 use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\SettingApiServiceInterface;
 use App\Modules\Cms\Services\TagApiService;
@@ -338,5 +340,13 @@ class Services extends BaseService
             return static::getSharedInstance('tagApiService');
         }
         return new TagApiService(static::domainApiClient());
+    }
+    public static function redirectApiService(bool $getShared = true): RedirectApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var RedirectApiService */
+            return static::getSharedInstance('redirectApiService');
+        }
+        return new RedirectApiService(static::domainApiClient());
     }
 }
