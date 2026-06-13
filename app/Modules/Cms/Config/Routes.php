@@ -75,4 +75,14 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('block-types/(:segment)/edit', '\App\Modules\Cms\Controllers\BlockTypeController::edit/$1', ['as' => 'admin.cms.block_types.edit', 'filter' => 'permission:cms.blocks.write']);
     $routes->post('block-types/(:segment)', '\App\Modules\Cms\Controllers\BlockTypeController::update/$1', ['as' => 'admin.cms.block_types.update', 'filter' => 'permission:cms.blocks.write']);
     $routes->post('block-types/(:segment)/delete', '\App\Modules\Cms\Controllers\BlockTypeController::delete/$1', ['as' => 'admin.cms.block_types.delete', 'filter' => 'permission:cms.blocks.write']);
+
+    // Collection
+    $routes->get('collections', '\App\Modules\Cms\Controllers\CollectionController::index', ['as' => 'admin.cms.collections', 'filter' => 'permission:cms.collections.read']);
+    $routes->get('collections/data', '\App\Modules\Cms\Controllers\CollectionController::data', ['as' => 'admin.cms.collections.data', 'filter' => 'permission:cms.collections.read']);
+    $routes->get('collections/create', '\App\Modules\Cms\Controllers\CollectionController::create', ['as' => 'admin.cms.collections.create', 'filter' => 'permission:cms.collections.write']);
+    $routes->post('collections', '\App\Modules\Cms\Controllers\CollectionController::store', ['as' => 'admin.cms.collections.store', 'filter' => 'permission:cms.collections.write']);
+    $routes->get('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::show/$1', ['as' => 'admin.cms.collections.show', 'filter' => 'permission:cms.collections.read']);
+    $routes->get('collections/(:segment)/edit', '\App\Modules\Cms\Controllers\CollectionController::edit/$1', ['as' => 'admin.cms.collections.edit', 'filter' => 'permission:cms.collections.write']);
+    $routes->post('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::update/$1', ['as' => 'admin.cms.collections.update', 'filter' => 'permission:cms.collections.write']);
+    $routes->post('collections/(:segment)/delete', '\App\Modules\Cms\Controllers\CollectionController::delete/$1', ['as' => 'admin.cms.collections.delete', 'filter' => 'permission:cms.collections.write']);
 });

@@ -201,10 +201,10 @@ bash bin/make-module.sh Collection Cms /cms/collections \
 - **Link a Entries**: en show, añadir botón "Ver entries" → `/admin/cms/entries?collection_id={id}` (añadir al finalizar CMS-016).
 
 **Criterio de done:**
-- [ ] Index con `collection_key`, is_active.
-- [ ] Create/Edit envía traducción del idioma por defecto.
-- [ ] Sidebar link gateado con `cms.collections.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index con `collection_key`, is_active.
+- [x] Create/Edit envía traducción del idioma por defecto.
+- [x] Sidebar link gateado con `cms.collections.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

@@ -293,6 +293,7 @@ if (! function_exists('ui_icon')) {
             'cms-entry'       => 'newspaper',
             'cms-language'    => 'globe',
             'cms-redirect'    => 'corner-up-right',
+            'cms-collection'  => 'archive',
         ];
 
         if (! isset($icons[$name])) {

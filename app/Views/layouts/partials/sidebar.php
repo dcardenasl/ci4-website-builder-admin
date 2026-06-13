@@ -118,7 +118,7 @@
             <?php endif; ?>
             <?php if (has_permission('cms.collections.read')): ?>
                 <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
-                    <?= ui_icon('layers') ?>
+                    <?= ui_icon('cms-collection') ?>
                     <span><?= lang('Cms.collections_title') ?? 'Collections' ?></span>
                 </a>
             <?php endif; ?>
