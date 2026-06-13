@@ -10,9 +10,12 @@
 
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('Cms.field_setting_group') ?></label>
-        <input type="text" name="setting_group" value="<?= esc((string) request()->getGet('setting_group')) ?>"
-            placeholder="<?= esc(lang('Cms.field_setting_group_placeholder') ?? 'Filter by group') ?>"
-            class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
+        <select name="setting_group" class="<?= esc(filter_input_class()) ?>" data-table-filter>
+            <option value=""><?= lang('Cms.filter_all_groups') ?></option>
+            <option value="general" <?= request()->getGet('setting_group') === 'general' ? 'selected' : '' ?>><?= lang('Cms.group_general') ?></option>
+            <option value="seo" <?= request()->getGet('setting_group') === 'seo' ? 'selected' : '' ?>><?= lang('Cms.group_seo') ?></option>
+            <option value="cms_meta" <?= request()->getGet('setting_group') === 'cms_meta' ? 'selected' : '' ?>><?= lang('Cms.group_cms_meta') ?></option>
+        </select>
     </div>
 
     <?= view('layouts/partials/filter_limit', ['limitOptions' => $limitOptions ?? [10, 25, 50, 100]]) ?>

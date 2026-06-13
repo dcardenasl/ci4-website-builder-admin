@@ -34,7 +34,7 @@
             <?= view('components/display/field_row', [
                 'label' => 'Cms.field_setting_value',
                 'value' => (($setting['setting_type'] ?? '') === 'bool')
-                    ? (($setting['setting_value'] ?? '') === '1' || $setting['setting_value'] === 'true' || $setting['setting_value'] === true ? 'Yes' : 'No')
+                    ? (($setting['setting_value'] ?? '') === '1' || $setting['setting_value'] === 'true' || $setting['setting_value'] === true ? lang('App.yes') : lang('App.no'))
                     : ((($setting['setting_type'] ?? '') === 'json')
                         ? '<pre class="font-mono text-xs bg-gray-50 p-2 rounded border">' . esc(json_encode(json_decode($setting['setting_value'] ?? '{}'), JSON_PRETTY_PRINT)) . '</pre>'
                         : esc($setting['setting_value'] ?? '—')),
@@ -66,13 +66,13 @@
 
         <?php if (! empty($setting['is_translatable']) && ! empty($setting['translations'])): ?>
             <div class="mt-8">
-                <h4 class="text-md font-semibold text-gray-900 mb-3"><?= esc(lang('Cms.settings_translations') ?? 'Translations') ?></h4>
+                <h4 class="text-md font-semibold text-gray-900 mb-3"><?= esc(lang('Cms.settings_translations')) ?></h4>
                 <div class="<?= esc(table_wrapper_class()) ?>">
                     <table class="<?= esc(table_class()) ?>">
                         <thead class="<?= esc(table_head_class()) ?>">
                             <tr>
-                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_language') ?? 'Language') ?></th>
-                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_setting_value') ?? 'Value') ?></th>
+                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_language')) ?></th>
+                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_setting_value')) ?></th>
                             </tr>
                         </thead>
                         <tbody class="<?= esc(table_body_class()) ?>">

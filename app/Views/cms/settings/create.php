@@ -26,11 +26,11 @@
             'placeholder' => 'Cms.field_setting_type_placeholder',
             'help' => 'Cms.field_setting_type_help',
             'options' => [
-                'string' => 'String',
-                'int' => 'Integer',
-                'bool' => 'Boolean',
-                'json' => 'JSON',
-                'file_id' => 'File ID'
+                'string' => lang('Cms.type_string'),
+                'int' => lang('Cms.type_int'),
+                'bool' => lang('Cms.type_bool'),
+                'json' => lang('Cms.type_json'),
+                'file_id' => lang('Cms.type_file_id')
             ],
             'value' => $item['setting_type'] ?? 'string',
             'errors' => $errors ?? [],

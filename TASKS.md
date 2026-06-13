@@ -82,11 +82,11 @@ bash bin/make-module.sh Setting Cms /cms/settings \
 - **Traducciones (v1 read-only)**: settings con `is_translatable=true` muestran tabla de traducciones en `show`; edición per-idioma es trabajo futuro.
 
 **Criterio de done:**
-- [ ] Index filtrable por `setting_group`.
-- [ ] Campo value cambia de componente según `setting_type`.
-- [ ] Settings translatable muestran traducciones en show (read-only).
-- [ ] Sidebar link gateado con `cms.settings.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index filtrable por `setting_group`.
+- [x] Campo value cambia de componente según `setting_type`.
+- [x] Settings translatable muestran traducciones en show (read-only).
+- [x] Sidebar link gateado con `cms.settings.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

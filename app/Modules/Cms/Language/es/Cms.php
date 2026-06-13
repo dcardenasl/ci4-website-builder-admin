@@ -25,6 +25,11 @@ return [
 
     // Setting — form fields (add more as needed)
     'field_setting_key' => 'Clave de Configuración',
+    'type_string' => 'Texto (String)',
+    'type_int' => 'Entero (Integer)',
+    'type_bool' => 'Booleano (Boolean)',
+    'type_json' => 'JSON',
+    'type_file_id' => 'ID de Archivo (File ID)',
     'field_setting_key_placeholder' => 'Ingrese la clave de la configuración',
     'field_setting_key_help' => 'Clave única para identificar la configuración.',
     'field_setting_value' => 'Valor',
@@ -47,4 +52,8 @@ return [
     'field_description_placeholder' => 'Ingrese una descripción',
     'field_description_help' => 'Detalle descriptivo de la configuración.',
     'field_language' => 'Idioma',
+    'filter_all_groups' => 'Todos los grupos',
+    'group_general' => 'General',
+    'group_seo' => 'SEO',
+    'group_cms_meta' => 'Metadatos del CMS',
 ];

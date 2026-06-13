@@ -22,11 +22,20 @@ return [
     'settings_no_results'         => 'No settings found.',
     'settings_translations'       => 'Translations',
     'field_language'              => 'Language',
+    'filter_all_groups'           => 'All Groups',
+    'group_general'               => 'General',
+    'group_seo'                   => 'SEO',
+    'group_cms_meta'              => 'CMS Meta',
 
 
 
     // Setting — form fields (add more as needed)
     'field_setting_key' => 'Setting Key',
+    'type_string' => 'String',
+    'type_int' => 'Integer',
+    'type_bool' => 'Boolean',
+    'type_json' => 'JSON',
+    'type_file_id' => 'File ID',
     'field_setting_key_placeholder' => 'Enter Setting Key',
     'field_setting_key_help' => 'Enter Setting Key.',
     'field_setting_value' => 'Setting Value',
