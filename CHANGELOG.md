@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - [CMS-012] Page admin module to manage multi-language hierarchical pages, publishing, and sitemap settings.
 - [CMS-013] Menu admin module to manage menus and nested menu items with hierarchical tree views and link options.
+- [CMS-014] BlockType admin module to manage block configurations and localized schemas.
 - [CMS-019] Language admin module to list, create, edit, delete, and set default languages.
 - [CMS-020] Setting admin module to manage translatable system configuration variables.
 - Transversal CMS sidebar section header and Lucide icons in navigation.

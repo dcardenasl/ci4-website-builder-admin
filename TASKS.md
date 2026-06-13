@@ -145,12 +145,12 @@ bash bin/make-module.sh Menu Cms /cms/menus \
 - **Traducciones**: tabla read-only en show (v1).
 
 **Criterio de done:**
-- [ ] Index lista menús con `menu_key`, is_active, conteo de items.
-- [ ] CRUD básico de items funciona (sin drag-drop).
-- [ ] Vista show muestra árbol de items anidados.
-- [ ] Validación `page_id` / `url_override` mutuamente excluyentes.
-- [ ] Sidebar link gateado con `cms.menus.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index lista menús con `menu_key`, is_active, conteo de items.
+- [x] CRUD básico de items funciona (sin drag-drop).
+- [x] Vista show muestra árbol de items anidados.
+- [x] Validación `page_id` / `url_override` mutuamente excluyentes.
+- [x] Sidebar link gateado con `cms.menus.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 
@@ -174,11 +174,11 @@ bash bin/make-module.sh BlockType Cms /cms/block-types block-types \
 - **Seeds read-only**: anotar en show que `rich_text`, `image`, `cta` son tipos del sistema.
 
 **Criterio de done:**
-- [ ] Index lista block types con `type_key`, `name`, `is_active`.
-- [ ] Campo JSON válida y renderiza como pretty-print en show.
-- [ ] Permisos `cms.blocks.*` correctos en rutas.
-- [ ] Sidebar link gateado con `cms.blocks.read`.
-- [ ] Tests pasan + `composer quality` limpio.
+- [x] Index lista block types con `block_key`, `name`, `is_active`.
+- [x] Campo JSON válida y renderiza como pretty-print en show.
+- [x] Permisos `cms.blocks.*` correctos en rutas.
+- [x] Sidebar link gateado con `cms.blocks.read`.
+- [x] Tests pasan + `composer quality` limpio.
 
 ---
 

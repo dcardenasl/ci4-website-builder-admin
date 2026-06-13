@@ -65,4 +65,14 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('menus/(:num)/items/(:num)/edit', '\App\Modules\Cms\Controllers\MenuController::editItem/$1/$2', ['as' => 'admin.cms.menus.items.edit', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)', '\App\Modules\Cms\Controllers\MenuController::updateItem/$1/$2', ['as' => 'admin.cms.menus.items.update', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)/delete', '\App\Modules\Cms\Controllers\MenuController::deleteItem/$1/$2', ['as' => 'admin.cms.menus.items.delete', 'filter' => 'permission:cms.menus.write']);
+
+    // BlockType
+    $routes->get('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::index', ['as' => 'admin.cms.block_types', 'filter' => 'permission:cms.blocks.read']);
+    $routes->get('block-types/data', '\App\Modules\Cms\Controllers\BlockTypeController::data', ['as' => 'admin.cms.block_types.data', 'filter' => 'permission:cms.blocks.read']);
+    $routes->get('block-types/create', '\App\Modules\Cms\Controllers\BlockTypeController::create', ['as' => 'admin.cms.block_types.create', 'filter' => 'permission:cms.blocks.write']);
+    $routes->post('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::store', ['as' => 'admin.cms.block_types.store', 'filter' => 'permission:cms.blocks.write']);
+    $routes->get('block-types/(:segment)', '\App\Modules\Cms\Controllers\BlockTypeController::show/$1', ['as' => 'admin.cms.block_types.show', 'filter' => 'permission:cms.blocks.read']);
+    $routes->get('block-types/(:segment)/edit', '\App\Modules\Cms\Controllers\BlockTypeController::edit/$1', ['as' => 'admin.cms.block_types.edit', 'filter' => 'permission:cms.blocks.write']);
+    $routes->post('block-types/(:segment)', '\App\Modules\Cms\Controllers\BlockTypeController::update/$1', ['as' => 'admin.cms.block_types.update', 'filter' => 'permission:cms.blocks.write']);
+    $routes->post('block-types/(:segment)/delete', '\App\Modules\Cms\Controllers\BlockTypeController::delete/$1', ['as' => 'admin.cms.block_types.delete', 'filter' => 'permission:cms.blocks.write']);
 });
