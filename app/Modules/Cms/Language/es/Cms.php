@@ -52,4 +52,12 @@ return [
     'menus_items_edit_title' => 'Editar Elemento',
     'menus_items_list' => 'Lista de Elementos',
     'menus_items_count' => 'Elementos',
+
+    // Global CMS Titles (Sidebar navigation anchors)
+    'blocks_title' => 'Tipos de Bloque',
+    'collections_title' => 'Colecciones',
+    'entries_title' => 'Entradas',
+    'categories_title' => 'Categorías',
+    'tags_title' => 'Etiquetas',
+    'redirects_title' => 'Redirecciones',
 ];

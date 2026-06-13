@@ -51,4 +51,12 @@ return [
     'menus_items_edit_title' => 'Edit Menu Item',
     'menus_items_list' => 'Menu Items List',
     'menus_items_count' => 'Items',
+
+    // Global CMS Titles (Sidebar navigation anchors)
+    'blocks_title' => 'Block Types',
+    'collections_title' => 'Collections',
+    'entries_title' => 'Entries',
+    'categories_title' => 'Categories',
+    'tags_title' => 'Tags',
+    'redirects_title' => 'Redirects',
 ];
