@@ -23,68 +23,68 @@
 
         <?= view('components/form/text', [
     'name' => 'block_key',
-    'label' => 'Cms.field_block_key' ?? 'Block Key',
+    'label' => 'BlockTypes.field_block_key' ?? 'Block Key',
     'required' => true,
     'value' => $item['block_key'] ?? '',
     'readonly' => $isSystem,
-    'placeholder' => 'Cms.field_block_key_placeholder' ?? 'e.g. rich_text',
-    'help' => 'Cms.field_block_key_help' ?? 'Unique identifier for the block type.',
+    'placeholder' => 'BlockTypes.field_block_key_placeholder' ?? 'e.g. rich_text',
+    'help' => 'BlockTypes.field_block_key_help' ?? 'Unique identifier for the block type.',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/text', [
     'name' => 'name',
-    'label' => 'Cms.field_name',
+    'label' => 'BlockTypes.field_name',
     'required' => true,
     'value' => $item['name'] ?? '',
-    'placeholder' => 'Cms.field_name_placeholder',
-    'help' => 'Cms.field_name_help',
+    'placeholder' => 'BlockTypes.field_name_placeholder',
+    'help' => 'BlockTypes.field_name_help',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/textarea', [
     'name' => 'description',
-    'label' => 'Cms.field_description',
+    'label' => 'BlockTypes.field_description',
     'required' => false,
     'value' => $item['description'] ?? '',
-    'placeholder' => 'Cms.field_description_placeholder',
-    'help' => 'Cms.field_description_help',
+    'placeholder' => 'BlockTypes.field_description_placeholder',
+    'help' => 'BlockTypes.field_description_help',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/text', [
     'name' => 'category',
-    'label' => 'Cms.field_category' ?? 'Category',
+    'label' => 'BlockTypes.field_category' ?? 'Category',
     'required' => true,
     'value' => $item['category'] ?? '',
-    'placeholder' => 'Cms.field_category_placeholder' ?? 'e.g. content, media, marketing',
-    'help' => 'Cms.field_category_help' ?? 'Block grouping category.',
+    'placeholder' => 'BlockTypes.field_category_placeholder' ?? 'e.g. content, media, marketing',
+    'help' => 'BlockTypes.field_category_help' ?? 'Block grouping category.',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/text', [
     'name' => 'icon',
-    'label' => 'Cms.field_icon',
+    'label' => 'BlockTypes.field_icon',
     'required' => false,
     'value' => $item['icon'] ?? '',
-    'placeholder' => 'Cms.field_icon_placeholder',
-    'help' => 'Cms.field_icon_help',
+    'placeholder' => 'BlockTypes.field_icon_placeholder',
+    'help' => 'BlockTypes.field_icon_help',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/textarea', [
     'name' => 'schema_definition',
-    'label' => 'Cms.field_schema_definition' ?? 'Schema Definition (JSON)',
+    'label' => 'BlockTypes.field_schema_definition' ?? 'Schema Definition (JSON)',
     'required' => true,
     'value' => isset($item['schema_definition']) ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition']) : '{\n  \"fields\": {}\n}',
     'placeholder' => '{\n  \"fields\": {}\n}',
-    'help' => 'Cms.field_schema_definition_help' ?? 'Define structural and localized fields configuration in JSON format.',
+    'help' => 'BlockTypes.field_schema_definition_help' ?? 'Define structural and localized fields configuration in JSON format.',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/boolean', [
     'name' => 'supports_pages',
-    'label' => 'Cms.field_supports_pages' ?? 'Supports Pages',
+    'label' => 'BlockTypes.field_supports_pages' ?? 'Supports Pages',
     'value' => $item['supports_pages'] ?? true,
     'on_label' => 'App.yes',
     'off_label' => 'App.no',
@@ -93,7 +93,7 @@
 
         <?= view('components/form/boolean', [
     'name' => 'supports_entries',
-    'label' => 'Cms.field_supports_entries' ?? 'Supports Entries',
+    'label' => 'BlockTypes.field_supports_entries' ?? 'Supports Entries',
     'value' => $item['supports_entries'] ?? true,
     'on_label' => 'App.yes',
     'off_label' => 'App.no',
@@ -102,7 +102,7 @@
 
         <?= view('components/form/boolean', [
     'name' => 'is_container',
-    'label' => 'Cms.field_is_container' ?? 'Is Container',
+    'label' => 'BlockTypes.field_is_container' ?? 'Is Container',
     'value' => $item['is_container'] ?? false,
     'on_label' => 'App.yes',
     'off_label' => 'App.no',
@@ -111,17 +111,17 @@
 
         <?= view('components/form/boolean', [
     'name' => 'is_active',
-    'label' => 'Cms.field_is_active',
+    'label' => 'BlockTypes.field_is_active',
     'value' => $item['is_active'] ?? false,
-    'on_label' => 'Cms.field_is_active_on',
-    'off_label' => 'Cms.field_is_active_off',
-    'help' => 'Cms.field_is_active_help',
+    'on_label' => 'BlockTypes.field_is_active_on',
+    'off_label' => 'BlockTypes.field_is_active_off',
+    'help' => 'BlockTypes.field_is_active_help',
     'errors' => $errors ?? []
 ]) ?>
 
         <?= view('components/form/text', [
     'name' => 'sort_order',
-    'label' => 'Cms.field_sort_order' ?? 'Sort Order',
+    'label' => 'BlockTypes.field_sort_order' ?? 'Sort Order',
     'required' => true,
     'value' => $item['sort_order'] ?? '0',
     'errors' => $errors ?? []

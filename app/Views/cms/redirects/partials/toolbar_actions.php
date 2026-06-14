@@ -1,11 +1,11 @@
 
     <?= view('components/table/export_button', [
         'exportUrl' => route_to('admin.cms.redirects.export_csv'),
-        'label' => 'Cms.redirects_export_csv',
+        'label' => 'Redirects.redirects_export_csv',
     ]) ?>
     <?= view('components/form/export_import', [
         'importUrl' => route_to('admin.cms.redirects.import_csv'),
-        'importLabel' => 'Cms.redirects_import_csv',
+        'importLabel' => 'Redirects.redirects_import_csv',
         'previewView' => 'components/form/import_preview',
     ]) ?>
 <a href="<?= route_to('admin.cms.redirects.create') ?>" class="<?= esc(action_button_class('primary')) ?>">

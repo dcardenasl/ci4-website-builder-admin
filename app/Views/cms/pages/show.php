@@ -44,34 +44,34 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_page_type',
+                'label' => 'Pages.field_page_type',
                 'value' => ! empty($page['page_type']) ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($page['page_type']) . '</span>' : '—',
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_status',
+                'label' => 'Pages.field_status',
                 'value' => ! empty($page['status']) ? cms_status_badge($page['status']) : '—',
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_parent_id',
+                'label' => 'Pages.field_parent_id',
                 'value' => ($pages[(string) ($page['parent_id'] ?? '')] ?? ($page['parent_id'] ?? '—'))
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_in_sitemap',
+                'label' => 'Pages.field_is_in_sitemap',
                 'value' => view('components/table/boolean_cell', ['value' => $page['is_in_sitemap'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_sitemap_priority',
+                'label' => 'Pages.field_sitemap_priority',
                 'value' => $page['sitemap_priority'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_published_at',
+                'label' => 'Pages.field_published_at',
                 'value' => $page['published_at'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_scheduled_at',
+                'label' => 'Pages.field_scheduled_at',
                 'value' => $page['scheduled_at'] ?? '—'
             ]) ?>
             <div>

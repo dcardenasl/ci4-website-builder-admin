@@ -10,21 +10,21 @@
 
         <?= view('components/form/text', [
             'name' => 'setting_key',
-            'label' => 'Cms.field_setting_key',
+            'label' => 'Settings.field_setting_key',
             'required' => true,
             'value' => $item['setting_key'] ?? '',
-            'placeholder' => 'Cms.field_setting_key_placeholder',
-            'help' => 'Cms.field_setting_key_help',
+            'placeholder' => 'Settings.field_setting_key_placeholder',
+            'help' => 'Settings.field_setting_key_help',
             'errors' => $errors ?? []
         ]) ?>
 
     <div x-data="{ settingType: '<?= esc($item['setting_type'] ?? 'string') ?>' }">
         <?= view('components/form/select', [
             'name' => 'setting_type',
-            'label' => 'Cms.field_setting_type',
+            'label' => 'Settings.field_setting_type',
             'required' => true,
-            'placeholder' => 'Cms.field_setting_type_placeholder',
-            'help' => 'Cms.field_setting_type_help',
+            'placeholder' => 'Settings.field_setting_type_placeholder',
+            'help' => 'Settings.field_setting_type_help',
             'options' => [
                 'string' => lang('BlockTypes.type_string'),
                 'int' => lang('BlockTypes.type_int'),
@@ -41,10 +41,10 @@
         <div x-show="settingType === 'string' || settingType === 'file_id'">
             <?= view('components/form/text', [
                 'name' => 'setting_value_string',
-                'label' => 'Cms.field_setting_value',
+                'label' => 'Settings.field_setting_value',
                 'required' => false,
                 'value' => ($item['setting_type'] ?? '') === 'string' || ($item['setting_type'] ?? '') === 'file_id' ? ($item['setting_value'] ?? '') : '',
-                'placeholder' => 'Cms.field_setting_value_placeholder',
+                'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'attributes' => [':name' => "settingType === 'string' || settingType === 'file_id' ? 'setting_value' : ''"]
             ]) ?>
@@ -54,10 +54,10 @@
         <div x-show="settingType === 'int'" x-cloak>
             <?= view('components/form/number', [
                 'name' => 'setting_value_int',
-                'label' => 'Cms.field_setting_value',
+                'label' => 'Settings.field_setting_value',
                 'required' => false,
                 'value' => ($item['setting_type'] ?? '') === 'int' ? ($item['setting_value'] ?? '') : '',
-                'placeholder' => 'Cms.field_setting_value_placeholder',
+                'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'attributes' => [':name' => "settingType === 'int' ? 'setting_value' : ''"]
             ]) ?>
@@ -67,7 +67,7 @@
         <div x-show="settingType === 'bool'" x-cloak>
             <?= view('components/form/boolean', [
                 'name' => 'setting_value_bool',
-                'label' => 'Cms.field_setting_value',
+                'label' => 'Settings.field_setting_value',
                 'value' => ($item['setting_type'] ?? '') === 'bool' ? filter_var($item['setting_value'] ?? false, FILTER_VALIDATE_BOOLEAN) : false,
                 'on_label' => 'App.yes' ?? 'Yes',
                 'off_label' => 'App.no' ?? 'No',
@@ -80,10 +80,10 @@
         <div x-show="settingType === 'json'" x-cloak>
             <?= view('components/form/textarea', [
                 'name' => 'setting_value_json',
-                'label' => 'Cms.field_setting_value',
+                'label' => 'Settings.field_setting_value',
                 'required' => false,
                 'value' => ($item['setting_type'] ?? '') === 'json' ? ($item['setting_value'] ?? '') : '',
-                'placeholder' => 'Cms.field_setting_value_placeholder',
+                'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'rows' => 5,
                 'class' => 'font-mono text-sm',
@@ -94,31 +94,31 @@
 
         <?= view('components/form/text', [
             'name' => 'setting_group',
-            'label' => 'Cms.field_setting_group',
+            'label' => 'Settings.field_setting_group',
             'required' => false,
             'value' => $item['setting_group'] ?? '',
-            'placeholder' => 'Cms.field_setting_group_placeholder',
-            'help' => 'Cms.field_setting_group_help',
+            'placeholder' => 'Settings.field_setting_group_placeholder',
+            'help' => 'Settings.field_setting_group_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_translatable',
-            'label' => 'Cms.field_is_translatable',
+            'label' => 'Settings.field_is_translatable',
             'value' => $item['is_translatable'] ?? false,
-            'on_label' => 'Cms.field_is_translatable_on',
-            'off_label' => 'Cms.field_is_translatable_off',
-            'help' => 'Cms.field_is_translatable_help',
+            'on_label' => 'Settings.field_is_translatable_on',
+            'off_label' => 'Settings.field_is_translatable_off',
+            'help' => 'Settings.field_is_translatable_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/textarea', [
             'name' => 'description',
-            'label' => 'Cms.field_description',
+            'label' => 'Settings.field_description',
             'required' => false,
             'value' => $item['description'] ?? '',
-            'placeholder' => 'Cms.field_description_placeholder',
-            'help' => 'Cms.field_description_help',
+            'placeholder' => 'Settings.field_description_placeholder',
+            'help' => 'Settings.field_description_help',
             'errors' => $errors ?? []
         ]) ?>
 

@@ -10,30 +10,30 @@
 
         <?= view('components/form/text', [
             'name' => 'old_path',
-            'label' => 'Cms.field_old_path',
+            'label' => 'Redirects.field_old_path',
             'required' => true,
             'value' => $item['old_path'] ?? '',
-            'placeholder' => 'Cms.field_old_path_placeholder',
-            'help' => 'Cms.field_old_path_help',
+            'placeholder' => 'Redirects.field_old_path_placeholder',
+            'help' => 'Redirects.field_old_path_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'new_url',
-            'label' => 'Cms.field_new_url',
+            'label' => 'Redirects.field_new_url',
             'required' => true,
             'value' => $item['new_url'] ?? '',
-            'placeholder' => 'Cms.field_new_url_placeholder',
-            'help' => 'Cms.field_new_url_help',
+            'placeholder' => 'Redirects.field_new_url_placeholder',
+            'help' => 'Redirects.field_new_url_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'redirect_type',
-            'label' => 'Cms.field_redirect_type',
+            'label' => 'Redirects.field_redirect_type',
             'required' => false,
-            'placeholder' => 'Cms.field_redirect_type_placeholder',
-            'help' => 'Cms.field_redirect_type_help',
+            'placeholder' => 'Redirects.field_redirect_type_placeholder',
+            'help' => 'Redirects.field_redirect_type_help',
             'options' => [
                 '301' => '301',
                 '302' => '302'
@@ -44,21 +44,21 @@
 
         <?= view('components/form/textarea', [
             'name' => 'note',
-            'label' => 'Cms.field_note',
+            'label' => 'Redirects.field_note',
             'required' => false,
             'value' => $item['note'] ?? '',
-            'placeholder' => 'Cms.field_note_placeholder',
-            'help' => 'Cms.field_note_help',
+            'placeholder' => 'Redirects.field_note_placeholder',
+            'help' => 'Redirects.field_note_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'Redirects.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'Redirects.field_is_active_on',
+            'off_label' => 'Redirects.field_is_active_off',
+            'help' => 'Redirects.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 

@@ -10,40 +10,40 @@
 
         <?= view('components/form/text', [
             'name' => 'collection_key',
-            'label' => 'Cms.field_collection_key',
+            'label' => 'Collections.field_collection_key',
             'required' => true,
             'value' => $item['collection_key'] ?? '',
-            'placeholder' => 'Cms.field_collection_key_placeholder',
-            'help' => 'Cms.field_collection_key_help',
+            'placeholder' => 'Collections.field_collection_key_placeholder',
+            'help' => 'Collections.field_collection_key_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'url_prefix',
-            'label' => 'Cms.field_url_prefix',
+            'label' => 'Collections.field_url_prefix',
             'required' => true,
             'value' => $item['url_prefix'] ?? '',
-            'placeholder' => 'Cms.field_url_prefix_placeholder',
-            'help' => 'Cms.field_url_prefix_help',
+            'placeholder' => 'Collections.field_url_prefix_placeholder',
+            'help' => 'Collections.field_url_prefix_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/decimal', [
             'name' => 'default_sitemap_priority',
-            'label' => 'Cms.field_default_sitemap_priority',
+            'label' => 'Collections.field_default_sitemap_priority',
             'required' => false,
             'value' => $item['default_sitemap_priority'] ?? '0.5',
-            'placeholder' => 'Cms.field_default_sitemap_priority_placeholder',
-            'help' => 'Cms.field_default_sitemap_priority_help',
+            'placeholder' => 'Collections.field_default_sitemap_priority_placeholder',
+            'help' => 'Collections.field_default_sitemap_priority_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'default_changefreq',
-            'label' => 'Cms.field_default_changefreq',
+            'label' => 'Collections.field_default_changefreq',
             'required' => false,
-            'placeholder' => 'Cms.field_default_changefreq_placeholder',
-            'help' => 'Cms.field_default_changefreq_help',
+            'placeholder' => 'Collections.field_default_changefreq_placeholder',
+            'help' => 'Collections.field_default_changefreq_help',
             'options' => [
                 'always' => lang('Collections.frequency_always'),
                 'hourly' => lang('Collections.frequency_hourly'),
@@ -59,51 +59,51 @@
 
         <?= view('components/form/number', [
             'name' => 'sort_order',
-            'label' => 'Cms.field_sort_order',
+            'label' => 'Collections.field_sort_order',
             'required' => false,
             'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Cms.field_sort_order_placeholder',
-            'help' => 'Cms.field_sort_order_help',
+            'placeholder' => 'Collections.field_sort_order_placeholder',
+            'help' => 'Collections.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'Collections.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'Collections.field_is_active_on',
+            'off_label' => 'Collections.field_is_active_off',
+            'help' => 'Collections.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'requires_approval',
-            'label' => 'Cms.field_requires_approval',
+            'label' => 'Collections.field_requires_approval',
             'value' => $item['requires_approval'] ?? false,
-            'on_label' => 'Cms.field_requires_approval_on',
-            'off_label' => 'Cms.field_requires_approval_off',
-            'help' => 'Cms.field_requires_approval_help',
+            'on_label' => 'Collections.field_requires_approval_on',
+            'off_label' => 'Collections.field_requires_approval_off',
+            'help' => 'Collections.field_requires_approval_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'enables_categories',
-            'label' => 'Cms.field_enables_categories',
+            'label' => 'Collections.field_enables_categories',
             'value' => $item['enables_categories'] ?? false,
-            'on_label' => 'Cms.field_enables_categories_on',
-            'off_label' => 'Cms.field_enables_categories_off',
-            'help' => 'Cms.field_enables_categories_help',
+            'on_label' => 'Collections.field_enables_categories_on',
+            'off_label' => 'Collections.field_enables_categories_off',
+            'help' => 'Collections.field_enables_categories_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'enables_tags',
-            'label' => 'Cms.field_enables_tags',
+            'label' => 'Collections.field_enables_tags',
             'value' => $item['enables_tags'] ?? false,
-            'on_label' => 'Cms.field_enables_tags_on',
-            'off_label' => 'Cms.field_enables_tags_off',
-            'help' => 'Cms.field_enables_tags_help',
+            'on_label' => 'Collections.field_enables_tags_on',
+            'off_label' => 'Collections.field_enables_tags_off',
+            'help' => 'Collections.field_enables_tags_help',
             'errors' => $errors ?? []
         ]) ?>
 

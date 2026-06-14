@@ -10,51 +10,51 @@
 
         <?= view('components/form/text', [
             'name' => 'code',
-            'label' => 'Cms.field_code',
+            'label' => 'CmsLanguages.field_code',
             'required' => true,
             'value' => $item['code'] ?? '',
-            'placeholder' => 'Cms.field_code_placeholder',
-            'help' => 'Cms.field_code_help',
+            'placeholder' => 'CmsLanguages.field_code_placeholder',
+            'help' => 'CmsLanguages.field_code_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'name',
-            'label' => 'Cms.field_name',
+            'label' => 'CmsLanguages.field_name',
             'required' => true,
             'value' => $item['name'] ?? '',
-            'placeholder' => 'Cms.field_name_placeholder',
-            'help' => 'Cms.field_name_help',
+            'placeholder' => 'CmsLanguages.field_name_placeholder',
+            'help' => 'CmsLanguages.field_name_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'native_name',
-            'label' => 'Cms.field_native_name',
+            'label' => 'CmsLanguages.field_native_name',
             'required' => false,
             'value' => $item['native_name'] ?? '',
-            'placeholder' => 'Cms.field_native_name_placeholder',
-            'help' => 'Cms.field_native_name_help',
+            'placeholder' => 'CmsLanguages.field_native_name_placeholder',
+            'help' => 'CmsLanguages.field_native_name_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_default',
-            'label' => 'Cms.field_is_default',
+            'label' => 'CmsLanguages.field_is_default',
             'value' => $item['is_default'] ?? false,
-            'on_label' => 'Cms.field_is_default_on',
-            'off_label' => 'Cms.field_is_default_off',
-            'help' => 'Cms.field_is_default_help',
+            'on_label' => 'CmsLanguages.field_is_default_on',
+            'off_label' => 'CmsLanguages.field_is_default_off',
+            'help' => 'CmsLanguages.field_is_default_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'CmsLanguages.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'CmsLanguages.field_is_active_on',
+            'off_label' => 'CmsLanguages.field_is_active_off',
+            'help' => 'CmsLanguages.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 
@@ -69,12 +69,12 @@
 
         <?= view('components/form/select', [
         'name' => 'fallback_language_id',
-        'label' => 'Cms.field_fallback_language_id',
+        'label' => 'CmsLanguages.field_fallback_language_id',
         'options' => $fallbackOptions,
         'required' => false,
         'value' => $item['fallback_language_id'] ?? '',
-        'placeholder' => 'Cms.field_fallback_language_placeholder',
-        'help' => 'Cms.field_fallback_language_help',
+        'placeholder' => 'CmsLanguages.field_fallback_language_placeholder',
+        'help' => 'CmsLanguages.field_fallback_language_help',
         'errors' => $errors ?? []
     ]) ?>
 

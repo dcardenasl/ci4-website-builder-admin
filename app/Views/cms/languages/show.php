@@ -40,28 +40,28 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_code',
+                'label' => 'CmsLanguages.field_code',
                 'value' => $language['code'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_name',
+                'label' => 'CmsLanguages.field_name',
                 'value' => $language['name'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_native_name',
+                'label' => 'CmsLanguages.field_native_name',
                 'value' => $language['native_name'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_fallback_language_id',
+                'label' => 'CmsLanguages.field_fallback_language_id',
                 'value' => $language['fallback_language_id'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_default',
+                'label' => 'CmsLanguages.field_is_default',
                 'value' => view('components/table/boolean_cell', ['value' => $language['is_default'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'CmsLanguages.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $language['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>

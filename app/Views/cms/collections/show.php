@@ -28,26 +28,26 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_collection_key',
+                'label' => 'Collections.field_collection_key',
                 'value' => $collection['collection_key'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'Collections.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $collection['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_requires_approval',
+                'label' => 'Collections.field_requires_approval',
                 'value' => view('components/table/boolean_cell', ['value' => $collection['requires_approval'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_enables_categories',
+                'label' => 'Collections.field_enables_categories',
                 'value' => view('components/table/boolean_cell', ['value' => $collection['enables_categories'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_enables_tags',
+                'label' => 'Collections.field_enables_tags',
                 'value' => view('components/table/boolean_cell', ['value' => $collection['enables_tags'] ?? false]),
                 'isHtml' => true
             ]) ?>

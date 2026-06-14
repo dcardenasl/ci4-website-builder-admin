@@ -28,47 +28,47 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_block_key' ?? 'Block Key',
+                'label' => 'BlockTypes.field_block_key' ?? 'Block Key',
                 'value' => $blockType['block_key'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_name',
+                'label' => 'BlockTypes.field_name',
                 'value' => $blockType['name'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_description',
+                'label' => 'BlockTypes.field_description',
                 'value' => $blockType['description'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_category' ?? 'Category',
+                'label' => 'BlockTypes.field_category' ?? 'Category',
                 'value' => $blockType['category'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_icon',
+                'label' => 'BlockTypes.field_icon',
                 'value' => $blockType['icon'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'BlockTypes.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_supports_pages' ?? 'Supports Pages',
+                'label' => 'BlockTypes.field_supports_pages' ?? 'Supports Pages',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['supports_pages'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_supports_entries' ?? 'Supports Entries',
+                'label' => 'BlockTypes.field_supports_entries' ?? 'Supports Entries',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['supports_entries'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_container' ?? 'Is Container',
+                'label' => 'BlockTypes.field_is_container' ?? 'Is Container',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['is_container'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_sort_order' ?? 'Sort Order',
+                'label' => 'BlockTypes.field_sort_order' ?? 'Sort Order',
                 'value' => $blockType['sort_order'] ?? '—'
             ]) ?>
             <div class="col-span-1 md:col-span-2">

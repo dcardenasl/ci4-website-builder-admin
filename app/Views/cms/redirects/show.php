@@ -28,24 +28,24 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_old_path',
+                'label' => 'Redirects.field_old_path',
                 'value' => $redirect['old_path'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_new_url',
+                'label' => 'Redirects.field_new_url',
                 'value' => $redirect['new_url'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_redirect_type',
+                'label' => 'Redirects.field_redirect_type',
                 'value' => ! empty($redirect['redirect_type']) ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($redirect['redirect_type']) . '</span>' : '—',
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_note',
+                'label' => 'Redirects.field_note',
                 'value' => $redirect['note'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'Redirects.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $redirect['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>

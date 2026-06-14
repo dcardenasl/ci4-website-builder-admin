@@ -18,11 +18,11 @@
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'Tags.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'Tags.field_is_active_on',
+            'off_label' => 'Tags.field_is_active_off',
+            'help' => 'Tags.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 

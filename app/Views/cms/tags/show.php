@@ -32,7 +32,7 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'Tags.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $tag['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>

@@ -18,43 +18,43 @@
 
         <?= view('components/form/relation', [
             'name' => 'collection_id',
-            'label' => 'Cms.field_collection_id',
+            'label' => 'Categories.field_collection_id',
             'required' => true,
             'options' => $collections ?? [],
-            'placeholder' => 'Cms.field_collection_id_placeholder',
-            'help' => 'Cms.field_collection_id_help',
+            'placeholder' => 'Categories.field_collection_id_placeholder',
+            'help' => 'Categories.field_collection_id_help',
             'value' => $item['collection_id'] ?? '',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/relation', [
             'name' => 'parent_id',
-            'label' => 'Cms.field_parent_id',
+            'label' => 'Categories.field_parent_id',
             'required' => false,
             'options' => $categories ?? [],
-            'placeholder' => 'Cms.field_parent_id_placeholder',
-            'help' => 'Cms.field_parent_id_help',
+            'placeholder' => 'Categories.field_parent_id_placeholder',
+            'help' => 'Categories.field_parent_id_help',
             'value' => $item['parent_id'] ?? '',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/number', [
             'name' => 'sort_order',
-            'label' => 'Cms.field_sort_order',
+            'label' => 'Categories.field_sort_order',
             'required' => false,
             'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Cms.field_sort_order_placeholder',
-            'help' => 'Cms.field_sort_order_help',
+            'placeholder' => 'Categories.field_sort_order_placeholder',
+            'help' => 'Categories.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'Categories.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'Categories.field_is_active_on',
+            'off_label' => 'Categories.field_is_active_off',
+            'help' => 'Categories.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 

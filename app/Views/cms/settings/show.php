@@ -28,11 +28,11 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_setting_key',
+                'label' => 'Settings.field_setting_key',
                 'value' => $setting['setting_key'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_setting_value',
+                'label' => 'Settings.field_setting_value',
                 'value' => (($setting['setting_type'] ?? '') === 'bool')
                     ? (($setting['setting_value'] ?? '') === '1' || $setting['setting_value'] === 'true' || $setting['setting_value'] === true ? lang('App.yes') : lang('App.no'))
                     : ((($setting['setting_type'] ?? '') === 'json')
@@ -41,21 +41,21 @@
                 'isHtml' => ($setting['setting_type'] ?? '') === 'json'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_setting_type',
+                'label' => 'Settings.field_setting_type',
                 'value' => ! empty($setting['setting_type']) ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($setting['setting_type']) . '</span>' : '—',
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_setting_group',
+                'label' => 'Settings.field_setting_group',
                 'value' => $setting['setting_group'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_translatable',
+                'label' => 'Settings.field_is_translatable',
                 'value' => view('components/table/boolean_cell', ['value' => $setting['is_translatable'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_description',
+                'label' => 'Settings.field_description',
                 'value' => $setting['description'] ?? '—'
             ]) ?>
             <div>

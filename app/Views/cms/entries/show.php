@@ -44,20 +44,20 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_collection_id',
+                'label' => 'Entries.field_collection_id',
                 'value' => ($collections[(string) ($entry['collection_id'] ?? '')] ?? ($entry['collection_id'] ?? '—'))
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_status',
+                'label' => 'Entries.field_status',
                 'value' => ! empty($entry['status']) ? cms_status_badge($entry['status']) : '—',
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_published_at',
+                'label' => 'Entries.field_published_at',
                 'value' => $entry['published_at'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_scheduled_at',
+                'label' => 'Entries.field_scheduled_at',
                 'value' => $entry['scheduled_at'] ?? '—'
             ]) ?>
             <div>

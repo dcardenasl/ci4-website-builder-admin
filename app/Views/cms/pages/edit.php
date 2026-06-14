@@ -18,10 +18,10 @@
 
         <?= view('components/form/select', [
             'name' => 'page_type',
-            'label' => 'Cms.field_page_type',
+            'label' => 'Pages.field_page_type',
             'required' => true,
-            'placeholder' => 'Cms.field_page_type_placeholder',
-            'help' => 'Cms.field_page_type_help',
+            'placeholder' => 'Pages.field_page_type_placeholder',
+            'help' => 'Pages.field_page_type_help',
             'options' => [
                 'home' => 'Home',
                 'generic' => 'Generic',
@@ -38,10 +38,10 @@
 
         <?= view('components/form/select', [
             'name' => 'status',
-            'label' => 'Cms.field_status',
+            'label' => 'Pages.field_status',
             'required' => true,
-            'placeholder' => 'Cms.field_status_placeholder',
-            'help' => 'Cms.field_status_help',
+            'placeholder' => 'Pages.field_status_placeholder',
+            'help' => 'Pages.field_status_help',
             'options' => [
                 'draft' => 'Draft',
                 'published' => 'Published',
@@ -53,51 +53,51 @@
 
         <?= view('components/form/relation', [
             'name' => 'parent_id',
-            'label' => 'Cms.field_parent_id',
+            'label' => 'Pages.field_parent_id',
             'required' => false,
             'options' => $pages ?? [],
-            'placeholder' => 'Cms.field_parent_id_placeholder',
-            'help' => 'Cms.field_parent_id_help',
+            'placeholder' => 'Pages.field_parent_id_placeholder',
+            'help' => 'Pages.field_parent_id_help',
             'value' => $item['parent_id'] ?? '',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/number', [
             'name' => 'sort_order',
-            'label' => 'Cms.field_sort_order',
+            'label' => 'Pages.field_sort_order',
             'required' => false,
             'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Cms.field_sort_order_placeholder',
-            'help' => 'Cms.field_sort_order_help',
+            'placeholder' => 'Pages.field_sort_order_placeholder',
+            'help' => 'Pages.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_in_sitemap',
-            'label' => 'Cms.field_is_in_sitemap',
+            'label' => 'Pages.field_is_in_sitemap',
             'value' => $item['is_in_sitemap'] ?? false,
-            'on_label' => 'Cms.field_is_in_sitemap_on',
-            'off_label' => 'Cms.field_is_in_sitemap_off',
-            'help' => 'Cms.field_is_in_sitemap_help',
+            'on_label' => 'Pages.field_is_in_sitemap_on',
+            'off_label' => 'Pages.field_is_in_sitemap_off',
+            'help' => 'Pages.field_is_in_sitemap_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'sitemap_priority',
-            'label' => 'Cms.field_sitemap_priority',
+            'label' => 'Pages.field_sitemap_priority',
             'required' => false,
             'value' => $item['sitemap_priority'] ?? '',
-            'placeholder' => 'Cms.field_sitemap_priority_placeholder',
-            'help' => 'Cms.field_sitemap_priority_help',
+            'placeholder' => 'Pages.field_sitemap_priority_placeholder',
+            'help' => 'Pages.field_sitemap_priority_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'sitemap_changefreq',
-            'label' => 'Cms.field_sitemap_changefreq',
+            'label' => 'Pages.field_sitemap_changefreq',
             'required' => false,
-            'placeholder' => 'Cms.field_sitemap_changefreq_placeholder',
-            'help' => 'Cms.field_sitemap_changefreq_help',
+            'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
+            'help' => 'Pages.field_sitemap_changefreq_help',
             'options' => [
                 'always' => 'Always',
                 'hourly' => 'Hourly',
@@ -113,21 +113,21 @@
 
         <?= view('components/form/datetime', [
             'name' => 'published_at',
-            'label' => 'Cms.field_published_at',
+            'label' => 'Pages.field_published_at',
             'required' => false,
             'value' => $item['published_at'] ?? '',
-            'placeholder' => 'Cms.field_published_at_placeholder',
-            'help' => 'Cms.field_published_at_help',
+            'placeholder' => 'Pages.field_published_at_placeholder',
+            'help' => 'Pages.field_published_at_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/datetime', [
             'name' => 'scheduled_at',
-            'label' => 'Cms.field_scheduled_at',
+            'label' => 'Pages.field_scheduled_at',
             'required' => false,
             'value' => $item['scheduled_at'] ?? '',
-            'placeholder' => 'Cms.field_scheduled_at_placeholder',
-            'help' => 'Cms.field_scheduled_at_help',
+            'placeholder' => 'Pages.field_scheduled_at_placeholder',
+            'help' => 'Pages.field_scheduled_at_help',
             'errors' => $errors ?? []
         ]) ?>
 

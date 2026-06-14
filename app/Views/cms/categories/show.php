@@ -32,15 +32,15 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_collection_id',
+                'label' => 'Categories.field_collection_id',
                 'value' => ($collections[(string) ($category['collection_id'] ?? '')] ?? ($category['collection_id'] ?? '—'))
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_parent_id',
+                'label' => 'Categories.field_parent_id',
                 'value' => ($categories[(string) ($category['parent_id'] ?? '')] ?? ($category['parent_id'] ?? '—'))
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'Cms.field_is_active',
+                'label' => 'Categories.field_is_active',
                 'value' => view('components/table/boolean_cell', ['value' => $category['is_active'] ?? false]),
                 'isHtml' => true
             ]) ?>

@@ -31,11 +31,11 @@
 
                 <dl class="mt-4 space-y-3 text-sm">
                     <?= view('components/display/field_row', [
-                        'label' => 'Cms.field_menu_key',
+                        'label' => 'Menus.field_menu_key',
                         'value' => $menu['menu_key'] ?? '—'
                     ]) ?>
                     <?= view('components/display/field_row', [
-                        'label' => 'Cms.field_is_active',
+                        'label' => 'Menus.field_is_active',
                         'value' => view('components/table/boolean_cell', ['value' => $menu['is_active'] ?? false]),
                         'isHtml' => true
                     ]) ?>
@@ -77,10 +77,10 @@
 
                 <?php if (empty($items)): ?>
                     <?= view('components/display/empty_state', [
-                        'title' => 'Cms.menus_items_empty' ?? 'No items inside this menu',
-                        'description' => 'Cms.menus_items_empty_desc' ?? 'Get started by creating a new link for this menu.',
+                        'title' => 'Menus.menus_items_empty' ?? 'No items inside this menu',
+                        'description' => 'Menus.menus_items_empty_desc' ?? 'Get started by creating a new link for this menu.',
                         'actionUrl' => route_to('admin.cms.menus.items.create', $itemId),
-                        'actionLabel' => 'Cms.menus_items_create' ?? 'Add Item',
+                        'actionLabel' => 'Menus.menus_items_create' ?? 'Add Item',
                     ]) ?>
                 <?php else: ?>
                     <div class="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-150">

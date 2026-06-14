@@ -10,21 +10,21 @@
 
         <?= view('components/form/relation', [
             'name' => 'collection_id',
-            'label' => 'Cms.field_collection_id',
+            'label' => 'Entries.field_collection_id',
             'required' => true,
             'options' => $collections ?? [],
-            'placeholder' => 'Cms.field_collection_id_placeholder',
-            'help' => 'Cms.field_collection_id_help',
+            'placeholder' => 'Entries.field_collection_id_placeholder',
+            'help' => 'Entries.field_collection_id_help',
             'value' => $item['collection_id'] ?? '',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'status',
-            'label' => 'Cms.field_status',
+            'label' => 'Entries.field_status',
             'required' => true,
-            'placeholder' => 'Cms.field_status_placeholder',
-            'help' => 'Cms.field_status_help',
+            'placeholder' => 'Entries.field_status_placeholder',
+            'help' => 'Entries.field_status_help',
             'options' => [
                 'draft' => 'Draft',
                 'published' => 'Published',
@@ -36,60 +36,60 @@
 
         <?= view('components/form/boolean', [
             'name' => 'is_featured',
-            'label' => 'Cms.field_is_featured',
+            'label' => 'Entries.field_is_featured',
             'value' => $item['is_featured'] ?? false,
-            'on_label' => 'Cms.field_is_featured_on',
-            'off_label' => 'Cms.field_is_featured_off',
-            'help' => 'Cms.field_is_featured_help',
+            'on_label' => 'Entries.field_is_featured_on',
+            'off_label' => 'Entries.field_is_featured_off',
+            'help' => 'Entries.field_is_featured_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/number', [
             'name' => 'view_count',
-            'label' => 'Cms.field_view_count',
+            'label' => 'Entries.field_view_count',
             'required' => false,
             'value' => $item['view_count'] ?? 0,
-            'placeholder' => 'Cms.field_view_count_placeholder',
-            'help' => 'Cms.field_view_count_help',
+            'placeholder' => 'Entries.field_view_count_placeholder',
+            'help' => 'Entries.field_view_count_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/number', [
             'name' => 'sort_order',
-            'label' => 'Cms.field_sort_order',
+            'label' => 'Entries.field_sort_order',
             'required' => false,
             'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Cms.field_sort_order_placeholder',
-            'help' => 'Cms.field_sort_order_help',
+            'placeholder' => 'Entries.field_sort_order_placeholder',
+            'help' => 'Entries.field_sort_order_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_in_sitemap',
-            'label' => 'Cms.field_is_in_sitemap',
+            'label' => 'Entries.field_is_in_sitemap',
             'value' => $item['is_in_sitemap'] ?? false,
-            'on_label' => 'Cms.field_is_in_sitemap_on',
-            'off_label' => 'Cms.field_is_in_sitemap_off',
-            'help' => 'Cms.field_is_in_sitemap_help',
+            'on_label' => 'Entries.field_is_in_sitemap_on',
+            'off_label' => 'Entries.field_is_in_sitemap_off',
+            'help' => 'Entries.field_is_in_sitemap_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'sitemap_priority',
-            'label' => 'Cms.field_sitemap_priority',
+            'label' => 'Entries.field_sitemap_priority',
             'required' => false,
             'value' => $item['sitemap_priority'] ?? '',
-            'placeholder' => 'Cms.field_sitemap_priority_placeholder',
-            'help' => 'Cms.field_sitemap_priority_help',
+            'placeholder' => 'Entries.field_sitemap_priority_placeholder',
+            'help' => 'Entries.field_sitemap_priority_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/select', [
             'name' => 'sitemap_changefreq',
-            'label' => 'Cms.field_sitemap_changefreq',
+            'label' => 'Entries.field_sitemap_changefreq',
             'required' => false,
-            'placeholder' => 'Cms.field_sitemap_changefreq_placeholder',
-            'help' => 'Cms.field_sitemap_changefreq_help',
+            'placeholder' => 'Entries.field_sitemap_changefreq_placeholder',
+            'help' => 'Entries.field_sitemap_changefreq_help',
             'options' => [
                 'always' => 'Always',
                 'hourly' => 'Hourly',
@@ -105,21 +105,21 @@
 
         <?= view('components/form/datetime', [
             'name' => 'published_at',
-            'label' => 'Cms.field_published_at',
+            'label' => 'Entries.field_published_at',
             'required' => false,
             'value' => $item['published_at'] ?? '',
-            'placeholder' => 'Cms.field_published_at_placeholder',
-            'help' => 'Cms.field_published_at_help',
+            'placeholder' => 'Entries.field_published_at_placeholder',
+            'help' => 'Entries.field_published_at_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/datetime', [
             'name' => 'scheduled_at',
-            'label' => 'Cms.field_scheduled_at',
+            'label' => 'Entries.field_scheduled_at',
             'required' => false,
             'value' => $item['scheduled_at'] ?? '',
-            'placeholder' => 'Cms.field_scheduled_at_placeholder',
-            'help' => 'Cms.field_scheduled_at_help',
+            'placeholder' => 'Entries.field_scheduled_at_placeholder',
+            'help' => 'Entries.field_scheduled_at_help',
             'errors' => $errors ?? []
         ]) ?>
 

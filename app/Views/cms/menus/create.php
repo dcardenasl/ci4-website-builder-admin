@@ -10,31 +10,31 @@
 
         <?= view('components/form/text', [
             'name' => 'menu_key',
-            'label' => 'Cms.field_menu_key',
+            'label' => 'Menus.field_menu_key',
             'required' => true,
             'value' => $item['menu_key'] ?? '',
-            'placeholder' => 'Cms.field_menu_key_placeholder',
-            'help' => 'Cms.field_menu_key_help',
+            'placeholder' => 'Menus.field_menu_key_placeholder',
+            'help' => 'Menus.field_menu_key_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/text', [
             'name' => 'location',
-            'label' => 'Cms.field_location',
+            'label' => 'Menus.field_location',
             'required' => true,
             'value' => $item['location'] ?? '',
-            'placeholder' => 'Cms.field_location_placeholder',
-            'help' => 'Cms.field_location_help',
+            'placeholder' => 'Menus.field_location_placeholder',
+            'help' => 'Menus.field_location_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'is_active',
-            'label' => 'Cms.field_is_active',
+            'label' => 'Menus.field_is_active',
             'value' => $item['is_active'] ?? false,
-            'on_label' => 'Cms.field_is_active_on',
-            'off_label' => 'Cms.field_is_active_off',
-            'help' => 'Cms.field_is_active_help',
+            'on_label' => 'Menus.field_is_active_on',
+            'off_label' => 'Menus.field_is_active_off',
+            'help' => 'Menus.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
 
