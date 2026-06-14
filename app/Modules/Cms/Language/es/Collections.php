@@ -22,6 +22,12 @@ return [
     'collections_no_results'         => 'No se encontraron colecciones.',
 
     // Collection — form fields
+    'field_name'                        => 'Nombre',
+    'field_name_placeholder'            => 'Ingrese Nombre',
+    'field_name_help'                   => 'Ingrese el nombre.',
+    'field_description'                 => 'Descripción',
+    'field_description_placeholder'     => 'Ingrese Descripción',
+    'field_description_help'            => 'Ingrese la descripción.',
     'field_collection_key'              => 'Clave de Colección',
     'field_collection_key_placeholder'  => 'Ingrese la Clave de Colección',
     'field_collection_key_help'         => 'Ingrese la Clave de Colección.',

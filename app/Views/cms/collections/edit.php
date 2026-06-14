@@ -142,7 +142,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][name]",
-                            'label' => 'Name',
+                            'label' => 'Collections.field_name',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter collection name',
                             'value' => old("translations.{$index}.name") ?? $transValue['name'] ?? '',
@@ -151,7 +151,7 @@
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][description]",
-                            'label' => 'Description',
+                            'label' => 'Collections.field_description',
                             'required' => false,
                             'placeholder' => 'Enter collection description',
                             'value' => old("translations.{$index}.description") ?? $transValue['description'] ?? '',

@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-return [
-    'tags_title'              => 'Etiquetas',
+return [    'tags_title'              => 'Etiquetas',
     'tags_new'                => 'Nueva Etiqueta',
     'tags_create'             => 'Nueva Etiqueta',
     'tags_edit'               => 'Editar Etiqueta',
@@ -19,4 +18,12 @@ return [
     'tags_search_placeholder' => 'Buscar etiquetas...',
     'tags_loading'            => 'Cargando etiquetas...',
     'tags_no_results'         => 'No se encontraron etiquetas.',
+
+    // Tag — form fields
+    'field_name'              => 'Nombre',
+    'field_name_placeholder'  => 'Ingrese Nombre',
+    'field_name_help'         => 'Ingrese el nombre.',
+    'field_slug'              => 'Slug',
+    'field_slug_placeholder'  => 'Ingrese Slug',
+    'field_slug_help'         => 'Ingrese el slug.',
 ];

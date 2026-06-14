@@ -53,7 +53,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][name]",
-                            'label' => 'Name',
+                            'label' => 'Tags.field_name',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter tag name',
                             'value' => old("translations.{$index}.name") ?? $transValue['name'] ?? '',
@@ -62,7 +62,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Slug',
+                            'label' => 'Tags.field_slug',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter tag slug',
                             'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',

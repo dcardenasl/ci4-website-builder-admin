@@ -139,7 +139,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][title]",
-                            'label' => 'Title',
+                            'label' => 'Entries.field_title',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter entry title',
                             'value' => old("translations.{$index}.title") ?? '',
@@ -148,7 +148,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Slug',
+                            'label' => 'Entries.field_slug',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter entry slug',
                             'value' => old("translations.{$index}.slug") ?? '',
@@ -157,7 +157,7 @@
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][excerpt]",
-                            'label' => 'Excerpt',
+                            'label' => 'Entries.field_excerpt',
                             'required' => false,
                             'placeholder' => 'Enter short excerpt/summary',
                             'value' => old("translations.{$index}.excerpt") ?? '',
@@ -166,7 +166,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][meta_title]",
-                            'label' => 'SEO Meta Title',
+                            'label' => 'Entries.field_seo_meta_title',
                             'required' => false,
                             'placeholder' => 'Enter SEO title',
                             'value' => old("translations.{$index}.meta_title") ?? '',
@@ -175,7 +175,7 @@
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][meta_description]",
-                            'label' => 'SEO Meta Description',
+                            'label' => 'Entries.field_seo_meta_description',
                             'required' => false,
                             'placeholder' => 'Enter SEO description',
                             'value' => old("translations.{$index}.meta_description") ?? '',

@@ -22,12 +22,12 @@ return [
     'categories_no_results'         => 'No categories found.',
 
     // Category — form fields
-    'field_parent_id'               => 'Parent Category',
-    'field_parent_id_placeholder'   => 'Select Parent Category',
-    'field_parent_id_help'          => 'Select parent category under the same collection.',
     'field_name'                    => 'Name',
     'field_name_placeholder'        => 'Enter Name',
     'field_name_help'               => 'Enter name.',
+    'field_parent_id'               => 'Parent Category',
+    'field_parent_id_placeholder'   => 'Select Parent Category',
+    'field_parent_id_help'          => 'Select parent category under the same collection.',
     'field_slug'                    => 'Slug',
     'field_slug_placeholder'        => 'Enter Slug',
     'field_slug_help'               => 'Enter slug.',

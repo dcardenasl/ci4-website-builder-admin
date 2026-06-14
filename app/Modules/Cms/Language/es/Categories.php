@@ -22,13 +22,13 @@ return [
     'categories_no_results'         => 'No se encontraron categorías.',
 
     // Category — form fields
-    'field_parent_id'               => 'Categoría Principal',
-    'field_parent_id_placeholder'   => 'Seleccione Categoría Principal',
-    'field_parent_id_help'          => 'Seleccione la categoría principal bajo la misma colección.',
-    'field_name'                    => 'Nombre',
-    'field_name_placeholder'        => 'Ingrese Nombre',
-    'field_name_help'               => 'Ingrese el nombre.',
-    'field_slug'                    => 'Slug',
-    'field_slug_placeholder'        => 'Ingrese Slug',
-    'field_slug_help'               => 'Ingrese el slug.',
+    'field_name'              => 'Nombre',
+    'field_name_placeholder'  => 'Ingrese Nombre',
+    'field_name_help'         => 'Ingrese el nombre.',
+    'field_parent_id'         => 'Categoría Principal',
+    'field_parent_id_placeholder' => 'Seleccione Categoría Principal',
+    'field_parent_id_help'    => 'Seleccione la categoría principal bajo la misma colección.',
+    'field_slug'              => 'Slug',
+    'field_slug_placeholder'  => 'Ingrese Slug',
+    'field_slug_help'         => 'Ingrese el slug.',
 ];

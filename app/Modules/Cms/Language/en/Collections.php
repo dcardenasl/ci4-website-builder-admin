@@ -22,6 +22,12 @@ return [
     'collections_no_results'         => 'No collections found.',
 
     // Collection — form fields
+    'field_name'                        => 'Name',
+    'field_name_placeholder'            => 'Enter Name',
+    'field_name_help'                   => 'Enter name.',
+    'field_description'                 => 'Description',
+    'field_description_placeholder'     => 'Enter Description',
+    'field_description_help'            => 'Enter description.',
     'field_collection_key'              => 'Collection Key',
     'field_collection_key_placeholder'  => 'Enter Collection Key',
     'field_collection_key_help'         => 'Enter Collection Key.',

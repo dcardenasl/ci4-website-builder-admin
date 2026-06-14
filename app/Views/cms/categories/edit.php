@@ -85,7 +85,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][name]",
-                            'label' => 'Name',
+                            'label' => 'Categories.field_name',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter category name',
                             'value' => old("translations.{$index}.name") ?? $transValue['name'] ?? '',
@@ -94,7 +94,7 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Slug',
+                            'label' => 'Categories.field_slug',
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Enter category slug',
                             'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',

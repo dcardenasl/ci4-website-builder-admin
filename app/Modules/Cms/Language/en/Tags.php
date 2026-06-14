@@ -19,4 +19,12 @@ return [
     'tags_search_placeholder' => 'Search tags...',
     'tags_loading'            => 'Loading tags...',
     'tags_no_results'         => 'No tags found.',
+
+    // Tag — form fields
+    'field_name'              => 'Name',
+    'field_name_placeholder'  => 'Enter Name',
+    'field_name_help'         => 'Enter name.',
+    'field_slug'              => 'Slug',
+    'field_slug_placeholder'  => 'Enter Slug',
+    'field_slug_help'         => 'Enter slug.',
 ];
