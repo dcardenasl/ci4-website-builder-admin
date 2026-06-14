@@ -18,8 +18,8 @@ return [
     'menus_loading'         => 'Loading menus...',
     'menus_search_placeholder'    => 'Search menus...',
 
-    'menus_items_title'           => 'Menu items',
-    'menus_items_count'           => 'Items',
+    'menus_items_title'              => 'Menu items',
+    'menus_items_count'              => 'Items',
     'menus_items_create'          => 'New menu item',
     'menus_items_edit'            => 'Edit menu item',
     'menus_items_empty'           => 'No menu items yet.',

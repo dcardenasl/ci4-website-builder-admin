@@ -18,8 +18,8 @@ return [
     'menus_loading'         => 'Cargando menús...',
     'menus_search_placeholder'    => 'Buscar menús...',
 
-    'menus_items_title'           => 'Elementos del menú',
-    'menus_items_count'           => 'Elementos',
+    'menus_items_title'              => 'Elementos del menú',
+    'menus_items_count'              => 'Elementos',
     'menus_items_create'          => 'Nuevo elemento del menú',
     'menus_items_edit'            => 'Editar elemento del menú',
     'menus_items_empty'           => 'Sin elementos de menú aún.',

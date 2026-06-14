@@ -19,13 +19,13 @@
                 <form method="post" action="<?= route_to('admin.cms.entries.publish', $itemId) ?>">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class()) ?>">
-                        <?= esc(lang('Entries.publish')) ?>
+                        <?= esc(lang('Entries.entries_publish')) ?>
                     </button>
                 </form>
                 <form method="post" action="<?= route_to('admin.cms.entries.archive', $itemId) ?>">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class()) ?>">
-                        <?= esc(lang('Entries.archive')) ?>
+                        <?= esc(lang('Entries.entries_archive')) ?>
                     </button>
                 </form>
                 <a href="<?= route_to('admin.cms.entries.reorder') ?>" class="<?= esc(action_button_class('neutral')) ?>">
