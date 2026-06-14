@@ -26,7 +26,7 @@ class CollectionController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/collections/index', [
-            'title'        => lang('Cms.collections_title'),
+            'title'        => lang('Collections.collections_title'),
             'limitOptions' => [10, 25, 50, 100],
 
         ]);
@@ -47,15 +47,15 @@ class CollectionController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/collections/show', [
-                'title' => lang('Cms.collections_details'),
+                'title' => lang('Collections.collections_details'),
                 'collection' => [],
-                'error' => $this->firstMessage($response, lang('Cms.collections_not_found')),
+                'error' => $this->firstMessage($response, lang('Collections.collections_not_found')),
 
             ]);
         }
 
         return $this->render('cms/collections/show', [
-            'title' => lang('Cms.collections_details'),
+            'title' => lang('Collections.collections_details'),
             'collection' => $this->extractData($response),
 
         ]);
@@ -73,7 +73,7 @@ class CollectionController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/collections/create', [
-            'title'     => lang('Cms.collections_create'),
+            'title'     => lang('Collections.collections_create'),
             'languages' => $this->getLanguages(),
         ]);
     }
@@ -90,21 +90,21 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.collections_create_failed'));
+            return $this->failApi($response, lang('Collections.collections_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Cms.collections_create_success'));
+        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->collectionService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.collections_not_found'), route_to('admin.cms.collections'));
+            return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
         }
 
         return $this->render('cms/collections/edit', [
-            'title'     => lang('Cms.collections_edit'),
+            'title'     => lang('Collections.collections_edit'),
             'item'      => $this->extractData($response),
             'languages' => $this->getLanguages(),
         ]);
@@ -122,10 +122,10 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.collections_update_failed'));
+            return $this->failApi($response, lang('Collections.collections_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Cms.collections_update_success'));
+        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -133,10 +133,10 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.collections_delete_failed'), route_to('admin.cms.collections'), false);
+            return $this->failApi($response, lang('Collections.collections_delete_failed'), route_to('admin.cms.collections'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Cms.collections_delete_success'));
+        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_delete_success'));
     }
 
 

@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'settings_title'           => 'Settings',
+    'settings_new'             => 'New Setting',
+    'settings_create'          => 'New Setting',
+    'settings_edit'            => 'Edit Setting',
+    'settings_details'         => 'Setting details',
+    'settings_not_found'       => 'Setting not found.',
+    'settings_create_success'  => 'Setting created successfully.',
+    'settings_create_failed'   => 'Could not create the setting.',
+    'settings_update_success'  => 'Setting updated successfully.',
+    'settings_update_failed'   => 'Could not update the setting.',
+    'settings_delete_success'  => 'Setting deleted successfully.',
+    'settings_delete_failed'   => 'Could not delete the setting.',
+    'settings_loading'         => 'Loading settings...',
+    'settings_translations'    => 'Translations',
+
+    'field_setting_key'           => 'Setting key',
+    'field_setting_key_placeholder' => 'site.name',
+    'field_setting_key_help'      => 'Unique key used to read this setting.',
+    'field_setting_value'         => 'Setting value',
+    'field_setting_value_placeholder' => 'Enter setting value',
+    'field_setting_type'          => 'Setting type',
+    'field_setting_type_placeholder' => 'Select setting type',
+    'field_setting_type_help'     => 'Controls how the setting value is stored.',
+    'field_setting_group'         => 'Group',
+    'field_setting_group_placeholder' => 'general',
+    'field_setting_group_help'    => 'Group used to organize settings.',
+    'field_description'           => 'Description',
+    'field_description_placeholder' => 'Optional description',
+    'field_description_help'      => 'Short internal description.',
+    'field_is_translatable'       => 'Translatable',
+    'field_is_translatable_help'  => 'Allows this setting to have translations.',
+    'field_is_translatable_on'    => 'Translatable',
+    'field_is_translatable_off'   => 'Single value',
+    'field_language'              => 'Language',
+];

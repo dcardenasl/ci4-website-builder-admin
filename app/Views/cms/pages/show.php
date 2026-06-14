@@ -1,6 +1,6 @@
 <?php $page = $page ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.pages') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Cms.pages_title') ?></a>
+    <a href="<?= route_to('admin.cms.pages') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Pages.title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,25 +12,25 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Cms.pages_details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Pages.details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
                 <form method="post" action="<?= route_to('admin.cms.pages.publish', $itemId) ?>">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class()) ?>">
-                        <?= esc(lang('Cms.pages_publish')) ?>
+                        <?= esc(lang('Pages.publish')) ?>
                     </button>
                 </form>
                 <form method="post" action="<?= route_to('admin.cms.pages.archive', $itemId) ?>">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class()) ?>">
-                        <?= esc(lang('Cms.pages_archive')) ?>
+                        <?= esc(lang('Pages.archive')) ?>
                     </button>
                 </form>
                 <a href="<?= route_to('admin.cms.pages.reorder') ?>" class="<?= esc(action_button_class('neutral')) ?>">
                     <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-                    <?= esc(lang('Cms.field_sort_order') ?? lang('App.reorder')) ?>
+                    <?= esc(lang('Pages.field_sort_order') ?? lang('App.reorder')) ?>
                 </a>
                 <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
                     <?= csrf_field() ?>

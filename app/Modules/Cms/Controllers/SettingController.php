@@ -47,7 +47,7 @@ class SettingController extends BaseWebController
         }
 
         return $this->render('cms/settings/index', [
-            'title'        => lang('Cms.settings_title'),
+            'title'        => lang('Settings.settings_title'),
             'limitOptions' => [10, 25, 50, 100],
         ]);
     }
@@ -79,15 +79,15 @@ class SettingController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/settings/show', [
-                'title' => lang('Cms.settings_details'),
+                'title' => lang('Settings.settings_details'),
                 'setting' => [],
-                'error' => $this->firstMessage($response, lang('Cms.settings_not_found')),
+                'error' => $this->firstMessage($response, lang('Settings.settings_not_found')),
 
             ]);
         }
 
         return $this->render('cms/settings/show', [
-            'title' => lang('Cms.settings_details'),
+            'title' => lang('Settings.settings_details'),
             'setting' => $this->extractData($response),
 
         ]);
@@ -101,7 +101,7 @@ class SettingController extends BaseWebController
         }
 
         return $this->render('cms/settings/create', [
-            'title' => lang('Cms.settings_create'),
+            'title' => lang('Settings.settings_create'),
         ]);
     }
 
@@ -122,10 +122,10 @@ class SettingController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->settingService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.settings_create_failed'));
+            return $this->failApi($response, lang('Settings.settings_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Cms.settings_create_success'));
+        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Settings.settings_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
@@ -137,11 +137,11 @@ class SettingController extends BaseWebController
 
         $response = $this->safeApiCall(fn () => $this->settingService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.settings_not_found'), route_to('admin.cms.settings'));
+            return $this->withError(lang('Settings.settings_not_found'), route_to('admin.cms.settings'));
         }
 
         return $this->render('cms/settings/edit', [
-            'title' => lang('Cms.settings_edit'),
+            'title' => lang('Settings.settings_edit'),
             'item'  => $this->extractData($response),
         ]);
     }
@@ -163,10 +163,10 @@ class SettingController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->settingService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.settings_update_failed'));
+            return $this->failApi($response, lang('Settings.settings_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Cms.settings_update_success'));
+        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Settings.settings_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -179,9 +179,9 @@ class SettingController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->settingService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.settings_delete_failed'), route_to('admin.cms.settings'), false);
+            return $this->failApi($response, lang('Settings.settings_delete_failed'), route_to('admin.cms.settings'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Cms.settings_delete_success'));
+        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Settings.settings_delete_success'));
     }
 }

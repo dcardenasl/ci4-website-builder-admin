@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.settings_title'),
+        'title'       => lang('Settings.title'),
         'actionsView' => 'cms/settings/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.settings_loading') ?>
+        <?= lang('Settings.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,38 +51,38 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('setting_key')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_setting_key')])) ?>">
-                                <span><?= lang('Cms.field_setting_key') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_setting_key')])) ?>">
+                                <span><?= lang('Settings.field_setting_key') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('setting_key')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('setting_value')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_value')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_setting_value')])) ?>">
-                                <span><?= lang('Cms.field_setting_value') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_value')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_setting_value')])) ?>">
+                                <span><?= lang('Settings.field_setting_value') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('setting_value')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('setting_type')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_setting_type')])) ?>">
-                                <span><?= lang('Cms.field_setting_type') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_setting_type')])) ?>">
+                                <span><?= lang('Settings.field_setting_type') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('setting_type')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('setting_group')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_group')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_setting_group')])) ?>">
-                                <span><?= lang('Cms.field_setting_group') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('setting_group')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_setting_group')])) ?>">
+                                <span><?= lang('Settings.field_setting_group') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('setting_group')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_translatable')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_translatable')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_translatable')])) ?>">
-                                <span><?= lang('Cms.field_is_translatable') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_translatable')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_is_translatable')])) ?>">
+                                <span><?= lang('Settings.field_is_translatable') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_translatable')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('description')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('description')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_description')])) ?>">
-                                <span><?= lang('Cms.field_description') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('description')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_description')])) ?>">
+                                <span><?= lang('Settings.field_description') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('description')"></span>
                             </button>
                         </th>

@@ -4,11 +4,11 @@
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('App.search') ?></label>
         <input type="text" name="search" value="<?= esc((string) request()->getGet('search')) ?>"
-            placeholder="<?= esc(lang('Cms.pages_search_placeholder')) ?>"
+            placeholder="<?= esc(lang('Pages.search_placeholder')) ?>"
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
     <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Cms.field_parent_id') ?></label>
+        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Pages.field_parent_id') ?></label>
         <select name="parent_id" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_parent_id = (string) request()->getGet('parent_id'); ?>
@@ -18,7 +18,7 @@
         </select>
     </div>
     <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Cms.field_status') ?></label>
+        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Pages.field_status') ?></label>
         <select name="status" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_status = (string) request()->getGet('status'); ?>
@@ -28,7 +28,7 @@
         </select>
     </div>
     <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Cms.field_page_type') ?></label>
+        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Pages.field_page_type') ?></label>
         <select name="page_type" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_type = (string) request()->getGet('page_type'); ?>

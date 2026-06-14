@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.block_types_title'),
+        'title'       => lang('BlockTypes.title'),
         'actionsView' => 'cms/block_types/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.block_types_loading') ?>
+        <?= lang('BlockTypes.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,38 +51,38 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('block_key')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('block_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_block_key') ?? 'Block Key'])) ?>">
-                                <span><?= lang('Cms.field_block_key') ?? 'Block Key' ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('block_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_block_key') ?? 'Block Key'])) ?>">
+                                <span><?= lang('BlockTypes.field_block_key') ?? 'Block Key' ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('block_key')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('name')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_name')])) ?>">
-                                <span><?= lang('Cms.field_name') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_name')])) ?>">
+                                <span><?= lang('BlockTypes.field_name') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('name')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('category')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('category')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_category') ?? 'Category'])) ?>">
-                                <span><?= lang('Cms.field_category') ?? 'Category' ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('category')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_category') ?? 'Category'])) ?>">
+                                <span><?= lang('BlockTypes.field_category') ?? 'Category' ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('category')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('description')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('description')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_description')])) ?>">
-                                <span><?= lang('Cms.field_description') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('description')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_description')])) ?>">
+                                <span><?= lang('BlockTypes.field_description') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('description')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('icon')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('icon')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_icon')])) ?>">
-                                <span><?= lang('Cms.field_icon') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('icon')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_icon')])) ?>">
+                                <span><?= lang('BlockTypes.field_icon') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('icon')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_active')])) ?>">
-                                <span><?= lang('Cms.field_is_active') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_is_active')])) ?>">
+                                <span><?= lang('BlockTypes.field_is_active') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_active')"></span>
                             </button>
                         </th>

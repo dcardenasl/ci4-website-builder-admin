@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.menus_title'),
+        'title'       => lang('Menus.title'),
         'actionsView' => 'cms/menus/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.menus_loading') ?>
+        <?= lang('Menus.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,19 +51,19 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('menu_key')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('menu_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_menu_key')])) ?>">
-                                <span><?= lang('Cms.field_menu_key') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('menu_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Menus.field_menu_key')])) ?>">
+                                <span><?= lang('Menus.field_menu_key') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('menu_key')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_active')])) ?>">
-                                <span><?= lang('Cms.field_is_active') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Menus.field_is_active')])) ?>">
+                                <span><?= lang('Menus.field_is_active') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_active')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span><?= lang('Cms.menus_items_count') ?? 'Items' ?></span>
+                            <span><?= lang('Menus.items_count') ?? 'Items' ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('created_at')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('created_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('TableColumns.created_at')])) ?>">

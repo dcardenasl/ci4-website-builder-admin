@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'languages_title'              => 'Languages',
+    'languages_new'                => 'New Language',
+    'languages_create'             => 'New Language',
+    'languages_edit'               => 'Edit Language',
+    'languages_details'            => 'Language details',
+    'languages_loading'            => 'Loading languages...',
+    'languages_not_found'          => 'Language not found.',
+    'languages_create_success'     => 'Language created successfully.',
+    'languages_create_failed'      => 'Could not create the language.',
+    'languages_update_success'     => 'Language updated successfully.',
+    'languages_update_failed'      => 'Could not update the language.',
+    'languages_delete_success'     => 'Language deleted successfully.',
+    'languages_delete_failed'      => 'Could not delete the language.',
+    'languages_set_default'        => 'Set as default',
+
+    'field_code'                      => 'Code',
+    'field_code_placeholder'          => 'en',
+    'field_code_help'                 => 'Locale code used by the site.',
+    'field_language_name'             => 'Language name',
+    'field_native_name'               => 'Native name',
+    'field_native_name_placeholder'   => 'English',
+    'field_native_name_help'          => 'Language name as written in that language.',
+    'field_fallback_language_id'      => 'Fallback language',
+    'field_fallback_language_placeholder' => 'Select fallback language',
+    'field_fallback_language_help'    => 'Language used when a translation is missing.',
+    'field_is_default'                => 'Default language',
+    'field_is_default_on'             => 'Default',
+    'field_is_default_off'            => 'Secondary',
+    'field_is_default_help'           => 'Marks this language as the default site language.',
+];

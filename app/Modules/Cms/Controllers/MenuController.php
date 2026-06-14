@@ -28,7 +28,7 @@ class MenuController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/menus/index', [
-            'title'        => lang('Cms.menus_title'),
+            'title'        => lang('Menus.menus_title'),
             'limitOptions' => [10, 25, 50, 100],
         ]);
     }
@@ -73,9 +73,9 @@ class MenuController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/menus/show', [
-                'title' => lang('Cms.menus_details'),
+                'title' => lang('Menus.menus_details'),
                 'menu' => [],
-                'error' => $this->firstMessage($response, lang('Cms.menus_not_found')),
+                'error' => $this->firstMessage($response, lang('Menus.menus_not_found')),
             ]);
         }
 
@@ -86,7 +86,7 @@ class MenuController extends BaseWebController
         }
 
         return $this->render('cms/menus/show', [
-            'title' => lang('Cms.menus_details'),
+            'title' => lang('Menus.menus_details'),
             'menu' => $this->extractData($response),
             'items' => $items,
             'languages' => $this->getLanguages(),
@@ -96,7 +96,7 @@ class MenuController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/menus/create', [
-            'title' => lang('Cms.menus_create'),
+            'title' => lang('Menus.menus_create'),
             'languages' => $this->getLanguages(),
         ]);
     }
@@ -113,21 +113,21 @@ class MenuController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->menuService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_create_failed'));
+            return $this->failApi($response, lang('Menus.menus_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_create_success'));
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Menus.menus_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->menuService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.menus_not_found'), route_to('admin.cms.menus'));
+            return $this->withError(lang('Menus.menus_not_found'), route_to('admin.cms.menus'));
         }
 
         return $this->render('cms/menus/edit', [
-            'title' => lang('Cms.menus_edit'),
+            'title' => lang('Menus.menus_edit'),
             'item'  => $this->extractData($response),
             'languages' => $this->getLanguages(),
         ]);
@@ -145,10 +145,10 @@ class MenuController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->menuService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_update_failed'));
+            return $this->failApi($response, lang('Menus.menus_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_update_success'));
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Menus.menus_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -156,10 +156,10 @@ class MenuController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->menuService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_delete_failed'), route_to('admin.cms.menus'), false);
+            return $this->failApi($response, lang('Menus.menus_delete_failed'), route_to('admin.cms.menus'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Cms.menus_delete_success'));
+        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Menus.menus_delete_success'));
     }
 
     // MenuItem operations
@@ -174,7 +174,7 @@ class MenuController extends BaseWebController
         }
 
         return $this->render('cms/menus/items/create', [
-            'title'     => lang('Cms.menus_items_create') ?? 'Add Menu Item',
+            'title'     => lang('Menus.menus_items_create') ?? 'Add Menu Item',
             'menuId'    => $menuId,
             'menu'      => $this->extractData($menuResponse),
             'items'     => $items,
@@ -196,7 +196,7 @@ class MenuController extends BaseWebController
 
         // Manual validation: exclusion mutua page_id vs custom_url in link_type
         if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
-            return redirect()->back()->withInput()->with('error', lang('Cms.field_page_id_required') ?? 'Page selection is required for Page link type.');
+            return redirect()->back()->withInput()->with('error', lang('Menus.field_page_id_required') ?? 'Page selection is required for Page link type.');
         }
         if ($payload['link_type'] === 'custom_url') {
             $hasUrl = false;
@@ -207,17 +207,17 @@ class MenuController extends BaseWebController
                 }
             }
             if (!$hasUrl) {
-                return redirect()->back()->withInput()->with('error', lang('Cms.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
+                return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
             }
         }
 
         $response = $this->safeApiCall(fn () => $this->menuService->createItem($payload));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_items_create_failed') ?? 'Failed to create menu item.', route_to('admin.cms.menus.show', $menuId));
+            return $this->failApi($response, lang('Menus.menus_items_create_failed') ?? 'Failed to create menu item.', route_to('admin.cms.menus.show', $menuId));
         }
 
-        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_create_success') ?? 'Menu item created successfully.');
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Menus.menus_items_create_success') ?? 'Menu item created successfully.');
     }
 
     public function editItem(string $menuId, string $itemId): string|RedirectResponse
@@ -225,7 +225,7 @@ class MenuController extends BaseWebController
         $menuResponse = $this->safeApiCall(fn () => $this->menuService->get($menuId));
         $itemResponse = $this->safeApiCall(fn () => $this->menuService->getItem($itemId));
         if (! $itemResponse['ok']) {
-            return $this->withError(lang('Cms.menus_items_not_found') ?? 'Menu item not found.', route_to('admin.cms.menus.show', $menuId));
+            return $this->withError(lang('Menus.menus_items_not_found') ?? 'Menu item not found.', route_to('admin.cms.menus.show', $menuId));
         }
 
         $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
@@ -235,7 +235,7 @@ class MenuController extends BaseWebController
         }
 
         return $this->render('cms/menus/items/edit', [
-            'title'     => lang('Cms.menus_items_edit') ?? 'Edit Menu Item',
+            'title'     => lang('Menus.menus_items_edit') ?? 'Edit Menu Item',
             'menuId'    => $menuId,
             'itemId'    => $itemId,
             'menu'      => $this->extractData($menuResponse),
@@ -259,7 +259,7 @@ class MenuController extends BaseWebController
 
         // Manual validation: exclusion mutua page_id vs custom_url in link_type
         if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
-            return redirect()->back()->withInput()->with('error', lang('Cms.field_page_id_required') ?? 'Page selection is required for Page link type.');
+            return redirect()->back()->withInput()->with('error', lang('Menus.field_page_id_required') ?? 'Page selection is required for Page link type.');
         }
         if ($payload['link_type'] === 'custom_url') {
             $hasUrl = false;
@@ -270,17 +270,17 @@ class MenuController extends BaseWebController
                 }
             }
             if (!$hasUrl) {
-                return redirect()->back()->withInput()->with('error', lang('Cms.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
+                return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
             }
         }
 
         $response = $this->safeApiCall(fn () => $this->menuService->updateItem($itemId, $payload));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_items_update_failed') ?? 'Failed to update menu item.', route_to('admin.cms.menus.show', $menuId));
+            return $this->failApi($response, lang('Menus.menus_items_update_failed') ?? 'Failed to update menu item.', route_to('admin.cms.menus.show', $menuId));
         }
 
-        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_update_success') ?? 'Menu item updated successfully.');
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Menus.menus_items_update_success') ?? 'Menu item updated successfully.');
     }
 
     public function deleteItem(string $menuId, string $itemId): RedirectResponse
@@ -288,10 +288,10 @@ class MenuController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->menuService->deleteItem($itemId));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.menus_items_delete_failed') ?? 'Failed to delete menu item.', route_to('admin.cms.menus.show', $menuId), false);
+            return $this->failApi($response, lang('Menus.menus_items_delete_failed') ?? 'Failed to delete menu item.', route_to('admin.cms.menus.show', $menuId), false);
         }
 
-        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Cms.menus_items_delete_success') ?? 'Menu item deleted successfully.');
+        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Menus.menus_items_delete_success') ?? 'Menu item deleted successfully.');
     }
 
     /**

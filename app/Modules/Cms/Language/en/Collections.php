@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Collection — list & actions
+    'collections_title'              => 'Collections',
+    'collections_new'                => 'New Collection',
+    'collections_create'             => 'New Collection',
+    'collections_edit'               => 'Edit Collection',
+    'collections_details'            => 'Collection details',
+    'collections_not_found'          => 'Collection not found.',
+    'collections_create_success'     => 'Collection created successfully.',
+    'collections_create_failed'      => 'Could not create the collection.',
+    'collections_update_success'     => 'Collection updated successfully.',
+    'collections_update_failed'      => 'Could not update the collection.',
+    'collections_delete_success'     => 'Collection deleted successfully.',
+    'collections_delete_failed'      => 'Could not delete the collection.',
+    'collections_empty'              => 'No collections registered yet.',
+    'collections_search_placeholder' => 'Search by name...',
+    'collections_loading'            => 'Loading collections...',
+    'collections_no_results'         => 'No collections found.',
+
+    // Collection — form fields
+    'field_collection_key'              => 'Collection Key',
+    'field_collection_key_placeholder'  => 'Enter Collection Key',
+    'field_collection_key_help'         => 'Enter Collection Key.',
+    'field_url_prefix'                  => 'URL prefix',
+    'field_url_prefix_placeholder'      => '/blog',
+    'field_url_prefix_help'             => 'Public URL prefix for entries in this collection.',
+    'field_default_sitemap_priority'    => 'Default sitemap priority',
+    'field_default_sitemap_priority_placeholder' => '0.5',
+    'field_default_sitemap_priority_help' => 'Default sitemap priority for generated URLs.',
+    'field_default_changefreq'          => 'Default change frequency',
+    'field_default_changefreq_placeholder' => 'Select frequency',
+    'field_default_changefreq_help'     => 'Default sitemap change frequency.',
+    'field_sort_order'                  => 'Sort Order',
+    'field_sort_order_placeholder'      => 'Enter Sort Order',
+    'field_sort_order_help'             => 'Enter sorting order.',
+    'field_is_active'                   => 'Is Active',
+    'field_is_active_help'              => 'Toggle Is Active.',
+    'field_is_active_on'                => 'Active',
+    'field_is_active_off'               => 'Inactive',
+    'field_requires_approval'           => 'Requires Approval',
+    'field_requires_approval_help'      => 'Toggle Requires Approval.',
+    'field_requires_approval_on'        => 'Yes',
+    'field_requires_approval_off'       => 'No',
+    'field_enables_categories'          => 'Enables Categories',
+    'field_enables_categories_help'     => 'Toggle Enables Categories.',
+    'field_enables_categories_on'       => 'Enabled',
+    'field_enables_categories_off'      => 'Disabled',
+    'field_enables_tags'                => 'Enables Tags',
+    'field_enables_tags_help'           => 'Toggle Enables Tags.',
+    'field_enables_tags_on'             => 'Enabled',
+    'field_enables_tags_off'            => 'Disabled',
+
+    // Frequency options for changefreq
+    'frequency_always'  => 'Always',
+    'frequency_hourly'  => 'Hourly',
+    'frequency_daily'   => 'Daily',
+    'frequency_weekly'  => 'Weekly',
+    'frequency_monthly' => 'Monthly',
+    'frequency_yearly'  => 'Yearly',
+    'frequency_never'   => 'Never',
+
+    // Translation section
+    'translation_title'       => 'Translations',
+    'translation_label_default' => 'Default',
+    'translation_name_label'    => 'Name',
+    'translation_name_placeholder' => 'Enter collection name',
+    'translation_description_label' => 'Description',
+    'translation_description_placeholder' => 'Enter collection description',
+];

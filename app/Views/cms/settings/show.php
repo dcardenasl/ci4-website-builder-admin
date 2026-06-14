@@ -1,6 +1,6 @@
 <?php $setting = $setting ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.settings') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Cms.settings_title') ?></a>
+    <a href="<?= route_to('admin.cms.settings') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Settings.title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,7 +12,7 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Cms.settings_details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Settings.details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.settings.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
@@ -66,13 +66,13 @@
 
         <?php if (! empty($setting['is_translatable']) && ! empty($setting['translations'])): ?>
             <div class="mt-8">
-                <h4 class="text-md font-semibold text-gray-900 mb-3"><?= esc(lang('Cms.settings_translations')) ?></h4>
+                <h4 class="text-md font-semibold text-gray-900 mb-3"><?= esc(lang('Settings.translations')) ?></h4>
                 <div class="<?= esc(table_wrapper_class()) ?>">
                     <table class="<?= esc(table_class()) ?>">
                         <thead class="<?= esc(table_head_class()) ?>">
                             <tr>
-                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_language')) ?></th>
-                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Cms.field_setting_value')) ?></th>
+                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Settings.field_language')) ?></th>
+                                <th class="<?= esc(table_th_class()) ?>"><?= esc(lang('Settings.field_setting_value')) ?></th>
                             </tr>
                         </thead>
                         <tbody class="<?= esc(table_body_class()) ?>">

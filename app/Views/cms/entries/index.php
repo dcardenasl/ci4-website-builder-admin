@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.entries_title'),
+        'title'       => lang('Entries.title'),
         'actionsView' => 'cms/entries/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.entries_loading') ?>
+        <?= lang('Entries.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,29 +51,29 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span><?= lang('Cms.field_title') ?? 'Title' ?></span>
+                            <span><?= lang('Entries.field_title') ?? 'Title' ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('collection_id')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_collection_id')])) ?>">
-                                <span><?= lang('Cms.field_collection_id') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Entries.field_collection_id')])) ?>">
+                                <span><?= lang('Entries.field_collection_id') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('collection_id')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('status')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('status')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_status')])) ?>">
-                                <span><?= lang('Cms.field_status') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('status')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Entries.field_status')])) ?>">
+                                <span><?= lang('Entries.field_status') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('status')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('published_at')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('published_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_published_at')])) ?>">
-                                <span><?= lang('Cms.field_published_at') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('published_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Entries.field_published_at')])) ?>">
+                                <span><?= lang('Entries.field_published_at') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('published_at')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('scheduled_at')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('scheduled_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_scheduled_at')])) ?>">
-                                <span><?= lang('Cms.field_scheduled_at') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('scheduled_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Entries.field_scheduled_at')])) ?>">
+                                <span><?= lang('Entries.field_scheduled_at') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('scheduled_at')"></span>
                             </button>
                         </th>

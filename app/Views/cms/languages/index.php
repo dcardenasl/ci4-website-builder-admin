@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.languages_title'),
+        'title'       => lang('CmsLanguages.title'),
         'actionsView' => 'cms/languages/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.languages_loading') ?>
+        <?= lang('CmsLanguages.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,32 +51,32 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('code')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('code')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_code')])) ?>">
-                                <span><?= lang('Cms.field_code') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('code')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('CmsLanguages.field_code')])) ?>">
+                                <span><?= lang('CmsLanguages.field_code') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('code')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('name')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_name')])) ?>">
-                                <span><?= lang('Cms.field_name') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('CmsLanguages.field_name')])) ?>">
+                                <span><?= lang('CmsLanguages.field_name') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('name')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('native_name')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('native_name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_native_name')])) ?>">
-                                <span><?= lang('Cms.field_native_name') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('native_name')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('CmsLanguages.field_native_name')])) ?>">
+                                <span><?= lang('CmsLanguages.field_native_name') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('native_name')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_default')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_default')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_default')])) ?>">
-                                <span><?= lang('Cms.field_is_default') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_default')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('CmsLanguages.field_is_default')])) ?>">
+                                <span><?= lang('CmsLanguages.field_is_default') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_default')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_active')])) ?>">
-                                <span><?= lang('Cms.field_is_active') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('CmsLanguages.field_is_active')])) ?>">
+                                <span><?= lang('CmsLanguages.field_is_active') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_active')"></span>
                             </button>
                         </th>
@@ -132,7 +132,7 @@
                                     <template x-if="!row.is_default">
                                         <form method="post" :action="'<?= site_url('admin/cms/languages') ?>/' + row.id + '/set-default'">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="<?= esc(action_button_class()) ?>"><?= esc(lang('Cms.languages_set_default') ?? 'Set Default') ?></button>
+                                            <button type="submit" class="<?= esc(action_button_class()) ?>"><?= esc(lang('CmsLanguages.set_default') ?? 'Set Default') ?></button>
                                         </form>
                                     </template>
                                     <?php endif; ?>

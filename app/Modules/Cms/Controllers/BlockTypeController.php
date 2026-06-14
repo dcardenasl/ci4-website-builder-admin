@@ -26,7 +26,7 @@ class BlockTypeController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/block_types/index', [
-            'title'        => lang('Cms.block_types_title'),
+            'title'        => lang('BlockTypes.block_types_title'),
             'limitOptions' => [10, 25, 50, 100],
 
         ]);
@@ -47,15 +47,15 @@ class BlockTypeController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/block_types/show', [
-                'title' => lang('Cms.block_types_details'),
+                'title' => lang('BlockTypes.block_types_details'),
                 'blockType' => [],
-                'error' => $this->firstMessage($response, lang('Cms.block_types_not_found')),
+                'error' => $this->firstMessage($response, lang('BlockTypes.block_types_not_found')),
 
             ]);
         }
 
         return $this->render('cms/block_types/show', [
-            'title' => lang('Cms.block_types_details'),
+            'title' => lang('BlockTypes.block_types_details'),
             'blockType' => $this->extractData($response),
 
         ]);
@@ -64,7 +64,7 @@ class BlockTypeController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/block_types/create', [
-            'title' => lang('Cms.block_types_create'),
+            'title' => lang('BlockTypes.block_types_create'),
 
         ]);
     }
@@ -81,21 +81,21 @@ class BlockTypeController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockTypeService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.block_types_create_failed'));
+            return $this->failApi($response, lang('BlockTypes.block_types_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('Cms.block_types_create_success'));
+        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->blockTypeService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.block_types_not_found'), route_to('admin.cms.block_types'));
+            return $this->withError(lang('BlockTypes.block_types_not_found'), route_to('admin.cms.block_types'));
         }
 
         return $this->render('cms/block_types/edit', [
-            'title' => lang('Cms.block_types_edit'),
+            'title' => lang('BlockTypes.block_types_edit'),
             'item'  => $this->extractData($response),
 
         ]);
@@ -113,10 +113,10 @@ class BlockTypeController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockTypeService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.block_types_update_failed'));
+            return $this->failApi($response, lang('BlockTypes.block_types_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('Cms.block_types_update_success'));
+        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -124,10 +124,10 @@ class BlockTypeController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockTypeService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.block_types_delete_failed'), route_to('admin.cms.block_types'), false);
+            return $this->failApi($response, lang('BlockTypes.block_types_delete_failed'), route_to('admin.cms.block_types'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('Cms.block_types_delete_success'));
+        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_delete_success'));
     }
 
 

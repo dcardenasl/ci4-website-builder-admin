@@ -1,13 +1,13 @@
-<aside id="app-sidebar" class="bg-gray-900 text-gray-200 w-72 fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:translate-x-0"
+<aside id="app-sidebar" class="bg-gray-900 text-gray-200 w-72 fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:translate-x-0 flex flex-col"
     :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
-    <div class="h-16 px-4 border-b border-gray-800 flex items-center justify-between">
+    <div class="h-16 px-4 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
         <span class="text-sm uppercase tracking-widest text-gray-400"><?= lang('App.menu') ?></span>
         <button class="md:hidden text-gray-400 hover:text-white" @click="sidebarOpen = false" aria-label="<?= esc(lang('App.close_navigation')) ?>">
             <span aria-hidden="true">x</span>
         </button>
     </div>
 
-    <nav class="p-3 space-y-1">
+    <nav class="p-3 space-y-1 flex-1 overflow-y-auto">
         <a href="<?= route_to('dashboard') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('dashboard') ?>">
             <?= ui_icon('dashboard') ?>
             <span><?= lang('App.dashboard') ?></span>
@@ -89,61 +89,61 @@
             <?php if (has_permission('cms.languages.read')): ?>
                 <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
                     <?= ui_icon('cms-language') ?>
-                    <span><?= lang('Cms.languages_title') ?></span>
+                    <span><?= lang('Collections.languages_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.settings.read')): ?>
                 <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
                     <?= ui_icon('settings') ?>
-                    <span><?= lang('Cms.settings_title') ?></span>
+                    <span><?= lang('Collections.settings_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.pages.read')): ?>
                 <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
                     <?= ui_icon('cms-page') ?>
-                    <span><?= lang('Cms.pages_title') ?></span>
+                    <span><?= lang('Collections.pages_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.menus.read')): ?>
                 <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
                     <?= ui_icon('cms-menu') ?>
-                    <span><?= lang('Cms.menus_title') ?></span>
+                    <span><?= lang('Collections.menus_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.blocks.read')): ?>
                 <a href="<?= site_url('admin/cms/block-types') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/block-types*') ?>">
                     <?= ui_icon('cms-block-type') ?>
-                    <span><?= lang('Cms.blocks_title') ?? 'Block Types' ?></span>
+                    <span><?= lang('Collections.blocks_title') ?? 'Block Types' ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.collections.read')): ?>
                 <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
                     <?= ui_icon('cms-collection') ?>
-                    <span><?= lang('Cms.collections_title') ?? 'Collections' ?></span>
+                    <span><?= lang('Collections.collections_title') ?? 'Collections' ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.entries.read')): ?>
                 <a href="<?= site_url('admin/cms/entries') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/entries*') ?>">
                     <?= ui_icon('cms-entry') ?>
-                    <span><?= lang('Cms.entries_title') ?? 'Entries' ?></span>
+                    <span><?= lang('Collections.entries_title') ?? 'Entries' ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.categories.read')): ?>
                 <a href="<?= site_url('admin/cms/categories') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/categories*') ?>">
                     <?= ui_icon('folder-open') ?>
-                    <span><?= lang('Cms.categories_title') ?? 'Categories' ?></span>
+                    <span><?= lang('Collections.categories_title') ?? 'Categories' ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.tags.read')): ?>
                 <a href="<?= site_url('admin/cms/tags') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/tags*') ?>">
                     <?= ui_icon('tag') ?>
-                    <span><?= lang('Cms.tags_title') ?? 'Tags' ?></span>
+                    <span><?= lang('Collections.tags_title') ?? 'Tags' ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.redirects.read')): ?>
                 <a href="<?= site_url('admin/cms/redirects') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/redirects*') ?>">
                     <?= ui_icon('cms-redirect') ?>
-                    <span><?= lang('Cms.redirects_title') ?? 'Redirects' ?></span>
+                    <span><?= lang('Collections.redirects_title') ?? 'Redirects' ?></span>
                 </a>
             <?php endif; ?>
         <?php endif; ?>

@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.collections_title'),
+        'title'       => lang('Collections.title'),
         'actionsView' => 'cms/collections/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.collections_loading') ?>
+        <?= lang('Collections.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,32 +51,32 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('collection_key')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_collection_key')])) ?>">
-                                <span><?= lang('Cms.field_collection_key') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_collection_key')])) ?>">
+                                <span><?= lang('Collections.field_collection_key') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('collection_key')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_active')])) ?>">
-                                <span><?= lang('Cms.field_is_active') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_is_active')])) ?>">
+                                <span><?= lang('Collections.field_is_active') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_active')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('requires_approval')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('requires_approval')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_requires_approval')])) ?>">
-                                <span><?= lang('Cms.field_requires_approval') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('requires_approval')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_requires_approval')])) ?>">
+                                <span><?= lang('Collections.field_requires_approval') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('requires_approval')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('enables_categories')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('enables_categories')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_enables_categories')])) ?>">
-                                <span><?= lang('Cms.field_enables_categories') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('enables_categories')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_enables_categories')])) ?>">
+                                <span><?= lang('Collections.field_enables_categories') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('enables_categories')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('enables_tags')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('enables_tags')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_enables_tags')])) ?>">
-                                <span><?= lang('Cms.field_enables_tags') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('enables_tags')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_enables_tags')])) ?>">
+                                <span><?= lang('Collections.field_enables_tags') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('enables_tags')"></span>
                             </button>
                         </th>

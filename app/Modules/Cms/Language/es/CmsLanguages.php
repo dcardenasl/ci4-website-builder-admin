@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'languages_title'              => 'Idiomas',
+    'languages_new'                => 'Nuevo Idioma',
+    'languages_create'             => 'Nuevo Idioma',
+    'languages_edit'               => 'Editar Idioma',
+    'languages_details'            => 'Detalles del idioma',
+    'languages_loading'            => 'Cargando idiomas...',
+    'languages_not_found'          => 'Idioma no encontrado.',
+    'languages_create_success'     => 'Idioma creado exitosamente.',
+    'languages_create_failed'      => 'No se pudo crear el idioma.',
+    'languages_update_success'     => 'Idioma actualizado exitosamente.',
+    'languages_update_failed'      => 'No se pudo actualizar el idioma.',
+    'languages_delete_success'     => 'Idioma eliminado exitosamente.',
+    'languages_delete_failed'      => 'No se pudo eliminar el idioma.',
+    'languages_set_default'        => 'Establecer como predeterminado',
+
+    'field_code'                      => 'Código',
+    'field_code_placeholder'          => 'es',
+    'field_code_help'                 => 'Código de localización utilizado por el sitio.',
+    'field_language_name'             => 'Nombre del idioma',
+    'field_native_name'               => 'Nombre nativo',
+    'field_native_name_placeholder'   => 'Español',
+    'field_native_name_help'          => 'Nombre del idioma tal como se escribiría en ese idioma.',
+    'field_fallback_language_id'      => 'Idioma de reserva',
+    'field_fallback_language_placeholder' => 'Seleccione idioma de reserva',
+    'field_fallback_language_help'    => 'Idioma utilizado cuando falta una traducción.',
+    'field_is_default'                => 'Idioma predeterminado',
+    'field_is_default_on'             => 'Predeterminado',
+    'field_is_default_off'            => 'Secundario',
+    'field_is_default_help'           => 'Marca este idioma como el idioma de sitio predeterminado.',
+];

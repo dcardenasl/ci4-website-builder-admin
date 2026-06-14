@@ -11,7 +11,7 @@
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Cms.pages_edit')) ?></h3>
+    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Pages.edit')) ?></h3>
 
     <form method="post" action="<?= route_to('admin.cms.pages.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>

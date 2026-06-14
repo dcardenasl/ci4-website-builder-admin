@@ -26,7 +26,7 @@ class EntryController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/entries/index', [
-            'title'        => lang('Cms.entries_title'),
+            'title'        => lang('Entries.entries_title'),
             'limitOptions' => [10, 25, 50, 100],
             'collections' => $this->collectionsOptions(),
         ]);
@@ -47,15 +47,15 @@ class EntryController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/entries/show', [
-                'title' => lang('Cms.entries_details'),
+                'title' => lang('Entries.entries_details'),
                 'entry' => [],
-                'error' => $this->firstMessage($response, lang('Cms.entries_not_found')),
+                'error' => $this->firstMessage($response, lang('Entries.entries_not_found')),
             'collections' => $this->collectionsOptions(),
             ]);
         }
 
         return $this->render('cms/entries/show', [
-            'title' => lang('Cms.entries_details'),
+            'title' => lang('Entries.entries_details'),
             'entry' => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
         ]);
@@ -64,7 +64,7 @@ class EntryController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/entries/create', [
-            'title'       => lang('Cms.entries_create'),
+            'title'       => lang('Entries.entries_create'),
             'collections' => $this->collectionsOptions(),
             'languages'   => $this->getLanguages(),
         ]);
@@ -82,21 +82,21 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.entries_create_failed'));
+            return $this->failApi($response, lang('Entries.entries_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Cms.entries_create_success'));
+        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Entries.entries_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->entryService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.entries_not_found'), route_to('admin.cms.entries'));
+            return $this->withError(lang('Entries.entries_not_found'), route_to('admin.cms.entries'));
         }
 
         return $this->render('cms/entries/edit', [
-            'title'       => lang('Cms.entries_edit'),
+            'title'       => lang('Entries.entries_edit'),
             'item'        => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
             'languages'   => $this->getLanguages(),
@@ -115,10 +115,10 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.entries_update_failed'));
+            return $this->failApi($response, lang('Entries.entries_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Cms.entries_update_success'));
+        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Entries.entries_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -126,10 +126,10 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.entries_delete_failed'), route_to('admin.cms.entries'), false);
+            return $this->failApi($response, lang('Entries.entries_delete_failed'), route_to('admin.cms.entries'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Cms.entries_delete_success'));
+        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Entries.entries_delete_success'));
     }
 
 
@@ -145,7 +145,7 @@ class EntryController extends BaseWebController
         $items = $this->extractItems($response);
 
         return $this->render('cms/entries/reorder', [
-            'title' => lang('Cms.entries_title') . ' - ' . lang('Cms.field_sort_order'),
+            'title' => lang('Entries.entries_title') . ' - ' . lang('Entries.field_sort_order'),
             'items' => $items,
         ]);
     }
@@ -200,10 +200,10 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->publish($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.entries_publish_failed'), route_to('admin.cms.entries.show', $id), false);
+            return $this->failApi($response, lang('Entries.entries_publish_failed'), route_to('admin.cms.entries.show', $id), false);
         }
 
-        return redirect()->to(route_to('admin.cms.entries.show', $id))->with('success', lang('Cms.entries_publish_success'));
+        return redirect()->to(route_to('admin.cms.entries.show', $id))->with('success', lang('Entries.entries_publish_success'));
     }
 
     public function archive(string $id): RedirectResponse
@@ -211,10 +211,10 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->archive($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.entries_archive_failed'), route_to('admin.cms.entries.show', $id), false);
+            return $this->failApi($response, lang('Entries.entries_archive_failed'), route_to('admin.cms.entries.show', $id), false);
         }
 
-        return redirect()->to(route_to('admin.cms.entries.show', $id))->with('success', lang('Cms.entries_archive_success'));
+        return redirect()->to(route_to('admin.cms.entries.show', $id))->with('success', lang('Entries.entries_archive_success'));
     }
 
 

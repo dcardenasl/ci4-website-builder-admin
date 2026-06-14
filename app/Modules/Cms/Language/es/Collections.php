@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Collection — list & actions
+    'collections_title'              => 'Colecciones',
+    'collections_new'                => 'Nueva Colección',
+    'collections_create'             => 'Nueva Colección',
+    'collections_edit'               => 'Editar Colección',
+    'collections_details'            => 'Detalles de la colección',
+    'collections_not_found'          => 'Colección no encontrada.',
+    'collections_create_success'     => 'Colección creada exitosamente.',
+    'collections_create_failed'      => 'No se pudo crear la colección.',
+    'collections_update_success'     => 'Colección actualizada exitosamente.',
+    'collections_update_failed'      => 'No se pudo actualizar la colección.',
+    'collections_delete_success'     => 'Colección eliminada exitosamente.',
+    'collections_delete_failed'      => 'No se pudo eliminar la colección.',
+    'collections_empty'              => 'No hay colecciones registradas aún.',
+    'collections_search_placeholder' => 'Buscar por nombre...',
+    'collections_loading'            => 'Cargando colecciones...',
+    'collections_no_results'         => 'No se encontraron colecciones.',
+
+    // Collection — form fields
+    'field_collection_key'              => 'Clave de Colección',
+    'field_collection_key_placeholder'  => 'Ingrese la Clave de Colección',
+    'field_collection_key_help'         => 'Ingrese la Clave de Colección.',
+    'field_url_prefix'                  => 'Prefijo URL',
+    'field_url_prefix_placeholder'      => '/blog',
+    'field_url_prefix_help'             => 'Prefijo de URL pública para las entradas en esta colección.',
+    'field_default_sitemap_priority'    => 'Prioridad de mapa de sitio predeterminada',
+    'field_default_sitemap_priority_placeholder' => '0.5',
+    'field_default_sitemap_priority_help' => 'Prioridad de mapa de sitio predeterminada para URLs generadas.',
+    'field_default_changefreq'          => 'Frecuencia de cambio predeterminada',
+    'field_default_changefreq_placeholder' => 'Seleccione frecuencia',
+    'field_default_changefreq_help'     => 'Frecuencia de cambio del mapa de sitio predeterminada.',
+    'field_sort_order'                  => 'Orden de Clasificación',
+    'field_sort_order_placeholder'      => 'Ingrese Orden de Clasificación',
+    'field_sort_order_help'             => 'Ingrese el orden de clasificación.',
+    'field_is_active'                   => 'Está Activo',
+    'field_is_active_help'              => 'Alternar Está Activo.',
+    'field_is_active_on'                => 'Activo',
+    'field_is_active_off'               => 'Inactivo',
+    'field_requires_approval'           => 'Requiere Aprobación',
+    'field_requires_approval_help'      => 'Alternar Requiere Aprobación.',
+    'field_requires_approval_on'        => 'Sí',
+    'field_requires_approval_off'       => 'No',
+    'field_enables_categories'          => 'Habilita Categorías',
+    'field_enables_categories_help'     => 'Alternar Habilita Categorías.',
+    'field_enables_categories_on'       => 'Habilitado',
+    'field_enables_categories_off'      => 'Deshabilitado',
+    'field_enables_tags'                => 'Habilita Etiquetas',
+    'field_enables_tags_help'           => 'Alternar Habilita Etiquetas.',
+    'field_enables_tags_on'             => 'Habilitado',
+    'field_enables_tags_off'            => 'Deshabilitado',
+
+    // Frequency options for changefreq
+    'frequency_always'  => 'Siempre',
+    'frequency_hourly'  => 'Cada hora',
+    'frequency_daily'   => 'Diariamente',
+    'frequency_weekly'  => 'Semanalmente',
+    'frequency_monthly' => 'Mensualmente',
+    'frequency_yearly'  => 'Anualmente',
+    'frequency_never'   => 'Nunca',
+
+    // Translation section
+    'translation_title'       => 'Traducciones',
+    'translation_label_default' => 'Predeterminado',
+    'translation_name_label'    => 'Nombre',
+    'translation_name_placeholder' => 'Ingrese el nombre de la colección',
+    'translation_description_label' => 'Descripción',
+    'translation_description_placeholder' => 'Ingrese la descripción de la colección',
+];

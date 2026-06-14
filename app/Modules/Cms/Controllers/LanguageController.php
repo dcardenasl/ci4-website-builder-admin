@@ -47,7 +47,7 @@ class LanguageController extends BaseWebController
         }
 
         return $this->render('cms/languages/index', [
-            'title'        => lang('Cms.languages_title'),
+            'title'        => lang('CmsLanguages.languages_title'),
             'limitOptions' => [10, 25, 50, 100],
         ]);
     }
@@ -80,14 +80,14 @@ class LanguageController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/languages/show', [
-                'title' => lang('Cms.languages_details'),
+                'title' => lang('CmsLanguages.languages_details'),
                 'language' => [],
-                'error' => $this->firstMessage($response, lang('Cms.languages_not_found')),
+                'error' => $this->firstMessage($response, lang('CmsLanguages.languages_not_found')),
             ]);
         }
 
         return $this->render('cms/languages/show', [
-            'title' => lang('Cms.languages_details'),
+            'title' => lang('CmsLanguages.languages_details'),
             'language' => $this->extractData($response),
         ]);
     }
@@ -103,7 +103,7 @@ class LanguageController extends BaseWebController
         $languages = $this->extractItems($response);
 
         return $this->render('cms/languages/create', [
-            'title' => lang('Cms.languages_create'),
+            'title' => lang('CmsLanguages.languages_create'),
             'languages' => $languages,
         ]);
     }
@@ -125,10 +125,10 @@ class LanguageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->languageService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.languages_create_failed'));
+            return $this->failApi($response, lang('CmsLanguages.languages_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('Cms.languages_create_success'));
+        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('CmsLanguages.languages_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
@@ -140,7 +140,7 @@ class LanguageController extends BaseWebController
 
         $response = $this->safeApiCall(fn () => $this->languageService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.languages_not_found'), route_to('admin.cms.languages'));
+            return $this->withError(lang('CmsLanguages.languages_not_found'), route_to('admin.cms.languages'));
         }
 
         $languagesResponse = $this->safeApiCall(fn () => $this->languageService->list(['limit' => 250]));
@@ -150,7 +150,7 @@ class LanguageController extends BaseWebController
         $languages = array_filter($languages, static fn ($lang) => (string) ($lang['id'] ?? '') !== $id);
 
         return $this->render('cms/languages/edit', [
-            'title' => lang('Cms.languages_edit'),
+            'title' => lang('CmsLanguages.languages_edit'),
             'item'  => $this->extractData($response),
             'languages' => $languages,
         ]);
@@ -173,10 +173,10 @@ class LanguageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->languageService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.languages_update_failed'));
+            return $this->failApi($response, lang('CmsLanguages.languages_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('Cms.languages_update_success'));
+        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('CmsLanguages.languages_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -189,10 +189,10 @@ class LanguageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->languageService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.languages_delete_failed'), route_to('admin.cms.languages'), false);
+            return $this->failApi($response, lang('CmsLanguages.languages_delete_failed'), route_to('admin.cms.languages'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('Cms.languages_delete_success'));
+        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('CmsLanguages.languages_delete_success'));
     }
 
     public function setDefault(string $id): RedirectResponse
@@ -205,10 +205,10 @@ class LanguageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->languageService->update($id, ['is_default' => true]));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.languages_update_failed'));
+            return $this->failApi($response, lang('CmsLanguages.languages_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('Cms.languages_update_success'));
+        return redirect()->to(route_to('admin.cms.languages'))->with('success', lang('CmsLanguages.languages_update_success'));
     }
 
     public function reorder(): string|RedirectResponse
@@ -222,7 +222,7 @@ class LanguageController extends BaseWebController
         $items = $this->extractItems($response);
 
         return $this->render('cms/languages/reorder', [
-            'title' => lang('Cms.languages_title') . ' - ' . lang('Cms.field_sort_order'),
+            'title' => lang('CmsLanguages.languages_title') . ' - ' . lang('CmsLanguages.field_sort_order'),
             'items' => $items,
         ]);
     }

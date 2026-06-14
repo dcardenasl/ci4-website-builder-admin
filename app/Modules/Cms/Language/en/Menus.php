@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'menus_title'           => 'Menus',
+    'menus_new'             => 'New Menu',
+    'menus_create'          => 'New Menu',
+    'menus_edit'            => 'Edit Menu',
+    'menus_details'         => 'Menu details',
+    'menus_not_found'       => 'Menu not found.',
+    'menus_create_success'  => 'Menu created successfully.',
+    'menus_create_failed'   => 'Could not create the menu.',
+    'menus_update_success'  => 'Menu updated successfully.',
+    'menus_update_failed'   => 'Could not update the menu.',
+    'menus_delete_success'  => 'Menu deleted successfully.',
+    'menus_delete_failed'   => 'Could not delete the menu.',
+    'menus_loading'         => 'Loading menus...',
+
+    'menus_items_title'           => 'Menu items',
+    'menus_items_count'           => 'Items',
+    'menus_items_create'          => 'New menu item',
+    'menus_items_edit'            => 'Edit menu item',
+    'menus_items_empty'           => 'No menu items yet.',
+    'menus_items_empty_desc'      => 'Add the first item to build this menu.',
+    'menus_items_not_found'       => 'Menu item not found.',
+    'menus_items_create_success'  => 'Menu item created successfully.',
+    'menus_items_create_failed'   => 'Could not create the menu item.',
+    'menus_items_update_success'  => 'Menu item updated successfully.',
+    'menus_items_update_failed'   => 'Could not update the menu item.',
+    'menus_items_delete_success'  => 'Menu item deleted successfully.',
+    'menus_items_delete_failed'   => 'Could not delete the menu item.',
+
+    'field_menu_key'              => 'Menu key',
+    'field_menu_key_placeholder'  => 'main',
+    'field_menu_key_help'         => 'Unique menu identifier.',
+    'field_location'              => 'Location',
+    'field_location_placeholder'  => 'header',
+    'field_location_help'         => 'Where this menu is rendered, for example header or footer.',
+    'field_custom_url_required'   => 'Custom URL is required for custom URL items.',
+    'field_page_id_required'      => 'A page is required for page links.',
+];

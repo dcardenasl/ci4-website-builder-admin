@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'settings_title'           => 'Configuración',
+    'settings_new'             => 'Nueva Configuración',
+    'settings_create'          => 'Nueva Configuración',
+    'settings_edit'            => 'Editar Configuración',
+    'settings_details'         => 'Detalles de la configuración',
+    'settings_not_found'       => 'Configuración no encontrada.',
+    'settings_create_success'  => 'Configuración creada exitosamente.',
+    'settings_create_failed'   => 'No se pudo crear la configuración.',
+    'settings_update_success'  => 'Configuración actualizada exitosamente.',
+    'settings_update_failed'   => 'No se pudo actualizar la configuración.',
+    'settings_delete_success'  => 'Configuración eliminada exitosamente.',
+    'settings_delete_failed'   => 'No se pudo eliminar la configuración.',
+    'settings_loading'         => 'Cargando configuración...',
+    'settings_translations'    => 'Traducciones',
+
+    'field_setting_key'           => 'Clave de configuración',
+    'field_setting_key_placeholder' => 'sitio.nombre',
+    'field_setting_key_help'      => 'Clave única utilizada para leer esta configuración.',
+    'field_setting_value'         => 'Valor de configuración',
+    'field_setting_value_placeholder' => 'Ingrese valor de configuración',
+    'field_setting_type'          => 'Tipo de configuración',
+    'field_setting_type_placeholder' => 'Seleccione tipo de configuración',
+    'field_setting_type_help'     => 'Controla cómo se almacena el valor de configuración.',
+    'field_setting_group'         => 'Grupo',
+    'field_setting_group_placeholder' => 'general',
+    'field_setting_group_help'    => 'Grupo utilizado para organizar configuraciones.',
+    'field_description'           => 'Descripción',
+    'field_description_placeholder' => 'Descripción opcional',
+    'field_description_help'      => 'Descripción interna breve.',
+    'field_is_translatable'       => 'Traducible',
+    'field_is_translatable_help'  => 'Permite que esta configuración tenga traducciones.',
+    'field_is_translatable_on'    => 'Traducible',
+    'field_is_translatable_off'   => 'Valor único',
+    'field_language'              => 'Idioma',
+];

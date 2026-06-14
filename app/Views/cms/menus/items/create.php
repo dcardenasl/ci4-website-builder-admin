@@ -1,10 +1,10 @@
 <?php $menu = $menu ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Cms.menus_details') ?></a>
+    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.details') ?></a>
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl" x-data="{ linkType: 'page' }">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Cms.menus_items_create') ?? 'Add Menu Item' ?> (Menu: <?= esc($menu['menu_key'] ?? '') ?>)</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Menus.items_create') ?? 'Add Menu Item' ?> (Menu: <?= esc($menu['menu_key'] ?? '') ?>)</h3>
 
     <?php if (session()->has('error')) : ?>
         <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">

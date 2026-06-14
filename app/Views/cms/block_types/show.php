@@ -1,6 +1,6 @@
 <?php $blockType = $blockType ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Cms.block_types_title') ?></a>
+    <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('BlockTypes.title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,7 +12,7 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Cms.block_types_details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('BlockTypes.details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.block_types.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
@@ -72,7 +72,7 @@
                 'value' => $blockType['sort_order'] ?? '—'
             ]) ?>
             <div class="col-span-1 md:col-span-2">
-                <dt class="text-gray-500 font-semibold mb-1"><?= lang('Cms.field_schema_definition') ?? 'Schema Definition' ?></dt>
+                <dt class="text-gray-500 font-semibold mb-1"><?= lang('BlockTypes.field_schema_definition') ?? 'Schema Definition' ?></dt>
                 <dd class="mt-1 bg-gray-55 text-gray-900 font-mono text-xs p-3 rounded-lg overflow-x-auto border border-gray-200">
                     <pre><?= esc(is_array($blockType['schema_definition']) ? json_encode($blockType['schema_definition'], JSON_PRETTY_PRINT) : (json_encode(json_decode($blockType['schema_definition'] ?? '{}'), JSON_PRETTY_PRINT) ?: '{}')) ?></pre>
                 </dd>

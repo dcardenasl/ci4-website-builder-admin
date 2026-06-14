@@ -26,7 +26,7 @@ class CategoryController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/categories/index', [
-            'title'        => lang('Cms.categories_title'),
+            'title'        => lang('Categories.categories_title'),
             'limitOptions' => [10, 25, 50, 100],
             'collections' => $this->collectionsOptions(),
             'categories' => $this->categoriesOptions(),
@@ -48,16 +48,16 @@ class CategoryController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/categories/show', [
-                'title' => lang('Cms.categories_details'),
+                'title' => lang('Categories.categories_details'),
                 'category' => [],
-                'error' => $this->firstMessage($response, lang('Cms.categories_not_found')),
+                'error' => $this->firstMessage($response, lang('Categories.categories_not_found')),
             'collections' => $this->collectionsOptions(),
             'categories' => $this->categoriesOptions(),
             ]);
         }
 
         return $this->render('cms/categories/show', [
-            'title' => lang('Cms.categories_details'),
+            'title' => lang('Categories.categories_details'),
             'category' => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
             'categories' => $this->categoriesOptions(),
@@ -67,7 +67,7 @@ class CategoryController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/categories/create', [
-            'title'       => lang('Cms.categories_create'),
+            'title'       => lang('Categories.categories_create'),
             'collections' => $this->collectionsOptions(),
             'categories'  => $this->categoriesOptions(),
             'languages'   => $this->getLanguages(),
@@ -86,21 +86,21 @@ class CategoryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->categoryService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.categories_create_failed'));
+            return $this->failApi($response, lang('Categories.categories_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_create_success'));
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Categories.categories_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->categoryService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.categories_not_found'), route_to('admin.cms.categories'));
+            return $this->withError(lang('Categories.categories_not_found'), route_to('admin.cms.categories'));
         }
 
         return $this->render('cms/categories/edit', [
-            'title'       => lang('Cms.categories_edit'),
+            'title'       => lang('Categories.categories_edit'),
             'item'        => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
             'categories'  => $this->categoriesOptions($id),
@@ -120,10 +120,10 @@ class CategoryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->categoryService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.categories_update_failed'));
+            return $this->failApi($response, lang('Categories.categories_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_update_success'));
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Categories.categories_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -131,10 +131,10 @@ class CategoryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->categoryService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.categories_delete_failed'), route_to('admin.cms.categories'), false);
+            return $this->failApi($response, lang('Categories.categories_delete_failed'), route_to('admin.cms.categories'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Cms.categories_delete_success'));
+        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Categories.categories_delete_success'));
     }
 
 
@@ -150,7 +150,7 @@ class CategoryController extends BaseWebController
         $items = $this->extractItems($response);
 
         return $this->render('cms/categories/reorder', [
-            'title' => lang('Cms.categories_title') . ' - ' . lang('Cms.field_sort_order'),
+            'title' => lang('Categories.categories_title') . ' - ' . lang('Categories.field_sort_order'),
             'items' => $items,
         ]);
     }

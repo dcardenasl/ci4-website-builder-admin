@@ -26,7 +26,7 @@ class RedirectController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/redirects/index', [
-            'title'        => lang('Cms.redirects_title'),
+            'title'        => lang('Redirects.redirects_title'),
             'limitOptions' => [10, 25, 50, 100],
 
         ]);
@@ -47,15 +47,15 @@ class RedirectController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/redirects/show', [
-                'title' => lang('Cms.redirects_details'),
+                'title' => lang('Redirects.redirects_details'),
                 'redirect' => [],
-                'error' => $this->firstMessage($response, lang('Cms.redirects_not_found')),
+                'error' => $this->firstMessage($response, lang('Redirects.redirects_not_found')),
 
             ]);
         }
 
         return $this->render('cms/redirects/show', [
-            'title' => lang('Cms.redirects_details'),
+            'title' => lang('Redirects.redirects_details'),
             'redirect' => $this->extractData($response),
 
         ]);
@@ -64,7 +64,7 @@ class RedirectController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/redirects/create', [
-            'title' => lang('Cms.redirects_create'),
+            'title' => lang('Redirects.redirects_create'),
 
         ]);
     }
@@ -81,21 +81,21 @@ class RedirectController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->redirectService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.redirects_create_failed'));
+            return $this->failApi($response, lang('Redirects.redirects_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Cms.redirects_create_success'));
+        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Redirects.redirects_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->redirectService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.redirects_not_found'), route_to('admin.cms.redirects'));
+            return $this->withError(lang('Redirects.redirects_not_found'), route_to('admin.cms.redirects'));
         }
 
         return $this->render('cms/redirects/edit', [
-            'title' => lang('Cms.redirects_edit'),
+            'title' => lang('Redirects.redirects_edit'),
             'item'  => $this->extractData($response),
 
         ]);
@@ -113,10 +113,10 @@ class RedirectController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->redirectService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.redirects_update_failed'));
+            return $this->failApi($response, lang('Redirects.redirects_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Cms.redirects_update_success'));
+        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Redirects.redirects_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -124,10 +124,10 @@ class RedirectController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->redirectService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.redirects_delete_failed'), route_to('admin.cms.redirects'), false);
+            return $this->failApi($response, lang('Redirects.redirects_delete_failed'), route_to('admin.cms.redirects'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Cms.redirects_delete_success'));
+        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Redirects.redirects_delete_success'));
     }
 
 
@@ -137,14 +137,14 @@ class RedirectController extends BaseWebController
         $filters = is_array($getParams) ? $getParams : [];
         $response = $this->safeApiCall(fn () => $this->redirectService->exportCsv($filters));
         if (! $response['ok']) {
-            return $this->response->setStatusCode(500)->setBody(lang('Cms.redirects_csv_export_failed'));
+            return $this->response->setStatusCode(500)->setBody(lang('Redirects.redirects_csv_export_failed'));
         }
 
         $rows = $this->extractItems($response);
         $columns = ['old_path', 'new_url', 'redirect_type', 'is_active', 'note'];
         $stream = fopen('php://temp', 'w+');
         if ($stream === false) {
-            return $this->response->setStatusCode(500)->setBody(lang('Cms.redirects_csv_export_failed'));
+            return $this->response->setStatusCode(500)->setBody(lang('Redirects.redirects_csv_export_failed'));
         }
         fputcsv($stream, $columns);
 
@@ -176,18 +176,18 @@ class RedirectController extends BaseWebController
     {
         $file = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest ? $this->request->getFile('csv_file') : null;
         if ($file === null || ! $file->isValid()) {
-            return $this->withError(lang('Cms.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
+            return $this->withError(lang('Redirects.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
         }
 
         $handle = fopen($file->getTempName(), 'r');
         if ($handle === false) {
-            return $this->withError(lang('Cms.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
+            return $this->withError(lang('Redirects.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
         }
 
         $headers = fgetcsv($handle);
         if (! is_array($headers)) {
             fclose($handle);
-            return $this->withError(lang('Cms.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
+            return $this->withError(lang('Redirects.redirects_csv_invalid_file'), route_to('admin.cms.redirects'));
         }
 
         $columns = ['old_path', 'new_url', 'redirect_type', 'is_active', 'note'];
@@ -208,13 +208,13 @@ class RedirectController extends BaseWebController
                 $oldPath = trim((string)$assoc['old_path']);
                 if (strpos($oldPath, '/') !== 0) {
                     fclose($handle);
-                    return $this->withError(lang('Cms.redirects_old_path_slash'), route_to('admin.cms.redirects'));
+                    return $this->withError(lang('Redirects.redirects_old_path_slash'), route_to('admin.cms.redirects'));
                 }
 
                 $redirectType = trim((string)$assoc['redirect_type']);
                 if ($redirectType !== '301' && $redirectType !== '302') {
                     fclose($handle);
-                    return $this->withError(lang('Cms.redirects_invalid_type'), route_to('admin.cms.redirects'));
+                    return $this->withError(lang('Redirects.redirects_invalid_type'), route_to('admin.cms.redirects'));
                 }
 
                 $assoc['is_active'] = filter_var($assoc['is_active'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -227,10 +227,10 @@ class RedirectController extends BaseWebController
 
         $response = $this->safeApiCall(fn () => $this->redirectService->importCsv($rows));
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.redirects_csv_import_failed'), route_to('admin.cms.redirects'), false);
+            return $this->failApi($response, lang('Redirects.redirects_csv_import_failed'), route_to('admin.cms.redirects'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Cms.redirects_csv_import_success'));
+        return redirect()->to(route_to('admin.cms.redirects'))->with('success', lang('Redirects.redirects_csv_import_success'));
     }
 
 

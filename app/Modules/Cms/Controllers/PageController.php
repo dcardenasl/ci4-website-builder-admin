@@ -26,7 +26,7 @@ class PageController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/pages/index', [
-            'title'        => lang('Cms.pages_title'),
+            'title'        => lang('Pages.pages_title'),
             'limitOptions' => [10, 25, 50, 100],
             'pages' => $this->pagesOptions(),
         ]);
@@ -47,15 +47,15 @@ class PageController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/pages/show', [
-                'title' => lang('Cms.pages_details'),
+                'title' => lang('Pages.pages_details'),
                 'page' => [],
-                'error' => $this->firstMessage($response, lang('Cms.pages_not_found')),
+                'error' => $this->firstMessage($response, lang('Pages.pages_not_found')),
             'pages' => $this->pagesOptions(),
             ]);
         }
 
         return $this->render('cms/pages/show', [
-            'title' => lang('Cms.pages_details'),
+            'title' => lang('Pages.pages_details'),
             'page' => $this->extractData($response),
             'pages' => $this->pagesOptions(),
         ]);
@@ -81,7 +81,7 @@ class PageController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/pages/create', [
-            'title' => lang('Cms.pages_create'),
+            'title' => lang('Pages.pages_create'),
             'pages' => $this->pagesOptions(),
             'languages' => $this->getLanguages(),
         ]);
@@ -99,21 +99,21 @@ class PageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->pageService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.pages_create_failed'));
+            return $this->failApi($response, lang('Pages.pages_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Cms.pages_create_success'));
+        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->pageService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.pages_not_found'), route_to('admin.cms.pages'));
+            return $this->withError(lang('Pages.pages_not_found'), route_to('admin.cms.pages'));
         }
 
         return $this->render('cms/pages/edit', [
-            'title' => lang('Cms.pages_edit'),
+            'title' => lang('Pages.pages_edit'),
             'item'  => $this->extractData($response),
             'pages' => $this->pagesOptions($id),
             'languages' => $this->getLanguages(),
@@ -132,10 +132,10 @@ class PageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->pageService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.pages_update_failed'));
+            return $this->failApi($response, lang('Pages.pages_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Cms.pages_update_success'));
+        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -143,10 +143,10 @@ class PageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->pageService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.pages_delete_failed'), route_to('admin.cms.pages'), false);
+            return $this->failApi($response, lang('Pages.pages_delete_failed'), route_to('admin.cms.pages'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Cms.pages_delete_success'));
+        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_delete_success'));
     }
 
 
@@ -162,7 +162,7 @@ class PageController extends BaseWebController
         $items = $this->extractItems($response);
 
         return $this->render('cms/pages/reorder', [
-            'title' => lang('Cms.pages_title') . ' - ' . lang('Cms.field_sort_order'),
+            'title' => lang('Pages.pages_title') . ' - ' . lang('Pages.field_sort_order'),
             'items' => $items,
         ]);
     }
@@ -217,10 +217,10 @@ class PageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->pageService->publish($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.pages_publish_failed'), route_to('admin.cms.pages.show', $id), false);
+            return $this->failApi($response, lang('Pages.pages_publish_failed'), route_to('admin.cms.pages.show', $id), false);
         }
 
-        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Cms.pages_publish_success'));
+        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Pages.pages_publish_success'));
     }
 
     public function archive(string $id): RedirectResponse
@@ -228,10 +228,10 @@ class PageController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->pageService->archive($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.pages_archive_failed'), route_to('admin.cms.pages.show', $id), false);
+            return $this->failApi($response, lang('Pages.pages_archive_failed'), route_to('admin.cms.pages.show', $id), false);
         }
 
-        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Cms.pages_archive_success'));
+        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Pages.pages_archive_success'));
     }
 
 

@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.pages_title'),
+        'title'       => lang('Pages.title'),
         'actionsView' => 'cms/pages/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.pages_loading') ?>
+        <?= lang('Pages.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -54,26 +54,26 @@
                             <span>Title / Name</span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('page_type')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('page_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_page_type')])) ?>">
-                                <span><?= lang('Cms.field_page_type') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('page_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_page_type')])) ?>">
+                                <span><?= lang('Pages.field_page_type') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('page_type')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('status')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('status')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_status')])) ?>">
-                                <span><?= lang('Cms.field_status') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('status')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_status')])) ?>">
+                                <span><?= lang('Pages.field_status') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('status')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('parent_id')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('parent_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_parent_id')])) ?>">
-                                <span><?= lang('Cms.field_parent_id') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('parent_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_parent_id')])) ?>">
+                                <span><?= lang('Pages.field_parent_id') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('parent_id')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_in_sitemap')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_in_sitemap')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_in_sitemap')])) ?>">
-                                <span><?= lang('Cms.field_is_in_sitemap') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_in_sitemap')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_is_in_sitemap')])) ?>">
+                                <span><?= lang('Pages.field_is_in_sitemap') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_in_sitemap')"></span>
                             </button>
                         </th>

@@ -26,7 +26,7 @@ class TagController extends BaseWebController
     public function index(): string
     {
         return $this->render('cms/tags/index', [
-            'title'        => lang('Cms.tags_title'),
+            'title'        => lang('Tags.tags_title'),
             'limitOptions' => [10, 25, 50, 100],
 
         ]);
@@ -47,15 +47,15 @@ class TagController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/tags/show', [
-                'title' => lang('Cms.tags_details'),
+                'title' => lang('Tags.tags_details'),
                 'tag' => [],
-                'error' => $this->firstMessage($response, lang('Cms.tags_not_found')),
+                'error' => $this->firstMessage($response, lang('Tags.tags_not_found')),
 
             ]);
         }
 
         return $this->render('cms/tags/show', [
-            'title' => lang('Cms.tags_details'),
+            'title' => lang('Tags.tags_details'),
             'tag' => $this->extractData($response),
 
         ]);
@@ -64,7 +64,7 @@ class TagController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/tags/create', [
-            'title'     => lang('Cms.tags_create'),
+            'title'     => lang('Tags.tags_create'),
             'languages' => $this->getLanguages(),
         ]);
     }
@@ -81,21 +81,21 @@ class TagController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->tagService->create($request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.tags_create_failed'));
+            return $this->failApi($response, lang('Tags.tags_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Cms.tags_create_success'));
+        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Tags.tags_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
     {
         $response = $this->safeApiCall(fn () => $this->tagService->get($id));
         if (! $response['ok']) {
-            return $this->withError(lang('Cms.tags_not_found'), route_to('admin.cms.tags'));
+            return $this->withError(lang('Tags.tags_not_found'), route_to('admin.cms.tags'));
         }
 
         return $this->render('cms/tags/edit', [
-            'title'     => lang('Cms.tags_edit'),
+            'title'     => lang('Tags.tags_edit'),
             'item'      => $this->extractData($response),
             'languages' => $this->getLanguages(),
         ]);
@@ -113,10 +113,10 @@ class TagController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->tagService->update($id, $request->payload()));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.tags_update_failed'));
+            return $this->failApi($response, lang('Tags.tags_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Cms.tags_update_success'));
+        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Tags.tags_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -124,10 +124,10 @@ class TagController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->tagService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Cms.tags_delete_failed'), route_to('admin.cms.tags'), false);
+            return $this->failApi($response, lang('Tags.tags_delete_failed'), route_to('admin.cms.tags'), false);
         }
 
-        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Cms.tags_delete_success'));
+        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Tags.tags_delete_success'));
     }
 
     /**

@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Cms.redirects_title'),
+        'title'       => lang('Redirects.title'),
         'actionsView' => 'cms/redirects/partials/toolbar_actions',
     ]) ?>
     <?php /* CSV scaffold hooks: components/table/export_button, components/form/export_import, components/form/import_preview */ ?>
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Cms.redirects_loading') ?>
+        <?= lang('Redirects.loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
@@ -51,26 +51,26 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('old_path')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('old_path')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_old_path')])) ?>">
-                                <span><?= lang('Cms.field_old_path') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('old_path')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Redirects.field_old_path')])) ?>">
+                                <span><?= lang('Redirects.field_old_path') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('old_path')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('new_url')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('new_url')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_new_url')])) ?>">
-                                <span><?= lang('Cms.field_new_url') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('new_url')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Redirects.field_new_url')])) ?>">
+                                <span><?= lang('Redirects.field_new_url') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('new_url')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('redirect_type')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('redirect_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_redirect_type')])) ?>">
-                                <span><?= lang('Cms.field_redirect_type') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('redirect_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Redirects.field_redirect_type')])) ?>">
+                                <span><?= lang('Redirects.field_redirect_type') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('redirect_type')"></span>
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Cms.field_is_active')])) ?>">
-                                <span><?= lang('Cms.field_is_active') ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Redirects.field_is_active')])) ?>">
+                                <span><?= lang('Redirects.field_is_active') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('is_active')"></span>
                             </button>
                         </th>

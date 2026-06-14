@@ -11,7 +11,7 @@
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Cms.settings_edit')) ?></h3>
+    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Settings.edit')) ?></h3>
 
     <form method="post" action="<?= route_to('admin.cms.settings.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>
@@ -34,11 +34,11 @@
             'placeholder' => 'Cms.field_setting_type_placeholder',
             'help' => 'Cms.field_setting_type_help',
             'options' => [
-                'string' => lang('Cms.type_string'),
-                'int' => lang('Cms.type_int'),
-                'bool' => lang('Cms.type_bool'),
-                'json' => lang('Cms.type_json'),
-                'file_id' => lang('Cms.type_file_id')
+                'string' => lang('BlockTypes.type_string'),
+                'int' => lang('BlockTypes.type_int'),
+                'bool' => lang('BlockTypes.type_bool'),
+                'json' => lang('BlockTypes.type_json'),
+                'file_id' => lang('BlockTypes.type_file_id')
             ],
             'value' => $item['setting_type'] ?? 'string',
             'errors' => $errors ?? [],

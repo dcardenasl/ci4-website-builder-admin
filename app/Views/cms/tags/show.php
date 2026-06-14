@@ -1,6 +1,6 @@
 <?php $tag = $tag ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.tags') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Cms.tags_title') ?></a>
+    <a href="<?= route_to('admin.cms.tags') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Tags.title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,7 +12,7 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Cms.tags_details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Tags.details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.entries') . '?tag_id=' . urlencode($itemId) ?>" class="<?= esc(action_button_class('neutral')) ?>">
                     <?= ui_icon('link', 'h-3.5 w-3.5') ?>
