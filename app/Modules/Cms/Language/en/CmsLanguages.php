@@ -32,4 +32,8 @@ return [
     'field_is_default_on'             => 'Default',
     'field_is_default_off'            => 'Secondary',
     'field_is_default_help'           => 'Marks this language as the default site language.',
+    'field_is_active'              => 'Is Active',
+    'field_is_active_help'          => 'Toggle Is Active.',
+    'field_is_active_on'            => 'Active',
+    'field_is_active_off'           => 'Inactive',
 ];

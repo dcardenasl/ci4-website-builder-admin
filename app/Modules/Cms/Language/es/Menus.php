@@ -39,4 +39,8 @@ return [
     'field_location_help'         => 'Dónde se representa este menú, por ejemplo encabezado o pie de página.',
     'field_custom_url_required'   => 'Se requiere una URL personalizada para elementos de URL personalizada.',
     'field_page_id_required'      => 'Se requiere una página para enlaces de página.',
+    'field_is_active'              => 'Está Activo',
+    'field_is_active_help'          => 'Alternar Está Activo.',
+    'field_is_active_on'            => 'Activo',
+    'field_is_active_off'           => 'Inactivo',
 ];

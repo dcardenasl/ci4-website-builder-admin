@@ -31,4 +31,8 @@ return [
     'field_slug'              => 'Slug',
     'field_slug_placeholder'  => 'Ingrese Slug',
     'field_slug_help'         => 'Ingrese el slug.',
+    'field_is_active'              => 'Está Activo',
+    'field_is_active_help'          => 'Alternar Está Activo.',
+    'field_is_active_on'            => 'Activo',
+    'field_is_active_off'           => 'Inactivo',
 ];

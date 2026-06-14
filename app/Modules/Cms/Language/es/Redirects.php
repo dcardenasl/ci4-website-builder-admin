@@ -49,4 +49,8 @@ return [
     'field_note'                   => 'Nota',
     'field_note_placeholder'       => 'Nota interna opcional',
     'field_note_help'              => 'Nota interna para administradores.',
+    'field_is_active'              => 'Está Activo',
+    'field_is_active_help'          => 'Alternar Está Activo.',
+    'field_is_active_on'            => 'Activo',
+    'field_is_active_off'           => 'Inactivo',
 ];

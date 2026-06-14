@@ -32,4 +32,8 @@ return [
     'field_is_default_on'             => 'Predeterminado',
     'field_is_default_off'            => 'Secundario',
     'field_is_default_help'           => 'Marca este idioma como el idioma de sitio predeterminado.',
+    'field_is_active'              => 'Está Activo',
+    'field_is_active_help'          => 'Alternar Está Activo.',
+    'field_is_active_on'            => 'Activo',
+    'field_is_active_off'           => 'Inactivo',
 ];

@@ -43,4 +43,8 @@ return [
     'type_bool'                            => 'Booleano',
     'type_json'                            => 'JSON',
     'type_file_id'                         => 'Archivo',
+    'field_is_active'              => 'Está Activo',
+    'field_is_active_help'          => 'Alternar Está Activo.',
+    'field_is_active_on'            => 'Activo',
+    'field_is_active_off'           => 'Inactivo',
 ];

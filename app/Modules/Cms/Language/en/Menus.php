@@ -39,4 +39,8 @@ return [
     'field_location_help'         => 'Where this menu is rendered, for example header or footer.',
     'field_custom_url_required'   => 'Custom URL is required for custom URL items.',
     'field_page_id_required'      => 'A page is required for page links.',
+    'field_is_active'              => 'Is Active',
+    'field_is_active_help'          => 'Toggle Is Active.',
+    'field_is_active_on'            => 'Active',
+    'field_is_active_off'           => 'Inactive',
 ];

@@ -43,4 +43,8 @@ return [
     'type_bool'                            => 'Boolean',
     'type_json'                            => 'JSON',
     'type_file_id'                         => 'File',
+    'field_is_active'              => 'Is Active',
+    'field_is_active_help'          => 'Toggle Is Active.',
+    'field_is_active_on'            => 'Active',
+    'field_is_active_off'           => 'Inactive',
 ];

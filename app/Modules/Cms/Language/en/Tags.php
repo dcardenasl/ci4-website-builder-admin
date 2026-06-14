@@ -27,4 +27,8 @@ return [
     'field_slug'              => 'Slug',
     'field_slug_placeholder'  => 'Enter Slug',
     'field_slug_help'         => 'Enter slug.',
+    'field_is_active'              => 'Is Active',
+    'field_is_active_help'          => 'Toggle Is Active.',
+    'field_is_active_on'            => 'Active',
+    'field_is_active_off'           => 'Inactive',
 ];
