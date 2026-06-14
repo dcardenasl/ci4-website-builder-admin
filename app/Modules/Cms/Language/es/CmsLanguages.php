@@ -17,7 +17,7 @@ return [
     'languages_update_failed'      => 'No se pudo actualizar el idioma.',
     'languages_delete_success'     => 'Idioma eliminado exitosamente.',
     'languages_delete_failed'      => 'No se pudo eliminar el idioma.',
-    'languages_set_default'        => 'Establecer como predeterminado',
+    'languages_set_default'        => 'Por defecto',
 
     'field_code'                      => 'Código',
     'field_code_placeholder'          => 'es',

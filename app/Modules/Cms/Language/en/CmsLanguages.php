@@ -17,7 +17,7 @@ return [
     'languages_update_failed'      => 'Could not update the language.',
     'languages_delete_success'     => 'Language deleted successfully.',
     'languages_delete_failed'      => 'Could not delete the language.',
-    'languages_set_default'        => 'Set as default',
+    'languages_set_default'        => 'Default',
 
     'field_code'                      => 'Code',
     'field_code_placeholder'          => 'en',
