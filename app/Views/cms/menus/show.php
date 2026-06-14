@@ -1,6 +1,6 @@
 <?php $menu = $menu ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.menus') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.title') ?></a>
+    <a href="<?= route_to('admin.cms.menus') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.menus_title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -15,7 +15,7 @@
         <div class="lg:col-span-1 space-y-6">
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Menus.details') ?></h3>
+                    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Menus.menus_details') ?></h3>
                     <div class="flex items-center gap-2">
                         <a href="<?= route_to('admin.cms.menus.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
@@ -48,7 +48,7 @@
 
             <!-- Translations List -->
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-                <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3"><?= lang('CmsLanguages.title') ?? 'Translations' ?></h4>
+                <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3"><?= lang('CmsLanguages.languages_title') ?? 'Translations' ?></h4>
                 <?php if (! empty($menu['translations']) && is_array($menu['translations'])): ?>
                     <div class="divide-y divide-gray-150">
                         <?php foreach ($menu['translations'] as $t): ?>

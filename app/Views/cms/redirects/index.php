@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('Redirects.title'),
+        'title'       => lang('Redirects.redirects_title'),
         'actionsView' => 'cms/redirects/partials/toolbar_actions',
     ]) ?>
     <?php /* CSV scaffold hooks: components/table/export_button, components/form/export_import, components/form/import_preview */ ?>
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Redirects.loading') ?>
+        <?= lang('Redirects.redirects_loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 

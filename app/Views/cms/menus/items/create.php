@@ -1,6 +1,6 @@
 <?php $menu = $menu ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.details') ?></a>
+    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.menus_details') ?></a>
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl" x-data="{ linkType: 'page' }">

@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('BlockTypes.title'),
+        'title'       => lang('BlockTypes.block_types_title'),
         'actionsView' => 'cms/block_types/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('BlockTypes.loading') ?>
+        <?= lang('BlockTypes.block_types_loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 

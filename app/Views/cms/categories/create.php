@@ -3,7 +3,7 @@
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Categories.create')) ?></h3>
+    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Categories.categories_create')) ?></h3>
 
     <form method="post" action="<?= route_to('admin.cms.categories.store') ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>

@@ -4,7 +4,7 @@
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('App.search') ?></label>
         <input type="text" name="search" value="<?= esc((string) request()->getGet('search')) ?>"
-            placeholder="<?= esc(lang('Settings.search_placeholder')) ?>"
+            placeholder="<?= esc(lang('Settings.settings_search_placeholder')) ?>"
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
 

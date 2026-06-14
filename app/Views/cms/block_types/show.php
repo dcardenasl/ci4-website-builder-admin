@@ -1,6 +1,6 @@
 <?php $blockType = $blockType ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('BlockTypes.title') ?></a>
+    <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('BlockTypes.block_types_title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,7 +12,7 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('BlockTypes.details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('BlockTypes.block_types_details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.block_types.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 

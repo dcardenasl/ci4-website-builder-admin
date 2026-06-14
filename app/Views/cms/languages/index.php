@@ -12,7 +12,7 @@
     })" x-init="init()">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title'       => lang('CmsLanguages.title'),
+        'title'       => lang('CmsLanguages.languages_title'),
         'actionsView' => 'cms/languages/partials/toolbar_actions',
     ]) ?>
     
@@ -32,7 +32,7 @@
     ]) ?>
 
     <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('CmsLanguages.loading') ?>
+        <?= lang('CmsLanguages.languages_loading') ?>
     </div>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 

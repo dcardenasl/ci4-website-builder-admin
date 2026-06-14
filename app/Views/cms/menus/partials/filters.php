@@ -4,7 +4,7 @@
     <div class="xl:col-span-2">
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('App.search') ?></label>
         <input type="text" name="search" value="<?= esc((string) request()->getGet('search')) ?>"
-            placeholder="<?= esc(lang('Menus.search_placeholder')) ?>"
+            placeholder="<?= esc(lang('Menus.menus_search_placeholder')) ?>"
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
 

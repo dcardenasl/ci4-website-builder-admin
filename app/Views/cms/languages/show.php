@@ -1,6 +1,6 @@
 <?php $language = $language ?? []; ?>
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.languages') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('CmsLanguages.title') ?></a>
+    <a href="<?= route_to('admin.cms.languages') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('CmsLanguages.languages_title') ?></a>
 </div>
 
 <?php if (! empty($error)): ?>
@@ -12,7 +12,7 @@
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('CmsLanguages.details') ?></h3>
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('CmsLanguages.languages_details') ?></h3>
             <div class="flex items-center gap-2">
                 <?php if (has_permission('cms.languages.write') && !($language['is_default'] ?? false)): ?>
                 <form method="post" action="<?= route_to('admin.cms.languages.set_default', $itemId) ?>">
