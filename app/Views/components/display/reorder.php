@@ -22,6 +22,7 @@ $itemsKey      = $itemsKey ?? 'items';
 $backUrl       = $backUrl ?? '#';
 $title         = $title ?? lang('App.reorder') ?? 'Reordenar';
 $helpText      = $helpText ?? lang('Files.gallery_drag_help') ?? 'Arrastra los elementos para cambiar su orden.';
+$csrfHeader    = config('Security')->headerName;
 
 // Normalize data structure to support both grouped and flat lists uniformly in Alpine.js
 $groups = [];
@@ -89,7 +90,7 @@ if ($grouped) {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                    '<?= esc($csrfHeader, 'js') ?>': '<?= csrf_hash() ?>'
                 },
                 body: JSON.stringify({ items: itemsToSave })
             });
