@@ -72,6 +72,15 @@ if ($grouped) {
         list.splice(itemIndex, 0, movedItem);
         this.draggingItemIndex = itemIndex;
     },
+    moveItem(groupIndex, itemIndex, direction) {
+        const list = this.groups[groupIndex].items;
+        const targetIndex = itemIndex + direction;
+
+        if (targetIndex < 0 || targetIndex >= list.length) return;
+
+        const movedItem = list.splice(itemIndex, 1)[0];
+        list.splice(targetIndex, 0, movedItem);
+    },
     async saveOrder() {
         this.saving = true;
         const itemsToSave = [];
@@ -183,7 +192,24 @@ if ($grouped) {
                                 <div class="text-sm font-semibold text-gray-800" x-text="item['<?= esc($displayKey, 'js') ?>']"></div>
                             </div>
 
-                            <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded" x-text="'#' + (iIdx + 1)"></span>
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center rounded-lg border border-gray-200 bg-white overflow-hidden">
+                                    <button type="button"
+                                        class="px-2 py-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        :disabled="iIdx === 0"
+                                        @click="moveItem(gIdx, iIdx, -1)">
+                                        <?= ui_icon('chevron-up', 'h-4 w-4') ?>
+                                    </button>
+                                    <button type="button"
+                                        class="px-2 py-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed border-l border-gray-200"
+                                        :disabled="iIdx === group.items.length - 1"
+                                        @click="moveItem(gIdx, iIdx, 1)">
+                                        <?= ui_icon('chevron-down', 'h-4 w-4') ?>
+                                    </button>
+                                </div>
+
+                                <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded" x-text="'#' + (iIdx + 1)"></span>
+                            </div>
                         </div>
                     </template>
                 </div>

@@ -261,7 +261,14 @@ class LanguageController extends BaseWebController
             $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
 
             if ($id !== '') {
-                $this->languageService->update($id, ['sort_order' => $value]);
+                $response = $this->safeApiCall(fn () => $this->languageService->update($id, ['sort_order' => $value]));
+
+                if (! $response['ok']) {
+                    return $this->response->setJSON([
+                        'ok' => false,
+                        'message' => $this->firstMessage($response, lang('CmsLanguages.languages_update_failed')),
+                    ])->setStatusCode(422);
+                }
             }
         }
 
