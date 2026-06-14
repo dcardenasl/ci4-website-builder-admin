@@ -16,7 +16,7 @@ class TagStoreRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'is_active' => 'permit_empty',
+            'is_active' => 'permit_empty|in_list[0,1]',
             'translations' => 'permit_empty',
         ];
     }

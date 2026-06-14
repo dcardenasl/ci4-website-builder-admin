@@ -19,8 +19,8 @@ class LanguageStoreRequest extends BaseFormRequest
             'code' => 'required|min_length[2]|max_length[255]',
             'name' => 'required|min_length[2]|max_length[255]',
             'native_name' => 'permit_empty|string|max_length[255]',
-            'is_default' => 'permit_empty',
-            'is_active' => 'permit_empty',
+            'is_default' => 'permit_empty|in_list[0,1]',
+            'is_active' => 'permit_empty|in_list[0,1]',
             'sort_order' => 'permit_empty|integer',
             'fallback_language_id' => 'permit_empty|integer',
         ];

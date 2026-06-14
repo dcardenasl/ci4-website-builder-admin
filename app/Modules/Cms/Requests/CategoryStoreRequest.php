@@ -19,7 +19,7 @@ class CategoryStoreRequest extends BaseFormRequest
             'collection_id' => 'required|integer',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',
-            'is_active' => 'permit_empty',
+            'is_active' => 'permit_empty|in_list[0,1]',
             'translations' => 'permit_empty',
         ];
     }

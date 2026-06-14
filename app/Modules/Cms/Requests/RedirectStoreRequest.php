@@ -19,7 +19,7 @@ class RedirectStoreRequest extends BaseFormRequest
             'old_path' => 'required|min_length[2]|max_length[255]|regex_match[/^\\/.*$/]',
             'new_url' => 'required|min_length[2]|max_length[255]',
             'redirect_type' => 'permit_empty|in_list[301,302]',
-            'is_active' => 'permit_empty',
+            'is_active' => 'permit_empty|in_list[0,1]',
             'note' => 'permit_empty|string|max_length[255]',
         ];
     }

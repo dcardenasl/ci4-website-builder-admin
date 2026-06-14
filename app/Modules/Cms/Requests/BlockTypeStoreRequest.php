@@ -34,10 +34,10 @@ class BlockTypeStoreRequest extends BaseFormRequest
             'category'          => 'required|min_length[2]|max_length[255]',
             'icon'              => 'permit_empty|string|max_length[255]',
             'schema_definition' => 'required|json',
-            'supports_pages'    => 'permit_empty',
-            'supports_entries'  => 'permit_empty',
-            'is_container'      => 'permit_empty',
-            'is_active'         => 'permit_empty',
+            'supports_pages'    => 'permit_empty|in_list[0,1]',
+            'supports_entries'  => 'permit_empty|in_list[0,1]',
+            'is_container'      => 'permit_empty|in_list[0,1]',
+            'is_active'         => 'permit_empty|in_list[0,1]',
             'sort_order'        => 'required|integer',
         ];
     }

@@ -30,7 +30,7 @@ class PageStoreRequest extends BaseFormRequest
             'status' => 'required|in_list[draft,published,archived]',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',
-            'is_in_sitemap' => 'permit_empty',
+            'is_in_sitemap' => 'permit_empty|in_list[0,1]',
             'sitemap_priority' => 'permit_empty|string|max_length[255]',
             'sitemap_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
             'published_at' => 'permit_empty|valid_date',

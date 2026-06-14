@@ -35,7 +35,7 @@ class MenuItemStoreRequest extends BaseFormRequest
             'icon'        => 'permit_empty|string|max_length[50]',
             'css_class'   => 'permit_empty|string|max_length[100]',
             'sort_order'  => 'required|integer',
-            'is_active'   => 'permit_empty',
+            'is_active'   => 'permit_empty|in_list[0,1]',
         ];
     }
 

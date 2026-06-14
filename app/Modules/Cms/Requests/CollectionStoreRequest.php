@@ -31,10 +31,10 @@ class CollectionStoreRequest extends BaseFormRequest
             'default_sitemap_priority' => 'permit_empty|decimal',
             'default_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
             'sort_order' => 'permit_empty|integer',
-            'is_active' => 'permit_empty',
-            'requires_approval' => 'permit_empty',
-            'enables_categories' => 'permit_empty',
-            'enables_tags' => 'permit_empty',
+            'is_active' => 'permit_empty|in_list[0,1]',
+            'requires_approval' => 'permit_empty|in_list[0,1]',
+            'enables_categories' => 'permit_empty|in_list[0,1]',
+            'enables_tags' => 'permit_empty|in_list[0,1]',
             'translations' => 'permit_empty',
         ];
     }

@@ -30,11 +30,11 @@ class SettingStoreRequest extends BaseFormRequest
             'setting_key' => 'required|min_length[2]|max_length[255]',
             'setting_value_string' => 'permit_empty|string',
             'setting_value_int' => 'permit_empty|integer',
-            'setting_value_bool' => 'permit_empty',
+            'setting_value_bool' => 'permit_empty|in_list[0,1]',
             'setting_value_json' => 'permit_empty|string',
             'setting_type' => 'permit_empty|in_list[string,int,bool,json,file_id]',
             'setting_group' => 'permit_empty|string|max_length[255]',
-            'is_translatable' => 'permit_empty',
+            'is_translatable' => 'permit_empty|in_list[0,1]',
             'sort_order' => 'permit_empty|integer',
             'description' => 'permit_empty|string',
         ];
