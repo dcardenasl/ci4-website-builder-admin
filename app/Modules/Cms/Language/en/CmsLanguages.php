@@ -10,6 +10,7 @@ return [
     'languages_details'            => 'Language details',
     'languages_loading'            => 'Loading languages...',
     'languages_not_found'          => 'Language not found.',
+    'languages_search_placeholder' => 'Search languages...',
     'languages_create_success'     => 'Language created successfully.',
     'languages_create_failed'      => 'Could not create the language.',
     'languages_update_success'     => 'Language updated successfully.',

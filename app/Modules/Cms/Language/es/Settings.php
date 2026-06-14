@@ -16,6 +16,7 @@ return [
     'settings_delete_success'  => 'Configuración eliminada exitosamente.',
     'settings_delete_failed'   => 'No se pudo eliminar la configuración.',
     'settings_loading'         => 'Cargando configuración...',
+    'settings_search_placeholder' => 'Buscar configuración...',
     'settings_translations'    => 'Traducciones',
 
     'field_setting_key'           => 'Clave de configuración',

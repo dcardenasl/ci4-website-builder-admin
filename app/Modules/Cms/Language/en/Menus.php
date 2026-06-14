@@ -16,6 +16,7 @@ return [
     'menus_delete_success'  => 'Menu deleted successfully.',
     'menus_delete_failed'   => 'Could not delete the menu.',
     'menus_loading'         => 'Loading menus...',
+    'menus_search_placeholder'    => 'Search menus...',
 
     'menus_items_title'           => 'Menu items',
     'menus_items_count'           => 'Items',

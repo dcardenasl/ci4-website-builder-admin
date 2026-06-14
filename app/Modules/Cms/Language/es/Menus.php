@@ -16,6 +16,7 @@ return [
     'menus_delete_success'  => 'Menú eliminado exitosamente.',
     'menus_delete_failed'   => 'No se pudo eliminar el menú.',
     'menus_loading'         => 'Cargando menús...',
+    'menus_search_placeholder'    => 'Buscar menús...',
 
     'menus_items_title'           => 'Elementos del menú',
     'menus_items_count'           => 'Elementos',

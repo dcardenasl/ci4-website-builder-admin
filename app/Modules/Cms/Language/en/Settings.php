@@ -16,6 +16,7 @@ return [
     'settings_delete_success'  => 'Setting deleted successfully.',
     'settings_delete_failed'   => 'Could not delete the setting.',
     'settings_loading'         => 'Loading settings...',
+    'settings_search_placeholder' => 'Search settings...',
     'settings_translations'    => 'Translations',
 
     'field_setting_key'           => 'Setting key',

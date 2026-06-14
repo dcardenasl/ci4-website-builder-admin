@@ -16,6 +16,7 @@ return [
     'pages_delete_success'  => 'Página eliminada exitosamente.',
     'pages_delete_failed'   => 'No se pudo eliminar la página.',
     'pages_loading'         => 'Cargando páginas...',
+    'pages_search_placeholder' => 'Buscar páginas...',
     'pages_publish'         => 'Publicar Página',
     'pages_publish_success' => 'Página publicada exitosamente.',
     'pages_publish_failed'  => 'No se pudo publicar la página.',

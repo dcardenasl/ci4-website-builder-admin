@@ -16,6 +16,7 @@ return [
     'pages_delete_success'  => 'Page deleted successfully.',
     'pages_delete_failed'   => 'Could not delete the page.',
     'pages_loading'         => 'Loading pages...',
+    'pages_search_placeholder' => 'Search pages...',
     'pages_publish'         => 'Publish Page',
     'pages_publish_success' => 'Page published successfully.',
     'pages_publish_failed'  => 'Could not publish the page.',
