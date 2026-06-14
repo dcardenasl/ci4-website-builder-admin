@@ -63,7 +63,7 @@
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span><?= lang('Menus.items_count') ?? 'Items' ?></span>
+                            <span><?= lang('Menus.menus_items_count') ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('created_at')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('created_at')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('TableColumns.created_at')])) ?>">
