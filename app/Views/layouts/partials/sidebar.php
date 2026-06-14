@@ -89,61 +89,61 @@
             <?php if (has_permission('cms.languages.read')): ?>
                 <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
                     <?= ui_icon('cms-language') ?>
-                    <span><?= lang('Collections.languages_title') ?></span>
+                    <span><?= lang('CmsLanguages.languages_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.settings.read')): ?>
                 <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
                     <?= ui_icon('settings') ?>
-                    <span><?= lang('Collections.settings_title') ?></span>
+                    <span><?= lang('Settings.settings_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.pages.read')): ?>
                 <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
                     <?= ui_icon('cms-page') ?>
-                    <span><?= lang('Collections.pages_title') ?></span>
+                    <span><?= lang('Pages.pages_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.menus.read')): ?>
                 <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
                     <?= ui_icon('cms-menu') ?>
-                    <span><?= lang('Collections.menus_title') ?></span>
+                    <span><?= lang('Menus.menus_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.blocks.read')): ?>
                 <a href="<?= site_url('admin/cms/block-types') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/block-types*') ?>">
                     <?= ui_icon('cms-block-type') ?>
-                    <span><?= lang('Collections.blocks_title') ?? 'Block Types' ?></span>
+                    <span><?= lang('BlockTypes.block_types_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.collections.read')): ?>
                 <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
                     <?= ui_icon('cms-collection') ?>
-                    <span><?= lang('Collections.collections_title') ?? 'Collections' ?></span>
+                    <span><?= lang('Collections.collections_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.entries.read')): ?>
                 <a href="<?= site_url('admin/cms/entries') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/entries*') ?>">
                     <?= ui_icon('cms-entry') ?>
-                    <span><?= lang('Collections.entries_title') ?? 'Entries' ?></span>
+                    <span><?= lang('Entries.entries_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.categories.read')): ?>
                 <a href="<?= site_url('admin/cms/categories') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/categories*') ?>">
                     <?= ui_icon('folder-open') ?>
-                    <span><?= lang('Collections.categories_title') ?? 'Categories' ?></span>
+                    <span><?= lang('Categories.categories_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.tags.read')): ?>
                 <a href="<?= site_url('admin/cms/tags') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/tags*') ?>">
                     <?= ui_icon('tag') ?>
-                    <span><?= lang('Collections.tags_title') ?? 'Tags' ?></span>
+                    <span><?= lang('Tags.tags_title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('cms.redirects.read')): ?>
                 <a href="<?= site_url('admin/cms/redirects') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/redirects*') ?>">
                     <?= ui_icon('cms-redirect') ?>
-                    <span><?= lang('Collections.redirects_title') ?? 'Redirects' ?></span>
+                    <span><?= lang('Redirects.redirects_title') ?></span>
                 </a>
             <?php endif; ?>
         <?php endif; ?>
