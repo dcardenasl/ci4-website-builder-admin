@@ -13,15 +13,14 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('languages', '\\App\\Modules\\Cms\\Controllers\\LanguageController::index', ['as' => 'admin.cms.languages', 'filter' => 'permission:cms.languages.read']);
     $routes->get('languages/data', '\\App\\Modules\\Cms\\Controllers\\LanguageController::data', ['as' => 'admin.cms.languages.data', 'filter' => 'permission:cms.languages.read']);
     $routes->get('languages/create', '\\App\\Modules\\Cms\\Controllers\\LanguageController::create', ['as' => 'admin.cms.languages.create', 'filter' => 'permission:cms.languages.write']);
+    $routes->get('languages/reorder', '\\App\\Modules\\Cms\\Controllers\\LanguageController::reorder', ['as' => 'admin.cms.languages.reorder', 'filter' => 'permission:cms.languages.write']);
+    $routes->post('languages/reorder', '\\App\\Modules\\Cms\\Controllers\\LanguageController::saveOrder', ['as' => 'admin.cms.languages.save_order', 'filter' => 'permission:cms.languages.write']);
     $routes->post('languages', '\\App\\Modules\\Cms\\Controllers\\LanguageController::store', ['as' => 'admin.cms.languages.store', 'filter' => 'permission:cms.languages.write']);
     $routes->get('languages/(:segment)', '\\App\\Modules\\Cms\\Controllers\\LanguageController::show/$1', ['as' => 'admin.cms.languages.show', 'filter' => 'permission:cms.languages.read']);
     $routes->get('languages/(:segment)/edit', '\\App\\Modules\\Cms\\Controllers\\LanguageController::edit/$1', ['as' => 'admin.cms.languages.edit', 'filter' => 'permission:cms.languages.write']);
     $routes->post('languages/(:segment)', '\\App\\Modules\\Cms\\Controllers\\LanguageController::update/$1', ['as' => 'admin.cms.languages.update', 'filter' => 'permission:cms.languages.write']);
     $routes->post('languages/(:segment)/delete', '\\App\\Modules\\Cms\\Controllers\\LanguageController::delete/$1', ['as' => 'admin.cms.languages.delete', 'filter' => 'permission:cms.languages.write']);
     $routes->post('languages/(:segment)/set-default', '\\App\\Modules\\Cms\\Controllers\\LanguageController::setDefault/$1', ['as' => 'admin.cms.languages.set_default', 'filter' => 'permission:cms.languages.write']);
-
-    $routes->get('languages/reorder', '\\App\\Modules\\Cms\\Controllers\\LanguageController::reorder', ['as' => 'admin.cms.languages.reorder', 'filter' => 'permission:cms.languages.write']);
-    $routes->post('languages/reorder', '\\App\\Modules\\Cms\\Controllers\\LanguageController::saveOrder', ['as' => 'admin.cms.languages.save_order', 'filter' => 'permission:cms.languages.write']);
 
 
 
@@ -39,6 +38,8 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('pages', '\App\Modules\Cms\Controllers\PageController::index', ['as' => 'admin.cms.pages', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/data', '\App\Modules\Cms\Controllers\PageController::data', ['as' => 'admin.cms.pages.data', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/create', '\App\Modules\Cms\Controllers\PageController::create', ['as' => 'admin.cms.pages.create', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('pages/reorder', '\App\Modules\Cms\Controllers\PageController::reorder', ['as' => 'admin.cms.pages.reorder', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/reorder', '\App\Modules\Cms\Controllers\PageController::saveOrder', ['as' => 'admin.cms.pages.save_order', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages', '\App\Modules\Cms\Controllers\PageController::store', ['as' => 'admin.cms.pages.store', 'filter' => 'permission:cms.pages.write']);
     $routes->get('pages/(:segment)', '\App\Modules\Cms\Controllers\PageController::show/$1', ['as' => 'admin.cms.pages.show', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/(:segment)/edit', '\App\Modules\Cms\Controllers\PageController::edit/$1', ['as' => 'admin.cms.pages.edit', 'filter' => 'permission:cms.pages.write']);
@@ -46,8 +47,6 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('pages/(:segment)/delete', '\App\Modules\Cms\Controllers\PageController::delete/$1', ['as' => 'admin.cms.pages.delete', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/(:segment)/publish', '\App\Modules\Cms\Controllers\PageController::publish/$1', ['as' => 'admin.cms.pages.publish', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/(:segment)/archive', '\App\Modules\Cms\Controllers\PageController::archive/$1', ['as' => 'admin.cms.pages.archive', 'filter' => 'permission:cms.pages.write']);
-    $routes->get('pages/reorder', '\App\Modules\Cms\Controllers\PageController::reorder', ['as' => 'admin.cms.pages.reorder', 'filter' => 'permission:cms.pages.write']);
-    $routes->post('pages/reorder', '\App\Modules\Cms\Controllers\PageController::saveOrder', ['as' => 'admin.cms.pages.save_order', 'filter' => 'permission:cms.pages.write']);
 
     // Menu
     $routes->get('menus', '\App\Modules\Cms\Controllers\MenuController::index', ['as' => 'admin.cms.menus', 'filter' => 'permission:cms.menus.read']);
@@ -90,6 +89,8 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('entries', '\App\Modules\Cms\Controllers\EntryController::index', ['as' => 'admin.cms.entries', 'filter' => 'permission:cms.entries.read']);
     $routes->get('entries/data', '\App\Modules\Cms\Controllers\EntryController::data', ['as' => 'admin.cms.entries.data', 'filter' => 'permission:cms.entries.read']);
     $routes->get('entries/create', '\App\Modules\Cms\Controllers\EntryController::create', ['as' => 'admin.cms.entries.create', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::reorder', ['as' => 'admin.cms.entries.reorder', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::saveOrder', ['as' => 'admin.cms.entries.save_order', 'filter' => 'permission:cms.entries.write']);
     $routes->post('entries', '\App\Modules\Cms\Controllers\EntryController::store', ['as' => 'admin.cms.entries.store', 'filter' => 'permission:cms.entries.write']);
     $routes->get('entries/(:segment)', '\App\Modules\Cms\Controllers\EntryController::show/$1', ['as' => 'admin.cms.entries.show', 'filter' => 'permission:cms.entries.read']);
     $routes->get('entries/(:segment)/edit', '\App\Modules\Cms\Controllers\EntryController::edit/$1', ['as' => 'admin.cms.entries.edit', 'filter' => 'permission:cms.entries.write']);
@@ -97,20 +98,18 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('entries/(:segment)/delete', '\App\Modules\Cms\Controllers\EntryController::delete/$1', ['as' => 'admin.cms.entries.delete', 'filter' => 'permission:cms.entries.write']);
     $routes->post('entries/(:segment)/publish', '\App\Modules\Cms\Controllers\EntryController::publish/$1', ['as' => 'admin.cms.entries.publish', 'filter' => 'permission:cms.entries.write']);
     $routes->post('entries/(:segment)/archive', '\App\Modules\Cms\Controllers\EntryController::archive/$1', ['as' => 'admin.cms.entries.archive', 'filter' => 'permission:cms.entries.write']);
-    $routes->get('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::reorder', ['as' => 'admin.cms.entries.reorder', 'filter' => 'permission:cms.entries.write']);
-    $routes->post('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::saveOrder', ['as' => 'admin.cms.entries.save_order', 'filter' => 'permission:cms.entries.write']);
 
     // Category
     $routes->get('categories', '\App\Modules\Cms\Controllers\CategoryController::index', ['as' => 'admin.cms.categories', 'filter' => 'permission:cms.categories.read']);
     $routes->get('categories/data', '\App\Modules\Cms\Controllers\CategoryController::data', ['as' => 'admin.cms.categories.data', 'filter' => 'permission:cms.categories.read']);
     $routes->get('categories/create', '\App\Modules\Cms\Controllers\CategoryController::create', ['as' => 'admin.cms.categories.create', 'filter' => 'permission:cms.categories.write']);
+    $routes->get('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::reorder', ['as' => 'admin.cms.categories.reorder', 'filter' => 'permission:cms.categories.write']);
+    $routes->post('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::saveOrder', ['as' => 'admin.cms.categories.save_order', 'filter' => 'permission:cms.categories.write']);
     $routes->post('categories', '\App\Modules\Cms\Controllers\CategoryController::store', ['as' => 'admin.cms.categories.store', 'filter' => 'permission:cms.categories.write']);
     $routes->get('categories/(:segment)', '\App\Modules\Cms\Controllers\CategoryController::show/$1', ['as' => 'admin.cms.categories.show', 'filter' => 'permission:cms.categories.read']);
     $routes->get('categories/(:segment)/edit', '\App\Modules\Cms\Controllers\CategoryController::edit/$1', ['as' => 'admin.cms.categories.edit', 'filter' => 'permission:cms.categories.write']);
     $routes->post('categories/(:segment)', '\App\Modules\Cms\Controllers\CategoryController::update/$1', ['as' => 'admin.cms.categories.update', 'filter' => 'permission:cms.categories.write']);
     $routes->post('categories/(:segment)/delete', '\App\Modules\Cms\Controllers\CategoryController::delete/$1', ['as' => 'admin.cms.categories.delete', 'filter' => 'permission:cms.categories.write']);
-    $routes->get('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::reorder', ['as' => 'admin.cms.categories.reorder', 'filter' => 'permission:cms.categories.write']);
-    $routes->post('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::saveOrder', ['as' => 'admin.cms.categories.save_order', 'filter' => 'permission:cms.categories.write']);
 
     // Tag
     $routes->get('tags', '\App\Modules\Cms\Controllers\TagController::index', ['as' => 'admin.cms.tags', 'filter' => 'permission:cms.tags.read']);
