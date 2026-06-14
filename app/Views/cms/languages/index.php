@@ -132,7 +132,7 @@
                                     <template x-if="!row.is_default">
                                         <form method="post" :action="'<?= site_url('admin/cms/languages') ?>/' + row.id + '/set-default'">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="<?= esc(action_button_class()) ?>"><?= esc(lang('CmsLanguages.set_default') ?? 'Set Default') ?></button>
+                                            <button type="submit" class="<?= esc(action_button_class()) ?>"><?= esc(lang('CmsLanguages.languages_set_default')) ?></button>
                                         </form>
                                     </template>
                                     <?php endif; ?>
