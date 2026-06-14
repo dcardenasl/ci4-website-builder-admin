@@ -39,4 +39,5 @@ return [
     'field_is_active_help'          => 'Alternar Está Activo.',
     'field_is_active_on'            => 'Activo',
     'field_is_active_off'           => 'Inactivo',
+    'field_sort_order'              => 'Orden de Clasificación',
 ];

@@ -39,4 +39,5 @@ return [
     'field_is_active_help'          => 'Toggle Is Active.',
     'field_is_active_on'            => 'Active',
     'field_is_active_off'           => 'Inactive',
+    'field_sort_order'              => 'Sort Order',
 ];
