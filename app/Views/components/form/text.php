@@ -32,7 +32,7 @@ $attributes = is_array($attributes ?? null) ? $attributes : [];
         type="text" 
         value="<?= esc($value) ?>" 
         class="<?= input_class($name) ?>"
-        placeholder="<?= esc($placeholder, 'attr') ?>"
+        placeholder="<?= esc(lang($placeholder), 'attr') ?>"
         autocomplete="<?= esc($autocomplete, 'attr') ?>"
         <?= $required ? 'required' : '' ?>
         <?= field_aria_attrs($name, $required) ?>

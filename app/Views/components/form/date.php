@@ -28,7 +28,7 @@ $help = $help ?? '';
         type="date" 
         value="<?= esc($value) ?>" 
         class="<?= input_class($name) ?>"
-        placeholder="<?= esc($placeholder, 'attr') ?>"
+        placeholder="<?= esc(lang($placeholder), 'attr') ?>"
         <?= $required ? 'required' : '' ?>
         <?= field_aria_attrs($name, $required) ?>
     >

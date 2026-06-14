@@ -31,7 +31,7 @@ $attributes = is_array($attributes ?? null) ? $attributes : [];
         name="<?= esc($name, 'attr') ?>" 
         rows="<?= (int) $rows ?>" 
         class="<?= input_class($name) ?> resize-y"
-        placeholder="<?= esc($placeholder, 'attr') ?>"
+        placeholder="<?= esc(lang($placeholder), 'attr') ?>"
         <?= $required ? 'required' : '' ?>
         <?= field_aria_attrs($name, $required) ?>
         <?= render_extra_attrs($attributes) ?>

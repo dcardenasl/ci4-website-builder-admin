@@ -58,7 +58,7 @@ $help = $help ?? '';
                 @keydown.enter.prevent="addTag()" 
                 @keydown.comma.prevent="addTag()"
                 @blur="addTag()"
-                placeholder="<?= esc($placeholder, 'attr') ?>"
+                placeholder="<?= esc(lang($placeholder), 'attr') ?>"
                 class="flex-1 min-w-[120px] bg-transparent border-0 p-0 text-sm focus:ring-0 focus:outline-none"
             >
         </div>

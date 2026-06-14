@@ -36,7 +36,7 @@ $attributes = is_array($attributes ?? null) ? $attributes : [];
         type="number" 
         value="<?= esc($value) ?>" 
         class="<?= input_class($name) ?>"
-        placeholder="<?= esc($placeholder, 'attr') ?>"
+        placeholder="<?= esc(lang($placeholder), 'attr') ?>"
         <?= $min ?>
         <?= $max ?>
         <?= $step ?>
