@@ -49,7 +49,7 @@ class SettingStoreRequest extends BaseFormRequest
             'setting_value' => $this->settingValueForType($type),
             'setting_type' => $type,
             'setting_group' => $this->postString('setting_group'),
-            'is_translatable' => $this->postBool('is_translatable'),
+            'is_translatable' => $this->postBool('is_translatable') ? '1' : '0',
             'sort_order' => $this->postInt('sort_order', 0),
             'description' => $this->postString('description'),
         ];

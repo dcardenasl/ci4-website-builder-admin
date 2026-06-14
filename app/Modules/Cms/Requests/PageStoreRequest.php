@@ -63,7 +63,7 @@ class PageStoreRequest extends BaseFormRequest
             'status' => $this->postString('status') ?: 'draft',
             'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),
-            'is_in_sitemap' => $this->postBool('is_in_sitemap'),
+            'is_in_sitemap' => $this->postBool('is_in_sitemap') ? '1' : '0',
             'sitemap_priority' => $this->postString('sitemap_priority'),
             'sitemap_changefreq' => $this->postString('sitemap_changefreq') ?: 'weekly',
             'published_at' => $this->postString('published_at'),

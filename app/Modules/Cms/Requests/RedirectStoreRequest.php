@@ -30,7 +30,7 @@ class RedirectStoreRequest extends BaseFormRequest
             'old_path' => $this->postString('old_path'),
             'new_url' => $this->postString('new_url'),
             'redirect_type' => $this->postInt('redirect_type', 301),
-            'is_active' => $this->postBool('is_active'),
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
             'note' => $this->postString('note'),
         ];
     }

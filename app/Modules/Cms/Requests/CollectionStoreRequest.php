@@ -61,10 +61,10 @@ class CollectionStoreRequest extends BaseFormRequest
             'default_sitemap_priority' => $this->postString('default_sitemap_priority') ?: '0.5',
             'default_changefreq' => $this->postString('default_changefreq') ?: 'weekly',
             'sort_order' => $this->postInt('sort_order', 0),
-            'is_active' => $this->postBool('is_active'),
-            'requires_approval' => $this->postBool('requires_approval'),
-            'enables_categories' => $this->postBool('enables_categories'),
-            'enables_tags' => $this->postBool('enables_tags'),
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
+            'requires_approval' => $this->postBool('requires_approval') ? '1' : '0',
+            'enables_categories' => $this->postBool('enables_categories') ? '1' : '0',
+            'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
             'translations' => $translations,
         ];
     }

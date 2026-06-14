@@ -38,7 +38,7 @@ class TagStoreRequest extends BaseFormRequest
         }
 
         return [
-            'is_active' => $this->postBool('is_active'),
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
             'translations' => $translations,
         ];
     }

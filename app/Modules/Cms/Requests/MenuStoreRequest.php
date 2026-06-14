@@ -27,7 +27,7 @@ class MenuStoreRequest extends BaseFormRequest
         return [
             'menu_key' => $this->postString('menu_key'),
             'location' => $this->postString('location'),
-            'is_active' => $this->postBool('is_active'),
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
         ];
     }
 }

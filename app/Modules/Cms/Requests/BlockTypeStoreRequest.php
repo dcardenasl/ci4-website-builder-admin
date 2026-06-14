@@ -54,10 +54,10 @@ class BlockTypeStoreRequest extends BaseFormRequest
             'category'          => $this->postString('category'),
             'icon'              => $this->postString('icon'),
             'schema_definition' => $decodedSchema,
-            'supports_pages'    => $this->postBool('supports_pages'),
-            'supports_entries'  => $this->postBool('supports_entries'),
-            'is_container'      => $this->postBool('is_container'),
-            'is_active'         => $this->postBool('is_active'),
+            'supports_pages'    => $this->postBool('supports_pages') ? '1' : '0',
+            'supports_entries'  => $this->postBool('supports_entries') ? '1' : '0',
+            'is_container'      => $this->postBool('is_container') ? '1' : '0',
+            'is_active'         => $this->postBool('is_active') ? '1' : '0',
             'sort_order'        => $this->postInt('sort_order'),
         ];
     }

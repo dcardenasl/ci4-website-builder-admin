@@ -44,7 +44,7 @@ class CategoryStoreRequest extends BaseFormRequest
             'collection_id' => $this->postInt('collection_id'),
             'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),
-            'is_active' => $this->postBool('is_active'),
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
             'translations' => $translations,
         ];
     }

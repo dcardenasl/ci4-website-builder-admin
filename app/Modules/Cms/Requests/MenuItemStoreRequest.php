@@ -50,7 +50,7 @@ class MenuItemStoreRequest extends BaseFormRequest
             'icon'          => $this->postString('icon') ?: null,
             'css_class'     => $this->postString('css_class') ?: null,
             'sort_order'    => $this->postInt('sort_order'),
-            'is_active'     => $this->postBool('is_active'),
+            'is_active'     => $this->postBool('is_active') ? '1' : '0',
             'translations'  => []
         ];
 

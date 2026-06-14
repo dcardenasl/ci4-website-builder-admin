@@ -33,8 +33,8 @@ class LanguageStoreRequest extends BaseFormRequest
             'code' => $this->postString('code'),
             'name' => $this->postString('name'),
             'native_name' => $this->postString('native_name'),
-            'is_default' => $this->postBool('is_default'),
-            'is_active' => $this->postBool('is_active'),
+            'is_default' => $this->postBool('is_default') ? '1' : '0',
+            'is_active' => $this->postBool('is_active') ? '1' : '0',
             'sort_order' => $this->postInt('sort_order', 0),
             'fallback_language_id' => $fallback !== '' ? (int) $fallback : null,
         ];
