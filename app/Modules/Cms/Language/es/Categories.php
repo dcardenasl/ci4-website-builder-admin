@@ -35,4 +35,11 @@ return [
     'field_is_active_help'          => 'Alternar Está Activo.',
     'field_is_active_on'            => 'Activo',
     'field_is_active_off'           => 'Inactivo',
+    'field_collection_id'         => 'Colección',
+    'field_collection_id_placeholder' => 'Seleccione Colección',
+    'field_collection_id_help'    => 'Seleccione la colección.',
+    'field_sort_order'            => 'Orden de Clasificación',
+    'field_sort_order_placeholder' => 'Ingrese Orden de Clasificación',
+    'field_sort_order_help'       => 'Ingrese el orden de clasificación.',
+
 ];

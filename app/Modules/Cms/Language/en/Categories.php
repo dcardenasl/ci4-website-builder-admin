@@ -35,4 +35,11 @@ return [
     'field_is_active_help'          => 'Toggle Is Active.',
     'field_is_active_on'            => 'Active',
     'field_is_active_off'           => 'Inactive',
+    'field_collection_id'         => 'Collection',
+    'field_collection_id_placeholder' => 'Select Collection',
+    'field_collection_id_help'    => 'Select collection.',
+    'field_sort_order'            => 'Sort Order',
+    'field_sort_order_placeholder' => 'Enter Sort Order',
+    'field_sort_order_help'       => 'Enter sorting order.',
+
 ];
