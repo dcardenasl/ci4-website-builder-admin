@@ -13,6 +13,7 @@ class SettingStoreRequest extends BaseFormRequest
         return [
             'setting_key',
             'setting_type',
+            'setting_value',
             'setting_value_string',
             'setting_value_int',
             'setting_value_bool',
@@ -28,6 +29,7 @@ class SettingStoreRequest extends BaseFormRequest
     {
         return [
             'setting_key' => 'required|min_length[2]|max_length[255]',
+            'setting_value' => 'permit_empty|string',
             'setting_value_string' => 'permit_empty|string',
             'setting_value_int' => 'permit_empty|integer',
             'setting_value_bool' => 'permit_empty|in_list[0,1]',
@@ -43,20 +45,33 @@ class SettingStoreRequest extends BaseFormRequest
     public function payload(): array
     {
         $type = $this->postString('setting_type') ?: 'string';
+        $settingValue = $this->settingValueForType($type);
 
         return [
             'setting_key' => $this->postString('setting_key'),
-            'setting_value' => $this->settingValueForType($type),
+            'setting_value' => $settingValue,
             'setting_type' => $type,
             'setting_group' => $this->postString('setting_group'),
             'is_translatable' => $this->postBool('is_translatable') ? '1' : '0',
             'sort_order' => $this->postInt('sort_order', 0),
             'description' => $this->postString('description'),
+            // The settings API currently rejects empty translations arrays during
+            // create/update validation. We seed the default locale with the base
+            // value so the CRUD can complete without a dedicated translation UI.
+            'translations' => [[
+                'language_id' => 1,
+                'setting_value' => $settingValue,
+            ]],
         ];
     }
 
     private function settingValueForType(string $type): string
     {
+        $canonical = $this->postString('setting_value');
+        if ($canonical !== '') {
+            return $canonical;
+        }
+
         return match ($type) {
             'int' => $this->postString('setting_value_int'),
             'bool' => $this->postBool('setting_value_bool') ? '1' : '0',
