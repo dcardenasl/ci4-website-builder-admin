@@ -112,6 +112,12 @@ DOMAIN_API_BASE_URL = http://localhost:8190
 # domainApiClient.appKey = apk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #--------------------------------------------------------------------
+# AUTO-TRANSLATION
+# Uses MyMemory (mymemory.translated.net) — free, no API key required.
+# Limit: ~5,000 words/day for anonymous use. No configuration needed.
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 # BFF API CLIENT (optional — only when a ci4-bff-starter is part of the stack)
 #--------------------------------------------------------------------
 # Leave bffApiClient.baseUrl empty (default) to disable BFF health monitoring.

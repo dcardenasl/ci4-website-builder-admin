@@ -1780,6 +1780,123 @@ document.addEventListener('alpine:init', () => {
     // Backward compatibility mappings for historic templates
     Alpine.data('catalogMetadataField', (config = {}) => Alpine.data('adminMetadataField')(config));
     Alpine.data('catalogItemMedia', (config = {}) => Alpine.data('adminMediaGallery')(config));
+
+    // Language tabs for translatable forms.
+    // Usage: x-data="langTabs(defaultLangId, translateUrl, sourceLangCode)"
+    // Tab panels use x-show="isActive(langId)" — NOT x-if — so hidden inputs stay in the DOM.
+    Alpine.data('langTabs', (defaultId = 0, translateUrl = '', sourceLangCode = 'EN') => ({
+        active: defaultId,
+        translating: false,
+        translateError: '',
+        isActive(id) { return this.active === id; },
+        setTab(id) { this.active = id; },
+
+        translatingAll: false,
+        translateAllProgress: '',
+
+        async _translatePairs(targetLangCode, fieldPairs) {
+            for (const pair of fieldPairs) {
+                 
+                const sourceEl = document.querySelector(pair.from);
+                 
+                const targetEl = document.querySelector(pair.to);
+                // eslint-disable-next-line no-undef
+                if (!(sourceEl instanceof HTMLInputElement || sourceEl instanceof HTMLTextAreaElement)) continue;
+                // eslint-disable-next-line no-undef
+                if (!(targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement)) continue;
+
+                const sourceText = sourceEl.value.trim();
+                if (sourceText === '') continue;
+
+                const url = new URL(translateUrl, window.location.origin);
+                url.searchParams.set('text', sourceText);
+                url.searchParams.set('source_lang', sourceLangCode.toUpperCase());
+                url.searchParams.set('target_lang', targetLangCode.toUpperCase());
+
+                 
+                const res = await fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+                const json = await res.json();
+
+                if (json && typeof json.translated === 'string') {
+                    targetEl.value = json.translated;
+                    // eslint-disable-next-line no-undef
+                    targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+                } else if (json && json.error) {
+                    throw new Error(json.error);
+                }
+            }
+        },
+
+        /**
+         * Auto-translate fields from the default language tab into the currently active tab.
+         * @param {string} targetLangCode
+         * @param {Array<{from: string, to: string}>} fieldPairs
+         */
+        async autoTranslate(targetLangCode, fieldPairs) {
+            if (translateUrl === '' || this.translating || this.translatingAll) return;
+            this.translating = true;
+            this.translateError = '';
+            try {
+                await this._translatePairs(targetLangCode, fieldPairs);
+            } catch (e) {
+                this.translateError = e instanceof Error ? e.message : String(e);
+            } finally {
+                this.translating = false;
+            }
+        },
+
+        /**
+         * Translate all secondary language tabs in one click.
+         * @param {Array<{langCode: string, fieldPairs: Array<{from: string, to: string}>}>} targets
+         */
+        async autoTranslateAll(targets) {
+            if (translateUrl === '' || this.translating || this.translatingAll) return;
+            this.translatingAll = true;
+            this.translateError = '';
+            try {
+                for (let i = 0; i < targets.length; i++) {
+                    const { langCode, fieldPairs } = targets[i];
+                    this.translateAllProgress = langCode + ' (' + (i + 1) + '/' + targets.length + ')';
+                    await this._translatePairs(langCode, fieldPairs);
+                }
+                this.translateAllProgress = '';
+            } catch (e) {
+                this.translateError = e instanceof Error ? e.message : String(e);
+                this.translateAllProgress = '';
+            } finally {
+                this.translatingAll = false;
+            }
+        },
+    }));
+
+    // Inline JSON editor with format + validate helpers.
+    // Usage: x-data="jsonEditor(initialValue)"
+    // Bind textarea value with x-model="value".
+    Alpine.data('jsonEditor', (initialValue = '{}') => ({
+        value: initialValue,
+        isValid: true,
+        errorMsg: '',
+        validate() {
+            try {
+                JSON.parse(this.value);
+                this.isValid = true;
+                this.errorMsg = '';
+            } catch (e) {
+                this.isValid = false;
+                this.errorMsg = e instanceof Error ? e.message : String(e);
+            }
+        },
+        format() {
+            try {
+                this.value = JSON.stringify(JSON.parse(this.value), null, 2);
+                this.isValid = true;
+                this.errorMsg = '';
+            } catch (e) {
+                this.isValid = false;
+                this.errorMsg = e instanceof Error ? e.message : String(e);
+            }
+        },
+    }));
 });
 
 const slugify = (value) => String(value || '')
