@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **CMS form views** — Improved language strings and form field labels across all CMS modules (Pages, Entries, Menus, Categories, Collections, Tags, BlockTypes, Languages, Settings)
+- **Setting request validation** — Enhanced validation rules for system settings with comprehensive test coverage
+
 ### Added
 - [CMS-012] Page admin module to manage multi-language hierarchical pages, publishing, and sitemap settings.
 - [CMS-013] Menu admin module to manage menus and nested menu items with hierarchical tree views and link options.
