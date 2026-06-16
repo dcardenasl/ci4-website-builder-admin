@@ -43,25 +43,48 @@ class EntryStoreRequest extends BaseFormRequest
         ];
     }
 
-    public function payload(): array
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function normalizeTranslations(): array
     {
         $translations = [];
         $rawTranslations = $this->request->getPost('translations');
-        if (is_array($rawTranslations)) {
-            foreach ($rawTranslations as $trans) {
-                if (is_array($trans) && ! empty($trans['language_id'])) {
-                    $translations[] = [
-                        'language_id'      => (int) $trans['language_id'],
-                        'slug'             => isset($trans['slug']) ? (string) $trans['slug'] : '',
-                        'title'            => isset($trans['title']) ? (string) $trans['title'] : '',
-                        'excerpt'          => isset($trans['excerpt']) ? (string) $trans['excerpt'] : null,
-                        'meta_title'       => isset($trans['meta_title']) ? (string) $trans['meta_title'] : null,
-                        'meta_description' => isset($trans['meta_description']) ? (string) $trans['meta_description'] : null,
-                    ];
-                }
-            }
+
+        if (! is_array($rawTranslations)) {
+            return [];
         }
 
+        foreach ($rawTranslations as $trans) {
+            if (! is_array($trans) || empty($trans['language_id'])) {
+                continue;
+            }
+
+            $title = isset($trans['title']) ? trim((string) $trans['title']) : '';
+            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
+            $excerpt = isset($trans['excerpt']) ? trim((string) $trans['excerpt']) : '';
+            $metaTitle = isset($trans['meta_title']) ? trim((string) $trans['meta_title']) : '';
+            $metaDescription = isset($trans['meta_description']) ? trim((string) $trans['meta_description']) : '';
+
+            if ($title === '' && $slug === '' && $excerpt === '' && $metaTitle === '' && $metaDescription === '') {
+                continue;
+            }
+
+            $translations[] = [
+                'language_id' => (int) $trans['language_id'],
+                'slug' => $slug,
+                'title' => $title,
+                'excerpt' => $excerpt !== '' ? $excerpt : null,
+                'meta_title' => $metaTitle !== '' ? $metaTitle : null,
+                'meta_description' => $metaDescription !== '' ? $metaDescription : null,
+            ];
+        }
+
+        return $translations;
+    }
+
+    public function payload(): array
+    {
         return [
             'collection_id' => $this->postInt('collection_id'),
             'workflow_status' => $this->postString('status') ?: 'draft',
@@ -74,7 +97,7 @@ class EntryStoreRequest extends BaseFormRequest
             'sitemap_changefreq' => $this->postString('sitemap_changefreq') ?: 'weekly',
             'published_at' => $this->postString('published_at'),
             'scheduled_at' => $this->postString('scheduled_at'),
-            'translations' => $translations,
+            'translations' => $this->normalizeTranslations(),
         ];
     }
 }

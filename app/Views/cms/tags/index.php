@@ -71,7 +71,7 @@
                 <tbody class="<?= esc(table_body_class()) ?>">
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? '-')"></td>
+                            <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? (row.translations[0].name ?? row.translations[0].slug ?? '-') : '-'))"></td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span
                                     :class="row.is_active ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"

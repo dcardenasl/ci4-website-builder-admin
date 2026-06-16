@@ -41,22 +41,7 @@ class PageStoreRequest extends BaseFormRequest
 
     public function payload(): array
     {
-        $translations = [];
-        $rawTranslations = $this->request->getPost('translations');
-        if (is_array($rawTranslations)) {
-            foreach ($rawTranslations as $trans) {
-                if (is_array($trans) && ! empty($trans['language_id'])) {
-                    $translations[] = [
-                        'language_id'      => (int) $trans['language_id'],
-                        'slug'             => isset($trans['slug']) ? (string) $trans['slug'] : '',
-                        'title'            => isset($trans['title']) ? (string) $trans['title'] : '',
-                        'excerpt'          => isset($trans['excerpt']) ? (string) $trans['excerpt'] : null,
-                        'meta_title'       => isset($trans['meta_title']) ? (string) $trans['meta_title'] : null,
-                        'meta_description' => isset($trans['meta_description']) ? (string) $trans['meta_description'] : null,
-                    ];
-                }
-            }
-        }
+        $translations = $this->normalizeTranslations();
 
         return [
             'page_type' => $this->postString('page_type') ?: 'generic',
@@ -70,5 +55,48 @@ class PageStoreRequest extends BaseFormRequest
             'scheduled_at' => $this->postString('scheduled_at'),
             'translations' => $translations,
         ];
+    }
+
+    /**
+     * Keep only meaningful translation rows so empty secondary language slots
+     * do not trigger API validation failures.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function normalizeTranslations(): array
+    {
+        $translations = [];
+        $rawTranslations = $this->request->getPost('translations');
+
+        if (! is_array($rawTranslations)) {
+            return $translations;
+        }
+
+        foreach ($rawTranslations as $trans) {
+            if (! is_array($trans) || empty($trans['language_id'])) {
+                continue;
+            }
+
+            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
+            $title = isset($trans['title']) ? trim((string) $trans['title']) : '';
+            $excerpt = isset($trans['excerpt']) ? trim((string) $trans['excerpt']) : '';
+            $metaTitle = isset($trans['meta_title']) ? trim((string) $trans['meta_title']) : '';
+            $metaDescription = isset($trans['meta_description']) ? trim((string) $trans['meta_description']) : '';
+
+            if ($slug === '' && $title === '' && $excerpt === '' && $metaTitle === '' && $metaDescription === '') {
+                continue;
+            }
+
+            $translations[] = [
+                'language_id' => (int) $trans['language_id'],
+                'slug' => $slug,
+                'title' => $title,
+                'excerpt' => $excerpt !== '' ? $excerpt : null,
+                'meta_title' => $metaTitle !== '' ? $metaTitle : null,
+                'meta_description' => $metaDescription !== '' ? $metaDescription : null,
+            ];
+        }
+
+        return $translations;
     }
 }

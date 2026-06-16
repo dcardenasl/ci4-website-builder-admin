@@ -111,6 +111,18 @@ abstract class BaseWebController extends BaseController
         bool $withInput = true,
         array $allowedFieldErrors = [],
     ): RedirectResponse {
+        if (ENVIRONMENT === 'development') {
+            $devStatus = $response['status'] ?? 0;
+            $devRaw    = $response['raw'] ?? '';
+            log_message('debug', "[DEV] failApi — HTTP {$devStatus}\n{$devRaw}");
+            session()->setFlashdata('devApiError', [
+                'status'   => $devStatus,
+                'body'     => $devRaw,
+                'messages' => $response['messages'] ?? [],
+                'errors'   => $response['fieldErrors'] ?? [],
+            ]);
+        }
+
         $fieldErrors = $this->getFieldErrors($response);
 
         if ($allowedFieldErrors !== []) {

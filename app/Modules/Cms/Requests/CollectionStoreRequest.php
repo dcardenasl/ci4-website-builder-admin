@@ -39,22 +39,42 @@ class CollectionStoreRequest extends BaseFormRequest
         ];
     }
 
-    public function payload(): array
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function normalizeTranslations(): array
     {
         $translations = [];
         $rawTranslations = $this->request->getPost('translations');
-        if (is_array($rawTranslations)) {
-            foreach ($rawTranslations as $trans) {
-                if (is_array($trans) && ! empty($trans['language_id'])) {
-                    $translations[] = [
-                        'language_id' => (int) $trans['language_id'],
-                        'name' => isset($trans['name']) ? (string) $trans['name'] : '',
-                        'description' => isset($trans['description']) ? (string) $trans['description'] : null,
-                    ];
-                }
-            }
+
+        if (! is_array($rawTranslations)) {
+            return [];
         }
 
+        foreach ($rawTranslations as $trans) {
+            if (! is_array($trans) || empty($trans['language_id'])) {
+                continue;
+            }
+
+            $name = isset($trans['name']) ? trim((string) $trans['name']) : '';
+            $description = isset($trans['description']) ? trim((string) $trans['description']) : '';
+
+            if ($name === '' && $description === '') {
+                continue;
+            }
+
+            $translations[] = [
+                'language_id' => (int) $trans['language_id'],
+                'name' => $name,
+                'description' => $description !== '' ? $description : null,
+            ];
+        }
+
+        return $translations;
+    }
+
+    public function payload(): array
+    {
         return [
             'collection_key' => $this->postString('collection_key'),
             'url_prefix' => $this->postString('url_prefix'),
@@ -65,7 +85,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'requires_approval' => $this->postBool('requires_approval') ? '1' : '0',
             'enables_categories' => $this->postBool('enables_categories') ? '1' : '0',
             'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
-            'translations' => $translations,
+            'translations' => $this->normalizeTranslations(),
         ];
     }
 }

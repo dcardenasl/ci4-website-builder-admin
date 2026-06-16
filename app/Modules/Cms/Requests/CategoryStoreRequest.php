@@ -24,28 +24,48 @@ class CategoryStoreRequest extends BaseFormRequest
         ];
     }
 
-    public function payload(): array
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function normalizeTranslations(): array
     {
         $translations = [];
         $rawTranslations = $this->request->getPost('translations');
-        if (is_array($rawTranslations)) {
-            foreach ($rawTranslations as $trans) {
-                if (is_array($trans) && ! empty($trans['language_id'])) {
-                    $translations[] = [
-                        'language_id' => (int) $trans['language_id'],
-                        'name'        => isset($trans['name']) ? (string) $trans['name'] : '',
-                        'slug'        => isset($trans['slug']) ? (string) $trans['slug'] : '',
-                    ];
-                }
-            }
+
+        if (! is_array($rawTranslations)) {
+            return [];
         }
 
+        foreach ($rawTranslations as $trans) {
+            if (! is_array($trans) || empty($trans['language_id'])) {
+                continue;
+            }
+
+            $name = isset($trans['name']) ? trim((string) $trans['name']) : '';
+            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
+
+            if ($name === '' && $slug === '') {
+                continue;
+            }
+
+            $translations[] = [
+                'language_id' => (int) $trans['language_id'],
+                'name' => $name,
+                'slug' => $slug,
+            ];
+        }
+
+        return $translations;
+    }
+
+    public function payload(): array
+    {
         return [
             'collection_id' => $this->postInt('collection_id'),
             'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),
             'is_active' => $this->postBool('is_active') ? '1' : '0',
-            'translations' => $translations,
+            'translations' => $this->normalizeTranslations(),
         ];
     }
 }

@@ -43,10 +43,7 @@ class MenuController extends BaseWebController
                 if (isset($response['ok']) && $response['ok'] && isset($response['data']['items'])) {
                     // Fetch all items to count them
                     $itemsResponse = $this->menuService->listItems(['limit' => 1000]);
-                    $items = [];
-                    if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
-                        $items = $itemsResponse['data']['items'];
-                    }
+                    $items = $this->extractItems($itemsResponse);
 
                     // Group/count items by menu_id
                     $counts = [];
@@ -80,10 +77,7 @@ class MenuController extends BaseWebController
         }
 
         $itemsResponse = $this->menuService->listItems(['menu_id' => $id, 'limit' => 1000, 'sort' => 'sort_order']);
-        $items = [];
-        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
-            $items = $itemsResponse['data']['items'];
-        }
+        $items = $this->extractItems($itemsResponse);
 
         return $this->render('cms/menus/show', [
             'title' => lang('Menus.menus_details'),
@@ -168,10 +162,7 @@ class MenuController extends BaseWebController
         $menuResponse = $this->safeApiCall(fn () => $this->menuService->get($menuId));
 
         $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
-        $items = [];
-        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
-            $items = $itemsResponse['data']['items'];
-        }
+        $items = $this->extractItems($itemsResponse);
 
         return $this->render('cms/menus/items/create', [
             'title'     => lang('Menus.menus_items_create') ?? 'Add Menu Item',
@@ -229,10 +220,7 @@ class MenuController extends BaseWebController
         }
 
         $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
-        $items = [];
-        if (isset($itemsResponse['ok']) && $itemsResponse['ok'] && isset($itemsResponse['data']['items'])) {
-            $items = $itemsResponse['data']['items'];
-        }
+        $items = $this->extractItems($itemsResponse);
 
         return $this->render('cms/menus/items/edit', [
             'title'     => lang('Menus.menus_items_edit') ?? 'Edit Menu Item',

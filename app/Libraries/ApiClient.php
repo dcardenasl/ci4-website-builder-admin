@@ -195,7 +195,7 @@ class ApiClient implements ApiClientInterface
             ));
         }
 
-        return [
+        $result = [
             'ok'          => $status >= 200 && $status < 300,
             'status'      => $status,
             'data'        => is_array($payload) ? $payload : [],
@@ -204,6 +204,19 @@ class ApiClient implements ApiClientInterface
             'messages'    => $this->extractMessages($payload, $status),
             'fieldErrors' => $this->extractFieldErrors($payload),
         ];
+
+        if (ENVIRONMENT === 'development') {
+            \App\Debug\ApiCallsCollector::collect([
+                'method'    => $method,
+                'url'       => rtrim($this->config->baseUrl, '/') . $uri,
+                'status'    => $status,
+                'latency'   => $latency,
+                'requestId' => RequestIdHolder::get() ?? '',
+                'body'      => $body,
+            ]);
+        }
+
+        return $result;
     }
 
     public function attemptTokenRefresh(): bool
