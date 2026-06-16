@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Domain API configuration** — enforce required `DOMAIN_API_BASE_URL` with clear error messages when missing
+- **BlockType request validation** — update `schema_definition` validation from `json` to `string` type
 - **CMS form views** — Improved language strings and form field labels across all CMS modules (Pages, Entries, Menus, Categories, Collections, Tags, BlockTypes, Languages, Settings)
 - **Setting request validation** — Enhanced validation rules for system settings with comprehensive test coverage
 
