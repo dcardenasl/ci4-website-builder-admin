@@ -37,4 +37,13 @@ class EntryApiService extends ResourceApiService implements EntryApiServiceInter
     {
         return $this->apiClient->get('/cms/collections', $filters);
     }
+
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
+    {
+        $params = ['slug' => $slug, 'language_id' => $languageId];
+        if ($currentId !== '') {
+            $params['current_id'] = $currentId;
+        }
+        return $this->apiClient->get('/cms/entries/check-slug', $params);
+    }
 }

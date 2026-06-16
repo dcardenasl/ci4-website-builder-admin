@@ -34,9 +34,13 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('settings/(:segment)', '\App\Modules\Cms\Controllers\SettingController::update/$1', ['as' => 'admin.cms.settings.update', 'filter' => 'permission:cms.settings.write']);
     $routes->post('settings/(:segment)/delete', '\App\Modules\Cms\Controllers\SettingController::delete/$1', ['as' => 'admin.cms.settings.delete', 'filter' => 'permission:cms.settings.write']);
 
+    // Translate proxy (DeepL)
+    $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate', 'filter' => 'permission:cms.pages.read']);
+
     // Page
     $routes->get('pages', '\App\Modules\Cms\Controllers\PageController::index', ['as' => 'admin.cms.pages', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/data', '\App\Modules\Cms\Controllers\PageController::data', ['as' => 'admin.cms.pages.data', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('pages/check-slug', '\App\Modules\Cms\Controllers\PageController::checkSlug', ['as' => 'admin.cms.pages.check_slug', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/create', '\App\Modules\Cms\Controllers\PageController::create', ['as' => 'admin.cms.pages.create', 'filter' => 'permission:cms.pages.write']);
     $routes->get('pages/reorder', '\App\Modules\Cms\Controllers\PageController::reorder', ['as' => 'admin.cms.pages.reorder', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/reorder', '\App\Modules\Cms\Controllers\PageController::saveOrder', ['as' => 'admin.cms.pages.save_order', 'filter' => 'permission:cms.pages.write']);
@@ -88,6 +92,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     // Entry
     $routes->get('entries', '\App\Modules\Cms\Controllers\EntryController::index', ['as' => 'admin.cms.entries', 'filter' => 'permission:cms.entries.read']);
     $routes->get('entries/data', '\App\Modules\Cms\Controllers\EntryController::data', ['as' => 'admin.cms.entries.data', 'filter' => 'permission:cms.entries.read']);
+    $routes->get('entries/check-slug', '\App\Modules\Cms\Controllers\EntryController::checkSlug', ['as' => 'admin.cms.entries.check_slug', 'filter' => 'permission:cms.entries.read']);
     $routes->get('entries/create', '\App\Modules\Cms\Controllers\EntryController::create', ['as' => 'admin.cms.entries.create', 'filter' => 'permission:cms.entries.write']);
     $routes->get('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::reorder', ['as' => 'admin.cms.entries.reorder', 'filter' => 'permission:cms.entries.write']);
     $routes->post('entries/reorder', '\App\Modules\Cms\Controllers\EntryController::saveOrder', ['as' => 'admin.cms.entries.save_order', 'filter' => 'permission:cms.entries.write']);
@@ -102,6 +107,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     // Category
     $routes->get('categories', '\App\Modules\Cms\Controllers\CategoryController::index', ['as' => 'admin.cms.categories', 'filter' => 'permission:cms.categories.read']);
     $routes->get('categories/data', '\App\Modules\Cms\Controllers\CategoryController::data', ['as' => 'admin.cms.categories.data', 'filter' => 'permission:cms.categories.read']);
+    $routes->get('categories/check-slug', '\App\Modules\Cms\Controllers\CategoryController::checkSlug', ['as' => 'admin.cms.categories.check_slug', 'filter' => 'permission:cms.categories.read']);
     $routes->get('categories/create', '\App\Modules\Cms\Controllers\CategoryController::create', ['as' => 'admin.cms.categories.create', 'filter' => 'permission:cms.categories.write']);
     $routes->get('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::reorder', ['as' => 'admin.cms.categories.reorder', 'filter' => 'permission:cms.categories.write']);
     $routes->post('categories/reorder', '\App\Modules\Cms\Controllers\CategoryController::saveOrder', ['as' => 'admin.cms.categories.save_order', 'filter' => 'permission:cms.categories.write']);

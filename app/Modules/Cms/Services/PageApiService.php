@@ -37,4 +37,13 @@ class PageApiService extends ResourceApiService implements PageApiServiceInterfa
     {
         return $this->apiClient->get('/cms/pages', $filters);
     }
+
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
+    {
+        $params = ['slug' => $slug, 'language_id' => $languageId];
+        if ($currentId !== '') {
+            $params['current_id'] = $currentId;
+        }
+        return $this->apiClient->get('/cms/pages/check-slug', $params);
+    }
 }

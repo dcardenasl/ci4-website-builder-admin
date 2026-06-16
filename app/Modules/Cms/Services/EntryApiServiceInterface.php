@@ -47,4 +47,7 @@ interface EntryApiServiceInterface
      * @return ApiResponse
      */
     public function collections(array $filters = []): array;
+
+    /** @return ApiResponse */
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array;
 }

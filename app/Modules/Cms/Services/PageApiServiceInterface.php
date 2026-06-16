@@ -47,4 +47,7 @@ interface PageApiServiceInterface
      * @return ApiResponse
      */
     public function pages(array $filters = []): array;
+
+    /** @return ApiResponse */
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array;
 }

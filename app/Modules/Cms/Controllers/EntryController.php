@@ -134,6 +134,21 @@ class EntryController extends BaseWebController
 
 
 
+    public function checkSlug(): ResponseInterface
+    {
+        $slug       = (string) ($this->request->getGet('slug') ?? '');
+        $languageId = (int) ($this->request->getGet('language_id') ?? 0);
+        $currentId  = (string) ($this->request->getGet('current_id') ?? '');
+
+        if ($slug === '' || $languageId === 0) {
+            return $this->response->setJSON(['available' => false]);
+        }
+
+        $result = $this->safeApiCall(fn () => $this->entryService->checkSlug($slug, $languageId, $currentId));
+        $data   = $this->extractData($result);
+        return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
+    }
+
     public function reorder(): string|RedirectResponse
     {
         $deny = $this->requireWrite();

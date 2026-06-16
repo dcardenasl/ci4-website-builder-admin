@@ -47,4 +47,7 @@ interface CategoryApiServiceInterface
      * @return ApiResponse
      */
     public function categories(array $filters = []): array;
+
+    /** @return ApiResponse */
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array;
 }
