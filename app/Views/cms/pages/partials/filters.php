@@ -22,9 +22,9 @@
         <select name="status" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_status = (string) request()->getGet('status'); ?>
-            <option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Draft</option>
-            <option value="published" <?= $selected_status === 'published' ? 'selected' : '' ?>>Published</option>
-            <option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>>Archived</option>
+            <option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>><?= esc(lang('Pages.status_draft')) ?></option>
+            <option value="published" <?= $selected_status === 'published' ? 'selected' : '' ?>><?= esc(lang('Pages.status_published')) ?></option>
+            <option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>><?= esc(lang('Pages.status_archived')) ?></option>
         </select>
     </div>
     <div>
@@ -32,14 +32,14 @@
         <select name="page_type" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_type = (string) request()->getGet('page_type'); ?>
-            <option value="home" <?= $selected_type === 'home' ? 'selected' : '' ?>>Home</option>
-            <option value="generic" <?= $selected_type === 'generic' ? 'selected' : '' ?>>Generic</option>
-            <option value="contact" <?= $selected_type === 'contact' ? 'selected' : '' ?>>Contact</option>
-            <option value="privacy" <?= $selected_type === 'privacy' ? 'selected' : '' ?>>Privacy</option>
-            <option value="terms" <?= $selected_type === 'terms' ? 'selected' : '' ?>>Terms</option>
+            <option value="home" <?= $selected_type === 'home' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_home')) ?></option>
+            <option value="generic" <?= $selected_type === 'generic' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_generic')) ?></option>
+            <option value="contact" <?= $selected_type === 'contact' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_contact')) ?></option>
+            <option value="privacy" <?= $selected_type === 'privacy' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_privacy')) ?></option>
+            <option value="terms" <?= $selected_type === 'terms' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_terms')) ?></option>
             <option value="404" <?= $selected_type === '404' ? 'selected' : '' ?>>404</option>
             <option value="500" <?= $selected_type === '500' ? 'selected' : '' ?>>500</option>
-            <option value="maintenance" <?= $selected_type === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
+            <option value="maintenance" <?= $selected_type === 'maintenance' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_maintenance')) ?></option>
         </select>
     </div>
     <div class="md:col-span-2 xl:col-span-4">

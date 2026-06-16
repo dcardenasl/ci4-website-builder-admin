@@ -104,18 +104,10 @@
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.description ?? '-')"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.icon ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <span class="inline-flex items-center">
-                                    <template x-if="row.is_active">
-                                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </template>
-                                    <template x-if="!row.is_active">
-                                        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </template>
-                                </span>
+                                <span
+                                    :class="row.is_active ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"
+                                    x-text="row.is_active ? '<?= esc(lang('App.yes'), 'js') ?>' : '<?= esc(lang('App.no'), 'js') ?>'"
+                                ></span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>
                             <td class="<?= esc(table_td_class()) ?>">

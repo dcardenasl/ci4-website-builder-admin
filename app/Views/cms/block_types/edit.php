@@ -72,12 +72,12 @@
     'errors' => $errors ?? []
 ]) ?>
 
-        <?= view('components/form/textarea', [
+<?= view('components/form/textarea', [
     'name' => 'schema_definition',
     'label' => 'BlockTypes.field_schema_definition',
     'required' => true,
-    'value' => isset($item['schema_definition']) ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition']) : '{\n  \"fields\": {}\n}',
-    'placeholder' => '{\n  \"fields\": {}\n}',
+    'value' => isset($item['schema_definition']) ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition']) : "{\n  \"fields\": {}\n}",
+    'placeholder' => "{\n  \"fields\": {}\n}",
     'help' => 'BlockTypes.field_schema_definition_help',
     'errors' => $errors ?? []
 ]) ?>

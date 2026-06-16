@@ -8,7 +8,7 @@
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
     <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Collections.field_collection_id') ?></label>
+        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Entries.field_collection_id') ?></label>
         <select name="collection_id" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_collection_id = (string) request()->getGet('collection_id'); ?>
@@ -22,9 +22,9 @@
         <select name="status" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_status = (string) request()->getGet('status'); ?>
-            <option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Draft</option>
-            <option value="published" <?= $selected_status === 'published' ? 'selected' : '' ?>>Published</option>
-            <option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>>Archived</option>
+            <option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>><?= esc(lang('Entries.status_draft')) ?></option>
+            <option value="published" <?= $selected_status === 'published' ? 'selected' : '' ?>><?= esc(lang('Entries.status_published')) ?></option>
+            <option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>><?= esc(lang('Entries.status_archived')) ?></option>
         </select>
     </div>
     <?= view('layouts/partials/filter_limit', ['limitOptions' => $limitOptions ?? [10, 25, 50, 100]]) ?>

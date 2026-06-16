@@ -37,6 +37,7 @@ return [
     'download'        => 'Download',
     'preview'         => 'Preview',
     'view'            => 'View',
+    'csv_help'        => 'Use a CSV file to export or import records.',
     'back'            => 'Back',
     'select'          => 'Select…',
     'yes'             => 'Yes',

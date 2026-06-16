@@ -8,7 +8,7 @@
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
     <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Collections.field_collection_id') ?></label>
+        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Categories.field_collection_id') ?></label>
         <select name="collection_id" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('App.all')) ?></option>
             <?php $selected_collection_id = (string) request()->getGet('collection_id'); ?>

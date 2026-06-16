@@ -35,19 +35,13 @@ final class DomainApiClientTest extends CIUnitTestCase
         $this->assertTrue($reflection->isSubclassOf(ApiClientInterface::class));
     }
 
-    public function testConfigDefaultBaseUrlPointsToPort8090(): void
+    public function testConfigDefaultBaseUrlPointsToPort8190(): void
     {
-        // Save and clear the env var so we test the actual default
-        $saved = $_ENV['domainApiClient.baseUrl'] ?? null;
-        unset($_ENV['domainApiClient.baseUrl']);
+        $this->unsetEnvVar('domainApiClient.baseUrl');
+        $this->unsetEnvVar('DOMAIN_API_BASE_URL');
 
         $config = new DomainApiClientConfig();
-        $this->assertSame('http://localhost:8090', $config->baseUrl);
-
-        // Restore the env var if it was set
-        if ($saved !== null) {
-            $_ENV['domainApiClient.baseUrl'] = $saved;
-        }
+        $this->assertSame('http://localhost:8190', $config->baseUrl);
     }
 
     public function testConfigInheritsApiClientDefaults(): void
@@ -60,50 +54,42 @@ final class DomainApiClientTest extends CIUnitTestCase
 
     public function testConfigBaseUrlOverridableViaEnv(): void
     {
-        // Save and clear the dotted key so we test the UPPERCASE key override
-        $saved = $_ENV['domainApiClient.baseUrl'] ?? null;
-        unset($_ENV['domainApiClient.baseUrl']);
+        $this->unsetEnvVar('domainApiClient.baseUrl');
+        $this->setEnvVar('DOMAIN_API_BASE_URL', 'http://localhost:9999');
 
-        $_ENV['DOMAIN_API_BASE_URL'] = 'http://localhost:9999';
         $config = new DomainApiClientConfig();
         $this->assertSame('http://localhost:9999', $config->baseUrl);
-        unset($_ENV['DOMAIN_API_BASE_URL']);
 
-        // Restore the env var if it was set
-        if ($saved !== null) {
-            $_ENV['domainApiClient.baseUrl'] = $saved;
-        }
+        $this->unsetEnvVar('DOMAIN_API_BASE_URL');
     }
 
     public function testConfigDottedKeyOverridesUppercase(): void
     {
-        $_ENV['domainApiClient.baseUrl'] = 'http://dotted.example';
-        $_ENV['DOMAIN_API_BASE_URL']     = 'http://uppercase.example';
+        $this->setEnvVar('domainApiClient.baseUrl', 'http://dotted.example');
+        $this->setEnvVar('DOMAIN_API_BASE_URL', 'http://uppercase.example');
+
         $config = new DomainApiClientConfig();
         $this->assertSame('http://dotted.example', $config->baseUrl);
-        unset($_ENV['domainApiClient.baseUrl'], $_ENV['DOMAIN_API_BASE_URL']);
+
+        $this->unsetEnvVar('domainApiClient.baseUrl');
+        $this->unsetEnvVar('DOMAIN_API_BASE_URL');
     }
 
     public function testConfigDoesNotReadApiClientHubEnvVars(): void
     {
         // Hub env vars must NOT leak into the domain config — otherwise both
         // clients would silently point at the same backend.
-        // Save and clear the domain client key so we test the default behavior
-        $saved = $_ENV['domainApiClient.baseUrl'] ?? null;
-        unset($_ENV['domainApiClient.baseUrl']);
+        $this->unsetEnvVar('domainApiClient.baseUrl');
+        $this->unsetEnvVar('DOMAIN_API_BASE_URL');
 
-        $_ENV['API_BASE_URL']     = 'http://hub.example';
-        $_ENV['apiClient.baseUrl'] = 'http://hub.example';
+        $this->setEnvVar('API_BASE_URL', 'http://hub.example');
+        $this->setEnvVar('apiClient.baseUrl', 'http://hub.example');
 
         $config = new DomainApiClientConfig();
-        $this->assertSame('http://localhost:8090', $config->baseUrl);
+        $this->assertSame('http://localhost:8190', $config->baseUrl);
 
-        unset($_ENV['API_BASE_URL'], $_ENV['apiClient.baseUrl']);
-
-        // Restore the env var if it was set
-        if ($saved !== null) {
-            $_ENV['domainApiClient.baseUrl'] = $saved;
-        }
+        $this->unsetEnvVar('API_BASE_URL');
+        $this->unsetEnvVar('apiClient.baseUrl');
     }
 
     public function testServicesFactoryReturnsDomainApiClientInterface(): void
@@ -122,5 +108,17 @@ final class DomainApiClientTest extends CIUnitTestCase
         $this->assertInstanceOf(DomainApiClientInterface::class, $domain);
         // Domain client must satisfy ApiClientInterface so existing services accept it.
         $this->assertInstanceOf(ApiClientInterface::class, $domain);
+    }
+
+    private function setEnvVar(string $key, string $value): void
+    {
+        putenv($key . '=' . $value);
+        $_ENV[$key] = $value;
+    }
+
+    private function unsetEnvVar(string $key): void
+    {
+        putenv($key);
+        unset($_ENV[$key], $_SERVER[$key]);
     }
 }

@@ -37,6 +37,7 @@ return [
     'download'        => 'Descargar',
     'preview'         => 'Vista previa',
     'view'            => 'Ver',
+    'csv_help'        => 'Use un archivo CSV para exportar o importar registros.',
     'back'            => 'Volver',
     'select'          => 'Seleccionar…',
     'yes'             => 'Sí',

@@ -51,7 +51,7 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span>Title / Name</span>
+                            <span><?= lang('Pages.translation_title_label') ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('page_type')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('page_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_page_type')])) ?>">
@@ -92,32 +92,24 @@
                             <td class="<?= esc(table_td_class()) ?> font-semibold text-gray-900" x-text="row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations[0]).title : (row.title || row.name || row.slug || '-')">
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10" x-text="String(row.page_type ?? '-')"></span>
+                                <span
+                                    class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+                                    x-text="row.page_type === 'home' ? '<?= esc(lang('Pages.page_type_home'), 'js') ?>' : row.page_type === 'generic' ? '<?= esc(lang('Pages.page_type_generic'), 'js') ?>' : row.page_type === 'contact' ? '<?= esc(lang('Pages.page_type_contact'), 'js') ?>' : row.page_type === 'privacy' ? '<?= esc(lang('Pages.page_type_privacy'), 'js') ?>' : row.page_type === 'terms' ? '<?= esc(lang('Pages.page_type_terms'), 'js') ?>' : row.page_type === 'maintenance' ? '<?= esc(lang('Pages.page_type_maintenance'), 'js') ?>' : String(row.page_type ?? '-')"
+                                ></span>
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <template x-if="row.status === 'published'">
-                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">published</span>
-                                </template>
-                                <template x-if="row.status === 'archived'">
-                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">archived</span>
-                                </template>
-                                <template x-if="row.status !== 'published' && row.status !== 'archived'">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600" x-text="row.status || 'draft'"></span>
-                                </template>
+                                <span
+                                    :class="row.status === 'published' ? 'inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800' : row.status === 'archived' ? 'inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800' : 'inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600'"
+                                    x-text="row.status === 'published' ? '<?= esc(lang('Pages.status_published'), 'js') ?>' : row.status === 'archived' ? '<?= esc(lang('Pages.status_archived'), 'js') ?>' : '<?= esc(lang('Pages.status_draft'), 'js') ?>'"
+                                ></span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.parent_id ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span class="inline-flex items-center">
-                                    <template x-if="row.is_in_sitemap">
-                                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </template>
-                                    <template x-if="!row.is_in_sitemap">
-                                        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </template>
+                                    <span
+                                        :class="row.is_in_sitemap ? 'text-green-700' : 'text-red-600'"
+                                        x-text="row.is_in_sitemap ? '<?= esc(lang('Pages.field_is_in_sitemap_on'), 'js') ?>' : '<?= esc(lang('Pages.field_is_in_sitemap_off'), 'js') ?>'"
+                                    ></span>
                                 </span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>

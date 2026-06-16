@@ -51,7 +51,7 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span>Name</span>
+                            <span><?= lang('Tags.translation_name_label') ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Tags.field_is_active')])) ?>">
@@ -73,18 +73,10 @@
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <span class="inline-flex items-center">
-                                    <template x-if="row.is_active">
-                                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </template>
-                                    <template x-if="!row.is_active">
-                                        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </template>
-                                </span>
+                                <span
+                                    :class="row.is_active ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"
+                                    x-text="row.is_active ? '<?= esc(lang('App.yes'), 'js') ?>' : '<?= esc(lang('App.no'), 'js') ?>'"
+                                ></span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>
                             <td class="<?= esc(table_td_class()) ?>">
