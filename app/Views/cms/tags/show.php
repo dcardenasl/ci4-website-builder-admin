@@ -16,7 +16,7 @@
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.entries') . '?tag_id=' . urlencode($itemId) ?>" class="<?= esc(action_button_class('neutral')) ?>">
                     <?= ui_icon('link', 'h-3.5 w-3.5') ?>
-                    View Entries
+                    <?= esc(lang('Entries.entries_title')) ?>
                 </a>
                 <a href="<?= route_to('admin.cms.tags.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
@@ -44,21 +44,21 @@
 
         <?php if (! empty($tag['translations']) && is_array($tag['translations'])): ?>
             <div class="mt-6 border-t border-gray-200 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Tags.translations_title')) ?></h4>
                 <div class="mt-4 space-y-4">
                     <?php foreach ($tag['translations'] as $t): ?>
                         <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
                             <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between">
-                                <span>Language ID: <?= esc($t['language_id']) ?></span>
+                                <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($t['language_id']) ?></span>
                                 <span class="text-gray-500 font-mono">/<?= esc($t['slug']) ?></span>
                             </div>
                             <dl class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Name</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Tags.translation_name_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5 font-medium"><?= esc($t['name'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Slug</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Tags.translation_slug_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['slug'] ?? '—') ?></dd>
                                 </div>
                             </dl>

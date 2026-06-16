@@ -68,15 +68,15 @@
     ?>
 
         <?= view('components/form/select', [
-        'name' => 'fallback_language_id',
-        'label' => 'CmsLanguages.field_fallback_language_id',
-        'options' => $fallbackOptions,
-        'required' => false,
-        'value' => $item['fallback_language_id'] ?? '',
-        'placeholder' => 'CmsLanguages.field_fallback_language_placeholder',
-        'help' => 'CmsLanguages.field_fallback_language_help',
-        'errors' => $errors ?? []
-    ]) ?>
+            'name' => 'fallback_language_id',
+            'label' => 'CmsLanguages.field_fallback_language_id',
+            'options' => $fallbackOptions,
+            'required' => false,
+            'value' => $item['fallback_language_id'] ?? '',
+            'placeholder' => 'CmsLanguages.field_fallback_language_placeholder',
+            'help' => 'CmsLanguages.field_fallback_language_help',
+            'errors' => $errors ?? []
+        ]) ?>
 
         <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>

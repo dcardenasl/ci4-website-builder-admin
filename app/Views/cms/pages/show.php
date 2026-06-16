@@ -82,29 +82,29 @@
 
         <?php if (! empty($page['translations']) && is_array($page['translations'])): ?>
             <div class="mt-6 border-t border-gray-200 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Pages.translations_title')) ?></h4>
                 <div class="mt-4 space-y-4">
                     <?php foreach ($page['translations'] as $t): ?>
                         <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
                             <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between">
-                                <span>Language ID: <?= esc($t['language_id']) ?></span>
+                                <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($t['language_id']) ?></span>
                                 <span class="text-gray-500 font-mono">/<?= esc($t['slug']) ?></span>
                             </div>
                             <dl class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Title</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Pages.translation_title_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5 font-medium"><?= esc($t['title'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Excerpt</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Pages.translation_excerpt_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['excerpt'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Meta Title</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Pages.translation_meta_title_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['meta_title'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Meta Description</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Pages.translation_meta_description_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['meta_description'] ?? '—') ?></dd>
                                 </div>
                             </dl>

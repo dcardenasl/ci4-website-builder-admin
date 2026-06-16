@@ -41,5 +41,13 @@ return [
     'field_sort_order'            => 'Sort Order',
     'field_sort_order_placeholder' => 'Enter Sort Order',
     'field_sort_order_help'       => 'Enter sorting order.',
+    'translations_title'          => 'Translations / Content',
+    'translation_label_default'   => 'Default',
+    'translation_name_label'      => 'Name',
+    'translation_name_placeholder' => 'Enter category name',
+    'translation_name_help'       => 'Name for this language.',
+    'translation_slug_label'      => 'Slug',
+    'translation_slug_placeholder' => 'Enter category slug',
+    'translation_slug_help'       => 'URL-friendly slug for this language.',
 
 ];

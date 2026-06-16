@@ -16,6 +16,7 @@ helper('form');
 $required = $required ?? false;
 $value = old($name, $value ?? '');
 $placeholder = $placeholder ?? '';
+$placeholderText = $placeholder !== '' ? lang($placeholder) : lang('App.select_option');
 $help = $help ?? '';
 $async = $async ?? false;
 $options = $options ?? [];
@@ -86,7 +87,7 @@ $hasOptions = is_array($options) && $options !== [];
             class="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             <?= $required ? 'required' : '' ?>
         >
-            <span x-text="label || '<?= esc($placeholder ?: lang('App.select_option'), 'js') ?>'" :class="!label && 'text-gray-400'"></span>
+            <span x-text="label || '<?= esc($placeholderText, 'js') ?>'" :class="!label && 'text-gray-400'"></span>
             <span class="pointer-events-none flex items-center">
                 <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4" />
@@ -162,7 +163,7 @@ $hasOptions = is_array($options) && $options !== [];
             <?php if (! $hasOptions): ?>
                 <option value=""><?= esc(lang('App.relation_no_options')) ?></option>
             <?php else: ?>
-                <option value=""><?= esc($placeholder ?: lang('App.select_option')) ?></option>
+                <option value=""><?= esc($placeholderText) ?></option>
                 <?php foreach ($options as $val => $lbl): ?>
                     <option value="<?= esc($val, 'attr') ?>" <?= (string) $val === (string) $value ? 'selected' : '' ?>>
                         <?= esc($lbl) ?>

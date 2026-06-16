@@ -52,13 +52,13 @@
 
         <?php if (!empty($languages)): ?>
             <div class="space-y-6 border-t border-gray-100 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Categories.translations_title')) ?></h4>
                 <?php foreach ($languages as $index => $lang): ?>
                     <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
                         <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
                             <span class="text-sm font-bold text-brand-700"><?= esc($lang['name']) ?> (<?= esc($lang['code']) ?>)</span>
                             <?php if (!empty($lang['is_default'])): ?>
-                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10">Default</span>
+                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10"><?= esc(lang('Categories.translation_label_default')) ?></span>
                             <?php endif; ?>
                         </div>
                         
@@ -66,18 +66,20 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][name]",
-                            'label' => 'Categories.field_name',
+                            'label' => 'Categories.translation_name_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter category name',
+                            'placeholder' => 'Categories.translation_name_placeholder',
+                            'help' => 'Categories.translation_name_help',
                             'value' => old("translations.{$index}.name") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Categories.field_slug',
+                            'label' => 'Categories.translation_slug_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter category slug',
+                            'placeholder' => 'Categories.translation_slug_placeholder',
+                            'help' => 'Categories.translation_slug_help',
                             'value' => old("translations.{$index}.slug") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>

@@ -10,11 +10,11 @@
 
         <?= view('components/form/text', [
             'name' => 'block_key',
-            'label' => 'BlockTypes.field_block_key' ?? 'Block Key',
+            'label' => 'BlockTypes.field_block_key',
             'required' => true,
             'value' => $item['block_key'] ?? '',
-            'placeholder' => 'BlockTypes.field_block_key_placeholder' ?? 'e.g. rich_text',
-            'help' => 'BlockTypes.field_block_key_help' ?? 'Unique identifier for the block type.',
+            'placeholder' => 'BlockTypes.field_block_key_placeholder',
+            'help' => 'BlockTypes.field_block_key_help',
             'errors' => $errors ?? []
         ]) ?>
 
@@ -40,11 +40,11 @@
 
         <?= view('components/form/text', [
             'name' => 'category',
-            'label' => 'BlockTypes.field_category' ?? 'Category',
+            'label' => 'BlockTypes.field_category',
             'required' => true,
             'value' => $item['category'] ?? '',
-            'placeholder' => 'BlockTypes.field_category_placeholder' ?? 'e.g. content, media, marketing',
-            'help' => 'BlockTypes.field_category_help' ?? 'Block grouping category.',
+            'placeholder' => 'BlockTypes.field_category_placeholder',
+            'help' => 'BlockTypes.field_category_help',
             'errors' => $errors ?? []
         ]) ?>
 
@@ -60,17 +60,17 @@
 
         <?= view('components/form/textarea', [
             'name' => 'schema_definition',
-            'label' => 'BlockTypes.field_schema_definition' ?? 'Schema Definition (JSON)',
+            'label' => 'BlockTypes.field_schema_definition',
             'required' => true,
             'value' => isset($item['schema_definition']) ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition']) : '{\n  \"fields\": {}\n}',
             'placeholder' => '{\n  \"fields\": {}\n}',
-            'help' => 'BlockTypes.field_schema_definition_help' ?? 'Define structural and localized fields configuration in JSON format.',
+            'help' => 'BlockTypes.field_schema_definition_help',
             'errors' => $errors ?? []
         ]) ?>
 
         <?= view('components/form/boolean', [
             'name' => 'supports_pages',
-            'label' => 'BlockTypes.field_supports_pages' ?? 'Supports Pages',
+            'label' => 'BlockTypes.field_supports_pages',
             'value' => $item['supports_pages'] ?? true,
             'on_label' => 'App.yes',
             'off_label' => 'App.no',
@@ -79,7 +79,7 @@
 
         <?= view('components/form/boolean', [
             'name' => 'supports_entries',
-            'label' => 'BlockTypes.field_supports_entries' ?? 'Supports Entries',
+            'label' => 'BlockTypes.field_supports_entries',
             'value' => $item['supports_entries'] ?? true,
             'on_label' => 'App.yes',
             'off_label' => 'App.no',
@@ -88,7 +88,7 @@
 
         <?= view('components/form/boolean', [
             'name' => 'is_container',
-            'label' => 'BlockTypes.field_is_container' ?? 'Is Container',
+            'label' => 'BlockTypes.field_is_container',
             'value' => $item['is_container'] ?? false,
             'on_label' => 'App.yes',
             'off_label' => 'App.no',
@@ -107,9 +107,10 @@
 
         <?= view('components/form/text', [
             'name' => 'sort_order',
-            'label' => 'BlockTypes.field_sort_order' ?? 'Sort Order',
+            'label' => 'BlockTypes.field_sort_order',
             'required' => true,
             'value' => $item['sort_order'] ?? '0',
+            'placeholder' => 'BlockTypes.field_sort_order_placeholder',
             'errors' => $errors ?? []
         ]) ?>
 

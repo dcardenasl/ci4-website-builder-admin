@@ -15,6 +15,7 @@
 
     <form method="post" action="<?= route_to('admin.cms.settings.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>
+        <?php $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string'); ?>
 
         <?= view('components/form/text', [
             'name' => 'setting_key',
@@ -26,7 +27,7 @@
             'errors' => $errors ?? []
         ]) ?>
 
-    <div x-data="{ settingType: '<?= esc($item['setting_type'] ?? 'string') ?>' }">
+    <div x-data="{ settingType: '<?= esc($selectedSettingType, 'js') ?>' }">
         <?= view('components/form/select', [
             'name' => 'setting_type',
             'label' => 'Settings.field_setting_type',
@@ -51,7 +52,7 @@
                 'name' => 'setting_value_string',
                 'label' => 'Settings.field_setting_value',
                 'required' => false,
-                'value' => ($item['setting_type'] ?? '') === 'string' || ($item['setting_type'] ?? '') === 'file_id' ? ($item['setting_value'] ?? '') : '',
+                'value' => in_array($selectedSettingType, ['string', 'file_id'], true) ? ($item['setting_value'] ?? '') : '',
                 'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'attributes' => [':name' => "settingType === 'string' || settingType === 'file_id' ? 'setting_value' : ''"]
@@ -64,7 +65,7 @@
                 'name' => 'setting_value_int',
                 'label' => 'Settings.field_setting_value',
                 'required' => false,
-                'value' => ($item['setting_type'] ?? '') === 'int' ? ($item['setting_value'] ?? '') : '',
+                'value' => $selectedSettingType === 'int' ? ($item['setting_value'] ?? '') : '',
                 'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'attributes' => [':name' => "settingType === 'int' ? 'setting_value' : ''"]
@@ -76,7 +77,7 @@
             <?= view('components/form/boolean', [
                 'name' => 'setting_value_bool',
                 'label' => 'Settings.field_setting_value',
-                'value' => ($item['setting_type'] ?? '') === 'bool' ? filter_var($item['setting_value'] ?? false, FILTER_VALIDATE_BOOLEAN) : false,
+                'value' => $selectedSettingType === 'bool' ? filter_var($item['setting_value'] ?? false, FILTER_VALIDATE_BOOLEAN) : false,
                 'on_label' => 'App.yes' ?? 'Yes',
                 'off_label' => 'App.no' ?? 'No',
                 'errors' => $errors ?? [],
@@ -90,7 +91,7 @@
                 'name' => 'setting_value_json',
                 'label' => 'Settings.field_setting_value',
                 'required' => false,
-                'value' => ($item['setting_type'] ?? '') === 'json' ? ($item['setting_value'] ?? '') : '',
+                'value' => $selectedSettingType === 'json' ? ($item['setting_value'] ?? '') : '',
                 'placeholder' => 'Settings.field_setting_value_placeholder',
                 'errors' => $errors ?? [],
                 'rows' => 5,
@@ -98,6 +99,7 @@
                 'attributes' => [':name' => "settingType === 'json' ? 'setting_value' : ''"]
             ]) ?>
         </div>
+        <?= render_field_error('setting_value') ?>
     </div>
 
         <?= view('components/form/text', [

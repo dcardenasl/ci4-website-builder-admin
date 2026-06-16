@@ -51,8 +51,8 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('block_key')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('block_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_block_key') ?? 'Block Key'])) ?>">
-                                <span><?= lang('BlockTypes.field_block_key') ?? 'Block Key' ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('block_key')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_block_key')])) ?>">
+                                <span><?= lang('BlockTypes.field_block_key') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('block_key')"></span>
                             </button>
                         </th>
@@ -63,8 +63,8 @@
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('category')">
-                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('category')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_category') ?? 'Category'])) ?>">
-                                <span><?= lang('BlockTypes.field_category') ?? 'Category' ?></span>
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('category')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('BlockTypes.field_category')])) ?>">
+                                <span><?= lang('BlockTypes.field_category') ?></span>
                                 <span aria-hidden="true" x-text="sortIcon('category')"></span>
                             </button>
                         </th>

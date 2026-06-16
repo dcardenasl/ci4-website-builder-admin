@@ -30,7 +30,7 @@
                 </form>
                 <a href="<?= route_to('admin.cms.entries.reorder') ?>" class="<?= esc(action_button_class('neutral')) ?>">
                     <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-                    <?= esc(lang('Entries.field_sort_order') ?? lang('App.reorder')) ?>
+                    <?= esc(lang('App.reorder')) ?>
                 </a>
                 <form method="post" action="<?= route_to('admin.cms.entries.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
                     <?= csrf_field() ?>
@@ -67,7 +67,7 @@
             
             <?php if (! empty($entry['categories']) && is_array($entry['categories'])): ?>
                 <div>
-                    <dt class="text-gray-500">Categories</dt>
+                    <dt class="text-gray-500"><?= esc(lang('Entries.categories_title')) ?></dt>
                     <dd class="mt-1 flex flex-wrap gap-1">
                         <?php foreach ($entry['categories'] as $c): ?>
                             <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
@@ -80,7 +80,7 @@
 
             <?php if (! empty($entry['tags']) && is_array($entry['tags'])): ?>
                 <div>
-                    <dt class="text-gray-500">Tags</dt>
+                    <dt class="text-gray-500"><?= esc(lang('Entries.tags_title')) ?></dt>
                     <dd class="mt-1 flex flex-wrap gap-1">
                         <?php foreach ($entry['tags'] as $tg): ?>
                             <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
@@ -94,29 +94,29 @@
 
         <?php if (! empty($entry['translations']) && is_array($entry['translations'])): ?>
             <div class="mt-6 border-t border-gray-200 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Entries.translation_title')) ?></h4>
                 <div class="mt-4 space-y-4">
                     <?php foreach ($entry['translations'] as $t): ?>
                         <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
                             <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between">
-                                <span>Language ID: <?= esc($t['language_id']) ?></span>
+                                <span><?= esc(lang('Entries.translation_language_label')) ?>: <?= esc($t['language_id']) ?></span>
                                 <span class="text-gray-500 font-mono">/<?= esc($t['slug']) ?></span>
                             </div>
                             <dl class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Title</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Entries.translation_name_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5 font-medium"><?= esc($t['title'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Excerpt</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Entries.translation_excerpt_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['excerpt'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Meta Title</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Entries.translation_meta_title_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['meta_title'] ?? '—') ?></dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500 font-semibold">Meta Description</dt>
+                                    <dt class="text-gray-500 font-semibold"><?= esc(lang('Entries.translation_meta_description_label')) ?></dt>
                                     <dd class="text-gray-900 mt-0.5"><?= esc($t['meta_description'] ?? '—') ?></dd>
                                 </div>
                             </dl>
@@ -128,7 +128,7 @@
 
         <?php if (! empty($entry['blocks']) && is_array($entry['blocks'])): ?>
             <div class="mt-6 border-t border-gray-200 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Block Instances</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Entries.blocks_title')) ?></h4>
                 <ul class="mt-2 divide-y divide-gray-100 border border-gray-200 rounded-lg">
                     <?php foreach ($entry['blocks'] as $b): ?>
                         <li class="flex items-center justify-between p-3 text-xs">

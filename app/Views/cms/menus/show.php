@@ -48,18 +48,18 @@
 
             <!-- Translations List -->
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-                <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3"><?= lang('CmsLanguages.languages_title') ?? 'Translations' ?></h4>
+                <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3"><?= esc(lang('Menus.menus_translations_title')) ?></h4>
                 <?php if (! empty($menu['translations']) && is_array($menu['translations'])): ?>
                     <div class="divide-y divide-gray-150">
                         <?php foreach ($menu['translations'] as $t): ?>
                             <div class="py-2 text-sm">
-                                <span class="font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded text-xs mr-2">Lang ID: <?= esc((string)$t['language_id']) ?></span>
+                                <span class="font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded text-xs mr-2"><?= esc(lang('Menus.menus_lang_id_label')) ?>: <?= esc((string)$t['language_id']) ?></span>
                                 <span class="text-gray-900 font-medium"><?= esc($t['name'] ?? '—') ?></span>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <p class="text-xs text-gray-500">No translations available.</p>
+                    <p class="text-xs text-gray-500"><?= esc(lang('Menus.menus_no_translations')) ?></p>
                 <?php endif; ?>
             </section>
         </div>
@@ -127,14 +127,14 @@
                                                     <?php endif; ?>
                                                 </span>
                                                 <?php if (empty($item['is_active'])): ?>
-                                                    <span class="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded uppercase">Inactive</span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <a href="<?= route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition">Edit</a>
+                                                <span class="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded uppercase"><?= esc(lang('Menus.menus_item_inactive')) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                                <a href="<?= route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_edit')) ?></a>
                                                 <form method="post" action="<?= route_to('admin.cms.menus.items.delete', $item['menu_id'], $item['id']) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');" class="inline">
                                                     <?= csrf_field() ?>
-                                                    <button type="submit" class="px-2.5 py-1 text-xs border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg shadow-sm transition">Delete</button>
+                                                    <button type="submit" class="px-2.5 py-1 text-xs border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_delete')) ?></button>
                                                 </form>
                                             </div>
                                         </div>

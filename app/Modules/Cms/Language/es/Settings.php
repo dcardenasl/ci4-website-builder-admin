@@ -34,8 +34,8 @@ return [
     'field_description_placeholder' => 'Descripción opcional',
     'field_description_help'      => 'Descripción interna breve.',
     'field_is_translatable'       => 'Traducible',
-    'field_is_translatable_help'  => 'Permite que esta configuración tenga traducciones.',
+    'field_is_translatable_help'  => 'Activa traducciones por idioma para esta configuración.',
     'field_is_translatable_on'    => 'Traducible',
-    'field_is_translatable_off'   => 'Valor único',
+    'field_is_translatable_off'   => 'No traducible',
     'field_language'              => 'Idioma',
 ];

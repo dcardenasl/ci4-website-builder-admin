@@ -32,8 +32,8 @@ return [
     'field_collection_key_placeholder'  => 'Ingrese la Clave de Colección',
     'field_collection_key_help'         => 'Ingrese la Clave de Colección.',
     'field_url_prefix'                  => 'Prefijo URL',
-    'field_url_prefix_placeholder'      => '/blog',
-    'field_url_prefix_help'             => 'Prefijo de URL pública para las entradas en esta colección.',
+    'field_url_prefix_placeholder'      => 'blog',
+    'field_url_prefix_help'             => 'Prefijo de URL pública sin / inicial para las entradas de esta colección.',
     'field_default_sitemap_priority'    => 'Prioridad de mapa de sitio predeterminada',
     'field_default_sitemap_priority_placeholder' => '0.5',
     'field_default_sitemap_priority_help' => 'Prioridad de mapa de sitio predeterminada para URLs generadas.',
@@ -72,8 +72,12 @@ return [
     // Translation section
     'translation_title'       => 'Traducciones',
     'translation_label_default' => 'Predeterminado',
+    'translation_language_label' => 'ID de idioma',
     'translation_name_label'    => 'Nombre',
     'translation_name_placeholder' => 'Ingrese el nombre de la colección',
+    'translation_name_help'     => 'Ingrese el nombre de la colección para este idioma.',
     'translation_description_label' => 'Descripción',
     'translation_description_placeholder' => 'Ingrese la descripción de la colección',
+    'translation_description_help' => 'Ingrese la descripción de la colección para este idioma.',
+    'collections_entries' => 'Ver Entradas',
 ];

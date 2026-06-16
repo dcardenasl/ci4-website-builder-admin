@@ -59,18 +59,18 @@
 
         <?php if (!empty($collection['translations']) && is_array($collection['translations'])): ?>
             <div class="mt-6 border-t border-gray-100 pt-6">
-                <h4 class="text-md font-semibold text-gray-800 mb-3">Translations / Traducciones</h4>
+                <h4 class="text-md font-semibold text-gray-800 mb-3"><?= esc(lang('Collections.translation_title')) ?></h4>
                 <div class="space-y-4">
                     <?php foreach ($collection['translations'] as $t): ?>
                         <div class="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
-                            <div class="text-xs font-semibold text-brand-700 mb-1">Language ID: <?= esc((string)($t['language_id'] ?? '')) ?></div>
+                            <div class="text-xs font-semibold text-brand-700 mb-1"><?= esc(lang('Collections.translation_language_label')) ?>: <?= esc((string)($t['language_id'] ?? '')) ?></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span class="text-gray-500 block">Name</span>
+                                    <span class="text-gray-500 block"><?= esc(lang('Collections.translation_name_label')) ?></span>
                                     <span class="text-gray-900 font-medium"><?= esc($t['name'] ?? '—') ?></span>
                                 </div>
                                 <div>
-                                    <span class="text-gray-500 block">Description</span>
+                                    <span class="text-gray-500 block"><?= esc(lang('Collections.translation_description_label')) ?></span>
                                     <span class="text-gray-900"><?= esc($t['description'] ?? '—') ?></span>
                                 </div>
                             </div>
@@ -83,7 +83,7 @@
         <div class="mt-6 border-t border-gray-100 pt-6">
             <a href="<?= site_url('admin/cms/entries?collection_id=' . $itemId) ?>" class="<?= esc(action_button_class('primary')) ?>">
                 <?= ui_icon('cms-entry', 'h-4 w-4') ?>
-                <span>Ver Entries</span>
+                <span><?= esc(lang('Collections.collections_entries')) ?></span>
             </a>
         </div>
     </section>

@@ -18,7 +18,7 @@
                 <form method="post" action="<?= route_to('admin.cms.languages.set_default', $itemId) ?>">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('primary')) ?>">
-                        <?= esc(lang('CmsLanguages.set_default') ?? 'Set Default') ?>
+                        <?= esc(lang('CmsLanguages.languages_set_default') ?? 'Set Default') ?>
                     </button>
                 </form>
                 <?php endif; ?>

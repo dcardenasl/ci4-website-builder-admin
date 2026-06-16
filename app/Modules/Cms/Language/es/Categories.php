@@ -41,5 +41,13 @@ return [
     'field_sort_order'            => 'Orden de Clasificación',
     'field_sort_order_placeholder' => 'Ingrese Orden de Clasificación',
     'field_sort_order_help'       => 'Ingrese el orden de clasificación.',
+    'translations_title'          => 'Traducciones / Contenido',
+    'translation_label_default'   => 'Predeterminado',
+    'translation_name_label'      => 'Nombre',
+    'translation_name_placeholder' => 'Ingrese el nombre de la categoría',
+    'translation_name_help'       => 'Nombre para este idioma.',
+    'translation_slug_label'      => 'Slug',
+    'translation_slug_placeholder' => 'Ingrese el slug de la categoría',
+    'translation_slug_help'       => 'Slug amigable para la URL en este idioma.',
 
 ];

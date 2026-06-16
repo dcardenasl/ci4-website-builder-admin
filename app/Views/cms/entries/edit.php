@@ -34,9 +34,9 @@
             'placeholder' => 'Entries.field_status_placeholder',
             'help' => 'Entries.field_status_help',
             'options' => [
-                'draft' => 'Draft',
-                'published' => 'Published',
-                'archived' => 'Archived'
+                'draft' => lang('Entries.status_draft'),
+                'published' => lang('Entries.status_published'),
+                'archived' => lang('Entries.status_archived')
             ],
             'value' => $item['status'] ?? $item['workflow_status'] ?? 'draft',
             'errors' => $errors ?? []
@@ -133,7 +133,7 @@
 
         <?php if (!empty($languages)): ?>
             <div class="space-y-6 border-t border-gray-100 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Entries.translation_title')) ?></h4>
                 <?php foreach ($languages as $index => $lang): ?>
                     <?php
                         $transValue = [];
@@ -150,7 +150,7 @@
                         <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
                             <span class="text-sm font-bold text-brand-700"><?= esc($lang['name']) ?> (<?= esc($lang['code']) ?>)</span>
                             <?php if (!empty($lang['is_default'])): ?>
-                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10">Default</span>
+                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10"><?= esc(lang('Entries.translation_label_default')) ?></span>
                             <?php endif; ?>
                         </div>
                         
@@ -158,45 +158,50 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][title]",
-                            'label' => 'Entries.field_title',
+                            'label' => 'Entries.translation_name_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter entry title',
+                            'placeholder' => 'Entries.translation_name_placeholder',
+                            'help' => 'Entries.translation_name_help',
                             'value' => old("translations.{$index}.title") ?? $transValue['title'] ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Entries.field_slug',
+                            'label' => 'Entries.translation_slug_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter entry slug',
+                            'placeholder' => 'Entries.translation_slug_placeholder',
+                            'help' => 'Entries.translation_slug_help',
                             'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][excerpt]",
-                            'label' => 'Entries.field_excerpt',
+                            'label' => 'Entries.translation_excerpt_label',
                             'required' => false,
-                            'placeholder' => 'Enter short excerpt/summary',
+                            'placeholder' => 'Entries.translation_excerpt_placeholder',
+                            'help' => 'Entries.translation_excerpt_help',
                             'value' => old("translations.{$index}.excerpt") ?? $transValue['excerpt'] ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][meta_title]",
-                            'label' => 'Entries.field_seo_meta_title',
+                            'label' => 'Entries.translation_meta_title_label',
                             'required' => false,
-                            'placeholder' => 'Enter SEO title',
+                            'placeholder' => 'Entries.translation_meta_title_placeholder',
+                            'help' => 'Entries.translation_meta_title_help',
                             'value' => old("translations.{$index}.meta_title") ?? $transValue['meta_title'] ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][meta_description]",
-                            'label' => 'Entries.field_seo_meta_description',
+                            'label' => 'Entries.translation_meta_description_label',
                             'required' => false,
-                            'placeholder' => 'Enter SEO description',
+                            'placeholder' => 'Entries.translation_meta_description_placeholder',
+                            'help' => 'Entries.translation_meta_description_help',
                             'value' => old("translations.{$index}.meta_description") ?? $transValue['meta_description'] ?? '',
                             'errors' => $errors ?? []
                         ]) ?>

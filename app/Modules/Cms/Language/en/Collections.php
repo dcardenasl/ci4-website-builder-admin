@@ -32,8 +32,8 @@ return [
     'field_collection_key_placeholder'  => 'Enter Collection Key',
     'field_collection_key_help'         => 'Enter Collection Key.',
     'field_url_prefix'                  => 'URL prefix',
-    'field_url_prefix_placeholder'      => '/blog',
-    'field_url_prefix_help'             => 'Public URL prefix for entries in this collection.',
+    'field_url_prefix_placeholder'      => 'blog',
+    'field_url_prefix_help'             => 'Public URL prefix for entries in this collection without a leading /.',
     'field_default_sitemap_priority'    => 'Default sitemap priority',
     'field_default_sitemap_priority_placeholder' => '0.5',
     'field_default_sitemap_priority_help' => 'Default sitemap priority for generated URLs.',
@@ -72,8 +72,12 @@ return [
     // Translation section
     'translation_title'       => 'Translations',
     'translation_label_default' => 'Default',
+    'translation_language_label' => 'Language ID',
     'translation_name_label'    => 'Name',
     'translation_name_placeholder' => 'Enter collection name',
+    'translation_name_help'     => 'Enter the collection name for this language.',
     'translation_description_label' => 'Description',
     'translation_description_placeholder' => 'Enter collection description',
+    'translation_description_help' => 'Enter the collection description for this language.',
+    'collections_entries' => 'View Entries',
 ];

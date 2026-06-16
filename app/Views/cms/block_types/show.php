@@ -28,7 +28,7 @@
 
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_block_key' ?? 'Block Key',
+                'label' => 'BlockTypes.field_block_key',
                 'value' => $blockType['block_key'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
@@ -40,7 +40,7 @@
                 'value' => $blockType['description'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_category' ?? 'Category',
+                'label' => 'BlockTypes.field_category',
                 'value' => $blockType['category'] ?? '—'
             ]) ?>
             <?= view('components/display/field_row', [
@@ -53,26 +53,26 @@
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_supports_pages' ?? 'Supports Pages',
+                'label' => 'BlockTypes.field_supports_pages',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['supports_pages'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_supports_entries' ?? 'Supports Entries',
+                'label' => 'BlockTypes.field_supports_entries',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['supports_entries'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_is_container' ?? 'Is Container',
+                'label' => 'BlockTypes.field_is_container',
                 'value' => view('components/table/boolean_cell', ['value' => $blockType['is_container'] ?? false]),
                 'isHtml' => true
             ]) ?>
             <?= view('components/display/field_row', [
-                'label' => 'BlockTypes.field_sort_order' ?? 'Sort Order',
+                'label' => 'BlockTypes.field_sort_order',
                 'value' => $blockType['sort_order'] ?? '—'
             ]) ?>
             <div class="col-span-1 md:col-span-2">
-                <dt class="text-gray-500 font-semibold mb-1"><?= lang('BlockTypes.field_schema_definition') ?? 'Schema Definition' ?></dt>
+                <dt class="text-gray-500 font-semibold mb-1"><?= lang('BlockTypes.field_schema_definition') ?></dt>
                 <dd class="mt-1 bg-gray-55 text-gray-900 font-mono text-xs p-3 rounded-lg overflow-x-auto border border-gray-200">
                     <pre><?= esc(is_array($blockType['schema_definition']) ? json_encode($blockType['schema_definition'], JSON_PRETTY_PRINT) : (json_encode(json_decode($blockType['schema_definition'] ?? '{}'), JSON_PRETTY_PRINT) ?: '{}')) ?></pre>
                 </dd>

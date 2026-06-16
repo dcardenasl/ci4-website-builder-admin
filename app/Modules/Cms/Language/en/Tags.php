@@ -31,4 +31,12 @@ return [
     'field_is_active_help'          => 'Toggle Is Active.',
     'field_is_active_on'            => 'Active',
     'field_is_active_off'           => 'Inactive',
+    'translations_title'            => 'Translations / Content',
+    'translation_label_default'     => 'Default',
+    'translation_name_label'        => 'Name',
+    'translation_name_placeholder'   => 'Enter tag name',
+    'translation_name_help'         => 'Name for this language.',
+    'translation_slug_label'        => 'Slug',
+    'translation_slug_placeholder'   => 'Enter tag slug',
+    'translation_slug_help'         => 'URL-friendly slug for this language.',
 ];

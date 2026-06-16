@@ -15,14 +15,14 @@
             'placeholder' => 'Pages.field_page_type_placeholder',
             'help' => 'Pages.field_page_type_help',
             'options' => [
-                'home' => 'Home',
-                'generic' => 'Generic',
-                'contact' => 'Contact',
-                'privacy' => 'Privacy',
-                'terms' => 'Terms',
-                '404' => '404',
-                '500' => '500',
-                'maintenance' => 'Maintenance'
+                'home' => lang('Pages.page_type_home'),
+                'generic' => lang('Pages.page_type_generic'),
+                'contact' => lang('Pages.page_type_contact'),
+                'privacy' => lang('Pages.page_type_privacy'),
+                'terms' => lang('Pages.page_type_terms'),
+                '404' => lang('Pages.page_type_404'),
+                '500' => lang('Pages.page_type_500'),
+                'maintenance' => lang('Pages.page_type_maintenance')
             ],
             'value' => $item['page_type'] ?? 'generic',
             'errors' => $errors ?? []
@@ -35,9 +35,9 @@
             'placeholder' => 'Pages.field_status_placeholder',
             'help' => 'Pages.field_status_help',
             'options' => [
-                'draft' => 'Draft',
-                'published' => 'Published',
-                'archived' => 'Archived'
+                'draft' => lang('Pages.status_draft'),
+                'published' => lang('Pages.status_published'),
+                'archived' => lang('Pages.status_archived')
             ],
             'value' => $item['status'] ?? 'draft',
             'errors' => $errors ?? []
@@ -91,13 +91,13 @@
             'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
             'help' => 'Pages.field_sitemap_changefreq_help',
             'options' => [
-                'always' => 'Always',
-                'hourly' => 'Hourly',
-                'daily' => 'Daily',
-                'weekly' => 'Weekly',
-                'monthly' => 'Monthly',
-                'yearly' => 'Yearly',
-                'never' => 'Never',
+                'always' => lang('Pages.sitemap_changefreq_always'),
+                'hourly' => lang('Pages.sitemap_changefreq_hourly'),
+                'daily' => lang('Pages.sitemap_changefreq_daily'),
+                'weekly' => lang('Pages.sitemap_changefreq_weekly'),
+                'monthly' => lang('Pages.sitemap_changefreq_monthly'),
+                'yearly' => lang('Pages.sitemap_changefreq_yearly'),
+                'never' => lang('Pages.sitemap_changefreq_never'),
             ],
             'value' => $item['sitemap_changefreq'] ?? 'weekly',
             'errors' => $errors ?? []
@@ -125,13 +125,13 @@
 
         <?php if (!empty($languages)): ?>
             <div class="space-y-6 border-t border-gray-100 pt-6">
-                <h4 class="text-md font-semibold text-gray-800">Translations / Contenido</h4>
+                <h4 class="text-md font-semibold text-gray-800"><?= esc(lang('Pages.translations_title')) ?></h4>
                 <?php foreach ($languages as $index => $lang): ?>
                     <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
                         <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
                             <span class="text-sm font-bold text-brand-700"><?= esc($lang['name']) ?> (<?= esc($lang['code']) ?>)</span>
                             <?php if (!empty($lang['is_default'])): ?>
-                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10">Default</span>
+                                <span class="inline-flex items-center rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-700/10"><?= esc(lang('Pages.translation_label_default')) ?></span>
                             <?php endif; ?>
                         </div>
                         
@@ -139,45 +139,50 @@
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][title]",
-                            'label' => 'Title',
+                            'label' => 'Pages.translation_title_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter page title',
+                            'placeholder' => 'Pages.translation_title_placeholder',
+                            'help' => 'Pages.translation_title_help',
                             'value' => old("translations.{$index}.title") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][slug]",
-                            'label' => 'Slug',
+                            'label' => 'Pages.translation_slug_label',
                             'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Enter page slug',
+                            'placeholder' => 'Pages.translation_slug_placeholder',
+                            'help' => 'Pages.translation_slug_help',
                             'value' => old("translations.{$index}.slug") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][excerpt]",
-                            'label' => 'Excerpt',
+                            'label' => 'Pages.translation_excerpt_label',
                             'required' => false,
-                            'placeholder' => 'Enter short excerpt/summary',
+                            'placeholder' => 'Pages.translation_excerpt_placeholder',
+                            'help' => 'Pages.translation_excerpt_help',
                             'value' => old("translations.{$index}.excerpt") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/text', [
                             'name' => "translations[{$index}][meta_title]",
-                            'label' => 'SEO Meta Title',
+                            'label' => 'Pages.translation_meta_title_label',
                             'required' => false,
-                            'placeholder' => 'Enter SEO title',
+                            'placeholder' => 'Pages.translation_meta_title_placeholder',
+                            'help' => 'Pages.translation_meta_title_help',
                             'value' => old("translations.{$index}.meta_title") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>
 
                         <?= view('components/form/textarea', [
                             'name' => "translations[{$index}][meta_description]",
-                            'label' => 'SEO Meta Description',
+                            'label' => 'Pages.translation_meta_description_label',
                             'required' => false,
-                            'placeholder' => 'Enter SEO description',
+                            'placeholder' => 'Pages.translation_meta_description_placeholder',
+                            'help' => 'Pages.translation_meta_description_help',
                             'value' => old("translations.{$index}.meta_description") ?? '',
                             'errors' => $errors ?? []
                         ]) ?>

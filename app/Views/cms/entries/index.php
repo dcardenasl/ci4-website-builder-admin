@@ -51,7 +51,7 @@
                 <thead class="<?= esc(table_head_class()) ?>">
                     <tr>
                         <th class="<?= esc(table_th_class()) ?>">
-                            <span><?= lang('Entries.field_title') ?? 'Title' ?></span>
+                            <span><?= lang('Entries.translation_name_label') ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('collection_id')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Entries.field_collection_id')])) ?>">
@@ -96,7 +96,7 @@
                                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800': row.status === 'published',
                                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800': row.status === 'archived',
                                     'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800': row.status !== 'published' && row.status !== 'archived'
-                                }" x-text="String(row.status ?? 'draft')"></span>
+                                }" x-text="row.status === 'published' ? '<?= esc(lang('Entries.status_published')) ?>' : row.status === 'archived' ? '<?= esc(lang('Entries.status_archived')) ?>' : '<?= esc(lang('Entries.status_draft')) ?>'"></span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.published_at)"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.scheduled_at)"></td>

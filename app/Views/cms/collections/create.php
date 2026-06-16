@@ -127,6 +127,7 @@
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Collections.translation_name_placeholder',
                             'value' => old("translations.{$index}.name") ?? '',
+                            'help' => 'Collections.translation_name_help',
                             'errors' => $errors ?? []
                         ]) ?>
 
@@ -136,6 +137,7 @@
                             'required' => false,
                             'placeholder' => 'Collections.translation_description_placeholder',
                             'value' => old("translations.{$index}.description") ?? '',
+                            'help' => 'Collections.translation_description_help',
                             'errors' => $errors ?? []
                         ]) ?>
                     </div>

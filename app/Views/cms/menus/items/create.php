@@ -4,7 +4,7 @@
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl" x-data="{ linkType: 'page' }">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Menus.items_create') ?? 'Add Menu Item' ?> (Menu: <?= esc($menu['menu_key'] ?? '') ?>)</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-4"><?= esc(lang('Menus.items_create_title')) ?> (Menu: <?= esc($menu['menu_key'] ?? '') ?>)</h3>
 
     <?php if (session()->has('error')) : ?>
         <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -18,16 +18,16 @@
 
         <!-- Translations Fields (Labels & URL for Custom) -->
         <div class="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Translations & Labels</h4>
+            <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2"><?= esc(lang('Menus.items_translations_title')) ?></h4>
             <?php foreach ($languages as $lang): ?>
                 <?php $langId = $lang['id']; ?>
                 <div class="space-y-2">
-                    <label class="block text-xs font-bold text-gray-700">Label (<?= esc($lang['name']) ?>) <span class="text-red-500">*</span></label>
-                    <input type="text" name="translations[<?= esc($langId) ?>][label]" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="e.g. Home, Contact Us">
+                    <label class="block text-xs font-bold text-gray-700"><?= esc(lang('Menus.items_label_label')) ?> (<?= esc($lang['name']) ?>) <span class="text-red-500">*</span></label>
+                    <input type="text" name="translations[<?= esc($langId) ?>][label]" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_label_placeholder')) ?>">
                     
                     <div x-show="linkType === 'custom_url'" class="mt-2 space-y-1">
-                        <label class="block text-[11px] font-semibold text-gray-600">Custom URL (<?= esc($lang['name']) ?>)</label>
-                        <input type="text" name="translations[<?= esc($langId) ?>][custom_url]" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-xs text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="e.g. /my-custom-page, https://example.com">
+                        <label class="block text-[11px] font-semibold text-gray-600"><?= esc(lang('Menus.items_custom_url_label')) ?> (<?= esc($lang['name']) ?>)</label>
+                        <input type="text" name="translations[<?= esc($langId) ?>][custom_url]" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-xs text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_custom_url_placeholder')) ?>">
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -35,19 +35,19 @@
 
         <!-- Link Type Selector -->
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Link Type</label>
+            <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_link_type_label')) ?></label>
             <select name="link_type" x-model="linkType" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value="page">Page</option>
-                <option value="custom_url">Custom URL</option>
-                <option value="no_link">No Link (Placeholder)</option>
+                <option value="page"><?= esc(lang('Menus.items_link_type_page')) ?></option>
+                <option value="custom_url"><?= esc(lang('Menus.items_link_type_custom_url')) ?></option>
+                <option value="no_link"><?= esc(lang('Menus.items_link_type_no_link')) ?></option>
             </select>
         </div>
 
         <!-- Page Selector (visible only when linkType === 'page') -->
         <div x-show="linkType === 'page'" class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Target Page <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_target_page_label')) ?> <span class="text-red-500">*</span></label>
             <select name="page_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value="">-- Select Page --</option>
+                <option value=""><?= esc(lang('Menus.items_target_page_placeholder')) ?></option>
                 <?php foreach ($pages as $id => $title): ?>
                     <option value="<?= esc($id) ?>"><?= esc($title) ?></option>
                 <?php endforeach; ?>
@@ -56,9 +56,9 @@
 
         <!-- Parent Item (Optional) -->
         <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">Parent Item (Optional)</label>
+            <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_parent_label')) ?></label>
             <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value="">-- Root Level --</option>
+                <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
                 <?php foreach ($items as $item): ?>
                     <option value="<?= esc((string)$item['id']) ?>"><?= esc($item['translations'][0]['label'] ?? $item['label'] ?? 'Item #' . $item['id']) ?></option>
                 <?php endforeach; ?>
@@ -68,16 +68,16 @@
         <div class="grid grid-cols-2 gap-4">
             <!-- Link Target -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Link Target</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_link_target_label')) ?></label>
                 <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                    <option value="_self">Same Tab (_self)</option>
-                    <option value="_blank">New Tab (_blank)</option>
+                    <option value="_self"><?= esc(lang('Menus.items_link_target_same')) ?></option>
+                    <option value="_blank"><?= esc(lang('Menus.items_link_target_new')) ?></option>
                 </select>
             </div>
 
             <!-- Sort Order -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Sort Order</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
                 <input type="number" name="sort_order" value="0" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
             </div>
         </div>
@@ -85,27 +85,27 @@
         <div class="grid grid-cols-2 gap-4">
             <!-- Icon -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Icon (optional)</label>
-                <input type="text" name="icon" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="e.g. home, settings">
+                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_icon_label')) ?></label>
+                <input type="text" name="icon" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_icon_placeholder')) ?>">
             </div>
 
             <!-- CSS Class -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">CSS Class (optional)</label>
-                <input type="text" name="css_class" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="e.g. nav-highlight font-bold">
+                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_css_class_label')) ?></label>
+                <input type="text" name="css_class" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_css_class_placeholder')) ?>">
             </div>
         </div>
 
         <!-- Active Toggle -->
         <div class="flex items-center gap-2 pt-2">
             <input type="checkbox" name="is_active" value="1" checked id="is_active" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-            <label for="is_active" class="text-sm font-medium text-gray-700">Active</label>
+            <label for="is_active" class="text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_is_active_label')) ?></label>
         </div>
 
         <!-- Form Actions -->
         <div class="flex items-center justify-end gap-2 pt-4 border-t border-gray-150">
-            <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="px-4 py-2 text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm">Cancel</a>
-            <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm">Add Item</button>
+            <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="px-4 py-2 text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm"><?= esc(lang('Menus.items_cancel')) ?></a>
+            <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm"><?= esc(lang('Menus.items_add')) ?></button>
         </div>
     </form>
 </section>
