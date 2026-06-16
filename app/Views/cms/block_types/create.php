@@ -28,16 +28,6 @@
             'errors' => $errors ?? []
         ]) ?>
 
-        <?= view('components/form/textarea', [
-            'name' => 'description',
-            'label' => 'BlockTypes.field_description',
-            'required' => false,
-            'value' => $item['description'] ?? '',
-            'placeholder' => 'BlockTypes.field_description_placeholder',
-            'help' => 'BlockTypes.field_description_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
         <?= view('components/form/text', [
             'name' => 'category',
             'label' => 'BlockTypes.field_category',
@@ -48,71 +38,125 @@
             'errors' => $errors ?? []
         ]) ?>
 
-        <?= view('components/form/text', [
-            'name' => 'icon',
-            'label' => 'BlockTypes.field_icon',
-            'required' => false,
-            'value' => $item['icon'] ?? '',
-            'placeholder' => 'BlockTypes.field_icon_placeholder',
-            'help' => 'BlockTypes.field_icon_help',
-            'errors' => $errors ?? []
-        ]) ?>
+        <!-- JSON Schema Editor with validate + format + templates -->
+        <?php
+            $schemaValue = isset($item['schema_definition'])
+                ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition'])
+                : "{\n  \"fields\": {}\n}";
+            $schemaValueJs = json_encode($schemaValue);
+        ?>
+        <div x-data="jsonEditor(<?= $schemaValueJs ?>)">
+            <div class="flex items-center justify-between mb-1">
+                <label class="block text-sm font-medium text-gray-700">
+                    <?= esc(lang('BlockTypes.field_schema_definition')) ?>
+                    <span class="text-red-500" aria-hidden="true">*</span>
+                </label>
+                <div class="flex items-center gap-2">
+                    <!-- Template presets -->
+                    <select class="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white"
+                        @change="if ($event.target.value) { value = $event.target.value; validate(); $event.target.value = ''; }">
+                        <option value=""><?= esc(lang('BlockTypes.schema_template_placeholder')) ?></option>
+                        <option value='{"fields":{"title":{"type":"string","label":"Title","required":true},"body":{"type":"richtext","label":"Body","required":false}}}'><?= esc(lang('BlockTypes.schema_template_text')) ?></option>
+                        <option value='{"fields":{"title":{"type":"string","label":"Title","required":true},"subtitle":{"type":"string","label":"Subtitle","required":false},"image":{"type":"file","label":"Image","required":false},"cta_label":{"type":"string","label":"CTA Label","required":false},"cta_url":{"type":"string","label":"CTA URL","required":false}}}'><?= esc(lang('BlockTypes.schema_template_hero')) ?></option>
+                        <option value='{"fields":{"image":{"type":"file","label":"Image","required":true},"alt":{"type":"string","label":"Alt Text","required":false},"caption":{"type":"string","label":"Caption","required":false}}}'><?= esc(lang('BlockTypes.schema_template_image')) ?></option>
+                        <option value='{"fields":{"label":{"type":"string","label":"Button Label","required":true},"url":{"type":"string","label":"URL","required":true},"style":{"type":"select","label":"Style","options":["primary","secondary","outline"],"required":false}}}'><?= esc(lang('BlockTypes.schema_template_cta')) ?></option>
+                    </select>
+                    <button type="button"
+                        @click="format()"
+                        class="text-xs text-gray-500 hover:text-brand-600 border border-gray-200 rounded px-2 py-1 bg-white transition-colors">
+                        <?= esc(lang('BlockTypes.schema_btn_format')) ?>
+                    </button>
+                    <button type="button"
+                        @click="validate()"
+                        class="text-xs border rounded px-2 py-1 transition-colors"
+                        :class="isValid ? 'text-green-700 border-green-200 bg-green-50' : 'text-red-700 border-red-200 bg-red-50'">
+                        <?= esc(lang('BlockTypes.schema_btn_validate')) ?>
+                    </button>
+                </div>
+            </div>
+            <textarea
+                name="schema_definition"
+                id="schema_definition"
+                rows="10"
+                x-model="value"
+                @blur="validate()"
+                class="<?= input_class('schema_definition') ?> resize-y font-mono text-sm"
+                :class="!isValid ? 'border-red-400 ring-1 ring-red-400' : ''"
+                required><?= esc($schemaValue) ?></textarea>
+            <p x-show="!isValid" x-text="errorMsg" x-cloak class="mt-1 text-xs text-red-600"></p>
+            <p class="mt-1 text-xs text-gray-500"><?= esc(lang('BlockTypes.field_schema_definition_help')) ?></p>
+            <?= render_field_error('schema_definition') ?>
+        </div>
 
-        <?= view('components/form/textarea', [
-            'name' => 'schema_definition',
-            'label' => 'BlockTypes.field_schema_definition',
-            'required' => true,
-            'value' => isset($item['schema_definition']) ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition']) : "{\n  \"fields\": {}\n}",
-            'placeholder' => "{\n  \"fields\": {}\n}",
-            'help' => 'BlockTypes.field_schema_definition_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/boolean', [
-            'name' => 'supports_pages',
-            'label' => 'BlockTypes.field_supports_pages',
-            'value' => $item['supports_pages'] ?? true,
-            'on_label' => 'App.yes',
-            'off_label' => 'App.no',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/boolean', [
-            'name' => 'supports_entries',
-            'label' => 'BlockTypes.field_supports_entries',
-            'value' => $item['supports_entries'] ?? true,
-            'on_label' => 'App.yes',
-            'off_label' => 'App.no',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/boolean', [
-            'name' => 'is_container',
-            'label' => 'BlockTypes.field_is_container',
-            'value' => $item['is_container'] ?? false,
-            'on_label' => 'App.yes',
-            'off_label' => 'App.no',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/boolean', [
-            'name' => 'is_active',
-            'label' => 'BlockTypes.field_is_active',
-            'value' => $item['is_active'] ?? true,
-            'on_label' => 'BlockTypes.field_is_active_on',
-            'off_label' => 'BlockTypes.field_is_active_off',
-            'help' => 'BlockTypes.field_is_active_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/text', [
-            'name' => 'sort_order',
-            'label' => 'BlockTypes.field_sort_order',
-            'required' => true,
-            'value' => $item['sort_order'] ?? '0',
-            'placeholder' => 'BlockTypes.field_sort_order_placeholder',
-            'errors' => $errors ?? []
-        ]) ?>
+        <!-- Options (collapsed) -->
+        <details class="group border border-gray-200 rounded-lg">
+            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                <span><?= esc(lang('BlockTypes.section_options')) ?></span>
+                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+            </summary>
+            <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                <?= view('components/form/textarea', [
+                    'name' => 'description',
+                    'label' => 'BlockTypes.field_description',
+                    'required' => false,
+                    'value' => $item['description'] ?? '',
+                    'placeholder' => 'BlockTypes.field_description_placeholder',
+                    'help' => 'BlockTypes.field_description_help',
+                    'rows' => 2,
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/text', [
+                    'name' => 'icon',
+                    'label' => 'BlockTypes.field_icon',
+                    'required' => false,
+                    'value' => $item['icon'] ?? '',
+                    'placeholder' => 'BlockTypes.field_icon_placeholder',
+                    'help' => 'BlockTypes.field_icon_help',
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/boolean', [
+                    'name' => 'supports_pages',
+                    'label' => 'BlockTypes.field_supports_pages',
+                    'value' => $item['supports_pages'] ?? true,
+                    'on_label' => 'App.yes',
+                    'off_label' => 'App.no',
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/boolean', [
+                    'name' => 'supports_entries',
+                    'label' => 'BlockTypes.field_supports_entries',
+                    'value' => $item['supports_entries'] ?? true,
+                    'on_label' => 'App.yes',
+                    'off_label' => 'App.no',
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/boolean', [
+                    'name' => 'is_container',
+                    'label' => 'BlockTypes.field_is_container',
+                    'value' => $item['is_container'] ?? false,
+                    'on_label' => 'App.yes',
+                    'off_label' => 'App.no',
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/boolean', [
+                    'name' => 'is_active',
+                    'label' => 'BlockTypes.field_is_active',
+                    'value' => $item['is_active'] ?? true,
+                    'on_label' => 'BlockTypes.field_is_active_on',
+                    'off_label' => 'BlockTypes.field_is_active_off',
+                    'help' => 'BlockTypes.field_is_active_help',
+                    'errors' => $errors ?? []
+                ]) ?>
+                <?= view('components/form/text', [
+                    'name' => 'sort_order',
+                    'label' => 'BlockTypes.field_sort_order',
+                    'required' => false,
+                    'value' => $item['sort_order'] ?? '0',
+                    'placeholder' => 'BlockTypes.field_sort_order_placeholder',
+                    'errors' => $errors ?? []
+                ]) ?>
+            </div>
+        </details>
 
         <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
