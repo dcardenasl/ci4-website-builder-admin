@@ -73,6 +73,10 @@ return [
     'field_scheduled_at_placeholder' => 'Seleccione fecha y hora de programación',
     'field_scheduled_at_help'    => 'Fecha y hora opcional para publicación diferida.',
 
+    'section_publishing'               => 'Publicación y Programación',
+    'section_seo_sitemap'              => 'SEO y Sitemap',
+    'section_seo_per_lang'             => 'SEO (meta etiquetas)',
+
     'translations_title'             => 'Traducciones / Contenido',
     'translation_label_default'      => 'Predeterminado',
     'translation_title_label'        => 'Título',

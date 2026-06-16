@@ -60,6 +60,9 @@ return [
     'field_enables_tags_on'             => 'Enabled',
     'field_enables_tags_off'            => 'Disabled',
 
+    'section_taxonomy'                => 'Taxonomy',
+    'section_seo_defaults'            => 'SEO Defaults',
+
     // Frequency options for changefreq
     'frequency_always'  => 'Always',
     'frequency_hourly'  => 'Hourly',

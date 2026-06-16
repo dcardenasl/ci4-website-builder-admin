@@ -79,6 +79,10 @@ return [
     'field_sitemap_changefreq_placeholder' => 'Seleccione frecuencia',
     'field_sitemap_changefreq_help' => 'Con qué frecuencia suele cambiar esta URL.',
 
+    'section_publishing'              => 'Publicación y Programación',
+    'section_seo_sitemap'             => 'SEO y Sitemap',
+    'section_seo_per_lang'            => 'SEO (meta etiquetas)',
+
     // Traducciones de la entrada
     'translation_title'             => 'Traducciones / Contenido',
     'translation_label_default'     => 'Predeterminado',

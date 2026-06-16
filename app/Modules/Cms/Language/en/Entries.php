@@ -79,6 +79,10 @@ return [
     'field_sitemap_changefreq_placeholder' => 'Select frequency',
     'field_sitemap_changefreq_help' => 'How often this URL usually changes.',
 
+    'section_publishing'             => 'Publishing & Scheduling',
+    'section_seo_sitemap'            => 'SEO & Sitemap',
+    'section_seo_per_lang'           => 'SEO (meta tags)',
+
     // Entry translations
     'translation_title'             => 'Translations / Content',
     'translation_label_default'     => 'Default',

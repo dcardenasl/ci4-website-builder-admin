@@ -73,6 +73,10 @@ return [
     'field_scheduled_at_placeholder' => 'Select schedule date and time',
     'field_scheduled_at_help'    => 'Optional date and time for deferred publication.',
 
+    'section_publishing'             => 'Publishing & Scheduling',
+    'section_seo_sitemap'            => 'SEO & Sitemap',
+    'section_seo_per_lang'           => 'SEO (meta tags)',
+
     'translations_title'             => 'Translations / Content',
     'translation_label_default'      => 'Default',
     'translation_title_label'        => 'Title',
