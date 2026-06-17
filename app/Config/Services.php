@@ -17,6 +17,8 @@ use App\Modules\Audit\Services\AuditApiService;
 use App\Modules\Audit\Services\AuditApiServiceInterface;
 use App\Modules\Auth\Services\AuthApiService;
 use App\Modules\Auth\Services\AuthApiServiceInterface;
+use App\Modules\Cms\Services\BlockInstanceApiService;
+use App\Modules\Cms\Services\BlockInstanceApiServiceInterface;
 use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\BlockTypeApiServiceInterface;
 use App\Modules\Cms\Services\CategoryApiService;
@@ -300,6 +302,14 @@ class Services extends BaseService
             return static::getSharedInstance('menuApiService');
         }
         return new MenuApiService(static::domainApiClient());
+    }
+    public static function blockInstanceApiService(bool $getShared = true): BlockInstanceApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var BlockInstanceApiService */
+            return static::getSharedInstance('blockInstanceApiService');
+        }
+        return new BlockInstanceApiService(static::domainApiClient());
     }
     public static function blockTypeApiService(bool $getShared = true): BlockTypeApiServiceInterface
     {

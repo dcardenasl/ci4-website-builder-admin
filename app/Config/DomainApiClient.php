@@ -12,7 +12,7 @@ namespace Config;
  */
 class DomainApiClient extends ApiClient
 {
-    public string $baseUrl = '';
+    public string $baseUrl = 'http://localhost:8190';
 
     public function __construct()
     {
@@ -21,7 +21,7 @@ class DomainApiClient extends ApiClient
         // `domainApiClient.*` / `DOMAIN_API_*` namespace instead.
         \CodeIgniter\Config\BaseConfig::__construct();
 
-        $baseUrl = env('domainApiClient.baseUrl') ?: env('DOMAIN_API_BASE_URL');
+        $baseUrl = env('domainApiClient.baseUrl') ?: env('DOMAIN_API_BASE_URL') ?: $this->baseUrl;
         if (! is_string($baseUrl) || trim($baseUrl) === '') {
             throw new \LogicException(
                 'Missing DOMAIN_API_BASE_URL in .env. '

@@ -52,6 +52,15 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('pages/(:segment)/publish', '\App\Modules\Cms\Controllers\PageController::publish/$1', ['as' => 'admin.cms.pages.publish', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/(:segment)/archive', '\App\Modules\Cms\Controllers\PageController::archive/$1', ['as' => 'admin.cms.pages.archive', 'filter' => 'permission:cms.pages.write']);
 
+    // Page Blocks Builder
+    $routes->get('pages/(:num)/blocks', '\App\Modules\Cms\Controllers\BlockInstanceController::index/$1', ['as' => 'admin.cms.pages.blocks', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('pages/(:num)/blocks/create', '\App\Modules\Cms\Controllers\BlockInstanceController::create/$1', ['as' => 'admin.cms.pages.blocks.create', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:num)/blocks/store', '\App\Modules\Cms\Controllers\BlockInstanceController::store/$1', ['as' => 'admin.cms.pages.blocks.store', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('pages/(:num)/blocks/(:num)/edit', '\App\Modules\Cms\Controllers\BlockInstanceController::edit/$1/$2', ['as' => 'admin.cms.pages.blocks.edit', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:num)/blocks/(:num)', '\App\Modules\Cms\Controllers\BlockInstanceController::update/$1/$2', ['as' => 'admin.cms.pages.blocks.update', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:num)/blocks/(:num)/delete', '\App\Modules\Cms\Controllers\BlockInstanceController::delete/$1/$2', ['as' => 'admin.cms.pages.blocks.delete', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('pages/(:num)/blocks/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorder/$1', ['as' => 'admin.cms.pages.blocks.reorder', 'filter' => 'permission:cms.pages.write']);
+
     // Menu
     $routes->get('menus', '\App\Modules\Cms\Controllers\MenuController::index', ['as' => 'admin.cms.menus', 'filter' => 'permission:cms.menus.read']);
     $routes->get('menus/data', '\App\Modules\Cms\Controllers\MenuController::data', ['as' => 'admin.cms.menus.data', 'filter' => 'permission:cms.menus.read']);

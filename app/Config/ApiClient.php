@@ -8,7 +8,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class ApiClient extends BaseConfig
 {
-    public string $baseUrl = '';
+    public string $baseUrl = 'http://localhost:8180';
 
     public int $timeout = 15;
 
@@ -33,7 +33,7 @@ class ApiClient extends BaseConfig
 
         // Support both CodeIgniter dotted .env keys (apiClient.*)
         // and uppercase env vars (API_*) for compatibility across deployments.
-        $baseUrl = env('apiClient.baseUrl') ?: env('API_BASE_URL');
+        $baseUrl = env('apiClient.baseUrl') ?: env('API_BASE_URL') ?: $this->baseUrl;
         if (! is_string($baseUrl) || trim($baseUrl) === '') {
             throw new \LogicException(
                 'Missing API_BASE_URL in .env. '

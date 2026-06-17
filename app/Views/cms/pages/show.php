@@ -28,6 +28,10 @@
                         <?= esc(lang('Pages.pages_archive')) ?>
                     </button>
                 </form>
+                <a href="<?= route_to('admin.cms.pages.blocks', $itemId) ?>" class="<?= esc(action_button_class('neutral')) ?>">
+                    <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+                    <span>Bloques</span>
+                </a>
                 <a href="<?= route_to('admin.cms.pages.reorder') ?>" class="<?= esc(action_button_class('neutral')) ?>">
                     <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
                     <?= esc(lang('Pages.field_sort_order') ?? lang('App.reorder')) ?>
