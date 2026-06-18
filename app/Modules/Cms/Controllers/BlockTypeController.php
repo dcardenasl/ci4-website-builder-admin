@@ -63,9 +63,11 @@ class BlockTypeController extends BaseWebController
 
     public function create(): string
     {
-        return $this->render('cms/block_types/create', [
-            'title' => lang('BlockTypes.block_types_create'),
+        $templates = $this->blockTypeService->templates();
 
+        return $this->render('cms/block_types/create', [
+            'title'     => lang('BlockTypes.block_types_create'),
+            'templates' => $templates,
         ]);
     }
 
@@ -94,10 +96,12 @@ class BlockTypeController extends BaseWebController
             return $this->withError(lang('BlockTypes.block_types_not_found'), route_to('admin.cms.block_types'));
         }
 
-        return $this->render('cms/block_types/edit', [
-            'title' => lang('BlockTypes.block_types_edit'),
-            'item'  => $this->extractData($response),
+        $templates = $this->blockTypeService->templates();
 
+        return $this->render('cms/block_types/edit', [
+            'title'     => lang('BlockTypes.block_types_edit'),
+            'item'      => $this->extractData($response),
+            'templates' => $templates,
         ]);
     }
 

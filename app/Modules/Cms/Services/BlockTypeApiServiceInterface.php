@@ -33,6 +33,6 @@ interface BlockTypeApiServiceInterface
     /** @return ApiResponse */
     public function delete(int|string $id): array;
 
-
-
+    /** @return array<int, array<string, mixed>> */
+    public function templates(): array;
 }

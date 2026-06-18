@@ -136,9 +136,12 @@ class EntryController extends BaseWebController
 
     public function checkSlug(): ResponseInterface
     {
-        $slug       = (string) ($this->request->getGet('slug') ?? '');
-        $languageId = (int) ($this->request->getGet('language_id') ?? 0);
-        $currentId  = (string) ($this->request->getGet('current_id') ?? '');
+        $slugRaw       = $this->request->getGet('slug');
+        $languageIdRaw = $this->request->getGet('language_id');
+        $currentIdRaw  = $this->request->getGet('current_id');
+        $slug          = is_scalar($slugRaw) ? (string) $slugRaw : '';
+        $languageId    = is_scalar($languageIdRaw) ? (int)    $languageIdRaw : 0;
+        $currentId     = is_scalar($currentIdRaw) ? (string) $currentIdRaw : '';
 
         if ($slug === '' || $languageId === 0) {
             return $this->response->setJSON(['available' => false]);

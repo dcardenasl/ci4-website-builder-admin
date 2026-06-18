@@ -13,9 +13,12 @@ class TranslateController extends BaseWebController
 
     public function translate(): ResponseInterface
     {
-        $text       = (string) ($this->request->getGet('text') ?? '');
-        $sourceLang = strtoupper((string) ($this->request->getGet('source_lang') ?? 'EN'));
-        $targetLang = strtoupper((string) ($this->request->getGet('target_lang') ?? ''));
+        $textRaw       = $this->request->getGet('text');
+        $sourceLangRaw = $this->request->getGet('source_lang');
+        $targetLangRaw = $this->request->getGet('target_lang');
+        $text       = is_scalar($textRaw) ? (string) $textRaw : '';
+        $sourceLang = strtoupper(is_scalar($sourceLangRaw) ? (string) $sourceLangRaw : 'EN');
+        $targetLang = strtoupper(is_scalar($targetLangRaw) ? (string) $targetLangRaw : '');
 
         if ($text === '' || $targetLang === '') {
             return $this->response->setJSON(['error' => 'Missing required parameters.'])->setStatusCode(400);

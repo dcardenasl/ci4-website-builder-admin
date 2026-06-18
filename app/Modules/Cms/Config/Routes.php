@@ -61,6 +61,10 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('pages/(:num)/blocks/(:num)/delete', '\App\Modules\Cms\Controllers\BlockInstanceController::delete/$1/$2', ['as' => 'admin.cms.pages.blocks.delete', 'filter' => 'permission:cms.pages.write']);
     $routes->post('pages/(:num)/blocks/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorder/$1', ['as' => 'admin.cms.pages.blocks.reorder', 'filter' => 'permission:cms.pages.write']);
 
+    // Child block management (for container blocks like hero_slider)
+    $routes->get('pages/(:num)/blocks/(:num)/children', '\App\Modules\Cms\Controllers\BlockInstanceController::children/$1/$2', ['as' => 'admin.cms.pages.blocks.children', 'filter' => 'permission:cms.pages.read']);
+    $routes->post('pages/(:num)/blocks/(:num)/children/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorderChildren/$1/$2', ['as' => 'admin.cms.pages.blocks.children.reorder', 'filter' => 'permission:cms.pages.write']);
+
     // Menu
     $routes->get('menus', '\App\Modules\Cms\Controllers\MenuController::index', ['as' => 'admin.cms.menus', 'filter' => 'permission:cms.menus.read']);
     $routes->get('menus/data', '\App\Modules\Cms\Controllers\MenuController::data', ['as' => 'admin.cms.menus.data', 'filter' => 'permission:cms.menus.read']);
@@ -77,6 +81,9 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('menus/(:num)/items/(:num)/edit', '\App\Modules\Cms\Controllers\MenuController::editItem/$1/$2', ['as' => 'admin.cms.menus.items.edit', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)', '\App\Modules\Cms\Controllers\MenuController::updateItem/$1/$2', ['as' => 'admin.cms.menus.items.update', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)/delete', '\App\Modules\Cms\Controllers\MenuController::deleteItem/$1/$2', ['as' => 'admin.cms.menus.items.delete', 'filter' => 'permission:cms.menus.write']);
+
+    // Block Preview (AJAX — must be before block-types to avoid segment collision)
+    $routes->post('blocks/preview', '\App\Modules\Cms\Controllers\BlockPreviewController::preview', ['as' => 'admin.cms.blocks.preview', 'filter' => 'permission:cms.pages.read']);
 
     // BlockType
     $routes->get('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::index', ['as' => 'admin.cms.block_types', 'filter' => 'permission:cms.blocks.read']);
