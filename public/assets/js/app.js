@@ -1,3 +1,4 @@
+/* global Sortable */
 /**
  * CI4 Admin Starter — Application JavaScript
  *
@@ -1895,6 +1896,287 @@ document.addEventListener('alpine:init', () => {
                 this.isValid = false;
                 this.errorMsg = e instanceof Error ? e.message : String(e);
             }
+        },
+    }));
+
+    // ---------------------------------------------------------------------------
+    // blockPreview — global modal for rendering block previews
+    // ---------------------------------------------------------------------------
+    Alpine.data('blockPreview', () => ({
+        isOpen: false,
+        loading: false,
+        error: '',
+        html: '',
+        blockKey: '',
+
+        openWithEvent(event) {
+            const { blockKey, blockConfig, blockData } = event.detail || {};
+            this.open(blockKey || '', blockConfig || {}, blockData || {});
+        },
+
+        open(blockKey, blockConfig, blockData) {
+            this.isOpen  = true;
+            this.loading = true;
+            this.error   = '';
+            this.html    = '';
+            this.blockKey = blockKey;
+
+            const previewUrl = document.querySelector('meta[name="block-preview-url"]')?.getAttribute('content') || '/admin/cms/blocks/preview';
+            const csrfInput  = document.querySelector('input[name^="ci4_"][name$="_csrf_token"]')
+                            || document.querySelector('input[name="csrf_token"]');
+            const csrfName   = csrfInput?.name  || 'csrf_token';
+            const csrfToken  = csrfInput?.value || '';
+
+            const body = new URLSearchParams({
+                block_key:    blockKey,
+                block_config: JSON.stringify(blockConfig),
+                block_data:   JSON.stringify(blockData),
+                [csrfName]:   csrfToken,
+            });
+
+            fetch(previewUrl, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body })
+                .then(r => r.json())
+                .then(json => {
+                    this.html    = json.html || '';
+                    this.loading = false;
+                })
+                .catch(err => {
+                    this.error   = 'Error al cargar el preview: ' + (err instanceof Error ? err.message : String(err));
+                    this.loading = false;
+                });
+        },
+
+        close() {
+            this.isOpen = false;
+        },
+    }));
+
+    // ---------------------------------------------------------------------------
+    // blockTypeDesigner — template gallery + structured schema editor for BlockType create/edit
+    // ---------------------------------------------------------------------------
+    Alpine.data('blockTypeDesigner', (templates = [], initialSchema = null) => ({
+        templates,
+        selectedTemplate: null,
+        customMode: false,
+        customBlockKey: '',
+        schemaFields: [],
+        configFields: [],
+        schemaJson: '{}',
+
+        get effectiveBlockKey() {
+            return this.customMode ? this.customBlockKey : (this.selectedTemplate?.key || '');
+        },
+
+        init() {
+            if (initialSchema) {
+                this.loadFromSchema(initialSchema);
+            }
+        },
+
+        selectTemplate(template) {
+            this.selectedTemplate = template;
+            this.customMode = false;
+            const schema = template.default_schema || {};
+            this.schemaFields = this._schemaToRows(schema.fields || {});
+            this.configFields = this._schemaToRows(schema.config_fields || {});
+            this.rebuildJson();
+        },
+
+        enableCustomMode() {
+            this.selectedTemplate = null;
+            this.customMode = true;
+            this.schemaFields = [];
+            this.configFields = [];
+            this.rebuildJson();
+        },
+
+        loadFromSchema(schema) {
+            this.schemaFields = this._schemaToRows(schema.fields || {});
+            this.configFields = this._schemaToRows(schema.config_fields || {});
+            this.rebuildJson();
+        },
+
+        _schemaToRows(fieldsObj) {
+            return Object.entries(fieldsObj).map(([key, def]) => ({
+                key,
+                type:     def.type    || 'string',
+                label:    def.label   || key,
+                required: def.required === true || def.required === 1,
+                options:  Array.isArray(def.options) ? def.options.join(', ') : '',
+                default:  def.default || '',
+            }));
+        },
+
+        addField(section) {
+            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '' };
+            if (section === 'config') {
+                this.configFields.push(row);
+            } else {
+                this.schemaFields.push(row);
+            }
+        },
+
+        removeField(section, index) {
+            if (section === 'config') {
+                this.configFields.splice(index, 1);
+            } else {
+                this.schemaFields.splice(index, 1);
+            }
+            this.rebuildJson();
+        },
+
+        rebuildJson() {
+            const buildObj = (rows) => {
+                const obj = {};
+                for (const row of rows) {
+                    if (!row.key) continue;
+                    const def = { type: row.type, label: row.label, required: row.required };
+                    if (row.type === 'select' && row.options) {
+                        def.options = row.options.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                    if (row.default !== '') def.default = row.default;
+                    obj[row.key] = def;
+                }
+                return obj;
+            };
+            const schema = {
+                fields:        buildObj(this.schemaFields),
+                config_fields: buildObj(this.configFields),
+            };
+            this.schemaJson = JSON.stringify(schema, null, 2);
+        },
+
+        openPreview() {
+            const sampleData   = this.selectedTemplate?.preview_sample || {};
+            const sampleConfig = this.selectedTemplate?.config_sample  || {};
+            const key = this.selectedTemplate?.key || document.getElementById('block_key')?.value || '';
+            window.dispatchEvent(new CustomEvent('block-preview-open', {
+                detail: { blockKey: key, blockConfig: sampleConfig, blockData: sampleData },
+            }));
+        },
+
+        isSelected(template) {
+            return this.selectedTemplate?.key === template.key;
+        },
+    }));
+
+    // ---------------------------------------------------------------------------
+    // schemaEditor — structured schema editor for existing BlockTypes (edit form)
+    // ---------------------------------------------------------------------------
+    Alpine.data('schemaEditor', (initialSchema = {}) => ({
+        schemaFields: [],
+        configFields: [],
+        schemaJson: '{}',
+
+        init() {
+            this.schemaFields = this._schemaToRows(initialSchema.fields || {});
+            this.configFields = this._schemaToRows(initialSchema.config_fields || {});
+            this.rebuildJson();
+        },
+
+        _schemaToRows(fieldsObj) {
+            return Object.entries(fieldsObj).map(([key, def]) => ({
+                key,
+                type:     def.type    || 'string',
+                label:    def.label   || key,
+                required: def.required === true || def.required === 1,
+                options:  Array.isArray(def.options) ? def.options.join(', ') : '',
+                default:  def.default || '',
+            }));
+        },
+
+        addField(section) {
+            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '' };
+            if (section === 'config') { this.configFields.push(row); }
+            else { this.schemaFields.push(row); }
+        },
+
+        removeField(section, index) {
+            if (section === 'config') { this.configFields.splice(index, 1); }
+            else { this.schemaFields.splice(index, 1); }
+            this.rebuildJson();
+        },
+
+        rebuildJson() {
+            const buildObj = (rows) => {
+                const obj = {};
+                for (const row of rows) {
+                    if (!row.key) continue;
+                    const def = { type: row.type, label: row.label, required: row.required };
+                    if (row.type === 'select' && row.options) {
+                        def.options = row.options.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                    if (row.default !== '') def.default = row.default;
+                    obj[row.key] = def;
+                }
+                return obj;
+            };
+            this.schemaJson = JSON.stringify({
+                fields:        buildObj(this.schemaFields),
+                config_fields: buildObj(this.configFields),
+            }, null, 2);
+        },
+    }));
+
+    // ---------------------------------------------------------------------------
+    // blockSorter — drag & drop ordering for block instance lists (SortableJS)
+    // ---------------------------------------------------------------------------
+    Alpine.data('blockSorter', (reorderUrl = '') => ({
+        saving: false,
+        saved: false,
+        dirty: false,
+        _list: null,
+
+        init() {
+            const list = this.$el.querySelector('[data-sortable-list]');
+            if (!list || typeof Sortable === 'undefined') return;
+            this._list = list;
+
+            Sortable.create(list, {
+                handle: '[data-drag-handle]',
+                animation: 150,
+                ghostClass: 'opacity-40',
+                onEnd: () => {
+                    this.dirty = true;
+                    this.saved = false;
+                },
+            });
+        },
+
+        saveOrder() {
+            const list = this._list;
+            if (!list) return;
+
+            const items = list.querySelectorAll('[data-block-id]');
+            const orders = {};
+            items.forEach((el, index) => {
+                const id = el.getAttribute('data-block-id');
+                if (id) orders[id] = index + 1;
+            });
+
+            this.saving = true;
+            this.saved  = false;
+
+            const csrfInput = document.querySelector('input[name^="ci4_"][name$="_csrf_token"]')
+                          || document.querySelector('input[name="csrf_token"]');
+            const csrfName  = csrfInput?.name  || 'csrf_token';
+            const csrfToken = csrfInput?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const body = new URLSearchParams({ [csrfName]: csrfToken });
+            Object.entries(orders).forEach(([id, pos]) => body.append(`orders[${id}]`, String(pos)));
+
+            fetch(reorderUrl, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body })
+                .then(r => r.json())
+                .then(() => {
+                    this.saving = false;
+                    this.saved  = true;
+                    this.dirty  = false;
+                    setTimeout(() => { this.saved = false; }, 2500);
+                })
+                .catch(() => {
+                    this.saving = false;
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: 'Error al guardar el orden' } }));
+                });
         },
     }));
 });

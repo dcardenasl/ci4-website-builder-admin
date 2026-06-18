@@ -22,6 +22,7 @@
 
     <?= $this->include('layouts/partials/confirm_modal') ?>
     <?= $this->include('layouts/partials/file_picker_modal') ?>
+    <?= $this->include('cms/partials/block_preview_modal') ?>
     <script <?= csp_script_nonce() ?> src="<?= asset_url('assets/js/app.js') ?>"></script>
 </body>
 </html>

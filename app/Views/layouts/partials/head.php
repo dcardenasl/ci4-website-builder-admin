@@ -15,9 +15,15 @@ $appName ??= config('App')->appName;
 // build step on a fresh clone — fall back to the pinned CDN URLs so the
 // page still works in development. Vendored copies are cache-busted via
 // `asset_url()`; CDN URLs already pin a version (audit B8.1).
-$alpineLocal = file_exists(FCPATH . 'assets/vendor/alpine.min.js');
-$lucideLocal = file_exists(FCPATH . 'assets/vendor/lucide.min.js');
+$alpineLocal  = file_exists(FCPATH . 'assets/vendor/alpine.min.js');
+$lucideLocal  = file_exists(FCPATH . 'assets/vendor/lucide.min.js');
+$sortableLocal = file_exists(FCPATH . 'assets/vendor/sortable.min.js');
 ?>
+<?php if ($sortableLocal): ?>
+<script src="<?= asset_url('assets/vendor/sortable.min.js') ?>"></script>
+<?php else: ?>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<?php endif; ?>
 <?php if ($alpineLocal): ?>
 <script defer src="<?= asset_url('assets/vendor/alpine.min.js') ?>"></script>
 <?php else: ?>

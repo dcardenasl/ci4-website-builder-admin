@@ -9,7 +9,8 @@ if (!fs.existsSync(destDir)) {
 
 const filesToCopy = [
     { src: 'node_modules/alpinejs/dist/cdn.min.js', dest: 'alpine.min.js' },
-    { src: 'node_modules/lucide/dist/umd/lucide.min.js', dest: 'lucide.min.js' }
+    { src: 'node_modules/lucide/dist/umd/lucide.min.js', dest: 'lucide.min.js' },
+    { src: 'node_modules/sortablejs/Sortable.min.js', dest: 'sortable.min.js' }
 ];
 
 filesToCopy.forEach(f => {
