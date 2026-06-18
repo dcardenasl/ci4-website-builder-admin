@@ -1,32 +1,22 @@
 <?php
-$page          = $page          ?? [];
-$blocks        = $blocks        ?? [];
-$blockTypes    = $blockTypes    ?? [];
-$publicSiteUrl = $publicSiteUrl ?? '';
-$reorderUrl    = route_to('admin.cms.pages.blocks.reorder', (string) $page['id']);
+$page        = $page        ?? [];
+$parentBlock = $parentBlock ?? [];
+$parentType  = $parentType  ?? [];
+$children    = $children    ?? [];
+$blockTypes  = $blockTypes  ?? [];
 
-// Build preview URL from first translation slug, fall back to page id path
-$previewSlug = '';
-if (! empty($page['translations']) && is_array($page['translations'])) {
-    $previewSlug = (string) ($page['translations'][0]['slug'] ?? '');
-}
-$previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
-    ? $publicSiteUrl . '/' . ltrim($previewSlug, '/')
-    : '';
+$pageId     = (string) ($page['id'] ?? '');
+$instanceId = (string) ($parentBlock['id'] ?? '');
+$reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $instanceId);
 ?>
 <div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.cms.pages.show', (string) $page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a la Página</a>
-    <div class="flex items-center gap-2">
-        <?php if ($previewUrl !== ''): ?>
-        <a href="<?= esc($previewUrl) ?>" target="_blank" rel="noopener noreferrer"
-           class="<?= esc(action_button_class('neutral')) ?>">
-            <?= ui_icon('external-link', 'h-4 w-4 mr-1') ?> Ver Página
-        </a>
-        <?php endif; ?>
-        <a href="<?= route_to('admin.cms.pages.blocks.create', (string) $page['id']) ?>" class="<?= esc(action_button_class('primary')) ?>">
-            <?= ui_icon('plus', 'h-4 w-4 mr-1') ?> Añadir Bloque
-        </a>
-    </div>
+    <a href="<?= route_to('admin.cms.pages.blocks', $pageId) ?>" class="text-sm text-brand-600 hover:text-brand-700">
+        &larr; Volver a Bloques de <?= esc($page['title'] ?? 'Página') ?>
+    </a>
+    <a href="<?= route_to('admin.cms.pages.blocks.create', $pageId) ?>?parent_instance_id=<?= esc($instanceId) ?>"
+       class="<?= esc(action_button_class('primary')) ?>">
+        <?= ui_icon('plus', 'h-4 w-4 mr-1') ?> Agregar Diapositiva
+    </a>
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-4xl"
@@ -34,11 +24,13 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
 
     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
         <div>
-            <h3 class="text-xl font-bold text-gray-900">Bloques de Contenido</h3>
-            <p class="text-sm text-gray-500 mt-1">Administra y ordena los bloques para: <strong><?= esc($page['title'] ?? '') ?></strong></p>
+            <h3 class="text-xl font-bold text-gray-900">
+                <?= ui_icon($parentType['icon'] ?? 'gallery-horizontal', 'h-5 w-5 inline-block mr-2 text-brand-600') ?>
+                Diapositivas del <?= esc($parentType['name'] ?? 'Carrusel') ?>
+            </h3>
+            <p class="text-sm text-gray-500 mt-1">Página: <strong><?= esc($page['title'] ?? '') ?></strong></p>
         </div>
         <div class="flex items-center gap-3">
-            <!-- Save status indicators -->
             <span x-show="saving" class="flex items-center gap-1.5 text-xs text-gray-500">
                 <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -52,9 +44,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
                 </svg>
                 Orden guardado
             </span>
-
-            <!-- Save order button — shown when order has changed -->
-            <?php if (! empty($blocks)): ?>
+            <?php if (!empty($children)): ?>
             <button type="button"
                     x-show="dirty && !saving"
                     x-cloak
@@ -67,20 +57,30 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
         </div>
     </div>
 
-    <?php if (empty($blocks)): ?>
+    <?php if (empty($children)): ?>
         <div class="text-center py-12 border border-dashed border-gray-200 rounded-xl">
-            <?= ui_icon('layout-template', 'h-10 w-10 text-gray-300 mx-auto mb-3') ?>
-            <p class="text-sm text-gray-500 font-medium">Esta página aún no tiene bloques de contenido.</p>
-            <p class="text-xs text-gray-400 mt-1">Haz clic en "Añadir Bloque" para comenzar a poblar el sitio.</p>
+            <?= ui_icon('image', 'h-10 w-10 text-gray-300 mx-auto mb-3') ?>
+            <p class="text-sm text-gray-500 font-medium">Este carrusel aún no tiene diapositivas.</p>
+            <p class="text-xs text-gray-400 mt-1">Haz clic en "Agregar Diapositiva" para añadir slides al carrusel.</p>
         </div>
     <?php else: ?>
         <div data-sortable-list class="space-y-3">
-            <?php foreach ($blocks as $block):
-                $blockType = $blockTypes[$block['block_id']] ?? [];
-                $isActive  = (bool) ($block['is_active'] ?? true);
-                $blockId   = (string) $block['id'];
+            <?php foreach ($children as $child):
+                $childType = $blockTypes[$child['block_id']] ?? [];
+                $isActive  = (bool) ($child['is_active'] ?? true);
+                $childId   = (string) $child['id'];
+
+                // Get first translation's heading for preview
+                $previewText = '';
+                foreach ($child['translations'] ?? [] as $t) {
+                    $bd = is_array($t['block_data'] ?? null) ? $t['block_data'] : [];
+                    if (!empty($bd['heading'])) {
+                        $previewText = $bd['heading'];
+                        break;
+                    }
+                }
                 ?>
-            <div data-block-id="<?= esc($blockId) ?>"
+            <div data-block-id="<?= esc($childId) ?>"
                  class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group">
 
                 <!-- Drag handle -->
@@ -92,15 +92,33 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
                     </svg>
                 </div>
 
-                <!-- Block type icon -->
-                <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
-                    <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-5 h-5"></i>
-                </div>
+                <!-- Slide preview image -->
+                <?php
+                $previewImg = '';
+                foreach ($child['translations'] ?? [] as $t) {
+                    $bd = is_array($t['block_data'] ?? null) ? $t['block_data'] : [];
+                    if (!empty($bd['image_url'])) {
+                        $previewImg = $bd['image_url'];
+                        break;
+                    }
+                }
+                ?>
+                <?php if ($previewImg !== ''): ?>
+                    <div class="shrink-0 w-16 h-10 rounded overflow-hidden border border-gray-200">
+                        <img src="<?= esc($previewImg) ?>" alt="" class="w-full h-full object-cover">
+                    </div>
+                <?php else: ?>
+                    <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
+                        <i data-lucide="image" class="w-5 h-5"></i>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-gray-900 text-sm truncate"><?= esc($blockType['name'] ?? 'Bloque') ?></h4>
-                    <p class="text-xs text-gray-500 font-mono mt-0.5"><?= esc($blockType['block_key'] ?? '') ?></p>
+                    <h4 class="font-semibold text-gray-900 text-sm truncate">
+                        <?= esc($previewText !== '' ? $previewText : 'Diapositiva sin título') ?>
+                    </h4>
+                    <p class="text-xs text-gray-500 font-mono mt-0.5">slide <?= esc((string) ($child['sort_order'] ?? '')) ?></p>
                 </div>
 
                 <!-- Status badge -->
@@ -114,19 +132,13 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2 shrink-0">
-                    <?php if (!empty($blockType['is_container'])): ?>
-                        <a href="<?= route_to('admin.cms.pages.blocks.children', (string) $page['id'], $blockId) ?>"
-                           class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
-                            <?= ui_icon('layers', 'h-3.5 w-3.5 mr-1') ?> Slides
-                        </a>
-                    <?php endif; ?>
-                    <a href="<?= route_to('admin.cms.pages.blocks.edit', (string) $page['id'], $blockId) ?>"
+                    <a href="<?= route_to('admin.cms.pages.blocks.edit', $pageId, $childId) ?>"
                        class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
                         Editar
                     </a>
                     <form method="post"
-                          action="<?= route_to('admin.cms.pages.blocks.delete', (string) $page['id'], $blockId) ?>"
-                          onsubmit="return confirm('¿Seguro que deseas eliminar este bloque?');">
+                          action="<?= route_to('admin.cms.pages.blocks.delete', $pageId, $childId) ?>"
+                          onsubmit="return confirm('¿Seguro que deseas eliminar esta diapositiva?');">
                         <?= csrf_field() ?>
                         <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
                             Eliminar
@@ -141,7 +153,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/>
             </svg>
-            Arrastra los bloques para reordenarlos y luego haz clic en <strong class="font-medium text-gray-500">Guardar Orden</strong> para confirmar.
+            Arrastra los slides para reordenarlos y luego haz clic en <strong class="font-medium text-gray-500">Guardar Orden</strong> para confirmar.
         </p>
     <?php endif; ?>
 </section>

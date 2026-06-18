@@ -1,4 +1,22 @@
-<?php $item = $item ?? []; ?>
+<?php
+$item       = $item ?? [];
+$templates  = $templates ?? [];
+$schema     = is_array($item['schema_definition'] ?? []) ? ($item['schema_definition'] ?? []) : json_decode((string)($item['schema_definition'] ?? '{}'), true);
+$schemaJs   = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$isSystem   = in_array($item['block_key'] ?? '', ['rich_text', 'image', 'cta', 'hero_banner', 'container'], true);
+$previewUrl = route_to('admin.cms.blocks.preview');
+$currentKey = $item['block_key'] ?? '';
+$configSample = [];
+foreach ($templates as $tpl) {
+    if ($tpl['key'] === $currentKey) {
+        $configSample = $tpl['config_sample'] ?? [];
+        break;
+    }
+}
+$configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+?>
+<meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
+
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
     <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
@@ -10,159 +28,114 @@
     </form>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('BlockTypes.block_types_edit')) ?></h3>
+<div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>)" class="max-w-4xl">
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
 
-    <form method="post" action="<?= route_to('admin.cms.block_types.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
-        <?= csrf_field() ?>
-
-        <?php $isSystem = in_array($item['block_key'] ?? '', ['rich_text', 'image', 'cta'], true); ?>
-
-        <?= view('components/form/text', [
-            'name' => 'block_key',
-            'label' => 'BlockTypes.field_block_key',
-            'required' => true,
-            'value' => $item['block_key'] ?? '',
-            'readonly' => $isSystem,
-            'placeholder' => 'BlockTypes.field_block_key_placeholder',
-            'help' => 'BlockTypes.field_block_key_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/text', [
-            'name' => 'name',
-            'label' => 'BlockTypes.field_name',
-            'required' => true,
-            'value' => $item['name'] ?? '',
-            'placeholder' => 'BlockTypes.field_name_placeholder',
-            'help' => 'BlockTypes.field_name_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <?= view('components/form/text', [
-            'name' => 'category',
-            'label' => 'BlockTypes.field_category',
-            'required' => true,
-            'value' => $item['category'] ?? '',
-            'placeholder' => 'BlockTypes.field_category_placeholder',
-            'help' => 'BlockTypes.field_category_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
-        <!-- JSON Schema Editor -->
-        <?php
-            $schemaValue = isset($item['schema_definition'])
-                ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition'])
-                : "{\n  \"fields\": {}\n}";
-            $schemaValueJs = json_encode($schemaValue);
-        ?>
-        <div x-data="jsonEditor(<?= $schemaValueJs ?>)">
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-sm font-medium text-gray-700">
-                    <?= esc(lang('BlockTypes.field_schema_definition')) ?>
-                    <span class="text-red-500" aria-hidden="true">*</span>
-                </label>
-                <div class="flex items-center gap-2">
-                    <button type="button"
-                        @click="format()"
-                        class="text-xs text-gray-500 hover:text-brand-600 border border-gray-200 rounded px-2 py-1 bg-white transition-colors">
-                        <?= esc(lang('BlockTypes.schema_btn_format')) ?>
-                    </button>
-                    <button type="button"
-                        @click="validate()"
-                        class="text-xs border rounded px-2 py-1 transition-colors"
-                        :class="isValid ? 'text-green-700 border-green-200 bg-green-50' : 'text-red-700 border-red-200 bg-red-50'">
-                        <?= esc(lang('BlockTypes.schema_btn_validate')) ?>
-                    </button>
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('BlockTypes.block_types_edit')) ?></h3>
+                <div class="flex items-center gap-2 mt-1">
+                    <code class="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded"><?= esc($item['block_key'] ?? '') ?></code>
+                    <?php if ($isSystem): ?>
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Diseño del sistema</span>
+                    <?php endif; ?>
                 </div>
             </div>
-            <textarea
-                name="schema_definition"
-                id="schema_definition"
-                rows="10"
-                x-model="value"
-                @blur="validate()"
-                class="<?= input_class('schema_definition') ?> resize-y font-mono text-sm"
-                :class="!isValid ? 'border-red-400 ring-1 ring-red-400' : ''"
-                required><?= esc($schemaValue) ?></textarea>
-            <p x-show="!isValid" x-text="errorMsg" x-cloak class="mt-1 text-xs text-red-600"></p>
-            <p class="mt-1 text-xs text-gray-500"><?= esc(lang('BlockTypes.field_schema_definition_help')) ?></p>
-            <?= render_field_error('schema_definition') ?>
+            <button type="button"
+                @click="window.dispatchEvent(new CustomEvent('block-preview-open', { detail: { blockKey: '<?= esc($currentKey) ?>', blockConfig: <?= esc($configSampleJs, 'attr') ?>, blockData: {} } }))"
+                class="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 border border-brand-200 hover:border-brand-400 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                </svg>
+                Vista previa
+            </button>
         </div>
 
-        <!-- Options (collapsed) -->
-        <details class="group border border-gray-200 rounded-lg">
-            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
-                <span><?= esc(lang('BlockTypes.section_options')) ?></span>
-                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-            </summary>
-            <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
-                <?= view('components/form/textarea', [
-                    'name' => 'description',
-                    'label' => 'BlockTypes.field_description',
-                    'required' => false,
-                    'value' => $item['description'] ?? '',
-                    'placeholder' => 'BlockTypes.field_description_placeholder',
-                    'help' => 'BlockTypes.field_description_help',
-                    'rows' => 2,
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/text', [
-                    'name' => 'icon',
-                    'label' => 'BlockTypes.field_icon',
-                    'required' => false,
-                    'value' => $item['icon'] ?? '',
-                    'placeholder' => 'BlockTypes.field_icon_placeholder',
-                    'help' => 'BlockTypes.field_icon_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'supports_pages',
-                    'label' => 'BlockTypes.field_supports_pages',
-                    'value' => $item['supports_pages'] ?? true,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'supports_entries',
-                    'label' => 'BlockTypes.field_supports_entries',
-                    'value' => $item['supports_entries'] ?? true,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'is_container',
-                    'label' => 'BlockTypes.field_is_container',
-                    'value' => $item['is_container'] ?? false,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'is_active',
-                    'label' => 'BlockTypes.field_is_active',
-                    'value' => $item['is_active'] ?? true,
-                    'on_label' => 'BlockTypes.field_is_active_on',
-                    'off_label' => 'BlockTypes.field_is_active_off',
-                    'help' => 'BlockTypes.field_is_active_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/text', [
-                    'name' => 'sort_order',
-                    'label' => 'BlockTypes.field_sort_order',
-                    'required' => false,
-                    'value' => $item['sort_order'] ?? '0',
-                    'placeholder' => 'BlockTypes.field_sort_order_placeholder',
-                    'errors' => $errors ?? []
-                ]) ?>
+        <form method="post" action="<?= route_to('admin.cms.block_types.update', (string) ($item['id'] ?? '')) ?>"
+              class="space-y-6"
+              @submit="rebuildJson()">
+            <?= csrf_field() ?>
+
+            <!-- block_key: readonly si es sistema, editable si es custom -->
+            <?= view('components/form/text', [
+                'name'        => 'block_key',
+                'label'       => 'BlockTypes.field_block_key',
+                'required'    => true,
+                'value'       => $item['block_key'] ?? '',
+                'readonly'    => $isSystem,
+                'placeholder' => 'BlockTypes.field_block_key_placeholder',
+                'help'        => 'BlockTypes.field_block_key_help',
+                'errors'      => $errors ?? [],
+            ]) ?>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <?= view('components/form/text', ['name' => 'name',     'label' => 'BlockTypes.field_name',     'required' => true, 'value' => $item['name'] ?? '',     'errors' => $errors ?? []]) ?>
+                <?= view('components/form/text', ['name' => 'category', 'label' => 'BlockTypes.field_category', 'required' => true, 'value' => $item['category'] ?? '', 'errors' => $errors ?? []]) ?>
             </div>
-        </details>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-            <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
-        </div>
-    </form>
-</section>
+            <!-- Schema JSON oculto (se construye en rebuildJson) -->
+            <input type="hidden" name="schema_definition" :value="schemaJson">
+
+            <!-- Campos de Contenido -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Campos de Contenido</h4>
+                        <p class="text-xs text-gray-500">Datos traducibles que el editor llena por idioma.</p>
+                    </div>
+                    <button type="button" @click="addField('content')" class="text-xs btn-secondary py-1 px-3">+ Añadir campo</button>
+                </div>
+                <div class="space-y-2">
+                    <template x-for="(field, index) in schemaFields" :key="index">
+                        <?= view('cms/block_types/partials/schema_field_row', ['section' => 'content']) ?>
+                    </template>
+                    <p x-show="schemaFields.length === 0" class="text-xs text-gray-400 italic py-2 text-center border border-dashed border-gray-200 rounded-lg">
+                        Sin campos de contenido.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Campos de Configuración -->
+            <div class="border-t border-gray-100 pt-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Campos de Configuración</h4>
+                        <p class="text-xs text-gray-500">Ajustes no traducibles (CSS, variante, etc.).</p>
+                    </div>
+                    <button type="button" @click="addField('config')" class="text-xs btn-secondary py-1 px-3">+ Añadir campo</button>
+                </div>
+                <div class="space-y-2">
+                    <template x-for="(field, index) in configFields" :key="index">
+                        <?= view('cms/block_types/partials/schema_field_row', ['section' => 'config']) ?>
+                    </template>
+                    <p x-show="configFields.length === 0" class="text-xs text-gray-400 italic py-2 text-center border border-dashed border-gray-200 rounded-lg">
+                        Sin campos de configuración.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Opciones avanzadas -->
+            <details class="group border border-gray-200 rounded-lg">
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                    <span>Opciones avanzadas</span>
+                    <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                    <?= view('components/form/textarea', ['name' => 'description',      'label' => 'BlockTypes.field_description',      'required' => false, 'value' => $item['description'] ?? '',                            'rows' => 2,  'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/text', ['name' => 'icon',             'label' => 'BlockTypes.field_icon',             'required' => false, 'value' => $item['icon'] ?? '',                                              'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'supports_pages',   'label' => 'BlockTypes.field_supports_pages',   'value' => $item['supports_pages']   ?? true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'supports_entries', 'label' => 'BlockTypes.field_supports_entries', 'value' => $item['supports_entries'] ?? true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'is_container',     'label' => 'BlockTypes.field_is_container',     'value' => $item['is_container']     ?? false, 'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'is_active',        'label' => 'BlockTypes.field_is_active',        'value' => $item['is_active']        ?? true,  'on_label' => 'BlockTypes.field_is_active_on', 'off_label' => 'BlockTypes.field_is_active_off', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/text', ['name' => 'sort_order',       'label' => 'BlockTypes.field_sort_order',       'required' => false, 'value' => (string)($item['sort_order'] ?? '0'),                              'errors' => $errors ?? []]) ?>
+                </div>
+            </details>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
+                <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
+            </div>
+        </form>
+    </section>
+</div>

@@ -1,166 +1,201 @@
+<?php
+$templates    = $templates ?? [];
+$templatesJs  = json_encode($templates, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$previewUrl   = route_to('admin.cms.blocks.preview');
+?>
+<meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
+
 <div class="mb-4">
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('BlockTypes.block_types_create')) ?></h3>
+<div x-data="blockTypeDesigner(<?= esc($templatesJs, 'attr') ?>)" class="space-y-6 max-w-4xl">
 
-    <form method="post" action="<?= route_to('admin.cms.block_types.store') ?>" class="mt-4 space-y-4">
-        <?= csrf_field() ?>
+    <!-- ── PASO 1: Galería de diseños ──────────────────────────────────────── -->
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-1">Paso 1 — Elige un diseño</h3>
+        <p class="text-sm text-gray-500 mb-5">Cada diseño determina la plantilla visual que se usará para renderizar este bloque en el sitio público.</p>
 
-        <?= view('components/form/text', [
-            'name' => 'block_key',
-            'label' => 'BlockTypes.field_block_key',
-            'required' => true,
-            'value' => $item['block_key'] ?? '',
-            'placeholder' => 'BlockTypes.field_block_key_placeholder',
-            'help' => 'BlockTypes.field_block_key_help',
-            'errors' => $errors ?? []
-        ]) ?>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <template x-for="tpl in templates" :key="tpl.key">
+                <button type="button"
+                    @click="selectTemplate(tpl)"
+                    :class="isSelected(tpl)
+                        ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-400'
+                        : 'border-gray-200 bg-white hover:border-brand-400 hover:bg-brand-50/30'"
+                    class="relative flex flex-col items-center gap-2 p-4 border-2 rounded-xl text-center cursor-pointer transition-all">
 
-        <?= view('components/form/text', [
-            'name' => 'name',
-            'label' => 'BlockTypes.field_name',
-            'required' => true,
-            'value' => $item['name'] ?? '',
-            'placeholder' => 'BlockTypes.field_name_placeholder',
-            'help' => 'BlockTypes.field_name_help',
-            'errors' => $errors ?? []
-        ]) ?>
+                    <!-- Icono Lucide -->
+                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500"
+                         :class="isSelected(tpl) ? 'bg-brand-100 text-brand-600' : ''">
+                        <i :data-lucide="tpl.icon" class="w-5 h-5"></i>
+                    </div>
 
-        <?= view('components/form/text', [
-            'name' => 'category',
-            'label' => 'BlockTypes.field_category',
-            'required' => true,
-            'value' => $item['category'] ?? '',
-            'placeholder' => 'BlockTypes.field_category_placeholder',
-            'help' => 'BlockTypes.field_category_help',
-            'errors' => $errors ?? []
-        ]) ?>
+                    <span class="text-xs font-semibold text-gray-800 leading-tight" x-text="tpl.name"></span>
+                    <code class="text-[10px] text-gray-400 font-mono" x-text="tpl.key"></code>
 
-        <!-- JSON Schema Editor with validate + format + templates -->
-        <?php
-            $schemaValue = isset($item['schema_definition'])
-                ? (is_array($item['schema_definition']) ? json_encode($item['schema_definition'], JSON_PRETTY_PRINT) : $item['schema_definition'])
-                : "{\n  \"fields\": {}\n}";
-            $schemaValueJs = json_encode($schemaValue);
-        ?>
-        <div x-data="jsonEditor(<?= $schemaValueJs ?>)">
-            <div class="flex items-center justify-between mb-1">
+                    <!-- Check seleccionado -->
+                    <span x-show="isSelected(tpl)"
+                          class="absolute top-2 right-2 w-4 h-4 bg-brand-600 rounded-full flex items-center justify-center">
+                        <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 0 1.473 1.473 0 0 1 0 2.104L6.555 12.64 1.127 7.212a1.473 1.473 0 0 1 0-2.104 1.474 1.474 0 0 1 2.104 0l3.324 3.324 6.93-6.94z"/>
+                        </svg>
+                    </span>
+                </button>
+            </template>
+
+            <!-- Opción personalizada -->
+            <button type="button"
+                @click="enableCustomMode()"
+                :class="customMode
+                    ? 'border-gray-600 bg-gray-50 ring-2 ring-gray-400'
+                    : 'border-dashed border-gray-300 hover:border-gray-500 hover:bg-gray-50'"
+                class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl text-center cursor-pointer transition-all">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-600">Personalizado</span>
+                <code class="text-[10px] text-gray-400 font-mono">custom</code>
+            </button>
+        </div>
+
+        <!-- Descripción del diseño seleccionado -->
+        <div x-show="selectedTemplate" x-cloak class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-sm text-brand-800 flex items-start gap-2">
+            <svg class="w-4 h-4 mt-0.5 shrink-0 text-brand-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            </svg>
+            <div>
+                <span class="font-medium" x-text="selectedTemplate?.name"></span>
+                <span class="mx-1">·</span>
+                <span x-text="selectedTemplate?.description"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PASO 2: Configuración (visible tras selección) ──────────────────── -->
+    <section x-show="selectedTemplate || customMode" x-cloak class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-base font-semibold text-gray-900">Paso 2 — Configura el bloque</h3>
+                <p class="text-sm text-gray-500 mt-0.5">Personaliza el nombre y los campos que tendrá este tipo de bloque.</p>
+            </div>
+            <button type="button"
+                @click="openPreview()"
+                class="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 border border-brand-200 hover:border-brand-400 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                </svg>
+                Vista previa
+            </button>
+        </div>
+
+        <form method="post" action="<?= route_to('admin.cms.block_types.store') ?>" class="space-y-6"
+              @submit="rebuildJson()">
+            <?= csrf_field() ?>
+
+            <!-- Single hidden input that always carries the effective block_key -->
+            <input type="hidden" name="block_key" :value="effectiveBlockKey">
+
+            <!-- Visible text input only in custom mode — no name attr, bound to customBlockKey -->
+            <div x-show="customMode" x-cloak class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">
-                    <?= esc(lang('BlockTypes.field_schema_definition')) ?>
-                    <span class="text-red-500" aria-hidden="true">*</span>
+                    <?= esc(lang('BlockTypes.field_block_key')) ?> <span class="text-red-500">*</span>
                 </label>
-                <div class="flex items-center gap-2">
-                    <!-- Template presets -->
-                    <select class="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 bg-white"
-                        @change="if ($event.target.value) { value = $event.target.value; validate(); $event.target.value = ''; }">
-                        <option value=""><?= esc(lang('BlockTypes.schema_template_placeholder')) ?></option>
-                        <option value='{"fields":{"title":{"type":"string","label":"Title","required":true},"body":{"type":"richtext","label":"Body","required":false}}}'><?= esc(lang('BlockTypes.schema_template_text')) ?></option>
-                        <option value='{"fields":{"title":{"type":"string","label":"Title","required":true},"subtitle":{"type":"string","label":"Subtitle","required":false},"image":{"type":"file","label":"Image","required":false},"cta_label":{"type":"string","label":"CTA Label","required":false},"cta_url":{"type":"string","label":"CTA URL","required":false}}}'><?= esc(lang('BlockTypes.schema_template_hero')) ?></option>
-                        <option value='{"fields":{"image":{"type":"file","label":"Image","required":true},"alt":{"type":"string","label":"Alt Text","required":false},"caption":{"type":"string","label":"Caption","required":false}}}'><?= esc(lang('BlockTypes.schema_template_image')) ?></option>
-                        <option value='{"fields":{"label":{"type":"string","label":"Button Label","required":true},"url":{"type":"string","label":"URL","required":true},"style":{"type":"select","label":"Style","options":["primary","secondary","outline"],"required":false}}}'><?= esc(lang('BlockTypes.schema_template_cta')) ?></option>
-                    </select>
-                    <button type="button"
-                        @click="format()"
-                        class="text-xs text-gray-500 hover:text-brand-600 border border-gray-200 rounded px-2 py-1 bg-white transition-colors">
-                        <?= esc(lang('BlockTypes.schema_btn_format')) ?>
-                    </button>
-                    <button type="button"
-                        @click="validate()"
-                        class="text-xs border rounded px-2 py-1 transition-colors"
-                        :class="isValid ? 'text-green-700 border-green-200 bg-green-50' : 'text-red-700 border-red-200 bg-red-50'">
-                        <?= esc(lang('BlockTypes.schema_btn_validate')) ?>
-                    </button>
+                <input type="text"
+                       x-model="customBlockKey"
+                       placeholder="<?= esc(lang('BlockTypes.field_block_key_placeholder')) ?>"
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm font-mono">
+                <p class="text-xs text-gray-500"><?= esc(lang('BlockTypes.field_block_key_help')) ?></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <?= view('components/form/text', [
+                    'name' => 'name',
+                    'label' => 'BlockTypes.field_name',
+                    'required' => true,
+                    'value' => '',
+                    'placeholder' => 'BlockTypes.field_name_placeholder',
+                    'errors' => $errors ?? []
+                ]) ?>
+
+                <?= view('components/form/text', [
+                    'name' => 'category',
+                    'label' => 'BlockTypes.field_category',
+                    'required' => true,
+                    'value' => '',
+                    'placeholder' => 'BlockTypes.field_category_placeholder',
+                    'errors' => $errors ?? []
+                ]) ?>
+            </div>
+
+            <!-- Schema: hidden JSON + editor estructurado -->
+            <input type="hidden" name="schema_definition" :value="schemaJson">
+
+            <!-- Campos de Contenido -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Campos de Contenido</h4>
+                        <p class="text-xs text-gray-500">Datos traducibles que el editor llena por idioma.</p>
+                    </div>
+                    <button type="button" @click="addField('content')" class="text-xs btn-secondary py-1 px-3">+ Añadir campo</button>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="(field, index) in schemaFields" :key="index">
+                        <?= view('cms/block_types/partials/schema_field_row', ['section' => 'content']) ?>
+                    </template>
+                    <p x-show="schemaFields.length === 0" class="text-xs text-gray-400 italic py-2 text-center border border-dashed border-gray-200 rounded-lg">
+                        Sin campos de contenido. Este bloque no tiene texto editable.
+                    </p>
                 </div>
             </div>
-            <textarea
-                name="schema_definition"
-                id="schema_definition"
-                rows="10"
-                x-model="value"
-                @blur="validate()"
-                class="<?= input_class('schema_definition') ?> resize-y font-mono text-sm"
-                :class="!isValid ? 'border-red-400 ring-1 ring-red-400' : ''"
-                required><?= esc($schemaValue) ?></textarea>
-            <p x-show="!isValid" x-text="errorMsg" x-cloak class="mt-1 text-xs text-red-600"></p>
-            <p class="mt-1 text-xs text-gray-500"><?= esc(lang('BlockTypes.field_schema_definition_help')) ?></p>
-            <?= render_field_error('schema_definition') ?>
-        </div>
 
-        <!-- Options (collapsed) -->
-        <details class="group border border-gray-200 rounded-lg">
-            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
-                <span><?= esc(lang('BlockTypes.section_options')) ?></span>
-                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-            </summary>
-            <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
-                <?= view('components/form/textarea', [
-                    'name' => 'description',
-                    'label' => 'BlockTypes.field_description',
-                    'required' => false,
-                    'value' => $item['description'] ?? '',
-                    'placeholder' => 'BlockTypes.field_description_placeholder',
-                    'help' => 'BlockTypes.field_description_help',
-                    'rows' => 2,
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/text', [
-                    'name' => 'icon',
-                    'label' => 'BlockTypes.field_icon',
-                    'required' => false,
-                    'value' => $item['icon'] ?? '',
-                    'placeholder' => 'BlockTypes.field_icon_placeholder',
-                    'help' => 'BlockTypes.field_icon_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'supports_pages',
-                    'label' => 'BlockTypes.field_supports_pages',
-                    'value' => $item['supports_pages'] ?? true,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'supports_entries',
-                    'label' => 'BlockTypes.field_supports_entries',
-                    'value' => $item['supports_entries'] ?? true,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'is_container',
-                    'label' => 'BlockTypes.field_is_container',
-                    'value' => $item['is_container'] ?? false,
-                    'on_label' => 'App.yes',
-                    'off_label' => 'App.no',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/boolean', [
-                    'name' => 'is_active',
-                    'label' => 'BlockTypes.field_is_active',
-                    'value' => $item['is_active'] ?? true,
-                    'on_label' => 'BlockTypes.field_is_active_on',
-                    'off_label' => 'BlockTypes.field_is_active_off',
-                    'help' => 'BlockTypes.field_is_active_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/text', [
-                    'name' => 'sort_order',
-                    'label' => 'BlockTypes.field_sort_order',
-                    'required' => false,
-                    'value' => $item['sort_order'] ?? '0',
-                    'placeholder' => 'BlockTypes.field_sort_order_placeholder',
-                    'errors' => $errors ?? []
-                ]) ?>
+            <!-- Campos de Configuración -->
+            <div class="border-t border-gray-100 pt-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Campos de Configuración</h4>
+                        <p class="text-xs text-gray-500">Ajustes estructurales no traducibles (CSS, variante de layout, etc.).</p>
+                    </div>
+                    <button type="button" @click="addField('config')" class="text-xs btn-secondary py-1 px-3">+ Añadir campo</button>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="(field, index) in configFields" :key="index">
+                        <?= view('cms/block_types/partials/schema_field_row', ['section' => 'config']) ?>
+                    </template>
+                    <p x-show="configFields.length === 0" class="text-xs text-gray-400 italic py-2 text-center border border-dashed border-gray-200 rounded-lg">
+                        Sin campos de configuración.
+                    </p>
+                </div>
             </div>
-        </details>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
-            <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
-        </div>
-    </form>
-</section>
+            <!-- Opciones avanzadas -->
+            <details class="group border border-gray-200 rounded-lg">
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                    <span>Opciones avanzadas</span>
+                    <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                    <?= view('components/form/textarea', ['name' => 'description', 'label' => 'BlockTypes.field_description', 'required' => false, 'value' => '', 'rows' => 2, 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/text', ['name' => 'icon',        'label' => 'BlockTypes.field_icon',        'required' => false, 'value' => '', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'supports_pages',   'label' => 'BlockTypes.field_supports_pages',   'value' => true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'supports_entries', 'label' => 'BlockTypes.field_supports_entries', 'value' => true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'is_container', 'label' => 'BlockTypes.field_is_container', 'value' => false, 'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/boolean', ['name' => 'is_active', 'label' => 'BlockTypes.field_is_active', 'value' => true, 'on_label' => 'BlockTypes.field_is_active_on', 'off_label' => 'BlockTypes.field_is_active_off', 'errors' => $errors ?? []]) ?>
+                    <?= view('components/form/text', ['name' => 'sort_order', 'label' => 'BlockTypes.field_sort_order', 'required' => false, 'value' => '0', 'errors' => $errors ?? []]) ?>
+                </div>
+            </details>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
+                <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
+            </div>
+        </form>
+    </section>
+
+</div>

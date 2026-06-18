@@ -38,28 +38,19 @@ class BlockInstanceController extends BaseWebController
         $page = $this->extractData($pageResponse);
 
         $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, 'page'));
-        $blocks = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
+        $allBlocks = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
 
-        // Fetch block types to display their names/descriptions (cached for 1 hour)
-        $types = cache()->get('cms_block_types_list');
-        if ($types === null) {
-            $typesResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
-            $types = $typesResponse['ok'] ? $this->extractItems($typesResponse) : [];
-            if (! empty($types)) {
-                cache()->save('cms_block_types_list', $types, 3600);
-            }
-        }
-        
-        $typesIndexed = [];
-        foreach ($types as $t) {
-            $typesIndexed[$t['id']] = $t;
-        }
+        // Only show top-level blocks in the page editor (children managed via their parent's UI)
+        $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
+
+        $typesIndexed = $this->fetchBlockTypes();
 
         return $this->render('cms/pages/blocks/index', [
-            'title'      => 'Bloques de ' . ($page['title'] ?? 'Página'),
-            'page'       => $page,
-            'blocks'     => $blocks,
-            'blockTypes' => $typesIndexed
+            'title'         => 'Bloques de ' . ($page['title'] ?? 'Página'),
+            'page'          => $page,
+            'blocks'        => $blocks,
+            'blockTypes'    => $typesIndexed,
+            'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
         ]);
     }
 
@@ -96,11 +87,17 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
+        $parentIdRaw      = $this->request->getGet('parent_instance_id');
+        $parentInstanceId = ($parentIdRaw !== null && is_scalar($parentIdRaw) && (int) $parentIdRaw > 0)
+            ? (int) $parentIdRaw
+            : null;
+
         return $this->render('cms/pages/blocks/create', [
-            'title'     => 'Añadir Bloque',
-            'page'      => $page,
-            'blockTypes'=> $types,
-            'languages' => $languages
+            'title'            => $parentInstanceId !== null ? 'Añadir Diapositiva' : 'Añadir Bloque',
+            'page'             => $page,
+            'blockTypes'       => $types,
+            'languages'        => $languages,
+            'parentInstanceId' => $parentInstanceId,
         ]);
     }
 
@@ -111,14 +108,19 @@ class BlockInstanceController extends BaseWebController
             return $deny;
         }
 
-        $blockId = $this->request->getPost('block_id');
-        $sortOrder = (int) $this->request->getPost('sort_order');
-        $isActive = (bool) $this->request->getPost('is_active');
-        
-        // Parse config and translations
-        $blockConfigRaw = $this->request->getPost('block_config') ?? '';
+        $blockIdRaw    = $this->request->getPost('block_id');
+        $sortOrderRaw  = $this->request->getPost('sort_order');
+        $isActiveRaw   = $this->request->getPost('is_active');
+        $blockId       = is_scalar($blockIdRaw) ? (int) $blockIdRaw : 0;
+        $sortOrder     = is_scalar($sortOrderRaw) ? (int) $sortOrderRaw : 0;
+        $isActive      = ! empty($isActiveRaw);
+
+        // Parse config: accepts array (schema-driven form inputs) or JSON string (legacy)
+        $blockConfigRaw = $this->request->getPost('block_config');
         $blockConfig = [];
-        if (is_string($blockConfigRaw) && trim($blockConfigRaw) !== '') {
+        if (is_array($blockConfigRaw)) {
+            $blockConfig = $blockConfigRaw;
+        } elseif (is_string($blockConfigRaw) && trim($blockConfigRaw) !== '') {
             $decoded = json_decode($blockConfigRaw, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $blockConfig = $decoded;
@@ -126,14 +128,14 @@ class BlockInstanceController extends BaseWebController
         }
 
         // Process translations: normalize to drop blank translation rows
-        $translationsRaw = $this->request->getPost('translations') ?? [];
+        $translationsRaw = $this->request->getPost('translations');
         $translations = [];
-        foreach ($translationsRaw as $t) {
+        foreach (is_array($translationsRaw) ? $translationsRaw : [] as $t) {
             $langId = (int) ($t['language_id'] ?? 0);
             if ($langId <= 0) {
                 continue;
             }
-            
+
             $blockData = $t['block_data'] ?? [];
             // Check if there is actual content in the block data
             $hasData = false;
@@ -157,20 +159,30 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
+        $parentIdRaw       = $this->request->getPost('parent_instance_id');
+        $parentInstanceId  = ($parentIdRaw !== null && is_scalar($parentIdRaw) && (int) $parentIdRaw > 0)
+            ? (int) $parentIdRaw
+            : null;
+
         $payload = [
-            'block_id'     => (int) $blockId,
-            'owner_type'   => 'page',
-            'owner_id'     => (int) $ownerId,
-            'sort_order'   => $sortOrder,
-            'is_active'    => $isActive,
-            'block_config' => $blockConfig,
-            'translations' => $translations
+            'block_id'           => $blockId,
+            'owner_type'         => 'page',
+            'owner_id'           => (int) $ownerId,
+            'parent_instance_id' => $parentInstanceId,
+            'sort_order'         => $sortOrder,
+            'is_active'          => $isActive,
+            'block_config'       => $blockConfig,
+            'translations'       => $translations,
         ];
 
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->create($ownerId, 'page', $payload));
 
         if (!$response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al crear el bloque'));
+        }
+
+        if ($parentInstanceId !== null) {
+            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva añadida con éxito.');
         }
 
         return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque añadido con éxito.');
@@ -232,27 +244,36 @@ class BlockInstanceController extends BaseWebController
             return $deny;
         }
 
-        $blockId = $this->request->getPost('block_id');
-        $sortOrder = (int) $this->request->getPost('sort_order');
-        $isActive = (bool) $this->request->getPost('is_active');
-        
-        $blockConfigRaw = $this->request->getPost('block_config') ?? '';
+        $blockIdRaw   = $this->request->getPost('block_id');
+        $sortOrderRaw = $this->request->getPost('sort_order');
+        $isActiveRaw  = $this->request->getPost('is_active');
+        $blockId      = is_scalar($blockIdRaw) ? (int) $blockIdRaw : 0;
+        $sortOrder    = is_scalar($sortOrderRaw) ? (int) $sortOrderRaw : 0;
+        $isActive     = ! empty($isActiveRaw);
+
+        // Preserve parent_instance_id from the existing block record
+        $existingBlock    = $this->extractData($this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id)));
+        $parentInstanceId = !empty($existingBlock['parent_instance_id']) ? (int) $existingBlock['parent_instance_id'] : null;
+
+        $blockConfigRaw = $this->request->getPost('block_config');
         $blockConfig = [];
-        if (is_string($blockConfigRaw) && trim($blockConfigRaw) !== '') {
+        if (is_array($blockConfigRaw)) {
+            $blockConfig = $blockConfigRaw;
+        } elseif (is_string($blockConfigRaw) && trim($blockConfigRaw) !== '') {
             $decoded = json_decode($blockConfigRaw, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $blockConfig = $decoded;
             }
         }
 
-        $translationsRaw = $this->request->getPost('translations') ?? [];
+        $translationsRaw = $this->request->getPost('translations');
         $translations = [];
-        foreach ($translationsRaw as $t) {
+        foreach (is_array($translationsRaw) ? $translationsRaw : [] as $t) {
             $langId = (int) ($t['language_id'] ?? 0);
             if ($langId <= 0) {
                 continue;
             }
-            
+
             $blockData = $t['block_data'] ?? [];
             $hasData = false;
             foreach ($blockData as $val) {
@@ -276,19 +297,24 @@ class BlockInstanceController extends BaseWebController
         }
 
         $payload = [
-            'block_id'     => (int) $blockId,
-            'owner_type'   => 'page',
-            'owner_id'     => (int) $ownerId,
-            'sort_order'   => $sortOrder,
-            'is_active'    => $isActive,
-            'block_config' => $blockConfig,
-            'translations' => $translations
+            'block_id'           => $blockId,
+            'owner_type'         => 'page',
+            'owner_id'           => (int) $ownerId,
+            'parent_instance_id' => $parentInstanceId,
+            'sort_order'         => $sortOrder,
+            'is_active'          => $isActive,
+            'block_config'       => $blockConfig,
+            'translations'       => $translations,
         ];
 
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, $payload));
 
         if (!$response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al actualizar el bloque'));
+        }
+
+        if ($parentInstanceId !== null) {
+            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva actualizada con éxito.');
         }
 
         return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque actualizado con éxito.');
@@ -301,31 +327,41 @@ class BlockInstanceController extends BaseWebController
             return $deny;
         }
 
+        // Fetch before deleting so we know where to redirect
+        $blockResponse    = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
+        $block            = $blockResponse['ok'] ? $this->extractData($blockResponse) : [];
+        $parentInstanceId = !empty($block['parent_instance_id']) ? (int) $block['parent_instance_id'] : null;
+
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->delete($ownerId, 'page', $id));
 
         if (!$response['ok']) {
+            if ($parentInstanceId !== null) {
+                return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('error', 'Error al borrar la diapositiva.');
+            }
             return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('error', 'Error al borrar el bloque.');
+        }
+
+        if ($parentInstanceId !== null) {
+            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva eliminada con éxito.');
         }
 
         return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque eliminado con éxito.');
     }
 
-    public function reorder(string $ownerId): RedirectResponse
+    public function reorder(string $ownerId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
     {
         $deny = $this->requireWrite();
         if ($deny !== null) {
             return $deny;
         }
 
-        $orders = $this->request->getPost('orders') ?? [];
-        
+        $ordersRaw = $this->request->getPost('orders');
+        $orders    = is_array($ordersRaw) ? $ordersRaw : [];
+
         foreach ($orders as $id => $order) {
             $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
             if ($blockResponse['ok']) {
                 $block = $this->extractData($blockResponse);
-                $block['sort_order'] = (int) $order;
-                
-                // Keep the exact same payload structure, just update the sort_order
                 $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, [
                     'block_id'     => (int) $block['block_id'],
                     'owner_type'   => 'page',
@@ -338,6 +374,100 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
+        if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+            return $this->response
+                ->setContentType('application/json')
+                ->setBody(json_encode(['ok' => true]) ?: '{}');
+        }
+
         return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Orden de bloques actualizado.');
+    }
+
+    public function reorderChildren(string $ownerId, string $instanceId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
+    {
+        $deny = $this->requireWrite();
+        if ($deny !== null) {
+            return $deny;
+        }
+
+        $ordersRaw = $this->request->getPost('orders');
+        $orders    = is_array($ordersRaw) ? $ordersRaw : [];
+
+        foreach ($orders as $id => $order) {
+            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
+            if ($blockResponse['ok']) {
+                $block = $this->extractData($blockResponse);
+                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, [
+                    'block_id'           => (int) $block['block_id'],
+                    'owner_type'         => 'page',
+                    'owner_id'           => (int) $ownerId,
+                    'parent_instance_id' => (int) $instanceId,
+                    'sort_order'         => (int) $order,
+                    'is_active'          => (bool) ($block['is_active'] ?? true),
+                    'block_config'       => $block['block_config'] ?? [],
+                    'translations'       => $block['translations'] ?? [],
+                ]));
+            }
+        }
+
+        if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+            return $this->response
+                ->setContentType('application/json')
+                ->setBody(json_encode(['ok' => true]) ?: '{}');
+        }
+
+        return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, $instanceId))->with('success', 'Orden actualizado.');
+    }
+
+    public function children(string $ownerId, string $instanceId): string|RedirectResponse
+    {
+        $pageResponse = $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
+        if (!$pageResponse['ok']) {
+            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('Pages.pages_not_found'));
+        }
+        $page = $this->extractData($pageResponse);
+
+        $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $instanceId));
+        if (!$parentResponse['ok']) {
+            return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('error', 'Bloque contenedor no encontrado.');
+        }
+        $parentBlock = $this->extractData($parentResponse);
+
+        // Fetch all page blocks and filter to just children of this instance
+        $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, 'page'));
+        $allBlocks      = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
+        $children       = array_values(array_filter($allBlocks, static fn (array $b) => (int) ($b['parent_instance_id'] ?? 0) === (int) $instanceId));
+
+        $typesIndexed = $this->fetchBlockTypes();
+
+        $parentType = $typesIndexed[$parentBlock['block_id']] ?? [];
+
+        return $this->render('cms/pages/blocks/children/index', [
+            'title'        => 'Diapositivas de ' . ($parentType['name'] ?? 'Bloque'),
+            'page'         => $page,
+            'parentBlock'  => $parentBlock,
+            'parentType'   => $parentType,
+            'children'     => $children,
+            'blockTypes'   => $typesIndexed,
+        ]);
+    }
+
+    /** @return array<int, array<string, mixed>> keyed by block type id */
+    private function fetchBlockTypes(): array
+    {
+        $types = cache()->get('cms_block_types_list');
+        if ($types === null) {
+            $typesResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
+            $types = $typesResponse['ok'] ? $this->extractItems($typesResponse) : [];
+            if (! empty($types)) {
+                cache()->save('cms_block_types_list', $types, 3600);
+            }
+        }
+
+        $indexed = [];
+        foreach ((array) $types as $t) {
+            $indexed[(int) $t['id']] = $t;
+        }
+        return $indexed;
     }
 }
