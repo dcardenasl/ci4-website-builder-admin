@@ -5,6 +5,7 @@
  * @var array       $items         Flat list of items or array of groups
  * @var string      $saveUrl       Endpoint to POST the final sorted array
  * @var string|null $displayKey    Attribute name to show in lists (default: 'name')
+ * @var string[]    $subtitleKeys  Optional extra field keys shown as a subtitle row (default: [])
  * @var bool|null   $grouped       Whether the list is grouped by category/parent (default: false)
  * @var string|null $groupTitleKey Attribute name for the group's title (default: 'name')
  * @var string|null $itemsKey      Attribute name for the child array inside groups (default: 'items')
@@ -16,6 +17,7 @@
 helper('form');
 
 $displayKey    = $displayKey ?? 'name';
+$subtitleKeys  = $subtitleKeys ?? [];
 $grouped       = $grouped ?? false;
 $groupTitleKey = $groupTitleKey ?? 'name';
 $itemsKey      = $itemsKey ?? 'items';
@@ -182,14 +184,28 @@ if ($grouped) {
                             style="cursor: grab;"
                             :class="draggingGroupIndex === gIdx && draggingItemIndex === iIdx ? 'opacity-40 border-dashed border-brand-400' : ''">
                             
-                            <div class="flex items-center gap-3 flex-1">
+                            <div class="flex items-center gap-3 flex-1 min-w-0">
                                 <!-- Drag handler visual handle -->
-                                <div class="text-gray-400 hover:text-gray-600 transition-colors" style="cursor: grab;">
+                                <div class="text-gray-400 hover:text-gray-600 transition-colors shrink-0" style="cursor: grab;">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h.01M16 9h.01M8 15h.01M16 15h.01M12 9h.01M12 15h.01M12 12h.01M8 12h.01M16 12h.01" />
                                     </svg>
                                 </div>
-                                <div class="text-sm font-semibold text-gray-800" x-text="item['<?= esc($displayKey, 'js') ?>']"></div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-gray-800 truncate" x-text="item['<?= esc($displayKey, 'js') ?>'] || '#' + item.id"></div>
+                                    <?php if (!empty($subtitleKeys)): ?>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                                        <?php foreach ($subtitleKeys as $i => $key): ?>
+                                        <template x-if="item['<?= esc($key, 'js') ?>']">
+                                            <span class="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                                                <span class="font-medium text-gray-400 uppercase tracking-wide text-[10px]"><?= esc($key) ?></span>
+                                                <span class="text-gray-600 font-mono" x-text="item['<?= esc($key, 'js') ?>']"></span>
+                                            </span>
+                                        </template>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
                             <div class="flex items-center gap-2">

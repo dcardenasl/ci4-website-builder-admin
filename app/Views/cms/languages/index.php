@@ -112,6 +112,9 @@
                                 <div class="flex items-center gap-2">
                                     <a :href="showUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.view') ?></a>
                                     <a :href="editUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
+                                    <button type="button" class="<?= esc(action_button_class('danger')) ?>"
+                                        @click="$store.confirm.show('<?= esc(lang('App.confirm_delete')) ?>', () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.languages'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
+                                    ><?= lang('App.delete') ?></button>
                                     <?php if (has_permission('cms.languages.write')): ?>
                                     <template x-if="!row.is_default">
                                         <form method="post" :action="'<?= site_url('admin/cms/languages') ?>/' + row.id + '/set-default'">

@@ -133,7 +133,8 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->delete($id));
 
         if (! $response['ok']) {
-            return $this->failApi($response, lang('Collections.collections_delete_failed'), route_to('admin.cms.collections'), false);
+            $message = $this->firstMessage($response, lang('Collections.collections_delete_failed'));
+            return $this->withError($message, route_to('admin.cms.collections'));
         }
 
         return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_delete_success'));
