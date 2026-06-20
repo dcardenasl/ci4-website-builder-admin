@@ -10,6 +10,8 @@ use App\Libraries\BffApiClient;
 use App\Libraries\BffApiClientInterface;
 use App\Libraries\DomainApiClient;
 use App\Libraries\DomainApiClientInterface;
+use App\Libraries\WebApiClient;
+use App\Libraries\WebApiClientInterface;
 use App\Libraries\PermissionsSessionRefresher;
 use App\Modules\ApiKeys\Services\ApiKeyApiService;
 use App\Modules\ApiKeys\Services\ApiKeyApiServiceInterface;
@@ -223,6 +225,26 @@ class Services extends BaseService
         }
 
         return new HealthApiService(static::bffApiClient(), config('BffApiClient')->healthPaths);
+    }
+
+    public static function webApiClient(bool $getShared = true): WebApiClientInterface
+    {
+        if ($getShared) {
+            /** @var WebApiClientInterface */
+            return static::getSharedInstance('webApiClient');
+        }
+
+        return new WebApiClient(config('WebApiClient'));
+    }
+
+    public static function webHealthApiService(bool $getShared = true): HealthApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var HealthApiService */
+            return static::getSharedInstance('webHealthApiService');
+        }
+
+        return new HealthApiService(static::webApiClient(), config('WebApiClient')->healthPaths);
     }
 
     public static function profileApiService(bool $getShared = true): ProfileApiServiceInterface
