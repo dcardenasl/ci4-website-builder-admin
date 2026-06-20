@@ -41,4 +41,5 @@ return [
     'service_hub'    => 'Hub API',
     'service_domain' => 'Dominio',
     'service_bff'    => 'Gateway BFF',
+    'service_web'    => 'Sitio Web Público',
 ];

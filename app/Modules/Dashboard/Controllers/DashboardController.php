@@ -112,6 +112,11 @@ class DashboardController extends BaseWebController
             ? $this->fetchCachedHealth('dashboard_health_bff', service('bffHealthApiService'), $cache)
             : null;
 
+        $webUrl    = config('WebApiClient')->baseUrl;
+        $webHealth = ($webUrl !== '')
+            ? $this->fetchCachedHealth('dashboard_health_web', service('webHealthApiService'), $cache)
+            : null;
+
         $healthServices = [
             ['name' => lang('Dashboard.service_hub'), 'health' => $hubHealth],
         ];
@@ -120,6 +125,9 @@ class DashboardController extends BaseWebController
         }
         if ($bffHealth !== null) {
             $healthServices[] = ['name' => lang('Dashboard.service_bff'), 'health' => $bffHealth];
+        }
+        if ($webHealth !== null) {
+            $healthServices[] = ['name' => lang('Dashboard.service_web'), 'health' => $webHealth];
         }
 
         return $this->response->setBody(view('dashboard/partials/widget_health', [

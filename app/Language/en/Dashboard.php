@@ -41,4 +41,5 @@ return [
     'service_hub'    => 'Hub API',
     'service_domain' => 'Domain App',
     'service_bff'    => 'BFF Gateway',
+    'service_web'    => 'Public Website',
 ];

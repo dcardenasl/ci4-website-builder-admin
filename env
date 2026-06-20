@@ -128,6 +128,13 @@ DOMAIN_API_BASE_URL = http://localhost:8190
 # bffApiClient.appName = 'BFF Gateway'
 # bffApiClient.logRequests = false
 
+# Public Website health monitoring (ci4-website-builder-web).
+# Leave webApiClient.baseUrl empty (default) to disable web health card on dashboard.
+# Set it to the web app base URL to show its health status alongside hub/domain.
+#
+# webApiClient.baseUrl = http://localhost:8186
+# webApiClient.logRequests = false
+
 # Maximum file upload size in bytes (applies to frontend validation + server rules)
 # FILE_MAX_SIZE = 10485760
 
