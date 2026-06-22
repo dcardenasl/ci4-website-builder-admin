@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Block composition hierarchy enforcement** — validate and filter child blocks based on parent's `allowed_children` schema, with fallback to slide_banner nesting for backward compatibility
 - **Translation endpoint** — new `TranslateController` with MyMemory API integration for content translation between languages
 - **Slug availability validation** — `checkSlug()` method to validate page slug uniqueness across languages
 
