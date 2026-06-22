@@ -1,13 +1,28 @@
-<?php $item = $item ?? []; ?>
+<?php
+$item        = $item        ?? [];
+$focusLangId = $focusLangId ?? 0;
+$itemIdStr   = (string) ($item['id'] ?? '');
+?>
 <div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.cms.pages') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-    <form method="post" action="<?= route_to('admin.cms.pages.delete', (string) ($item['id'] ?? '')) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
+    <a href="<?= $itemIdStr !== '' ? route_to('admin.cms.pages.show', $itemIdStr) : route_to('admin.cms.pages') ?>"
+       class="text-sm text-brand-600 hover:text-brand-700">
+        &larr; <?= esc(lang('Pages.pages_details')) ?>
+    </a>
+    <div class="flex items-center gap-2">
+        <?php if ($itemIdStr !== ''): ?>
+        <a href="<?= route_to('admin.cms.pages.blocks', $itemIdStr) ?>" class="<?= esc(action_button_class('neutral')) ?>">
+            <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('Pages.manage_blocks')) ?>
+        </a>
+        <?php endif; ?>
+        <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemIdStr) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($item['title'] ?? $item['slug'] ?? null), 'js') ?>');">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+    </div>
 </div>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
@@ -44,69 +59,73 @@ if (!empty($languages)) {
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a1 1 0 112 0v5a1 1 0 11-2 0V5zm1 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
             <div>
-                <span class="font-bold">Attention:</span> Translation issues detected for: <span class="font-semibold"><?= implode(', ', $issueDetails) ?></span>.
+                <span class="font-bold"><?= esc(lang('Pages.alert_translation_attention')) ?>:</span> Translation issues detected for: <span class="font-semibold"><?= implode(', ', $issueDetails) ?></span>.
             </div>
         </div>
     <?php endif; ?>
 
-    <form method="post" action="<?= route_to('admin.cms.pages.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
+    <form method="post" action="<?= route_to('admin.cms.pages.update', $itemIdStr) ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>
 
-        <?= view('components/form/select', [
-        'name' => 'page_type',
-        'label' => 'Pages.field_page_type',
-        'required' => true,
-        'placeholder' => 'Pages.field_page_type_placeholder',
-        'help' => 'Pages.field_page_type_help',
-        'options' => [
-            'home' => lang('Pages.page_type_home'),
-            'generic' => lang('Pages.page_type_generic'),
-            'contact' => lang('Pages.page_type_contact'),
-            'privacy' => lang('Pages.page_type_privacy'),
-            'terms' => lang('Pages.page_type_terms'),
-            '404' => lang('Pages.page_type_404'),
-            '500' => lang('Pages.page_type_500'),
-            'maintenance' => lang('Pages.page_type_maintenance')
-        ],
-        'value' => $item['page_type'] ?? 'generic',
-        'errors' => $errors ?? []
-    ]) ?>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <?= view('components/form/select', [
+            'name' => 'page_type',
+            'label' => 'Pages.field_page_type',
+            'required' => true,
+            'placeholder' => 'Pages.field_page_type_placeholder',
+            'help' => 'Pages.field_page_type_help',
+            'options' => [
+                'home' => lang('Pages.page_type_home'),
+                'generic' => lang('Pages.page_type_generic'),
+                'contact' => lang('Pages.page_type_contact'),
+                'privacy' => lang('Pages.page_type_privacy'),
+                'terms' => lang('Pages.page_type_terms'),
+                '404' => lang('Pages.page_type_404'),
+                '500' => lang('Pages.page_type_500'),
+                'maintenance' => lang('Pages.page_type_maintenance')
+            ],
+            'value' => $item['page_type'] ?? 'generic',
+            'errors' => $errors ?? []
+        ]) ?>
 
-        <?= view('components/form/select', [
-        'name' => 'status',
-        'label' => 'Pages.field_status',
-        'required' => true,
-        'placeholder' => 'Pages.field_status_placeholder',
-        'help' => 'Pages.field_status_help',
-        'options' => [
-            'draft' => lang('Pages.status_draft'),
-            'published' => lang('Pages.status_published'),
-            'archived' => lang('Pages.status_archived')
-        ],
-        'value' => $item['status'] ?? 'draft',
-        'errors' => $errors ?? []
-    ]) ?>
+            <?= view('components/form/select', [
+            'name' => 'status',
+            'label' => 'Pages.field_status',
+            'required' => true,
+            'placeholder' => 'Pages.field_status_placeholder',
+            'help' => 'Pages.field_status_help',
+            'options' => [
+                'draft' => lang('Pages.status_draft'),
+                'published' => lang('Pages.status_published'),
+                'archived' => lang('Pages.status_archived')
+            ],
+            'value' => $item['status'] ?? 'draft',
+            'errors' => $errors ?? []
+        ]) ?>
+        </div>
 
-        <?= view('components/form/relation', [
-        'name' => 'parent_id',
-        'label' => 'Pages.field_parent_id',
-        'required' => false,
-        'options' => $pages ?? [],
-        'placeholder' => 'Pages.field_parent_id_placeholder',
-        'help' => 'Pages.field_parent_id_help',
-        'value' => $item['parent_id'] ?? '',
-        'errors' => $errors ?? []
-    ]) ?>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <?= view('components/form/relation', [
+            'name' => 'parent_id',
+            'label' => 'Pages.field_parent_id',
+            'required' => false,
+            'options' => $pages ?? [],
+            'placeholder' => 'Pages.field_parent_id_placeholder',
+            'help' => 'Pages.field_parent_id_help',
+            'value' => $item['parent_id'] ?? '',
+            'errors' => $errors ?? []
+        ]) ?>
 
-        <?= view('components/form/number', [
-        'name' => 'sort_order',
-        'label' => 'Pages.field_sort_order',
-        'required' => false,
-        'value' => $item['sort_order'] ?? 0,
-        'placeholder' => 'Pages.field_sort_order_placeholder',
-        'help' => 'Pages.field_sort_order_help',
-        'errors' => $errors ?? []
-    ]) ?>
+            <?= view('components/form/number', [
+            'name' => 'sort_order',
+            'label' => 'Pages.field_sort_order',
+            'required' => false,
+            'value' => $item['sort_order'] ?? 0,
+            'placeholder' => 'Pages.field_sort_order_placeholder',
+            'help' => 'Pages.field_sort_order_help',
+            'errors' => $errors ?? []
+        ]) ?>
+        </div>
 
         <!-- Publishing & Scheduling -->
         <details class="group border border-gray-200 rounded-lg" <?= (!empty($item['published_at']) || !empty($item['scheduled_at'])) ? 'open' : '' ?>>
@@ -216,7 +235,8 @@ if (!empty($languages)) {
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="text-sm font-semibold text-gray-800 mb-3"><?= esc(lang('Pages.translations_title')) ?></h4>
 
-                <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                <?php $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId; ?>
+                <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                     <!-- Tab bar + translate-all button -->
                     <div class="flex items-center justify-between border-b border-gray-200 mb-4">
                         <div class="flex gap-0.5" role="tablist">
@@ -378,7 +398,8 @@ if (!empty($languages)) {
 
         <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-            <a href="<?= route_to('admin.cms.pages') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
+            <a href="<?= $itemIdStr !== '' ? route_to('admin.cms.pages.show', $itemIdStr) : route_to('admin.cms.pages') ?>"
+               class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
         </div>
     </form>
 </section>

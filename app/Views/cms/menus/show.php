@@ -19,7 +19,7 @@
                     <div class="flex items-center gap-2">
                         <a href="<?= route_to('admin.cms.menus.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
-                        <form method="post" action="<?= route_to('admin.cms.menus.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
+                        <form method="post" action="<?= route_to('admin.cms.menus.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($menu['name'] ?? $menu['menu_key'] ?? null), 'js') ?>');">
                             <?= csrf_field() ?>
                             <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                                 <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
@@ -147,7 +147,7 @@
                                         </div>
                                         <div class="flex items-center gap-2">
                                                 <a href="<?= route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_edit')) ?></a>
-                                                <form method="post" action="<?= route_to('admin.cms.menus.items.delete', $item['menu_id'], $item['id']) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');" class="inline">
+                                                <form method="post" action="<?= route_to('admin.cms.menus.items.delete', $item['menu_id'], $item['id']) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($label ?: ($item['translations'][0]['label'] ?? null)), 'js') ?>');" class="inline">
                                                     <?= csrf_field() ?>
                                                     <button type="submit" class="px-2.5 py-1 text-xs border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_delete')) ?></button>
                                                 </form>

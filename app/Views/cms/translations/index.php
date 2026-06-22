@@ -11,24 +11,27 @@
     </div>
 
     <!-- Stats / Progress Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($stats as $stat): ?>
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 space-y-4 flex flex-col justify-between">
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-4 min-h-[32px]">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="inline-flex items-center justify-center font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs border border-blue-200">
+                    <div class="flex items-center justify-between gap-2 min-h-[32px]">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="inline-flex items-center justify-center font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs border border-blue-200 shrink-0">
                                 <?= esc(strtoupper($stat['code'])) ?>
                             </span>
-                            <span class="text-sm font-semibold text-gray-700"><?= esc($stat['name']) ?></span>
-                            <?php if ($stat['is_default']): ?>
-                                <span class="inline-flex items-center rounded-full px-1.5 py-0.2 font-semibold bg-green-50 text-green-700 border border-green-200 whitespace-nowrap" style="font-size: 0.65rem; line-height: 1rem;">
-                                    <?= esc(lang('CmsLanguages.field_is_default')) ?>
-                                </span>
-                            <?php endif; ?>
+                            <span class="text-sm font-semibold text-gray-700 truncate"><?= esc($stat['name']) ?></span>
                         </div>
-                        <span class="text-lg font-bold text-gray-900"><?= esc($stat['percentage']) ?>%</span>
+                        <span class="text-lg font-bold text-gray-900 shrink-0"><?= esc($stat['percentage']) ?>%</span>
                     </div>
+
+                    <?php if ($stat['is_default']): ?>
+                        <div class="flex">
+                            <span class="inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold bg-green-50 text-green-700 border border-green-200 text-[10px] leading-3 whitespace-nowrap">
+                                <?= esc(lang('CmsLanguages.field_is_default')) ?>
+                            </span>
+                        </div>
+                    <?php endif; ?>
                     
                     <!-- Progress bar -->
                     <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">

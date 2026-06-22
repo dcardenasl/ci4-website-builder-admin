@@ -29,9 +29,13 @@
         'submitLabel' => lang('App.search'),
     ]) ?>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Iam.roles_loading') ?>
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'Iam.roles_loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'shield',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">

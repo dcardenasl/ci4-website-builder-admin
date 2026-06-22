@@ -37,9 +37,13 @@ $parentIdJs    = json_encode($parentInstanceId);
 
 <div class="mb-4">
     <?php if ($parentInstanceId !== null): ?>
-        <a href="javascript:history.back()" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a <?= esc($ownerChildLabel) ?>s</a>
+        <a href="javascript:history.back()" class="text-sm text-brand-600 hover:text-brand-700">
+            &larr; <?= esc(lang('Pages.block_back_to_blocks')) ?> — <?= esc($ownerChildLabel) ?>
+        </a>
     <?php else: ?>
-        <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Bloques de <?= esc($ownerLabel) ?></a>
+        <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">
+            &larr; <?= esc(lang('Pages.block_back_to_blocks')) ?> — <?= esc($ownerLabel) ?>
+        </a>
     <?php endif; ?>
 </div>
 
@@ -47,8 +51,8 @@ $parentIdJs    = json_encode($parentInstanceId);
 
     <!-- ── PASO 1: Selector visual de tipo de bloque ─────────────────────── -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-1">Paso 1 — Elige el bloque</h3>
-        <p class="text-sm text-gray-500 mb-5">Selecciona el tipo de bloque que quieres añadir a esta <?= esc(strtolower($ownerLabel)) ?>.</p>
+        <h3 class="text-base font-semibold text-gray-900 mb-1"><?= esc(lang('Pages.block_step1_title')) ?></h3>
+        <p class="text-sm text-gray-500 mb-5"><?= esc(lang('Pages.block_step1_desc')) ?></p>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <template x-for="bt in blockTypes" :key="bt.id">
@@ -90,8 +94,8 @@ $parentIdJs    = json_encode($parentInstanceId);
 
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-base font-semibold text-gray-900">Paso 2 — Define el contenido</h3>
-                <p class="text-sm text-gray-500 mt-0.5">El diseño ya está definido. Solo rellena el contenido para cada idioma.</p>
+                <h3 class="text-base font-semibold text-gray-900"><?= esc(lang('Pages.block_step2_title')) ?></h3>
+                <p class="text-sm text-gray-500 mt-0.5"><?= esc(lang('Pages.block_step2_desc')) ?></p>
             </div>
             <button type="button"
                 @click="openPreview()"
@@ -100,7 +104,7 @@ $parentIdJs    = json_encode($parentInstanceId);
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178Z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                 </svg>
-                Vista previa
+                <?= esc(lang('Pages.block_preview_button')) ?>
             </button>
         </div>
 
@@ -114,15 +118,15 @@ $parentIdJs    = json_encode($parentInstanceId);
             <!-- Opciones globales -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-gray-100">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Orden <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"><?= esc(lang('Pages.block_sort_order_label')) ?> <span class="text-red-500">*</span></label>
                     <input type="number" name="sort_order" value="0" min="0"
                            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-                    <p class="text-xs text-gray-400 mt-1">Posición en la página.</p>
+                    <p class="text-xs text-gray-400 mt-1"><?= esc(lang('Pages.block_sort_order_help')) ?></p>
                 </div>
                 <div class="flex items-center pt-6">
                     <input type="checkbox" name="is_active" id="is_active" value="1" checked
                            class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                    <label for="is_active" class="ml-2 block text-sm font-medium text-gray-700">Activo / Visible</label>
+                    <label for="is_active" class="ml-2 block text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></label>
                 </div>
             </div>
 
@@ -369,12 +373,12 @@ $parentIdJs    = json_encode($parentInstanceId);
             <!-- Sin campos de contenido (bloque estructural como contenedor) -->
             <div x-show="selectedBlockType && Object.keys(contentFields).length === 0" x-cloak
                  class="p-4 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 text-center">
-                Este bloque no tiene campos de contenido (es un bloque estructural).
+                <?= esc(lang('Pages.block_structural_note')) ?>
             </div>
 
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
-                <button type="submit" class="<?= esc(action_button_class('primary')) ?>">Añadir Bloque</button>
-                <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="<?= esc(action_button_class()) ?>">Cancelar</a>
+                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('Pages.block_add_button')) ?></button>
+                <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
             </div>
         </form>
     </section>

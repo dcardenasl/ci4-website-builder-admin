@@ -94,4 +94,72 @@ return [
     'translation_meta_description_label' => 'SEO meta description',
     'translation_meta_description_placeholder' => 'Enter SEO description',
     'translation_meta_description_help' => 'Optional description used by search engines.',
+
+    // Bloques (generales)
+    'manage_blocks'               => 'Manage Blocks',
+    'blocks_section_title'        => 'Content Blocks',
+    'blocks_section_desc'         => 'Manage and order the blocks for this page.',
+    'blocks_add'                  => 'Add Block',
+    'blocks_empty_title'          => 'No content blocks yet.',
+    'blocks_empty_desc'           => 'Click "Add Block" to start building this page.',
+    'blocks_drag_hint'            => 'Drag to reorder, then click Save Order to confirm.',
+    'blocks_saving'               => 'Saving…',
+    'blocks_saved'                => 'Order saved',
+    'blocks_save_order'           => 'Save Order',
+    'blocks_status_active'        => 'Active',
+    'blocks_status_inactive'      => 'Inactive',
+    'blocks_action_edit'          => 'Edit',
+    'blocks_action_delete'        => 'Delete',
+    'blocks_action_slides'        => 'Slides',
+    'blocks_view_page'            => 'View Page',
+    'blocks_delete_confirm'       => 'Are you sure you want to delete this block?',
+    'blocks_reorder_success'      => 'Block order updated.',
+
+    // Crear / Editar un bloque
+    'block_add_title'             => 'Add Block',
+    'block_edit_title'            => 'Edit Block',
+    'block_update_button'         => 'Update Block',
+    'block_add_button'            => 'Add Block',
+    'block_back_to_blocks'        => 'Back to Blocks',
+    'block_config_section'        => 'Configuration',
+    'block_config_desc'           => 'Structural settings for this block (not translated).',
+    'block_content_section'       => 'Content',
+    'block_content_desc'          => 'Text and images per language.',
+    'block_sort_order_label'      => 'Order',
+    'block_sort_order_help'       => 'Position of this block on the page.',
+    'block_active_label'          => 'Active / Visible',
+    'block_preview_button'        => 'Preview',
+    'block_structural_note'       => 'This block has no content fields (structural container).',
+
+    // Wizard crear bloque
+    'block_step1_title'           => 'Step 1 — Choose block type',
+    'block_step1_desc'            => 'Select the block type you want to add.',
+    'block_step2_title'           => 'Step 2 — Define the content',
+    'block_step2_desc'            => 'Fill in the content for each language.',
+
+    // Owner / child labels
+    'owner_label_page'            => 'Page',
+    'owner_label_entry'           => 'Entry',
+    'child_label_slide'           => 'Slide',
+    'child_label_subblock'        => 'Sub-block',
+
+    // Mensajes de controlador
+    'block_added_success'         => 'Block added successfully.',
+    'block_updated_success'       => 'Block updated successfully.',
+    'block_deleted_success'       => 'Block deleted successfully.',
+    'block_not_found'             => 'Block not found.',
+    'block_add_failed'            => 'Error creating the block.',
+    'block_update_failed'         => 'Error updating the block.',
+    'block_delete_failed'         => 'Error deleting the block.',
+    'child_added_success'         => '{0} added successfully.',
+    'child_updated_success'       => '{0} updated successfully.',
+    'child_deleted_success'       => '{0} deleted successfully.',
+    'child_reorder_success'       => 'Order updated.',
+    'owner_not_found_entry'       => 'Entry not found.',
+
+    // Alert en edit.php
+    'alert_translation_attention' => 'Attention',
+
+    // Acceso rápido a traducir
+    'edit_in_language'            => 'Edit in :lang',
 ];

@@ -16,7 +16,7 @@
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.settings.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
-                <form method="post" action="<?= route_to('admin.cms.settings.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
+                <form method="post" action="<?= route_to('admin.cms.settings.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($setting['setting_key'] ?? $setting['setting_group'] ?? null), 'js') ?>');">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                         <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

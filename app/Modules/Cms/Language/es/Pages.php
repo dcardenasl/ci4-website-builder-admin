@@ -94,4 +94,72 @@ return [
     'translation_meta_description_label' => 'Meta descripción SEO',
     'translation_meta_description_placeholder' => 'Ingrese la descripción SEO',
     'translation_meta_description_help' => 'Descripción opcional usada por buscadores.',
+
+    // Bloques (generales)
+    'manage_blocks'               => 'Administrar Bloques',
+    'blocks_section_title'        => 'Bloques de Contenido',
+    'blocks_section_desc'         => 'Administra y ordena los bloques de esta página.',
+    'blocks_add'                  => 'Añadir Bloque',
+    'blocks_empty_title'          => 'Esta página aún no tiene bloques de contenido.',
+    'blocks_empty_desc'           => 'Haz clic en "Añadir Bloque" para comenzar a poblar la página.',
+    'blocks_drag_hint'            => 'Arrastra para reordenar y haz clic en Guardar Orden para confirmar.',
+    'blocks_saving'               => 'Guardando…',
+    'blocks_saved'                => 'Orden guardado',
+    'blocks_save_order'           => 'Guardar Orden',
+    'blocks_status_active'        => 'Activo',
+    'blocks_status_inactive'      => 'Inactivo',
+    'blocks_action_edit'          => 'Editar',
+    'blocks_action_delete'        => 'Eliminar',
+    'blocks_action_slides'        => 'Slides',
+    'blocks_view_page'            => 'Ver Página',
+    'blocks_delete_confirm'       => '¿Seguro que deseas eliminar este bloque?',
+    'blocks_reorder_success'      => 'Orden de bloques actualizado.',
+
+    // Crear / Editar un bloque
+    'block_add_title'             => 'Añadir Bloque',
+    'block_edit_title'            => 'Editar Bloque',
+    'block_update_button'         => 'Actualizar Bloque',
+    'block_add_button'            => 'Añadir Bloque',
+    'block_back_to_blocks'        => 'Volver a Bloques',
+    'block_config_section'        => 'Configuración',
+    'block_config_desc'           => 'Ajustes estructurales del bloque (no se traducen).',
+    'block_content_section'       => 'Contenido',
+    'block_content_desc'          => 'Texto e imágenes por idioma.',
+    'block_sort_order_label'      => 'Orden',
+    'block_sort_order_help'       => 'Posición del bloque en la página.',
+    'block_active_label'          => 'Activo / Visible',
+    'block_preview_button'        => 'Vista previa',
+    'block_structural_note'       => 'Este bloque no tiene campos de contenido (bloque estructural).',
+
+    // Wizard crear bloque
+    'block_step1_title'           => 'Paso 1 — Elige el bloque',
+    'block_step1_desc'            => 'Selecciona el tipo de bloque que quieres añadir.',
+    'block_step2_title'           => 'Paso 2 — Define el contenido',
+    'block_step2_desc'            => 'Rellena el contenido para cada idioma.',
+
+    // Owner / child labels
+    'owner_label_page'            => 'Página',
+    'owner_label_entry'           => 'Entrada',
+    'child_label_slide'           => 'Diapositiva',
+    'child_label_subblock'        => 'Sub-bloque',
+
+    // Mensajes de controlador
+    'block_added_success'         => 'Bloque añadido con éxito.',
+    'block_updated_success'       => 'Bloque actualizado con éxito.',
+    'block_deleted_success'       => 'Bloque eliminado con éxito.',
+    'block_not_found'             => 'Bloque no encontrado.',
+    'block_add_failed'            => 'Error al crear el bloque.',
+    'block_update_failed'         => 'Error al actualizar el bloque.',
+    'block_delete_failed'         => 'Error al borrar el bloque.',
+    'child_added_success'         => '{0} añadida con éxito.',
+    'child_updated_success'       => '{0} actualizada con éxito.',
+    'child_deleted_success'       => '{0} eliminada con éxito.',
+    'child_reorder_success'       => 'Orden actualizado.',
+    'owner_not_found_entry'       => 'Entrada no encontrada.',
+
+    // Alert en edit.php
+    'alert_translation_attention' => 'Atención',
+
+    // Acceso rápido a traducir
+    'edit_in_language'            => 'Editar en :lang',
 ];

@@ -48,18 +48,32 @@ class PageController extends BaseWebController
 
         if (! $response['ok']) {
             return $this->render('cms/pages/show', [
-                'title' => lang('Pages.pages_details'),
-                'page' => [],
-                'error' => $this->firstMessage($response, lang('Pages.pages_not_found')),
-            'pages' => $this->pagesOptions(),
+                'title'      => lang('Pages.pages_details'),
+                'page'       => [],
+                'error'      => $this->firstMessage($response, lang('Pages.pages_not_found')),
+                'pages'      => $this->pagesOptions(),
+                'blocks'     => [],
+                'blockTypes' => [],
+                'languages'  => [],
             ]);
         }
+
+        $blocksResp = $this->safeApiCall(
+            fn () => service('blockInstanceApiService')->list($id, 'page')
+        );
+        $allBlocks = $blocksResp['ok'] ? $this->extractItems($blocksResp) : [];
+        $blocks    = array_values(
+            array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id']))
+        );
 
         return $this->render('cms/pages/show', [
             'title'         => lang('Pages.pages_details'),
             'page'          => $this->extractData($response),
             'pages'         => $this->pagesOptions(),
             'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
+            'blocks'        => $blocks,
+            'blockTypes'    => $this->fetchBlockTypesIndexed(),
+            'languages'     => $this->getLanguages(),
         ]);
     }
 
@@ -114,11 +128,17 @@ class PageController extends BaseWebController
             return $this->withError(lang('Pages.pages_not_found'), route_to('admin.cms.pages'));
         }
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/pages/edit', [
-            'title' => lang('Pages.pages_edit'),
-            'item'  => $this->extractData($response),
-            'pages' => $this->pagesOptions($id),
-            'languages' => $this->getLanguages(),
+            'title'       => lang('Pages.pages_edit'),
+            'item'        => $this->extractData($response),
+            'pages'       => $this->pagesOptions($id),
+            'languages'   => $this->getLanguages(),
+            'focusLangId' => $focusLangId,
         ]);
     }
 
@@ -137,7 +157,7 @@ class PageController extends BaseWebController
             return $this->failApi($response, lang('Pages.pages_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_update_success'));
+        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Pages.pages_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -254,6 +274,28 @@ class PageController extends BaseWebController
         return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Pages.pages_archive_success'));
     }
 
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchBlockTypesIndexed(): array
+    {
+        $types = cache()->get('cms_block_types_list');
+        if ($types === null) {
+            $r     = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
+            $types = $r['ok'] ? $this->extractItems($r) : [];
+            if (! empty($types)) {
+                cache()->save('cms_block_types_list', $types, 3600);
+            }
+        }
+        $indexed = [];
+        foreach ((array) $types as $t) {
+            if (is_array($t) && isset($t['id'])) {
+                $indexed[(int) $t['id']] = $t;
+            }
+        }
+        return $indexed;
+    }
 
     /** @return array<string, string> */
     private function pagesOptions(?string $excludeId = null): array

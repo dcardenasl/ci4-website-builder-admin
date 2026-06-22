@@ -43,12 +43,16 @@ class BlockInstanceController extends BaseWebController
 
     private function ownerLabel(string $ownerType): string
     {
-        return $ownerType === self::OWNER_ENTRY ? 'Entrada' : 'Página';
+        return $ownerType === self::OWNER_ENTRY
+            ? lang('Pages.owner_label_entry')
+            : lang('Pages.owner_label_page');
     }
 
     private function childLabel(string $ownerType): string
     {
-        return $ownerType === self::OWNER_ENTRY ? 'Sub-bloque' : 'Diapositiva';
+        return $ownerType === self::OWNER_ENTRY
+            ? lang('Pages.child_label_subblock')
+            : lang('Pages.child_label_slide');
     }
 
     private function ownerListRoute(string $ownerType): string
@@ -123,7 +127,9 @@ class BlockInstanceController extends BaseWebController
 
     private function ownerNotFoundMessage(string $ownerType): string
     {
-        return $ownerType === self::OWNER_ENTRY ? 'Entrada no encontrada' : lang('Pages.pages_not_found');
+        return $ownerType === self::OWNER_ENTRY
+            ? lang('Pages.owner_not_found_entry')
+            : lang('Pages.pages_not_found');
     }
 
     public function index(string $ownerId): string|RedirectResponse
@@ -145,7 +151,7 @@ class BlockInstanceController extends BaseWebController
         $routes = $this->ownerRoutes($ownerType);
 
         return $this->render('cms/pages/blocks/index', [
-            'title'             => 'Bloques de ' . ($page['title'] ?? $this->ownerLabel($ownerType)),
+            'title'             => lang('Pages.blocks_section_title') . ': ' . ($page['title'] ?? $this->ownerLabel($ownerType)),
             'page'              => $page,
             'blocks'            => $blocks,
             'blockTypes'        => $typesIndexed,
@@ -221,7 +227,9 @@ class BlockInstanceController extends BaseWebController
         $routes = $this->ownerRoutes($ownerType);
 
         return $this->render('cms/pages/blocks/create', [
-            'title'             => $parentInstanceId !== null ? 'Añadir ' . $this->childLabel($ownerType) : 'Añadir Bloque',
+            'title'             => $parentInstanceId !== null
+                ? lang('Pages.blocks_add') . ' ' . $this->childLabel($ownerType)
+                : lang('Pages.block_add_title'),
             'page'              => $page,
             'blockTypes'        => $types,
             'languages'         => $languages,
@@ -315,14 +323,14 @@ class BlockInstanceController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->create($ownerId, $ownerType, $payload));
 
         if (!$response['ok']) {
-            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al crear el bloque'));
+            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Pages.block_add_failed')));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' añadida con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_added_success', [$this->childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque añadido con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_added_success'));
     }
 
     public function edit(string $ownerId, string $id): string|RedirectResponse
@@ -340,7 +348,7 @@ class BlockInstanceController extends BaseWebController
 
         $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
         if (!$blockResponse['ok']) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Bloque no encontrado.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
         }
         $block = $this->extractData($blockResponse);
 
@@ -366,7 +374,7 @@ class BlockInstanceController extends BaseWebController
         }
 
         return $this->render('cms/pages/blocks/edit', [
-            'title'        => 'Editar Bloque',
+            'title'        => lang('Pages.block_edit_title'),
             'page'         => $page,
             'block'        => $block,
             'blockType'    => $blockType,
@@ -456,14 +464,14 @@ class BlockInstanceController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, $payload));
 
         if (!$response['ok']) {
-            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al actualizar el bloque'));
+            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Pages.block_update_failed')));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' actualizada con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_updated_success', [$this->childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque actualizado con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_updated_success'));
     }
 
     public function delete(string $ownerId, string $id): RedirectResponse
@@ -483,16 +491,16 @@ class BlockInstanceController extends BaseWebController
 
         if (!$response['ok']) {
             if ($parentInstanceId !== null) {
-                return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('error', 'Error al borrar ' . $this->childLabel($ownerType) . '.');
+                return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('error', lang('Pages.block_delete_failed'));
             }
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Error al borrar el bloque.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_delete_failed'));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' eliminada con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_deleted_success', [$this->childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque eliminado con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_deleted_success'));
     }
 
     public function reorder(string $ownerId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -529,7 +537,7 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Orden de bloques actualizado.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.blocks_reorder_success'));
     }
 
     public function reorderChildren(string $ownerId, string $instanceId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -567,7 +575,7 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, $instanceId))->with('success', 'Orden actualizado.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, $instanceId))->with('success', lang('Pages.child_reorder_success'));
     }
 
     public function children(string $ownerId, string $instanceId): string|RedirectResponse
@@ -580,7 +588,7 @@ class BlockInstanceController extends BaseWebController
 
         $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $instanceId));
         if (!$parentResponse['ok']) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Bloque contenedor no encontrado.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
         }
         $parentBlock = $this->extractData($parentResponse);
 
@@ -594,7 +602,7 @@ class BlockInstanceController extends BaseWebController
         $parentType = $typesIndexed[$parentBlock['block_id']] ?? [];
 
         return $this->render('cms/pages/blocks/children/index', [
-            'title'                => ($ownerType === self::OWNER_ENTRY ? 'Sub-bloques' : 'Diapositivas') . ' de ' . ($parentType['name'] ?? 'Bloque'),
+            'title'                => $this->childLabel($ownerType) . ': ' . ($parentType['name'] ?? $this->ownerLabel($ownerType)),
             'page'                 => $page,
             'parentBlock'          => $parentBlock,
             'parentType'           => $parentType,

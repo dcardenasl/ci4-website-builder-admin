@@ -36,7 +36,7 @@
                     <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
                     <?= esc(lang('App.reorder')) ?>
                 </a>
-                <form method="post" action="<?= route_to('admin.cms.entries.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
+                <form method="post" action="<?= route_to('admin.cms.entries.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($entry['title'] ?? $entry['slug'] ?? null), 'js') ?>');">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                         <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

@@ -68,6 +68,35 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
         <?php endif; ?>
     </div>
 
+    <?php if ($reactiveHasFilters || $hasFilters): ?>
+        <p
+            class="mt-2 text-xs text-gray-500"
+            <?php if ($reactiveHasFilters): ?>
+                x-cloak
+                x-show="hasActiveFilters()"
+            <?php endif; ?>
+        >
+            <?= esc(lang('App.filters_active')) ?>
+        </p>
+        <p
+            class="mt-2 text-xs text-gray-500"
+            <?php if ($reactiveHasFilters): ?>
+                x-cloak
+                x-show="!hasActiveFilters()"
+            <?php endif; ?>
+            >
+            <?= esc(lang('App.no_filters_active')) ?>
+        </p>
+    <?php endif; ?>
+
+    <p
+        class="mt-2 text-xs text-gray-500"
+        x-cloak
+        x-show="loading"
+    >
+        <?= esc(lang('App.loading_refreshing')) ?>
+    </p>
+
     <?php if (is_string($fieldsView) && $fieldsView !== ''): ?>
         <?= view($fieldsView, is_array($fieldsData) ? $fieldsData : []) ?>
     <?php endif; ?>

@@ -21,7 +21,7 @@ $smUrl    = is_array($variants['sm'] ?? null) ? (string) ($variants['sm']['url']
             </a>
         <?php endif; ?>
         <form method="post" action="<?= route_to('files') ?>/<?= esc($id) ?>/delete"
-              x-data @submit.prevent="$store.confirm.show('<?= esc(lang('Files.confirm_delete')) ?>', () => $el.submit())">
+              x-data @submit.prevent="$store.confirm.show(window.confirmDeleteMessage('<?= esc($file['original_name'] ?? $file['name'] ?? $id, 'js') ?>'), () => $el.submit())">
             <?= csrf_field() ?>
             <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                 <?= ui_icon('trash', 'h-3.5 w-3.5') ?> <?= esc(lang('App.delete')) ?>

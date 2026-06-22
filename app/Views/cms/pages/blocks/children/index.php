@@ -144,7 +144,7 @@ $reorderUrl = route_to($ownerChildrenReorderRoute, $pageId, $instanceId);
                     </a>
                     <form method="post"
                           action="<?= route_to($ownerType === 'entry' ? 'admin.cms.entries.blocks.delete' : 'admin.cms.pages.blocks.delete', $pageId, $childId) ?>"
-                          onsubmit="return confirm('¿Seguro que deseas eliminar esta diapositiva?');">
+                          onsubmit="return confirm('<?= esc(confirm_delete_message($previewText !== '' ? $previewText : ($childLabel . ' ' . $childId)), 'js') ?>');">
                         <?= csrf_field() ?>
                         <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
                             Eliminar

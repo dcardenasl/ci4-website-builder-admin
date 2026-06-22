@@ -1,5 +1,25 @@
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6"
-    x-data="remoteTable({
+    x-data="Object.assign({
+        deleteLabel(row) {
+            const preferredKeys = ['name', 'title', 'label', 'code', 'slug', 'key'];
+            for (const key of preferredKeys) {
+                const value = row?.[key];
+                if (typeof value === 'string' && value.trim() !== '') {
+                    return value.trim();
+                }
+            }
+
+            const fields = <?= esc(json_encode(array_values(array_map(static fn (array $field): string => (string) ($field['name'] ?? ''), $fields))), 'attr') ?>;
+            for (const key of fields) {
+                const value = row?.[key];
+                if (typeof value === 'string' && value.trim() !== '') {
+                    return value.trim();
+                }
+            }
+
+            return String(row?.id ?? '');
+        }
+    }, remoteTable({
         apiUrl: '<?= route_to('admin.universal.data', $resource) ?>',
         pageUrl: '<?= route_to('admin.universal.index', $resource) ?>',
         mode: '<?= esc($resource) ?>',
@@ -18,9 +38,13 @@
         </div>
     </div>
 
-    <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        Loading resource data...
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'App.loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'database',
+        ]) ?>
+    </template>
     <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
@@ -62,7 +86,7 @@
                             <td class="<?= esc(table_td_class() ?? 'px-6 py-4 whitespace-nowrap text-sm text-gray-600') ?>">
                                 <div class="flex items-center gap-2">
                                     <a :href="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/edit'" class="text-xs text-indigo-600 hover:text-indigo-900 font-semibold">Edit</a>
-                                    <form :action="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/delete'" method="post" @submit="if(!confirm('Are you sure you want to delete this record?')) $event.preventDefault()">
+                                    <form :action="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/delete'" method="post" @submit="if(!confirm(window.confirmDeleteMessage(deleteLabel(row)))) $event.preventDefault()">
                                         <button type="submit" class="text-xs text-red-600 hover:text-red-900 font-semibold bg-transparent border-0 p-0 cursor-pointer">Delete</button>
                                     </form>
                                 </div>

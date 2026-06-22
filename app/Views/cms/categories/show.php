@@ -20,7 +20,7 @@
                     <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
                     <?= esc(lang('Categories.field_sort_order') ?? lang('App.reorder')) ?>
                 </a>
-                <form method="post" action="<?= route_to('admin.cms.categories.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
+                <form method="post" action="<?= route_to('admin.cms.categories.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($category['name'] ?? $category['slug'] ?? null), 'js') ?>');">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                         <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

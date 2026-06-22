@@ -88,9 +88,13 @@ $csrfHash = csrf_hash();
         </div>
     </div>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('App.loading') ?>
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'App.loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'trash',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">

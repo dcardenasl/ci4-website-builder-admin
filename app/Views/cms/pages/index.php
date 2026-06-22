@@ -31,9 +31,13 @@
         'submitLabel' => lang('App.search'),
     ]) ?>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Pages.pages_loading') ?>
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'Pages.pages_loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'file-text',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
@@ -146,7 +150,7 @@
                                     <a :href="showUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.view') ?></a>
                                     <a :href="editUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
                                     <button type="button" class="<?= esc(action_button_class('danger')) ?>"
-                                        @click="$store.confirm.show('<?= esc(lang('App.confirm_delete')) ?>', () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.pages'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
+                                        @click="$store.confirm.show(window.confirmDeleteMessage(String(row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations[0]).title : (row.title || row.name || row.slug || ''))), () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.pages'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
                                     ><?= lang('App.delete') ?></button>
                                 </div>
                             </td>

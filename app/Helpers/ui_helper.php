@@ -61,6 +61,18 @@ if (! function_exists('filter_panel_class')) {
     }
 }
 
+if (! function_exists('confirm_delete_message')) {
+    function confirm_delete_message(?string $itemLabel = null): string
+    {
+        $label = trim((string) $itemLabel);
+        if ($label === '') {
+            return lang('App.confirm_delete');
+        }
+
+        return lang('App.confirm_delete_named', [$label]);
+    }
+}
+
 if (! function_exists('filter_submit_button_class')) {
     function filter_submit_button_class(bool $fullWidth = false): string
     {

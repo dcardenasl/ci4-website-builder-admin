@@ -13,6 +13,11 @@
             <h3 class="text-lg font-semibold text-gray-900"><?= lang('Iam.applications_details') ?></h3>
         </div>
 
+        <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            <p class="font-semibold"><?= esc(lang('App.readonly_notice')) ?></p>
+            <p class="mt-1 text-xs text-blue-800"><?= esc(lang('Iam.applications_managed_server_side')) ?></p>
+        </div>
+
         <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div>
                 <dt class="text-gray-500"><?= lang('Iam.field_code') ?></dt>

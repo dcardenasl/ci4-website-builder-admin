@@ -242,15 +242,36 @@ const uiLabels = {
     es: {
         confirmAction: 'Confirmar acción',
         confirm: 'Confirmar',
+        confirmDeleteNamed: '¿Seguro que quieres eliminar "{item}"?',
+        confirmDeleteFallback: '¿Seguro que quieres eliminar este elemento?',
         requestFailed: 'La solicitud falló (HTTP {status}).',
-        loadRetry: 'No se pudo cargar la información. Intenta nuevamente.'
+        loadRetry: 'No se pudo cargar la información. Intenta nuevamente.',
+        refreshing: 'Actualizando resultados...',
+        readonlyNotice: 'Esta pantalla es de solo lectura.'
     },
     en: {
         confirmAction: 'Confirm action',
         confirm: 'Confirm',
+        confirmDeleteNamed: 'Are you sure you want to delete "{item}"?',
+        confirmDeleteFallback: 'Are you sure you want to delete this item?',
         requestFailed: 'Request failed (HTTP {status}).',
-        loadRetry: 'Could not load the information. Please try again.'
+        loadRetry: 'Could not load the information. Please try again.',
+        refreshing: 'Refreshing results...',
+        readonlyNotice: 'This screen is read-only.'
     }
+};
+
+const buildConfirmDeleteMessage = (itemLabel = '', fallback = '') => {
+    const currentLocale = localePrefix();
+    const labels = uiLabels[currentLocale] || uiLabels.es;
+    const label = String(itemLabel ?? '').trim();
+
+    if (label === '') {
+        return String(fallback || labels.confirmDeleteFallback || labels.confirm);
+    }
+
+    return String(labels.confirmDeleteNamed || labels.confirmDeleteFallback || labels.confirm)
+        .replace('{item}', label);
 };
 
 const statusLabels = {
@@ -1218,6 +1239,7 @@ document.addEventListener('alpine:init', () => {
     });
     Alpine.data('remoteTable', remoteTableFactory);
     window.remoteTable = remoteTableFactory;
+    window.confirmDeleteMessage = buildConfirmDeleteMessage;
 
     /**
      * Global file picker store.

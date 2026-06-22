@@ -19,7 +19,7 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
 
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-    <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" onsubmit="return confirm('<?= esc(lang('App.confirm_delete')) ?>');">
+    <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($item['name'] ?? $item['block_key'] ?? null), 'js') ?>');">
         <?= csrf_field() ?>
         <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
             <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
