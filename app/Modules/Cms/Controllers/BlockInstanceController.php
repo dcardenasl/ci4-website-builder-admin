@@ -81,6 +81,7 @@ class BlockInstanceController extends BaseWebController
         ];
     }
 
+    /** @param array<string, mixed> $owner */
     private function ownerPreviewUrl(string $ownerType, array $owner): string
     {
         if ($ownerType !== self::OWNER_PAGE) {

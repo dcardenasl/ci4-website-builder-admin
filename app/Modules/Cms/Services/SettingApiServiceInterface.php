@@ -33,6 +33,6 @@ interface SettingApiServiceInterface
     /** @return ApiResponse */
     public function delete(int|string $id): array;
 
-
-
+    /** @return ApiResponse */
+    public function getByGroup(string $group): array;
 }

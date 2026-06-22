@@ -6,7 +6,7 @@ return [
     'audit_title'           => 'Auditoría de Traducciones',
     'audit_subtitle'        => 'Audita la completitud de las traducciones de páginas, elementos del menú y configuraciones.',
     'missing_incomplete'    => 'Traducciones Faltantes o Incompletas',
-    'missing_incomplete_desc'=> 'A continuación se muestran los elementos que requieren actualización de traducción.',
+    'missing_incomplete_desc' => 'A continuación se muestran los elementos que requieren actualización de traducción.',
     'all_active_languages'  => 'Todos los idiomas activos',
     'loading_report'        => 'Cargando reporte de auditoría...',
     'all_complete'          => '¡Todas las traducciones completadas!',

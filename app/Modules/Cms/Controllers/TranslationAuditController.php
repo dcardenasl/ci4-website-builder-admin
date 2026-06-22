@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\TranslationAuditApiServiceInterface;
 use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\TranslationAuditApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -66,15 +66,18 @@ class TranslationAuditController extends BaseWebController
 
         $langId = $this->request->getGet('language_id');
         $filters = [];
-        if ($langId !== null && $langId !== '') {
+        if (is_scalar($langId) && $langId !== '') {
             $filters['language_id'] = (int) $langId;
         }
 
         $response = $this->safeApiCall(fn () => $this->auditService->getReport($filters));
 
+        $drawRaw = $this->request->getGet('draw');
+        $draw    = is_scalar($drawRaw) ? (int) $drawRaw : 0;
+
         if (! $response['ok']) {
             return $this->response->setJSON([
-                'draw' => intval($this->request->getGet('draw')),
+                'draw' => $draw,
                 'recordsTotal' => 0,
                 'recordsFiltered' => 0,
                 'data' => [],
@@ -85,7 +88,7 @@ class TranslationAuditController extends BaseWebController
         $data = $this->extractData($response);
 
         return $this->response->setJSON([
-            'draw' => intval($this->request->getGet('draw')),
+            'draw' => $draw,
             'recordsTotal' => count($data),
             'recordsFiltered' => count($data),
             'data' => $data,

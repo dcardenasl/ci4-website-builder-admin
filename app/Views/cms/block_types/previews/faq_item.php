@@ -15,7 +15,7 @@ $isOpen = filter_var($config['is_open'] ?? false, FILTER_VALIDATE_BOOL);
     </div>
     <?php if ($answer !== ''): ?>
         <div class="text-[10px] text-slate-500 mt-2 border-t border-slate-50 pt-2 line-clamp-3">
-            <?= $answer // Rich text output ?>
+            <?= $answer // Rich text output?>
         </div>
     <?php endif; ?>
 </div>

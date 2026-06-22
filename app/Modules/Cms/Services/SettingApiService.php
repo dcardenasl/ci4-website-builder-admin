@@ -13,6 +13,8 @@ class SettingApiService extends ResourceApiService implements SettingApiServiceI
         return '/cms/settings';
     }
 
-
-
+    public function getByGroup(string $group): array
+    {
+        return $this->apiClient->get($this->resourcePath(), ['filter[setting_group]' => $group, 'per_page' => 100]);
+    }
 }

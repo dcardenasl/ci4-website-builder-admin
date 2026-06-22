@@ -10,9 +10,9 @@ use App\Libraries\BffApiClient;
 use App\Libraries\BffApiClientInterface;
 use App\Libraries\DomainApiClient;
 use App\Libraries\DomainApiClientInterface;
+use App\Libraries\PermissionsSessionRefresher;
 use App\Libraries\WebApiClient;
 use App\Libraries\WebApiClientInterface;
-use App\Libraries\PermissionsSessionRefresher;
 use App\Modules\ApiKeys\Services\ApiKeyApiService;
 use App\Modules\ApiKeys\Services\ApiKeyApiServiceInterface;
 use App\Modules\Audit\Services\AuditApiService;
@@ -29,6 +29,8 @@ use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\EntryApiServiceInterface;
+use App\Modules\Cms\Services\FileTranslationApiService;
+use App\Modules\Cms\Services\FileTranslationApiServiceInterface;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\LanguageApiServiceInterface;
 use App\Modules\Cms\Services\MenuApiService;
@@ -391,5 +393,14 @@ class Services extends BaseService
             return static::getSharedInstance('translationAuditApiService');
         }
         return new TranslationAuditApiService(static::domainApiClient());
+    }
+
+    public static function fileTranslationApiService(bool $getShared = true): FileTranslationApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var FileTranslationApiService */
+            return static::getSharedInstance('fileTranslationApiService');
+        }
+        return new FileTranslationApiService(static::domainApiClient());
     }
 }

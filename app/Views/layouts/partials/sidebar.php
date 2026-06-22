@@ -96,6 +96,12 @@
                     <span><?= lang('Translations.audit_title') ?></span>
                 </a>
             <?php endif; ?>
+            <?php if (has_permission('cms.settings.write')): ?>
+                <a href="<?= site_url('admin/cms/site-identity') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/site-identity*') ?>">
+                    <?= ui_icon('image') ?>
+                    <span><?= lang('SiteIdentity.sidebar_label') ?></span>
+                </a>
+            <?php endif; ?>
             <?php if (has_permission('cms.settings.read')): ?>
                 <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
                     <?= ui_icon('settings') ?>

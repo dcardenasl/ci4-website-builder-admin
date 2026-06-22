@@ -15,28 +15,28 @@
 
     <?php
     $hasTranslationIssues = false;
-    $issueDetails = [];
-    if (!empty($languages)) {
-        foreach ($languages as $lang) {
-            $transValue = [];
-            if (!empty($item['translations']) && is_array($item['translations'])) {
-                foreach ($item['translations'] as $t) {
-                    if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                        $transValue = $t;
-                        break;
-                    }
+$issueDetails = [];
+if (!empty($languages)) {
+    foreach ($languages as $lang) {
+        $transValue = [];
+        if (!empty($item['translations']) && is_array($item['translations'])) {
+            foreach ($item['translations'] as $t) {
+                if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
+                    $transValue = $t;
+                    break;
                 }
             }
-            if (empty($transValue)) {
-                $hasTranslationIssues = true;
-                $issueDetails[] = strtoupper($lang['code']) . ' (Missing)';
-            } elseif (empty($transValue['title']) || empty($transValue['slug'])) {
-                $hasTranslationIssues = true;
-                $issueDetails[] = strtoupper($lang['code']) . ' (Incomplete)';
-            }
+        }
+        if (empty($transValue)) {
+            $hasTranslationIssues = true;
+            $issueDetails[] = strtoupper($lang['code']) . ' (Missing)';
+        } elseif (empty($transValue['title']) || empty($transValue['slug'])) {
+            $hasTranslationIssues = true;
+            $issueDetails[] = strtoupper($lang['code']) . ' (Incomplete)';
         }
     }
-    ?>
+}
+?>
 
     <?php if ($hasTranslationIssues): ?>
         <div class="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800 flex items-center gap-2">
@@ -53,60 +53,60 @@
         <?= csrf_field() ?>
 
         <?= view('components/form/select', [
-            'name' => 'page_type',
-            'label' => 'Pages.field_page_type',
-            'required' => true,
-            'placeholder' => 'Pages.field_page_type_placeholder',
-            'help' => 'Pages.field_page_type_help',
-            'options' => [
-                'home' => lang('Pages.page_type_home'),
-                'generic' => lang('Pages.page_type_generic'),
-                'contact' => lang('Pages.page_type_contact'),
-                'privacy' => lang('Pages.page_type_privacy'),
-                'terms' => lang('Pages.page_type_terms'),
-                '404' => lang('Pages.page_type_404'),
-                '500' => lang('Pages.page_type_500'),
-                'maintenance' => lang('Pages.page_type_maintenance')
-            ],
-            'value' => $item['page_type'] ?? 'generic',
-            'errors' => $errors ?? []
-        ]) ?>
+        'name' => 'page_type',
+        'label' => 'Pages.field_page_type',
+        'required' => true,
+        'placeholder' => 'Pages.field_page_type_placeholder',
+        'help' => 'Pages.field_page_type_help',
+        'options' => [
+            'home' => lang('Pages.page_type_home'),
+            'generic' => lang('Pages.page_type_generic'),
+            'contact' => lang('Pages.page_type_contact'),
+            'privacy' => lang('Pages.page_type_privacy'),
+            'terms' => lang('Pages.page_type_terms'),
+            '404' => lang('Pages.page_type_404'),
+            '500' => lang('Pages.page_type_500'),
+            'maintenance' => lang('Pages.page_type_maintenance')
+        ],
+        'value' => $item['page_type'] ?? 'generic',
+        'errors' => $errors ?? []
+    ]) ?>
 
         <?= view('components/form/select', [
-            'name' => 'status',
-            'label' => 'Pages.field_status',
-            'required' => true,
-            'placeholder' => 'Pages.field_status_placeholder',
-            'help' => 'Pages.field_status_help',
-            'options' => [
-                'draft' => lang('Pages.status_draft'),
-                'published' => lang('Pages.status_published'),
-                'archived' => lang('Pages.status_archived')
-            ],
-            'value' => $item['status'] ?? 'draft',
-            'errors' => $errors ?? []
-        ]) ?>
+        'name' => 'status',
+        'label' => 'Pages.field_status',
+        'required' => true,
+        'placeholder' => 'Pages.field_status_placeholder',
+        'help' => 'Pages.field_status_help',
+        'options' => [
+            'draft' => lang('Pages.status_draft'),
+            'published' => lang('Pages.status_published'),
+            'archived' => lang('Pages.status_archived')
+        ],
+        'value' => $item['status'] ?? 'draft',
+        'errors' => $errors ?? []
+    ]) ?>
 
         <?= view('components/form/relation', [
-            'name' => 'parent_id',
-            'label' => 'Pages.field_parent_id',
-            'required' => false,
-            'options' => $pages ?? [],
-            'placeholder' => 'Pages.field_parent_id_placeholder',
-            'help' => 'Pages.field_parent_id_help',
-            'value' => $item['parent_id'] ?? '',
-            'errors' => $errors ?? []
-        ]) ?>
+        'name' => 'parent_id',
+        'label' => 'Pages.field_parent_id',
+        'required' => false,
+        'options' => $pages ?? [],
+        'placeholder' => 'Pages.field_parent_id_placeholder',
+        'help' => 'Pages.field_parent_id_help',
+        'value' => $item['parent_id'] ?? '',
+        'errors' => $errors ?? []
+    ]) ?>
 
         <?= view('components/form/number', [
-            'name' => 'sort_order',
-            'label' => 'Pages.field_sort_order',
-            'required' => false,
-            'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Pages.field_sort_order_placeholder',
-            'help' => 'Pages.field_sort_order_help',
-            'errors' => $errors ?? []
-        ]) ?>
+        'name' => 'sort_order',
+        'label' => 'Pages.field_sort_order',
+        'required' => false,
+        'value' => $item['sort_order'] ?? 0,
+        'placeholder' => 'Pages.field_sort_order_placeholder',
+        'help' => 'Pages.field_sort_order_help',
+        'errors' => $errors ?? []
+    ]) ?>
 
         <!-- Publishing & Scheduling -->
         <details class="group border border-gray-200 rounded-lg" <?= (!empty($item['published_at']) || !empty($item['scheduled_at'])) ? 'open' : '' ?>>
@@ -116,23 +116,23 @@
             </summary>
             <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
                 <?= view('components/form/datetime', [
-                    'name' => 'published_at',
-                    'label' => 'Pages.field_published_at',
-                    'required' => false,
-                    'value' => $item['published_at'] ?? '',
-                    'placeholder' => 'Pages.field_published_at_placeholder',
-                    'help' => 'Pages.field_published_at_help',
-                    'errors' => $errors ?? []
-                ]) ?>
+                'name' => 'published_at',
+                'label' => 'Pages.field_published_at',
+                'required' => false,
+                'value' => $item['published_at'] ?? '',
+                'placeholder' => 'Pages.field_published_at_placeholder',
+                'help' => 'Pages.field_published_at_help',
+                'errors' => $errors ?? []
+            ]) ?>
                 <?= view('components/form/datetime', [
-                    'name' => 'scheduled_at',
-                    'label' => 'Pages.field_scheduled_at',
-                    'required' => false,
-                    'value' => $item['scheduled_at'] ?? '',
-                    'placeholder' => 'Pages.field_scheduled_at_placeholder',
-                    'help' => 'Pages.field_scheduled_at_help',
-                    'errors' => $errors ?? []
-                ]) ?>
+                'name' => 'scheduled_at',
+                'label' => 'Pages.field_scheduled_at',
+                'required' => false,
+                'value' => $item['scheduled_at'] ?? '',
+                'placeholder' => 'Pages.field_scheduled_at_placeholder',
+                'help' => 'Pages.field_scheduled_at_help',
+                'errors' => $errors ?? []
+            ]) ?>
             </div>
         </details>
 
@@ -144,48 +144,48 @@
             </summary>
             <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
                 <?= view('components/form/boolean', [
-                    'name' => 'is_in_sitemap',
-                    'label' => 'Pages.field_is_in_sitemap',
-                    'value' => $item['is_in_sitemap'] ?? true,
-                    'on_label' => 'Pages.field_is_in_sitemap_on',
-                    'off_label' => 'Pages.field_is_in_sitemap_off',
-                    'help' => 'Pages.field_is_in_sitemap_help',
-                    'errors' => $errors ?? []
-                ]) ?>
+                'name' => 'is_in_sitemap',
+                'label' => 'Pages.field_is_in_sitemap',
+                'value' => $item['is_in_sitemap'] ?? true,
+                'on_label' => 'Pages.field_is_in_sitemap_on',
+                'off_label' => 'Pages.field_is_in_sitemap_off',
+                'help' => 'Pages.field_is_in_sitemap_help',
+                'errors' => $errors ?? []
+            ]) ?>
                 <?= view('components/form/text', [
-                    'name' => 'sitemap_priority',
-                    'label' => 'Pages.field_sitemap_priority',
-                    'required' => false,
-                    'value' => $item['sitemap_priority'] ?? '',
-                    'placeholder' => 'Pages.field_sitemap_priority_placeholder',
-                    'help' => 'Pages.field_sitemap_priority_help',
-                    'errors' => $errors ?? []
-                ]) ?>
+                'name' => 'sitemap_priority',
+                'label' => 'Pages.field_sitemap_priority',
+                'required' => false,
+                'value' => $item['sitemap_priority'] ?? '',
+                'placeholder' => 'Pages.field_sitemap_priority_placeholder',
+                'help' => 'Pages.field_sitemap_priority_help',
+                'errors' => $errors ?? []
+            ]) ?>
                 <?= view('components/form/select', [
-                    'name' => 'sitemap_changefreq',
-                    'label' => 'Pages.field_sitemap_changefreq',
-                    'required' => false,
-                    'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
-                    'help' => 'Pages.field_sitemap_changefreq_help',
-                    'options' => [
-                        'always' => lang('Pages.sitemap_changefreq_always'),
-                        'hourly' => lang('Pages.sitemap_changefreq_hourly'),
-                        'daily' => lang('Pages.sitemap_changefreq_daily'),
-                        'weekly' => lang('Pages.sitemap_changefreq_weekly'),
-                        'monthly' => lang('Pages.sitemap_changefreq_monthly'),
-                        'yearly' => lang('Pages.sitemap_changefreq_yearly'),
-                        'never' => lang('Pages.sitemap_changefreq_never'),
-                    ],
-                    'value' => $item['sitemap_changefreq'] ?? 'weekly',
-                    'errors' => $errors ?? []
-                ]) ?>
+                'name' => 'sitemap_changefreq',
+                'label' => 'Pages.field_sitemap_changefreq',
+                'required' => false,
+                'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
+                'help' => 'Pages.field_sitemap_changefreq_help',
+                'options' => [
+                    'always' => lang('Pages.sitemap_changefreq_always'),
+                    'hourly' => lang('Pages.sitemap_changefreq_hourly'),
+                    'daily' => lang('Pages.sitemap_changefreq_daily'),
+                    'weekly' => lang('Pages.sitemap_changefreq_weekly'),
+                    'monthly' => lang('Pages.sitemap_changefreq_monthly'),
+                    'yearly' => lang('Pages.sitemap_changefreq_yearly'),
+                    'never' => lang('Pages.sitemap_changefreq_never'),
+                ],
+                'value' => $item['sitemap_changefreq'] ?? 'weekly',
+                'errors' => $errors ?? []
+            ]) ?>
             </div>
         </details>
 
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = 0;
+            $defaultLangId = 0;
             $defaultLangCode = '';
             $defaultLangIndex = 0;
             foreach ($languages as $i => $l) {
@@ -223,18 +223,18 @@
                             <?php foreach ($languages as $lang): ?>
                                 <?php
                                     $transValue = [];
-                                    if (!empty($item['translations']) && is_array($item['translations'])) {
-                                        foreach ($item['translations'] as $t) {
-                                            if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                                                $transValue = $t;
-                                                break;
-                                            }
+                                if (!empty($item['translations']) && is_array($item['translations'])) {
+                                    foreach ($item['translations'] as $t) {
+                                        if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
+                                            $transValue = $t;
+                                            break;
                                         }
                                     }
-                                    $t_status = 'missing';
-                                    if (!empty($transValue)) {
-                                        $t_status = (!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete';
-                                    }
+                                }
+                                $t_status = 'missing';
+                                if (!empty($transValue)) {
+                                    $t_status = (!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete';
+                                }
                                 ?>
                                 <button type="button"
                                     role="tab"

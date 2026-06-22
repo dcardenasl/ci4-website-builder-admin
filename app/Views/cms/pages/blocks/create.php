@@ -14,8 +14,8 @@ $ownerChildLabel  = $ownerChildLabel  ?? 'Diapositiva';
 if ($parentInstanceId !== null) {
     $allowedChildren = [];
     if ($parentBlockType !== null) {
-        $parentSchema = is_array($parentBlockType['schema_definition'] ?? []) 
-            ? ($parentBlockType['schema_definition'] ?? []) 
+        $parentSchema = is_array($parentBlockType['schema_definition'] ?? [])
+            ? ($parentBlockType['schema_definition'] ?? [])
             : json_decode((string)($parentBlockType['schema_definition'] ?? '{}'), true);
         $allowedChildren = $parentSchema['allowed_children'] ?? [];
     }

@@ -9,6 +9,10 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (RouteCollection $routes): void {
+    // File Translations
+    $routes->get('files/(:num)/translations', '\\App\\Modules\\Cms\\Controllers\\FileTranslationController::edit/$1', ['as' => 'admin.cms.file_translations.edit',   'filter' => 'permission:cms.pages.write']);
+    $routes->post('files/(:num)/translations', '\\App\\Modules\\Cms\\Controllers\\FileTranslationController::update/$1', ['as' => 'admin.cms.file_translations.update', 'filter' => 'permission:cms.pages.write']);
+
     // Language
     $routes->get('languages', '\\App\\Modules\\Cms\\Controllers\\LanguageController::index', ['as' => 'admin.cms.languages', 'filter' => 'permission:cms.languages.read']);
     $routes->get('languages/data', '\\App\\Modules\\Cms\\Controllers\\LanguageController::data', ['as' => 'admin.cms.languages.data', 'filter' => 'permission:cms.languages.read']);
@@ -23,6 +27,10 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('languages/(:segment)/set-default', '\\App\\Modules\\Cms\\Controllers\\LanguageController::setDefault/$1', ['as' => 'admin.cms.languages.set_default', 'filter' => 'permission:cms.languages.write']);
 
 
+
+    // Site Identity
+    $routes->get('site-identity', '\App\Modules\Cms\Controllers\SiteIdentityController::show', ['as' => 'admin.cms.site_identity', 'filter' => 'permission:cms.settings.write']);
+    $routes->post('site-identity', '\App\Modules\Cms\Controllers\SiteIdentityController::update', ['as' => 'admin.cms.site_identity.update', 'filter' => 'permission:cms.settings.write']);
 
     // Setting
     $routes->get('settings', '\App\Modules\Cms\Controllers\SettingController::index', ['as' => 'admin.cms.settings', 'filter' => 'permission:cms.settings.read']);

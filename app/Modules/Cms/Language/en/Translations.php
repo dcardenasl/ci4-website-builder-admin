@@ -6,7 +6,7 @@ return [
     'audit_title'           => 'Translation Audit',
     'audit_subtitle'        => 'Audit translation completeness across pages, menu items, and settings.',
     'missing_incomplete'    => 'Missing or Incomplete Translations',
-    'missing_incomplete_desc'=> 'Below are the elements requiring translation updates.',
+    'missing_incomplete_desc' => 'Below are the elements requiring translation updates.',
     'all_active_languages'  => 'All Active Languages',
     'loading_report'        => 'Loading audit report...',
     'all_complete'          => 'All translations complete!',

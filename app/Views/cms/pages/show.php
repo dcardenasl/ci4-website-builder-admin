@@ -152,7 +152,7 @@ $status = $page['status'] ?? '';
                         $tPreview = $publicSiteUrl !== '' && $tSlug !== ''
                             ? $publicSiteUrl . '/' . ltrim($tSlug, '/')
                             : '';
-                    ?>
+                        ?>
                         <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
                             <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between items-center">
                                 <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($t['language_id']) ?></span>
