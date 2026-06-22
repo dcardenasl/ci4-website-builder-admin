@@ -10,6 +10,13 @@ $schema      = is_array($blockType['schema_definition'] ?? [])
 $fields      = $blockType['fields']       ?? $schema['fields']       ?? [];
 $configFields = $blockType['config_fields'] ?? $schema['config_fields'] ?? [];
 $blockConfig  = is_array($block['block_config'] ?? []) ? ($block['block_config'] ?? []) : [];
+$ownerType    = $ownerType    ?? 'page';
+$ownerLabel   = $ownerLabel   ?? 'Página';
+$ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
+$ownerEditRoute   = $ownerEditRoute ?? 'admin.cms.pages.blocks.edit';
+$ownerUpdateRoute = $ownerUpdateRoute ?? 'admin.cms.pages.blocks.update';
+$ownerDeleteRoute = $ownerDeleteRoute ?? 'admin.cms.pages.blocks.delete';
+$ownerChildrenRoute = $ownerChildrenRoute ?? 'admin.cms.pages.blocks.children';
 
 $defaultLangId = 0;
 foreach ($languages as $l) {
@@ -29,7 +36,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 <meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
 
 <div class="mb-4">
-    <a href="<?= route_to('admin.cms.pages.blocks', (string) $page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Bloques</a>
+    <a href="<?= route_to($ownerBlocksRoute, (string) $page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Bloques de <?= esc($ownerLabel) ?></a>
 </div>
 
 <div class="max-w-3xl space-y-5">
@@ -59,7 +66,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <form method="post"
-              action="<?= route_to('admin.cms.pages.blocks.update', (string) $page['id'], (string) $block['id']) ?>"
+              action="<?= route_to($ownerUpdateRoute, (string) $page['id'], (string) $block['id']) ?>"
               class="space-y-6">
             <?= csrf_field() ?>
             <input type="hidden" name="block_id" value="<?= esc((string) ($block['block_id'] ?? '')) ?>">
@@ -377,7 +384,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <button type="submit" class="<?= esc(action_button_class('primary')) ?>">Actualizar Bloque</button>
-                <a href="<?= route_to('admin.cms.pages.blocks', (string) $page['id']) ?>" class="<?= esc(action_button_class()) ?>">Cancelar</a>
+                <a href="<?= route_to($ownerBlocksRoute, (string) $page['id']) ?>" class="<?= esc(action_button_class()) ?>">Cancelar</a>
             </div>
         </form>
     </section>

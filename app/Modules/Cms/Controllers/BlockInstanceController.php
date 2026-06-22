@@ -15,6 +15,9 @@ class BlockInstanceController extends BaseWebController
 {
     protected BlockInstanceApiServiceInterface $blockInstanceService;
 
+    private const OWNER_PAGE = 'page';
+    private const OWNER_ENTRY = 'entry';
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
@@ -23,34 +26,143 @@ class BlockInstanceController extends BaseWebController
 
     private function requireWrite(): ?RedirectResponse
     {
-        if (! has_permission('cms.pages.write')) {
-            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('App.access_denied'));
+        $ownerType = $this->ownerTypeFromRequest();
+        $permission = $ownerType === self::OWNER_ENTRY ? 'cms.entries.write' : 'cms.pages.write';
+        if (! has_permission($permission)) {
+            return redirect()->to($this->ownerListRoute($ownerType))->with('error', lang('App.access_denied'));
         }
         return null;
     }
 
+    private function ownerTypeFromRequest(): string
+    {
+        $segments = service('request')->getUri()->getSegments();
+
+        return in_array('entries', $segments, true) ? self::OWNER_ENTRY : self::OWNER_PAGE;
+    }
+
+    private function ownerLabel(string $ownerType): string
+    {
+        return $ownerType === self::OWNER_ENTRY ? 'Entrada' : 'Página';
+    }
+
+    private function childLabel(string $ownerType): string
+    {
+        return $ownerType === self::OWNER_ENTRY ? 'Sub-bloque' : 'Diapositiva';
+    }
+
+    private function ownerListRoute(string $ownerType): string
+    {
+        return $ownerType === self::OWNER_ENTRY ? route_to('admin.cms.entries') : route_to('admin.cms.pages');
+    }
+
+    private function ownerShowRoute(string $ownerType): string
+    {
+        return $ownerType === self::OWNER_ENTRY ? 'admin.cms.entries.show' : 'admin.cms.pages.show';
+    }
+
+    /**
+     * @return array{index:string,create:string,store:string,edit:string,update:string,delete:string,reorder:string,children:string,childrenReorder:string}
+     */
+    private function ownerRoutes(string $ownerType): array
+    {
+        $prefix = $ownerType === self::OWNER_ENTRY ? 'admin.cms.entries.blocks' : 'admin.cms.pages.blocks';
+
+        return [
+            'index'           => $prefix,
+            'create'          => $prefix . '.create',
+            'store'           => $prefix . '.store',
+            'edit'            => $prefix . '.edit',
+            'update'          => $prefix . '.update',
+            'delete'          => $prefix . '.delete',
+            'reorder'         => $prefix . '.reorder',
+            'children'        => $prefix . '.children',
+            'childrenReorder' => $prefix . '.children.reorder',
+        ];
+    }
+
+    private function ownerPreviewUrl(string $ownerType, array $owner): string
+    {
+        if ($ownerType !== self::OWNER_PAGE) {
+            return '';
+        }
+
+        foreach (($owner['translations'] ?? []) as $translation) {
+            if (! is_array($translation)) {
+                continue;
+            }
+
+            $slug = (string) ($translation['slug'] ?? '');
+            if ($slug === '') {
+                continue;
+            }
+
+            $publicSiteUrl = rtrim((string) env('PUBLIC_SITE_URL'), '/');
+            if ($publicSiteUrl === '') {
+                return '';
+            }
+
+            return $publicSiteUrl . '/' . ltrim($slug, '/');
+        }
+
+        return '';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fetchOwner(string $ownerType, string $ownerId): array
+    {
+        $response = $ownerType === self::OWNER_ENTRY
+            ? $this->safeApiCall(fn () => service('entryApiService')->get($ownerId))
+            : $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
+
+        return $response['ok'] ? $this->extractData($response) : [];
+    }
+
+    private function ownerNotFoundMessage(string $ownerType): string
+    {
+        return $ownerType === self::OWNER_ENTRY ? 'Entrada no encontrada' : lang('Pages.pages_not_found');
+    }
+
     public function index(string $ownerId): string|RedirectResponse
     {
-        $pageResponse = $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
-        if (!$pageResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('Pages.pages_not_found'));
+        $ownerType = $this->ownerTypeFromRequest();
+        $page = $this->fetchOwner($ownerType, $ownerId);
+        if ($page === []) {
+            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
         }
-        $page = $this->extractData($pageResponse);
+        $routes = $this->ownerRoutes($ownerType);
 
-        $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, 'page'));
+        $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, $ownerType));
         $allBlocks = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
 
         // Only show top-level blocks in the page editor (children managed via their parent's UI)
         $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
 
         $typesIndexed = $this->fetchBlockTypes();
+        $routes = $this->ownerRoutes($ownerType);
 
         return $this->render('cms/pages/blocks/index', [
-            'title'         => 'Bloques de ' . ($page['title'] ?? 'Página'),
-            'page'          => $page,
-            'blocks'        => $blocks,
-            'blockTypes'    => $typesIndexed,
-            'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
+            'title'             => 'Bloques de ' . ($page['title'] ?? $this->ownerLabel($ownerType)),
+            'page'              => $page,
+            'blocks'            => $blocks,
+            'blockTypes'        => $typesIndexed,
+            'publicSiteUrl'     => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
+            'ownerType'         => $ownerType,
+            'ownerLabel'        => $this->ownerLabel($ownerType),
+            'ownerShowRoute'    => $this->ownerShowRoute($ownerType),
+            'ownerBlocksRoute'   => $routes['index'],
+            'ownerCreateRoute'   => $routes['create'],
+            'ownerStoreRoute'    => $routes['store'],
+            'ownerEditRoute'     => $routes['edit'],
+            'ownerUpdateRoute'   => $routes['update'],
+            'ownerDeleteRoute'   => $routes['delete'],
+            'ownerChildrenRoute' => $routes['children'],
+            'ownerReorderRoute'  => $routes['reorder'],
+            'ownerChildrenReorderRoute' => $routes['childrenReorder'],
+            'showPreview'        => $this->ownerPreviewUrl($ownerType, $page) !== '',
+            'previewUrl'         => $this->ownerPreviewUrl($ownerType, $page),
         ]);
     }
 
@@ -61,11 +173,11 @@ class BlockInstanceController extends BaseWebController
             return $deny;
         }
 
-        $pageResponse = $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
-        if (!$pageResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('Pages.pages_not_found'));
+        $ownerType = $this->ownerTypeFromRequest();
+        $page = $this->fetchOwner($ownerType, $ownerId);
+        if ($page === []) {
+            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
         }
-        $page = $this->extractData($pageResponse);
 
         // Fetch block types (cached)
         $types = cache()->get('cms_block_types_list');
@@ -94,7 +206,7 @@ class BlockInstanceController extends BaseWebController
 
         $parentBlockType = null;
         if ($parentInstanceId !== null) {
-            $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', (string) $parentInstanceId));
+            $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, (string) $parentInstanceId));
             if ($parentResponse['ok']) {
                 $parentBlock = $this->extractData($parentResponse);
                 $parentBlockId = $parentBlock['block_id'] ?? null;
@@ -105,13 +217,22 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
+        $routes = $this->ownerRoutes($ownerType);
+
         return $this->render('cms/pages/blocks/create', [
-            'title'            => $parentInstanceId !== null ? 'Añadir Diapositiva' : 'Añadir Bloque',
-            'page'             => $page,
-            'blockTypes'       => $types,
-            'languages'        => $languages,
-            'parentInstanceId' => $parentInstanceId,
-            'parentBlockType'  => $parentBlockType,
+            'title'             => $parentInstanceId !== null ? 'Añadir ' . $this->childLabel($ownerType) : 'Añadir Bloque',
+            'page'              => $page,
+            'blockTypes'        => $types,
+            'languages'         => $languages,
+            'parentInstanceId'  => $parentInstanceId,
+            'parentBlockType'   => $parentBlockType,
+            'ownerType'         => $ownerType,
+            'ownerLabel'        => $this->ownerLabel($ownerType),
+            'ownerBlocksRoute'   => $routes['index'],
+            'ownerCreateRoute'   => $routes['create'],
+            'ownerStoreRoute'    => $routes['store'],
+            'ownerChildrenRoute' => $routes['children'],
+            'ownerChildLabel'    => $this->childLabel($ownerType),
         ]);
     }
 
@@ -178,9 +299,10 @@ class BlockInstanceController extends BaseWebController
             ? (int) $parentIdRaw
             : null;
 
+        $ownerType = $this->ownerTypeFromRequest();
         $payload = [
             'block_id'           => $blockId,
-            'owner_type'         => 'page',
+            'owner_type'         => $ownerType,
             'owner_id'           => (int) $ownerId,
             'parent_instance_id' => $parentInstanceId,
             'sort_order'         => $sortOrder,
@@ -189,17 +311,17 @@ class BlockInstanceController extends BaseWebController
             'translations'       => $translations,
         ];
 
-        $response = $this->safeApiCall(fn () => $this->blockInstanceService->create($ownerId, 'page', $payload));
+        $response = $this->safeApiCall(fn () => $this->blockInstanceService->create($ownerId, $ownerType, $payload));
 
         if (!$response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al crear el bloque'));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva añadida con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' añadida con éxito.');
         }
 
-        return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque añadido con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque añadido con éxito.');
     }
 
     public function edit(string $ownerId, string $id): string|RedirectResponse
@@ -209,15 +331,15 @@ class BlockInstanceController extends BaseWebController
             return $deny;
         }
 
-        $pageResponse = $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
-        if (!$pageResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('Pages.pages_not_found'));
+        $ownerType = $this->ownerTypeFromRequest();
+        $page = $this->fetchOwner($ownerType, $ownerId);
+        if ($page === []) {
+            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
         }
-        $page = $this->extractData($pageResponse);
 
-        $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
+        $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
         if (!$blockResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('error', 'Bloque no encontrado.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Bloque no encontrado.');
         }
         $block = $this->extractData($blockResponse);
 
@@ -243,11 +365,19 @@ class BlockInstanceController extends BaseWebController
         }
 
         return $this->render('cms/pages/blocks/edit', [
-            'title'     => 'Editar Bloque',
-            'page'      => $page,
-            'block'     => $block,
-            'blockType' => $blockType,
-            'languages' => $languages
+            'title'        => 'Editar Bloque',
+            'page'         => $page,
+            'block'        => $block,
+            'blockType'    => $blockType,
+            'languages'    => $languages,
+            'ownerType'    => $ownerType,
+            'ownerLabel'   => $this->ownerLabel($ownerType),
+            'ownerBlocksRoute' => $this->ownerRoutes($ownerType)['index'],
+            'ownerStoreRoute' => $this->ownerRoutes($ownerType)['store'],
+            'ownerEditRoute' => $this->ownerRoutes($ownerType)['edit'],
+            'ownerUpdateRoute' => $this->ownerRoutes($ownerType)['update'],
+            'ownerDeleteRoute' => $this->ownerRoutes($ownerType)['delete'],
+            'ownerChildrenRoute' => $this->ownerRoutes($ownerType)['children'],
         ]);
     }
 
@@ -266,7 +396,8 @@ class BlockInstanceController extends BaseWebController
         $isActive     = ! empty($isActiveRaw);
 
         // Preserve parent_instance_id from the existing block record
-        $existingBlock    = $this->extractData($this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id)));
+        $ownerType        = $this->ownerTypeFromRequest();
+        $existingBlock    = $this->extractData($this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id)));
         $parentInstanceId = !empty($existingBlock['parent_instance_id']) ? (int) $existingBlock['parent_instance_id'] : null;
 
         $blockConfigRaw = $this->request->getPost('block_config');
@@ -312,7 +443,7 @@ class BlockInstanceController extends BaseWebController
 
         $payload = [
             'block_id'           => $blockId,
-            'owner_type'         => 'page',
+            'owner_type'         => $ownerType,
             'owner_id'           => (int) $ownerId,
             'parent_instance_id' => $parentInstanceId,
             'sort_order'         => $sortOrder,
@@ -321,17 +452,17 @@ class BlockInstanceController extends BaseWebController
             'translations'       => $translations,
         ];
 
-        $response = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, $payload));
+        $response = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, $payload));
 
         if (!$response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, 'Error al actualizar el bloque'));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva actualizada con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' actualizada con éxito.');
         }
 
-        return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque actualizado con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque actualizado con éxito.');
     }
 
     public function delete(string $ownerId, string $id): RedirectResponse
@@ -342,24 +473,25 @@ class BlockInstanceController extends BaseWebController
         }
 
         // Fetch before deleting so we know where to redirect
-        $blockResponse    = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
-        $block            = $blockResponse['ok'] ? $this->extractData($blockResponse) : [];
+        $ownerType        = $this->ownerTypeFromRequest();
+        $blockResponse    = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
+        $block            = ($blockResponse['ok'] ?? false) ? $this->extractData($blockResponse) : [];
         $parentInstanceId = !empty($block['parent_instance_id']) ? (int) $block['parent_instance_id'] : null;
 
-        $response = $this->safeApiCall(fn () => $this->blockInstanceService->delete($ownerId, 'page', $id));
+        $response = $this->safeApiCall(fn () => $this->blockInstanceService->delete($ownerId, $ownerType, $id));
 
         if (!$response['ok']) {
             if ($parentInstanceId !== null) {
-                return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('error', 'Error al borrar la diapositiva.');
+                return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('error', 'Error al borrar ' . $this->childLabel($ownerType) . '.');
             }
-            return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('error', 'Error al borrar el bloque.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Error al borrar el bloque.');
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, (string) $parentInstanceId))->with('success', 'Diapositiva eliminada con éxito.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', $this->childLabel($ownerType) . ' eliminada con éxito.');
         }
 
-        return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Bloque eliminado con éxito.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Bloque eliminado con éxito.');
     }
 
     public function reorder(string $ownerId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -372,13 +504,15 @@ class BlockInstanceController extends BaseWebController
         $ordersRaw = $this->request->getPost('orders');
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
+        $ownerType = $this->ownerTypeFromRequest();
+
         foreach ($orders as $id => $order) {
-            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
+            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
             if ($blockResponse['ok']) {
                 $block = $this->extractData($blockResponse);
-                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, [
+                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
                     'block_id'     => (int) $block['block_id'],
-                    'owner_type'   => 'page',
+                    'owner_type'   => $ownerType,
                     'owner_id'     => (int) $ownerId,
                     'sort_order'   => (int) $order,
                     'is_active'    => (bool) ($block['is_active'] ?? true),
@@ -394,7 +528,7 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('success', 'Orden de bloques actualizado.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', 'Orden de bloques actualizado.');
     }
 
     public function reorderChildren(string $ownerId, string $instanceId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -407,13 +541,15 @@ class BlockInstanceController extends BaseWebController
         $ordersRaw = $this->request->getPost('orders');
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
+        $ownerType = $this->ownerTypeFromRequest();
+
         foreach ($orders as $id => $order) {
-            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $id));
+            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
             if ($blockResponse['ok']) {
                 $block = $this->extractData($blockResponse);
-                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, 'page', $id, [
+                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
                     'block_id'           => (int) $block['block_id'],
-                    'owner_type'         => 'page',
+                    'owner_type'         => $ownerType,
                     'owner_id'           => (int) $ownerId,
                     'parent_instance_id' => (int) $instanceId,
                     'sort_order'         => (int) $order,
@@ -430,25 +566,25 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to('admin.cms.pages.blocks.children', $ownerId, $instanceId))->with('success', 'Orden actualizado.');
+        return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, $instanceId))->with('success', 'Orden actualizado.');
     }
 
     public function children(string $ownerId, string $instanceId): string|RedirectResponse
     {
-        $pageResponse = $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
-        if (!$pageResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages'))->with('error', lang('Pages.pages_not_found'));
+        $ownerType = $this->ownerTypeFromRequest();
+        $page = $this->fetchOwner($ownerType, $ownerId);
+        if ($page === []) {
+            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
         }
-        $page = $this->extractData($pageResponse);
 
-        $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', $instanceId));
+        $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $instanceId));
         if (!$parentResponse['ok']) {
-            return redirect()->to(route_to('admin.cms.pages.blocks', $ownerId))->with('error', 'Bloque contenedor no encontrado.');
+            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', 'Bloque contenedor no encontrado.');
         }
         $parentBlock = $this->extractData($parentResponse);
 
         // Fetch all page blocks and filter to just children of this instance
-        $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, 'page'));
+        $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, $ownerType));
         $allBlocks      = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
         $children       = array_values(array_filter($allBlocks, static fn (array $b) => (int) ($b['parent_instance_id'] ?? 0) === (int) $instanceId));
 
@@ -457,12 +593,22 @@ class BlockInstanceController extends BaseWebController
         $parentType = $typesIndexed[$parentBlock['block_id']] ?? [];
 
         return $this->render('cms/pages/blocks/children/index', [
-            'title'        => 'Diapositivas de ' . ($parentType['name'] ?? 'Bloque'),
-            'page'         => $page,
-            'parentBlock'  => $parentBlock,
-            'parentType'   => $parentType,
-            'children'     => $children,
-            'blockTypes'   => $typesIndexed,
+            'title'                => ($ownerType === self::OWNER_ENTRY ? 'Sub-bloques' : 'Diapositivas') . ' de ' . ($parentType['name'] ?? 'Bloque'),
+            'page'                 => $page,
+            'parentBlock'          => $parentBlock,
+            'parentType'           => $parentType,
+            'children'             => $children,
+            'blockTypes'           => $typesIndexed,
+            'ownerType'            => $ownerType,
+            'ownerLabel'           => $this->ownerLabel($ownerType),
+            'ownerBlocksRoute'     => $this->ownerRoutes($ownerType)['index'],
+            'ownerCreateRoute'     => $this->ownerRoutes($ownerType)['create'],
+            'ownerStoreRoute'      => $this->ownerRoutes($ownerType)['store'],
+            'ownerEditRoute'       => $this->ownerRoutes($ownerType)['edit'],
+            'ownerUpdateRoute'     => $this->ownerRoutes($ownerType)['update'],
+            'ownerDeleteRoute'     => $this->ownerRoutes($ownerType)['delete'],
+            'ownerChildrenReorderRoute' => $this->ownerRoutes($ownerType)['childrenReorder'],
+            'childLabel'           => $this->childLabel($ownerType),
         ]);
     }
 

@@ -4,6 +4,11 @@ $blockTypes       = $blockTypes       ?? [];
 $languages        = $languages        ?? [];
 $parentInstanceId = $parentInstanceId ?? null;
 $parentBlockType  = $parentBlockType  ?? null;
+$ownerType        = $ownerType        ?? 'page';
+$ownerLabel       = $ownerLabel       ?? 'Página';
+$ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
+$ownerStoreRoute  = $ownerStoreRoute  ?? 'admin.cms.pages.blocks.store';
+$ownerChildLabel  = $ownerChildLabel  ?? 'Diapositiva';
 
 // When creating a child block, filter dynamically using parent block's allowed_children schema definition
 if ($parentInstanceId !== null) {
@@ -32,9 +37,9 @@ $parentIdJs    = json_encode($parentInstanceId);
 
 <div class="mb-4">
     <?php if ($parentInstanceId !== null): ?>
-        <a href="javascript:history.back()" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Diapositivas</a>
+        <a href="javascript:history.back()" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a <?= esc($ownerChildLabel) ?>s</a>
     <?php else: ?>
-        <a href="<?= route_to('admin.cms.pages.blocks', (string)$page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Bloques</a>
+        <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a Bloques de <?= esc($ownerLabel) ?></a>
     <?php endif; ?>
 </div>
 
@@ -43,7 +48,7 @@ $parentIdJs    = json_encode($parentInstanceId);
     <!-- ── PASO 1: Selector visual de tipo de bloque ─────────────────────── -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <h3 class="text-base font-semibold text-gray-900 mb-1">Paso 1 — Elige el bloque</h3>
-        <p class="text-sm text-gray-500 mb-5">Selecciona el tipo de bloque que quieres añadir a esta página.</p>
+        <p class="text-sm text-gray-500 mb-5">Selecciona el tipo de bloque que quieres añadir a esta <?= esc(strtolower($ownerLabel)) ?>.</p>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <template x-for="bt in blockTypes" :key="bt.id">
@@ -99,7 +104,7 @@ $parentIdJs    = json_encode($parentInstanceId);
             </button>
         </div>
 
-        <form method="post" action="<?= route_to('admin.cms.pages.blocks.store', (string)$page['id']) ?>" class="space-y-6">
+        <form method="post" action="<?= route_to($ownerStoreRoute, (string)$page['id']) ?>" class="space-y-6">
             <?= csrf_field() ?>
             <input type="hidden" name="block_id" :value="selectedBlockType?.id">
             <?php if ($parentInstanceId !== null): ?>
@@ -369,7 +374,7 @@ $parentIdJs    = json_encode($parentInstanceId);
 
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <button type="submit" class="<?= esc(action_button_class('primary')) ?>">Añadir Bloque</button>
-                <a href="<?= route_to('admin.cms.pages.blocks', (string)$page['id']) ?>" class="<?= esc(action_button_class()) ?>">Cancelar</a>
+                <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="<?= esc(action_button_class()) ?>">Cancelar</a>
             </div>
         </form>
     </section>

@@ -4,18 +4,24 @@ $parentBlock = $parentBlock ?? [];
 $parentType  = $parentType  ?? [];
 $children    = $children    ?? [];
 $blockTypes  = $blockTypes  ?? [];
+$ownerType   = $ownerType   ?? 'page';
+$ownerLabel  = $ownerLabel  ?? 'Página';
+$ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
+$ownerCreateRoute = $ownerCreateRoute ?? 'admin.cms.pages.blocks.create';
+$ownerChildrenReorderRoute = $ownerChildrenReorderRoute ?? 'admin.cms.pages.blocks.children.reorder';
+$childLabel  = $childLabel  ?? 'Diapositiva';
 
 $pageId     = (string) ($page['id'] ?? '');
 $instanceId = (string) ($parentBlock['id'] ?? '');
-$reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $instanceId);
+$reorderUrl = route_to($ownerChildrenReorderRoute, $pageId, $instanceId);
 ?>
 <div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.cms.pages.blocks', $pageId) ?>" class="text-sm text-brand-600 hover:text-brand-700">
-        &larr; Volver a Bloques de <?= esc($page['title'] ?? 'Página') ?>
+    <a href="<?= route_to($ownerBlocksRoute, $pageId) ?>" class="text-sm text-brand-600 hover:text-brand-700">
+        &larr; Volver a Bloques de <?= esc($page['title'] ?? $ownerLabel) ?>
     </a>
-    <a href="<?= route_to('admin.cms.pages.blocks.create', $pageId) ?>?parent_instance_id=<?= esc($instanceId) ?>"
+    <a href="<?= route_to($ownerCreateRoute, $pageId) ?>?parent_instance_id=<?= esc($instanceId) ?>"
        class="<?= esc(action_button_class('primary')) ?>">
-        <?= ui_icon('plus', 'h-4 w-4 mr-1') ?> Agregar Diapositiva
+        <?= ui_icon('plus', 'h-4 w-4 mr-1') ?> Agregar <?= esc($childLabel) ?>
     </a>
 </div>
 
@@ -24,11 +30,11 @@ $reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $inst
 
     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
         <div>
-            <h3 class="text-xl font-bold text-gray-900">
+                <h3 class="text-xl font-bold text-gray-900">
                 <?= ui_icon($parentType['icon'] ?? 'gallery-horizontal', 'h-5 w-5 inline-block mr-2 text-brand-600') ?>
-                Diapositivas del <?= esc($parentType['name'] ?? 'Carrusel') ?>
+                <?= esc($ownerType === 'entry' ? 'Sub-bloques' : 'Diapositivas') ?> del <?= esc($parentType['name'] ?? 'Bloque') ?>
             </h3>
-            <p class="text-sm text-gray-500 mt-1">Página: <strong><?= esc($page['title'] ?? '') ?></strong></p>
+            <p class="text-sm text-gray-500 mt-1"><?= esc($ownerLabel) ?>: <strong><?= esc($page['title'] ?? '') ?></strong></p>
         </div>
         <div class="flex items-center gap-3">
             <span x-show="saving" class="flex items-center gap-1.5 text-xs text-gray-500">
@@ -60,8 +66,8 @@ $reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $inst
     <?php if (empty($children)): ?>
         <div class="text-center py-12 border border-dashed border-gray-200 rounded-xl">
             <?= ui_icon('image', 'h-10 w-10 text-gray-300 mx-auto mb-3') ?>
-            <p class="text-sm text-gray-500 font-medium">Este carrusel aún no tiene diapositivas.</p>
-            <p class="text-xs text-gray-400 mt-1">Haz clic en "Agregar Diapositiva" para añadir slides al carrusel.</p>
+            <p class="text-sm text-gray-500 font-medium">Este <?= esc(strtolower($ownerLabel)) ?> aún no tiene <?= esc(strtolower($childLabel)) ?>.</p>
+            <p class="text-xs text-gray-400 mt-1">Haz clic en "Agregar <?= esc($childLabel) ?>" para comenzar.</p>
         </div>
     <?php else: ?>
         <div data-sortable-list class="space-y-3">
@@ -132,12 +138,12 @@ $reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $inst
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2 shrink-0">
-                    <a href="<?= route_to('admin.cms.pages.blocks.edit', $pageId, $childId) ?>"
+                    <a href="<?= route_to($ownerType === 'entry' ? 'admin.cms.entries.blocks.edit' : 'admin.cms.pages.blocks.edit', $pageId, $childId) ?>"
                        class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
                         Editar
                     </a>
                     <form method="post"
-                          action="<?= route_to('admin.cms.pages.blocks.delete', $pageId, $childId) ?>"
+                          action="<?= route_to($ownerType === 'entry' ? 'admin.cms.entries.blocks.delete' : 'admin.cms.pages.blocks.delete', $pageId, $childId) ?>"
                           onsubmit="return confirm('¿Seguro que deseas eliminar esta diapositiva?');">
                         <?= csrf_field() ?>
                         <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
@@ -153,7 +159,7 @@ $reorderUrl = route_to('admin.cms.pages.blocks.children.reorder', $pageId, $inst
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/>
             </svg>
-            Arrastra los slides para reordenarlos y luego haz clic en <strong class="font-medium text-gray-500">Guardar Orden</strong> para confirmar.
+            Arrastra los bloques para reordenarlos y luego haz clic en <strong class="font-medium text-gray-500">Guardar Orden</strong> para confirmar.
         </p>
     <?php endif; ?>
 </section>

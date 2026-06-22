@@ -15,6 +15,10 @@
             <h3 class="text-lg font-semibold text-gray-900"><?= lang('Entries.entries_details') ?></h3>
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.entries.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
+                <a href="<?= route_to('admin.cms.entries.blocks', $itemId) ?>" class="<?= esc(action_button_class('neutral')) ?>">
+                    <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+                    <?= esc(lang('Entries.blocks_title')) ?>
+                </a>
 
                 <form method="post" action="<?= route_to('admin.cms.entries.publish', $itemId) ?>">
                     <?= csrf_field() ?>

@@ -69,6 +69,19 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('pages/(:num)/blocks/(:num)/children', '\App\Modules\Cms\Controllers\BlockInstanceController::children/$1/$2', ['as' => 'admin.cms.pages.blocks.children', 'filter' => 'permission:cms.pages.read']);
     $routes->post('pages/(:num)/blocks/(:num)/children/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorderChildren/$1/$2', ['as' => 'admin.cms.pages.blocks.children.reorder', 'filter' => 'permission:cms.pages.write']);
 
+    // Entry Blocks Builder
+    $routes->get('entries/(:num)/blocks', '\App\Modules\Cms\Controllers\BlockInstanceController::index/$1', ['as' => 'admin.cms.entries.blocks', 'filter' => 'permission:cms.entries.read']);
+    $routes->get('entries/(:num)/blocks/create', '\App\Modules\Cms\Controllers\BlockInstanceController::create/$1', ['as' => 'admin.cms.entries.blocks.create', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:num)/blocks/store', '\App\Modules\Cms\Controllers\BlockInstanceController::store/$1', ['as' => 'admin.cms.entries.blocks.store', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('entries/(:num)/blocks/(:num)/edit', '\App\Modules\Cms\Controllers\BlockInstanceController::edit/$1/$2', ['as' => 'admin.cms.entries.blocks.edit', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:num)/blocks/(:num)', '\App\Modules\Cms\Controllers\BlockInstanceController::update/$1/$2', ['as' => 'admin.cms.entries.blocks.update', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:num)/blocks/(:num)/delete', '\App\Modules\Cms\Controllers\BlockInstanceController::delete/$1/$2', ['as' => 'admin.cms.entries.blocks.delete', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('entries/(:num)/blocks/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorder/$1', ['as' => 'admin.cms.entries.blocks.reorder', 'filter' => 'permission:cms.entries.write']);
+
+    // Entry child block management
+    $routes->get('entries/(:num)/blocks/(:num)/children', '\App\Modules\Cms\Controllers\BlockInstanceController::children/$1/$2', ['as' => 'admin.cms.entries.blocks.children', 'filter' => 'permission:cms.entries.read']);
+    $routes->post('entries/(:num)/blocks/(:num)/children/reorder', '\App\Modules\Cms\Controllers\BlockInstanceController::reorderChildren/$1/$2', ['as' => 'admin.cms.entries.blocks.children.reorder', 'filter' => 'permission:cms.entries.write']);
+
     // Menu
     $routes->get('menus', '\App\Modules\Cms\Controllers\MenuController::index', ['as' => 'admin.cms.menus', 'filter' => 'permission:cms.menus.read']);
     $routes->get('menus/data', '\App\Modules\Cms\Controllers\MenuController::data', ['as' => 'admin.cms.menus.data', 'filter' => 'permission:cms.menus.read']);

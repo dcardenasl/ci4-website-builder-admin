@@ -3,7 +3,16 @@ $page          = $page          ?? [];
 $blocks        = $blocks        ?? [];
 $blockTypes    = $blockTypes    ?? [];
 $publicSiteUrl = $publicSiteUrl ?? '';
-$reorderUrl    = route_to('admin.cms.pages.blocks.reorder', (string) $page['id']);
+$ownerType     = $ownerType     ?? 'page';
+$ownerLabel    = $ownerLabel    ?? 'Página';
+$ownerShowRoute = $ownerShowRoute ?? 'admin.cms.pages.show';
+$ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
+$ownerCreateRoute = $ownerCreateRoute ?? 'admin.cms.pages.blocks.create';
+$ownerEditRoute   = $ownerEditRoute ?? 'admin.cms.pages.blocks.edit';
+$ownerDeleteRoute = $ownerDeleteRoute ?? 'admin.cms.pages.blocks.delete';
+$ownerChildrenRoute = $ownerChildrenRoute ?? 'admin.cms.pages.blocks.children';
+$ownerReorderRoute = $ownerReorderRoute ?? 'admin.cms.pages.blocks.reorder';
+$reorderUrl    = route_to($ownerReorderRoute, (string) $page['id']);
 
 // Build preview URL from first translation slug, fall back to page id path
 $previewSlug = '';
@@ -15,7 +24,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
     : '';
 ?>
 <div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.cms.pages.show', (string) $page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a la Página</a>
+    <a href="<?= route_to($ownerShowRoute, (string) $page['id']) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; Volver a <?= esc($ownerLabel) ?></a>
     <div class="flex items-center gap-2">
         <?php if ($previewUrl !== ''): ?>
         <a href="<?= esc($previewUrl) ?>" target="_blank" rel="noopener noreferrer"
@@ -23,7 +32,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
             <?= ui_icon('external-link', 'h-4 w-4 mr-1') ?> Ver Página
         </a>
         <?php endif; ?>
-        <a href="<?= route_to('admin.cms.pages.blocks.create', (string) $page['id']) ?>" class="<?= esc(action_button_class('primary')) ?>">
+        <a href="<?= route_to($ownerCreateRoute, (string) $page['id']) ?>" class="<?= esc(action_button_class('primary')) ?>">
             <?= ui_icon('plus', 'h-4 w-4 mr-1') ?> Añadir Bloque
         </a>
     </div>
@@ -115,17 +124,17 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
                 <!-- Actions -->
                 <div class="flex items-center gap-2 shrink-0">
                     <?php if (!empty($blockType['is_container'])): ?>
-                        <a href="<?= route_to('admin.cms.pages.blocks.children', (string) $page['id'], $blockId) ?>"
+                <a href="<?= route_to($ownerChildrenRoute, (string) $page['id'], $blockId) ?>"
                            class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
                             <?= ui_icon('layers', 'h-3.5 w-3.5 mr-1') ?> Slides
                         </a>
                     <?php endif; ?>
-                    <a href="<?= route_to('admin.cms.pages.blocks.edit', (string) $page['id'], $blockId) ?>"
+                    <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"
                        class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
                         Editar
                     </a>
                     <form method="post"
-                          action="<?= route_to('admin.cms.pages.blocks.delete', (string) $page['id'], $blockId) ?>"
+                          action="<?= route_to($ownerDeleteRoute, (string) $page['id'], $blockId) ?>"
                           onsubmit="return confirm('¿Seguro que deseas eliminar este bloque?');">
                         <?= csrf_field() ?>
                         <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">

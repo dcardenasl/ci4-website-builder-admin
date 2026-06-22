@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Modules\Cms\Services\BlockInstanceApiService;
 use App\Modules\Cms\Services\BlockTypeApiService;
+use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\PageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -67,6 +68,42 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
     }
 
+    public function testEntryIndexRendersForAdmin(): void
+    {
+        $entryMock = $this->createMock(EntryApiService::class);
+        $entryMock->method('get')
+            ->with('4')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 4, 'title' => 'Test Entry'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('entryApiService', $entryMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('list')
+            ->with('4', 'entry')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.entries.read']],
+        ])->get('/admin/cms/entries/4/blocks');
+
+        $result->assertStatus(200);
+    }
+
     public function testCreateRendersForAdmin(): void
     {
         $pageMock = $this->createMock(PageApiService::class);
@@ -98,6 +135,41 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
         ])->get('/admin/cms/pages/1/blocks/create');
+
+        $result->assertStatus(200);
+    }
+
+    public function testEntryCreateRendersForAdmin(): void
+    {
+        $entryMock = $this->createMock(EntryApiService::class);
+        $entryMock->method('get')
+            ->with('4')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 4, 'title' => 'Test Entry'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('entryApiService', $entryMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $langMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.entries.write', 'cms.entries.read']],
+        ])->get('/admin/cms/entries/4/blocks/create');
 
         $result->assertStatus(200);
     }
