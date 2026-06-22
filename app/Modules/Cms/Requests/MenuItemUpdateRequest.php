@@ -15,6 +15,8 @@ class MenuItemUpdateRequest extends BaseFormRequest
             'parent_id',
             'link_type',
             'page_id',
+            'entry_id',
+            'collection_id',
             'link_target',
             'icon',
             'css_class',
@@ -31,6 +33,8 @@ class MenuItemUpdateRequest extends BaseFormRequest
             'parent_id'   => 'permit_empty|integer',
             'link_type'   => 'required|in_list[page,entry,collection_listing,custom_url,no_link]',
             'page_id'     => 'permit_empty|integer',
+            'entry_id'    => 'permit_empty|integer',
+            'collection_id' => 'permit_empty|integer',
             'link_target' => 'required|in_list[_self,_blank]',
             'icon'        => 'permit_empty|string|max_length[50]',
             'css_class'   => 'permit_empty|string|max_length[100]',
@@ -45,7 +49,9 @@ class MenuItemUpdateRequest extends BaseFormRequest
             'menu_id'       => $this->postInt('menu_id'),
             'parent_id'     => is_numeric($this->request->getPost('parent_id')) ? (int) $this->request->getPost('parent_id') : null,
             'link_type'     => $this->postString('link_type'),
-            'page_id'       => is_numeric($this->request->getPost('page_id')) ? (int) $this->request->getPost('page_id') : null,
+            'page_id'       => $this->postInt('page_id'),
+            'entry_id'      => $this->postInt('entry_id'),
+            'collection_id' => $this->postInt('collection_id'),
             'link_target'   => $this->postString('link_target') ?: '_self',
             'icon'          => $this->postString('icon') ?: null,
             'css_class'     => $this->postString('css_class') ?: null,
@@ -53,6 +59,16 @@ class MenuItemUpdateRequest extends BaseFormRequest
             'is_active'     => $this->postBool('is_active') ? '1' : '0',
             'translations'  => []
         ];
+
+        if ($payload['link_type'] !== 'page') {
+            $payload['page_id'] = null;
+        }
+        if ($payload['link_type'] !== 'entry') {
+            $payload['entry_id'] = null;
+        }
+        if ($payload['link_type'] !== 'collection_listing') {
+            $payload['collection_id'] = null;
+        }
 
         // Format translations
         $rawTranslations = $this->postArray('translations');

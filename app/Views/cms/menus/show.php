@@ -119,11 +119,26 @@
                                                 <?php endif; ?>
                                                 <span class="font-medium text-gray-900"><?= esc($label ?: 'Untitled') ?></span>
                                                 <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
-                                                    <?= esc($item['link_type']) ?>
-                                                    <?php if ($item['link_type'] === 'page' && !empty($item['page_id'])): ?>
-                                                        : <?= esc((string)$item['page_id']) ?>
+                                                    <?php if ($item['link_type'] === 'page'): ?>
+                                                        <?= esc(lang('Menus.items_link_type_page')) ?>
+                                                        <?php if (!empty($item['page_id'])): ?>
+                                                            : <?= esc((string) $item['page_id']) ?>
+                                                        <?php endif; ?>
+                                                    <?php elseif ($item['link_type'] === 'entry'): ?>
+                                                        <?= esc(lang('Menus.items_link_type_entry')) ?>
+                                                        <?php if (!empty($item['entry_id'])): ?>
+                                                            : <?= esc((string) $item['entry_id']) ?>
+                                                        <?php endif; ?>
+                                                    <?php elseif ($item['link_type'] === 'collection_listing'): ?>
+                                                        <?= esc(lang('Menus.items_link_type_collection_listing')) ?>
+                                                        <?php if (!empty($item['collection_id'])): ?>
+                                                            : <?= esc((string) $item['collection_id']) ?>
+                                                        <?php endif; ?>
                                                     <?php elseif ($item['link_type'] === 'custom_url'): ?>
+                                                        <?= esc(lang('Menus.items_link_type_custom_url')) ?>
                                                         : <?= esc($item['translations'][0]['custom_url'] ?? '') ?>
+                                                    <?php else: ?>
+                                                        <?= esc(lang('Menus.items_link_type_no_link')) ?>
                                                     <?php endif; ?>
                                                 </span>
                                                 <?php if (empty($item['is_active'])): ?>

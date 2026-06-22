@@ -9,6 +9,7 @@ use App\Modules\Cms\Requests\MenuItemStoreRequest;
 use App\Modules\Cms\Requests\MenuItemUpdateRequest;
 use App\Modules\Cms\Requests\MenuStoreRequest;
 use App\Modules\Cms\Requests\MenuUpdateRequest;
+use App\Modules\Cms\Services\EntryApiServiceInterface;
 use App\Modules\Cms\Services\MenuApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -18,11 +19,13 @@ use Psr\Log\LoggerInterface;
 class MenuController extends BaseWebController
 {
     protected MenuApiServiceInterface $menuService;
+    protected EntryApiServiceInterface $entryService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->menuService = service('menuApiService');
+        $this->entryService = service('entryApiService');
     }
 
     public function index(): string
@@ -170,6 +173,8 @@ class MenuController extends BaseWebController
             'menu'      => $this->extractData($menuResponse),
             'items'     => $items,
             'pages'     => $this->pagesOptions(),
+            'entries'   => $this->entriesOptions(),
+            'collections' => $this->collectionsOptions(),
             'languages' => $this->getLanguages(),
         ]);
     }
@@ -185,21 +190,8 @@ class MenuController extends BaseWebController
 
         $payload = $request->payload();
 
-        // Manual validation: exclusion mutua page_id vs custom_url in link_type
-        if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
-            return redirect()->back()->withInput()->with('error', lang('Menus.field_page_id_required') ?? 'Page selection is required for Page link type.');
-        }
-        if ($payload['link_type'] === 'custom_url') {
-            $hasUrl = false;
-            foreach ($payload['translations'] as $t) {
-                if (!empty($t['custom_url'])) {
-                    $hasUrl = true;
-                    break;
-                }
-            }
-            if (!$hasUrl) {
-                return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
-            }
+        if ($invalid = $this->validateMenuItemTarget($payload)) {
+            return $invalid;
         }
 
         $response = $this->safeApiCall(fn () => $this->menuService->createItem($payload));
@@ -230,6 +222,8 @@ class MenuController extends BaseWebController
             'item'      => $this->extractData($itemResponse),
             'items'     => $items,
             'pages'     => $this->pagesOptions(),
+            'entries'   => $this->entriesOptions(),
+            'collections' => $this->collectionsOptions(),
             'languages' => $this->getLanguages(),
         ]);
     }
@@ -245,21 +239,8 @@ class MenuController extends BaseWebController
 
         $payload = $request->payload();
 
-        // Manual validation: exclusion mutua page_id vs custom_url in link_type
-        if ($payload['link_type'] === 'page' && empty($payload['page_id'])) {
-            return redirect()->back()->withInput()->with('error', lang('Menus.field_page_id_required') ?? 'Page selection is required for Page link type.');
-        }
-        if ($payload['link_type'] === 'custom_url') {
-            $hasUrl = false;
-            foreach ($payload['translations'] as $t) {
-                if (!empty($t['custom_url'])) {
-                    $hasUrl = true;
-                    break;
-                }
-            }
-            if (!$hasUrl) {
-                return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
-            }
+        if ($invalid = $this->validateMenuItemTarget($payload)) {
+            return $invalid;
         }
 
         $response = $this->safeApiCall(fn () => $this->menuService->updateItem($itemId, $payload));
@@ -318,5 +299,85 @@ class MenuController extends BaseWebController
         }
 
         return $options;
+    }
+
+    /** @return array<string, string> */
+    private function entriesOptions(): array
+    {
+        $response = $this->safeApiCall(fn () => $this->entryService->list(['limit' => 250]));
+        $options = [];
+
+        foreach ($this->extractItems($response) as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+
+            $label = null;
+            if (! empty($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $translation) {
+                    if (is_array($translation) && ! empty($translation['title'])) {
+                        $label = $translation['title'];
+                        break;
+                    }
+                }
+            }
+
+            $label ??= $item['title'] ?? $item['name'] ?? $item['slug'] ?? $item['id'];
+            $options[(string) $item['id']] = (string) $label;
+        }
+
+        return $options;
+    }
+
+    /** @return array<string, string> */
+    private function collectionsOptions(): array
+    {
+        $response = $this->safeApiCall(fn () => $this->entryService->collections(['limit' => 100, 'is_active' => true]));
+        $options = [];
+
+        foreach ($this->extractItems($response) as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+
+            $label = $item['collection_key'] ?? $item['name'] ?? $item['title'] ?? $item['label'] ?? $item['id'];
+            $options[(string) $item['id']] = (string) $label;
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function validateMenuItemTarget(array $payload): ?RedirectResponse
+    {
+        return match ($payload['link_type'] ?? '') {
+            'page' => empty($payload['page_id'])
+                ? redirect()->back()->withInput()->with('error', lang('Menus.field_page_id_required') ?? 'Page selection is required for Page link type.')
+                : null,
+            'entry' => empty($payload['entry_id'])
+                ? redirect()->back()->withInput()->with('error', lang('Menus.field_entry_id_required') ?? 'An entry is required for Entry link type.')
+                : null,
+            'collection_listing' => empty($payload['collection_id'])
+                ? redirect()->back()->withInput()->with('error', lang('Menus.field_collection_id_required') ?? 'A collection is required for Collection link type.')
+                : null,
+            'custom_url' => $this->validateCustomUrlTranslations($payload['translations'] ?? []),
+            default => null,
+        };
+    }
+
+    /**
+     * @param array<int, mixed> $translations
+     */
+    private function validateCustomUrlTranslations(array $translations): ?RedirectResponse
+    {
+        foreach ($translations as $translation) {
+            if (is_array($translation) && ! empty($translation['custom_url'])) {
+                return null;
+            }
+        }
+
+        return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
     }
 }
