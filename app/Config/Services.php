@@ -41,6 +41,8 @@ use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\SettingApiServiceInterface;
 use App\Modules\Cms\Services\TagApiService;
 use App\Modules\Cms\Services\TagApiServiceInterface;
+use App\Modules\Cms\Services\TranslationAuditApiService;
+use App\Modules\Cms\Services\TranslationAuditApiServiceInterface;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Dashboard\Services\HealthApiServiceInterface;
 use App\Modules\Files\Services\FileApiService;
@@ -382,4 +384,12 @@ class Services extends BaseService
         return new RedirectApiService(static::domainApiClient());
     }
 
+    public static function translationAuditApiService(bool $getShared = true): TranslationAuditApiServiceInterface
+    {
+        if ($getShared) {
+            /** @var TranslationAuditApiService */
+            return static::getSharedInstance('translationAuditApiService');
+        }
+        return new TranslationAuditApiService(static::domainApiClient());
+    }
 }

@@ -37,6 +37,10 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     // Translate proxy (DeepL)
     $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate', 'filter' => 'permission:cms.pages.read']);
 
+    // Translation Auditing
+    $routes->get('translations/audit', '\App\Modules\Cms\Controllers\TranslationAuditController::index', ['as' => 'admin.cms.translations.audit', 'filter' => 'permission:cms.languages.read']);
+    $routes->get('translations/audit/data', '\App\Modules\Cms\Controllers\TranslationAuditController::data', ['as' => 'admin.cms.translations.audit.data', 'filter' => 'permission:cms.languages.read']);
+
     // Page
     $routes->get('pages', '\App\Modules\Cms\Controllers\PageController::index', ['as' => 'admin.cms.pages', 'filter' => 'permission:cms.pages.read']);
     $routes->get('pages/data', '\App\Modules\Cms\Controllers\PageController::data', ['as' => 'admin.cms.pages.data', 'filter' => 'permission:cms.pages.read']);

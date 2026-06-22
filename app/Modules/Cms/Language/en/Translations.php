@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'audit_title'           => 'Translation Audit',
+    'audit_subtitle'        => 'Audit translation completeness across pages, menu items, and settings.',
+    'missing_incomplete'    => 'Missing or Incomplete Translations',
+    'missing_incomplete_desc'=> 'Below are the elements requiring translation updates.',
+    'all_active_languages'  => 'All Active Languages',
+    'loading_report'        => 'Loading audit report...',
+    'all_complete'          => 'All translations complete!',
+    'no_missing_elements'   => 'There are no missing translation elements in the active languages.',
+    'field_type'            => 'Type',
+    'field_item_name'       => 'Item Name/Key',
+    'field_language'        => 'Language',
+    'field_status'          => 'Status',
+    'field_details'         => 'Issue Details',
+    'field_action'          => 'Action',
+    'action_translate'      => 'Translate',
+    'translated'            => 'Translated',
+    'resource_page'         => 'Page',
+    'resource_menu_item'    => 'Menu Item',
+    'resource_setting'      => 'Setting',
+    'status_missing'        => 'Missing',
+    'status_incomplete'     => 'Incomplete',
+    'detail_missing_all'    => 'Translation is missing completely',
+    'detail_missing_fields' => 'Missing fields: {fields}',
+    'field_title'           => 'title',
+    'field_slug'            => 'slug',
+    'field_label'           => 'label',
+    'field_setting_value'   => 'setting value',
+];
