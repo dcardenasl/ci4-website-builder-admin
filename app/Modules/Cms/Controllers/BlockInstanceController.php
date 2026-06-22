@@ -92,12 +92,26 @@ class BlockInstanceController extends BaseWebController
             ? (int) $parentIdRaw
             : null;
 
+        $parentBlockType = null;
+        if ($parentInstanceId !== null) {
+            $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, 'page', (string) $parentInstanceId));
+            if ($parentResponse['ok']) {
+                $parentBlock = $this->extractData($parentResponse);
+                $parentBlockId = $parentBlock['block_id'] ?? null;
+                if ($parentBlockId) {
+                    $typesIndexed = $this->fetchBlockTypes();
+                    $parentBlockType = $typesIndexed[$parentBlockId] ?? null;
+                }
+            }
+        }
+
         return $this->render('cms/pages/blocks/create', [
             'title'            => $parentInstanceId !== null ? 'Añadir Diapositiva' : 'Añadir Bloque',
             'page'             => $page,
             'blockTypes'       => $types,
             'languages'        => $languages,
             'parentInstanceId' => $parentInstanceId,
+            'parentBlockType'  => $parentBlockType,
         ]);
     }
 

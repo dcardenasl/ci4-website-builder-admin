@@ -185,7 +185,39 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
                     <?= view('components/form/text', ['name' => 'icon',        'label' => 'BlockTypes.field_icon',        'required' => false, 'value' => '', 'errors' => $errors ?? []]) ?>
                     <?= view('components/form/boolean', ['name' => 'supports_pages',   'label' => 'BlockTypes.field_supports_pages',   'value' => true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
                     <?= view('components/form/boolean', ['name' => 'supports_entries', 'label' => 'BlockTypes.field_supports_entries', 'value' => true,  'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
-                    <?= view('components/form/boolean', ['name' => 'is_container', 'label' => 'BlockTypes.field_is_container', 'value' => false, 'on_label' => 'App.yes', 'off_label' => 'App.no', 'errors' => $errors ?? []]) ?>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700">
+                            <?= lang('BlockTypes.field_is_container') ?>
+                        </span>
+                        <input type="hidden" name="is_container" value="0">
+                        <label class="mt-2 inline-flex cursor-pointer items-center gap-3">
+                            <input id="is_container" name="is_container" type="checkbox" value="1"
+                                   class="peer sr-only" x-model="isContainer" @change="rebuildJson()">
+                            <span class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-gray-200 transition-colors duration-200 ease-in-out peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-2"
+                                  :style="isContainer ? 'width: 2.75rem; height: 1.5rem; background-color: var(--color-brand-600)' : 'width: 2.75rem; height: 1.5rem'"
+                                  aria-hidden="true">
+                                <span class="inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
+                                      :style="isContainer ? 'transform: translateX(1.25rem)' : 'transform: translateX(0.125rem)'"></span>
+                            </span>
+                            <span class="text-sm font-medium text-gray-700" x-text="isContainer ? 'Sí' : 'No'"></span>
+                        </label>
+                    </div>
+
+                    <!-- Seleccion de bloques hijos permitidos -->
+                    <div x-show="isContainer" x-cloak class="mt-4 p-4 border border-brand-200 bg-brand-50/30 rounded-xl space-y-3">
+                        <h5 class="text-sm font-semibold text-brand-900">Bloques Hijos Permitidos</h5>
+                        <p class="text-xs text-brand-700">Selecciona qué tipos de bloques se pueden agregar dentro de este contenedor.</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <?php foreach ($blockTypes as $bt): ?>
+                                <label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+                                    <input type="checkbox" value="<?= esc($bt['block_key']) ?>" 
+                                           x-model="allowedChildren" @change="rebuildJson()"
+                                           class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                    <span><?= esc($bt['name']) ?> (<code class="font-mono text-[10px]"><?= esc($bt['block_key']) ?></code>)</span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                     <?= view('components/form/boolean', ['name' => 'is_active', 'label' => 'BlockTypes.field_is_active', 'value' => true, 'on_label' => 'BlockTypes.field_is_active_on', 'off_label' => 'BlockTypes.field_is_active_off', 'errors' => $errors ?? []]) ?>
                     <?= view('components/form/text', ['name' => 'sort_order', 'label' => 'BlockTypes.field_sort_order', 'required' => false, 'value' => '0', 'errors' => $errors ?? []]) ?>
                 </div>

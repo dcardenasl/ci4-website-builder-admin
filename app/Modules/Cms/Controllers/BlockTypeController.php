@@ -64,10 +64,13 @@ class BlockTypeController extends BaseWebController
     public function create(): string
     {
         $templates = $this->blockTypeService->templates();
+        $listResponse = $this->safeApiCall(fn () => $this->blockTypeService->list(['limit' => 100]));
+        $blockTypes = $listResponse['ok'] ? $this->extractItems($listResponse) : [];
 
         return $this->render('cms/block_types/create', [
-            'title'     => lang('BlockTypes.block_types_create'),
-            'templates' => $templates,
+            'title'      => lang('BlockTypes.block_types_create'),
+            'templates'  => $templates,
+            'blockTypes' => $blockTypes,
         ]);
     }
 
@@ -97,11 +100,14 @@ class BlockTypeController extends BaseWebController
         }
 
         $templates = $this->blockTypeService->templates();
+        $listResponse = $this->safeApiCall(fn () => $this->blockTypeService->list(['limit' => 100]));
+        $blockTypes = $listResponse['ok'] ? $this->extractItems($listResponse) : [];
 
         return $this->render('cms/block_types/edit', [
-            'title'     => lang('BlockTypes.block_types_edit'),
-            'item'      => $this->extractData($response),
-            'templates' => $templates,
+            'title'      => lang('BlockTypes.block_types_edit'),
+            'item'       => $this->extractData($response),
+            'templates'  => $templates,
+            'blockTypes' => $blockTypes,
         ]);
     }
 

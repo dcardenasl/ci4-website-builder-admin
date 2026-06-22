@@ -3,10 +3,24 @@ $page             = $page             ?? [];
 $blockTypes       = $blockTypes       ?? [];
 $languages        = $languages        ?? [];
 $parentInstanceId = $parentInstanceId ?? null;
+$parentBlockType  = $parentBlockType  ?? null;
 
-// When creating a child block (e.g. a slide), filter to slide_banner type only
+// When creating a child block, filter dynamically using parent block's allowed_children schema definition
 if ($parentInstanceId !== null) {
-    $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => $bt['block_key'] === 'slide_banner'));
+    $allowedChildren = [];
+    if ($parentBlockType !== null) {
+        $parentSchema = is_array($parentBlockType['schema_definition'] ?? []) 
+            ? ($parentBlockType['schema_definition'] ?? []) 
+            : json_decode((string)($parentBlockType['schema_definition'] ?? '{}'), true);
+        $allowedChildren = $parentSchema['allowed_children'] ?? [];
+    }
+
+    if (!empty($allowedChildren)) {
+        $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => in_array($bt['block_key'], $allowedChildren, true)));
+    } else {
+        // Fallback for backward compatibility
+        $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => $bt['block_key'] === 'slide_banner'));
+    }
 }
 
 $blockTypesJs  = json_encode(array_values($blockTypes), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

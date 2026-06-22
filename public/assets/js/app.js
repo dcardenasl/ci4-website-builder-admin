@@ -1962,6 +1962,8 @@ document.addEventListener('alpine:init', () => {
         schemaFields: [],
         configFields: [],
         schemaJson: '{}',
+        isContainer: false,
+        allowedChildren: [],
 
         get effectiveBlockKey() {
             return this.customMode ? this.customBlockKey : (this.selectedTemplate?.key || '');
@@ -1979,6 +1981,8 @@ document.addEventListener('alpine:init', () => {
             const schema = template.default_schema || {};
             this.schemaFields = this._schemaToRows(schema.fields || {});
             this.configFields = this._schemaToRows(schema.config_fields || {});
+            this.isContainer = false;
+            this.allowedChildren = schema.allowed_children || [];
             this.rebuildJson();
         },
 
@@ -1987,12 +1991,15 @@ document.addEventListener('alpine:init', () => {
             this.customMode = true;
             this.schemaFields = [];
             this.configFields = [];
+            this.isContainer = false;
+            this.allowedChildren = [];
             this.rebuildJson();
         },
 
         loadFromSchema(schema) {
             this.schemaFields = this._schemaToRows(schema.fields || {});
             this.configFields = this._schemaToRows(schema.config_fields || {});
+            this.allowedChildren = schema.allowed_children || [];
             this.rebuildJson();
         },
 
@@ -2004,20 +2011,27 @@ document.addEventListener('alpine:init', () => {
                 required: def.required === true || def.required === 1,
                 options:  Array.isArray(def.options) ? def.options.join(', ') : '',
                 default:  def.default || '',
+                item_fields: def.item_fields ? this._schemaToRows(def.item_fields) : [],
             }));
         },
 
-        addField(section) {
-            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '' };
-            if (section === 'config') {
+        addField(section, parentRow = null) {
+            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '', item_fields: [] };
+            if (parentRow) {
+                if (!parentRow.item_fields) parentRow.item_fields = [];
+                parentRow.item_fields.push(row);
+            } else if (section === 'config') {
                 this.configFields.push(row);
             } else {
                 this.schemaFields.push(row);
             }
+            this.rebuildJson();
         },
 
-        removeField(section, index) {
-            if (section === 'config') {
+        removeField(section, index, parentRow = null) {
+            if (parentRow) {
+                parentRow.item_fields.splice(index, 1);
+            } else if (section === 'config') {
                 this.configFields.splice(index, 1);
             } else {
                 this.schemaFields.splice(index, 1);
@@ -2034,6 +2048,9 @@ document.addEventListener('alpine:init', () => {
                     if (row.type === 'select' && row.options) {
                         def.options = row.options.split(',').map(s => s.trim()).filter(Boolean);
                     }
+                    if (row.type === 'repeater') {
+                        def.item_fields = buildObj(row.item_fields || []);
+                    }
                     if (row.default !== '') def.default = row.default;
                     obj[row.key] = def;
                 }
@@ -2043,6 +2060,9 @@ document.addEventListener('alpine:init', () => {
                 fields:        buildObj(this.schemaFields),
                 config_fields: buildObj(this.configFields),
             };
+            if (this.isContainer) {
+                schema.allowed_children = this.allowedChildren || [];
+            }
             this.schemaJson = JSON.stringify(schema, null, 2);
         },
 
@@ -2063,14 +2083,17 @@ document.addEventListener('alpine:init', () => {
     // ---------------------------------------------------------------------------
     // schemaEditor — structured schema editor for existing BlockTypes (edit form)
     // ---------------------------------------------------------------------------
-    Alpine.data('schemaEditor', (initialSchema = {}) => ({
+    Alpine.data('schemaEditor', (initialSchema = {}, initialIsContainer = false) => ({
         schemaFields: [],
         configFields: [],
         schemaJson: '{}',
+        isContainer: initialIsContainer,
+        allowedChildren: [],
 
         init() {
             this.schemaFields = this._schemaToRows(initialSchema.fields || {});
             this.configFields = this._schemaToRows(initialSchema.config_fields || {});
+            this.allowedChildren = initialSchema.allowed_children || [];
             this.rebuildJson();
         },
 
@@ -2082,18 +2105,31 @@ document.addEventListener('alpine:init', () => {
                 required: def.required === true || def.required === 1,
                 options:  Array.isArray(def.options) ? def.options.join(', ') : '',
                 default:  def.default || '',
+                item_fields: def.item_fields ? this._schemaToRows(def.item_fields) : [],
             }));
         },
 
-        addField(section) {
-            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '' };
-            if (section === 'config') { this.configFields.push(row); }
-            else { this.schemaFields.push(row); }
+        addField(section, parentRow = null) {
+            const row = { key: '', type: 'string', label: '', required: false, options: '', default: '', item_fields: [] };
+            if (parentRow) {
+                if (!parentRow.item_fields) parentRow.item_fields = [];
+                parentRow.item_fields.push(row);
+            } else if (section === 'config') {
+                this.configFields.push(row);
+            } else {
+                this.schemaFields.push(row);
+            }
+            this.rebuildJson();
         },
 
-        removeField(section, index) {
-            if (section === 'config') { this.configFields.splice(index, 1); }
-            else { this.schemaFields.splice(index, 1); }
+        removeField(section, index, parentRow = null) {
+            if (parentRow) {
+                parentRow.item_fields.splice(index, 1);
+            } else if (section === 'config') {
+                this.configFields.splice(index, 1);
+            } else {
+                this.schemaFields.splice(index, 1);
+            }
             this.rebuildJson();
         },
 
@@ -2106,15 +2142,22 @@ document.addEventListener('alpine:init', () => {
                     if (row.type === 'select' && row.options) {
                         def.options = row.options.split(',').map(s => s.trim()).filter(Boolean);
                     }
+                    if (row.type === 'repeater') {
+                        def.item_fields = buildObj(row.item_fields || []);
+                    }
                     if (row.default !== '') def.default = row.default;
                     obj[row.key] = def;
                 }
                 return obj;
             };
-            this.schemaJson = JSON.stringify({
+            const schema = {
                 fields:        buildObj(this.schemaFields),
                 config_fields: buildObj(this.configFields),
-            }, null, 2);
+            };
+            if (this.isContainer) {
+                schema.allowed_children = this.allowedChildren || [];
+            }
+            this.schemaJson = JSON.stringify(schema, null, 2);
         },
     }));
 
