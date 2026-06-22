@@ -13,6 +13,42 @@
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
     <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Pages.pages_edit')) ?></h3>
 
+    <?php
+    $hasTranslationIssues = false;
+    $issueDetails = [];
+    if (!empty($languages)) {
+        foreach ($languages as $lang) {
+            $transValue = [];
+            if (!empty($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $t) {
+                    if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
+                        $transValue = $t;
+                        break;
+                    }
+                }
+            }
+            if (empty($transValue)) {
+                $hasTranslationIssues = true;
+                $issueDetails[] = strtoupper($lang['code']) . ' (Missing)';
+            } elseif (empty($transValue['title']) || empty($transValue['slug'])) {
+                $hasTranslationIssues = true;
+                $issueDetails[] = strtoupper($lang['code']) . ' (Incomplete)';
+            }
+        }
+    }
+    ?>
+
+    <?php if ($hasTranslationIssues): ?>
+        <div class="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800 flex items-center gap-2">
+            <svg class="h-5 w-5 text-yellow-600 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a1 1 0 112 0v5a1 1 0 11-2 0V5zm1 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+            </svg>
+            <div>
+                <span class="font-bold">Attention:</span> Translation issues detected for: <span class="font-semibold"><?= implode(', ', $issueDetails) ?></span>.
+            </div>
+        </div>
+    <?php endif; ?>
+
     <form method="post" action="<?= route_to('admin.cms.pages.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
         <?= csrf_field() ?>
 
@@ -185,13 +221,35 @@
                     <div class="flex items-center justify-between border-b border-gray-200 mb-4">
                         <div class="flex gap-0.5" role="tablist">
                             <?php foreach ($languages as $lang): ?>
+                                <?php
+                                    $transValue = [];
+                                    if (!empty($item['translations']) && is_array($item['translations'])) {
+                                        foreach ($item['translations'] as $t) {
+                                            if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
+                                                $transValue = $t;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    $t_status = 'missing';
+                                    if (!empty($transValue)) {
+                                        $t_status = (!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete';
+                                    }
+                                ?>
                                 <button type="button"
                                     role="tab"
                                     @click="setTab(<?= (int) $lang['id'] ?>)"
                                     :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
                                     :class="isActive(<?= (int) $lang['id'] ?>) ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
-                                    <?= esc(strtoupper($lang['code'])) ?>
+                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors inline-flex items-center gap-1.5">
+                                    <span><?= esc(strtoupper($lang['code'])) ?></span>
+                                    <?php if ($t_status === 'missing'): ?>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500" title="Missing translation"></span>
+                                    <?php elseif ($t_status === 'incomplete'): ?>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500" title="Incomplete translation"></span>
+                                    <?php else: ?>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500" title="Complete translation"></span>
+                                    <?php endif; ?>
                                     <?php if (!empty($lang['is_default'])): ?>
                                         <span class="ml-1 text-brand-400">★</span>
                                     <?php endif; ?>

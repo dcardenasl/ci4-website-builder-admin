@@ -91,6 +91,10 @@
                     <?= ui_icon('cms-language') ?>
                     <span><?= lang('CmsLanguages.languages_title') ?></span>
                 </a>
+                <a href="<?= site_url('admin/cms/translations/audit') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/translations/audit*') ?>">
+                    <?= ui_icon('languages') ?>
+                    <span><?= lang('Translations.audit_title') ?></span>
+                </a>
             <?php endif; ?>
             <?php if (has_permission('cms.settings.read')): ?>
                 <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">

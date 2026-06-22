@@ -53,6 +53,9 @@
                         <th class="<?= esc(table_th_class()) ?>">
                             <span><?= lang('Pages.translation_title_label') ?></span>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span>Translations</span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('page_type')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('page_type')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Pages.field_page_type')])) ?>">
                                 <span><?= lang('Pages.field_page_type') ?></span>
@@ -90,6 +93,31 @@
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class()) ?> font-semibold text-gray-900" x-text="row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations[0]).title : (row.title || row.name || row.slug || '-')">
+                            </td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <div class="flex items-center gap-1.5">
+                                    <?php foreach ($languages as $lang): ?>
+                                        <?php $langId = (int) $lang['id']; ?>
+                                        <template x-init="
+                                            const t = row.translations ? row.translations.find(t => parseInt(t.language_id) === <?= $langId ?>) : null;
+                                            row._t_status_<?= $langId ?> = t ? ((t.title && t.slug) ? 'complete' : 'incomplete') : 'missing';
+                                            row._t_detail_<?= $langId ?> = t ? ((t.title && t.slug) ? 'Complete' : 'Missing title or slug') : 'Missing translation';
+                                        ">
+                                        </template>
+                                        <span 
+                                            class="inline-flex items-center justify-center font-bold px-1.5 py-0.5 rounded text-[10px] border transition cursor-pointer"
+                                            :class="
+                                                row._t_status_<?= $langId ?> === 'complete' ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' :
+                                                row._t_status_<?= $langId ?> === 'incomplete' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100' :
+                                                'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                                            "
+                                            :title="'<?= esc($lang['name']) ?>: ' + row._t_detail_<?= $langId ?> + '. Click to translate.'"
+                                            @click="window.location.href = `<?= route_to('admin.cms.pages') ?>/${row.id}/edit`"
+                                        >
+                                            <?= esc(strtoupper($lang['code'])) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span

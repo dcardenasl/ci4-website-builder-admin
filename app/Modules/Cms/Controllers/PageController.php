@@ -29,6 +29,7 @@ class PageController extends BaseWebController
             'title'        => lang('Pages.pages_title'),
             'limitOptions' => [10, 25, 50, 100],
             'pages' => $this->pagesOptions(),
+            'languages'    => $this->getLanguages(),
         ]);
     }
 
