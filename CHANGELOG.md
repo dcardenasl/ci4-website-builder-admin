@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **File translation module** — new admin interface to manage file translations with localized URLs, MIME types, and metadata
+- **Site identity module** — new admin interface for managing site-wide identity settings, branding, and metadata
 - **Menu item linking** — support entries and collections as menu link targets alongside pages and custom URLs
 - **Translation audit module** — new `TranslationAuditController` with audit dashboard for multi-language translation coverage, completeness tracking, and language statistics
 - **Block composition hierarchy enforcement** — validate and filter child blocks based on parent's `allowed_children` schema, with fallback to slide_banner nesting for backward compatibility
