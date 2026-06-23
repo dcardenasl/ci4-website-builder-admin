@@ -82,5 +82,6 @@ return [
     'translation_description_label' => 'Descripción',
     'translation_description_placeholder' => 'Ingrese la descripción de la colección',
     'translation_description_help' => 'Ingrese la descripción de la colección para este idioma.',
+    'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la colección para cada locale.',
     'collections_entries' => 'Ver Entradas',
 ];

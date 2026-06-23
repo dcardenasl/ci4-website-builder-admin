@@ -16,7 +16,7 @@
             <div class="flex items-center gap-2">
                 <a href="<?= route_to('admin.cms.redirects.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
 
-                <form method="post" action="<?= route_to('admin.cms.redirects.delete', $itemId) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($redirect['old_path'] ?? $redirect['new_url'] ?? null), 'js') ?>');">
+                <form method="post" action="<?= route_to('admin.cms.redirects.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($redirect['old_path'] ?? $redirect['new_url'] ?? null), 'js') ?>', () => $el.submit())">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                         <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

@@ -21,7 +21,7 @@ $canModifyTarget = ! empty($user) ? can_act_on_user($user) : false;
                 <div class="flex items-center gap-2">
                     <?php if ($canModifyTarget): ?>
                         <a href="<?= route_to('admin.users.edit', $uid) ?>" class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><?= lang('App.edit') ?></a>
-                        <form method="post" action="<?= route_to('admin.users.delete', $uid) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(lang('Users.confirm_delete'), 'js') ?>', () => $el.submit())">
+                        <form method="post" action="<?= route_to('admin.users.delete', $uid) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')) ?: ($user['email'] ?? null)), 'js') ?>', () => $el.submit())">
                             <?= csrf_field() ?>
                             <button type="submit" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"><?= lang('App.delete') ?></button>
                         </form>

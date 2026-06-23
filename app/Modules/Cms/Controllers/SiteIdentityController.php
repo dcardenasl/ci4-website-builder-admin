@@ -48,9 +48,14 @@ class SiteIdentityController extends BaseWebController
             }
         }
 
+        // Get languages list for the translation inputs
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+
         return $this->render('cms/site-identity/show', [
             'title'       => lang('SiteIdentity.page_title'),
             'settingsMap' => $settingsMap,
+            'languages'   => $languages,
         ]);
     }
 
@@ -81,18 +86,50 @@ class SiteIdentityController extends BaseWebController
         }
 
         $payload = $formRequest->payload();
+        $fileFields = ['site_logo', 'favicon'];
 
-        $simpleFields = ['site_name', 'site_tagline'];
-        $fileFields   = ['site_logo', 'favicon'];
+        $siteNameTranslations = $this->request->getPost('site_name_translations');
+        $siteTaglineTranslations = $this->request->getPost('site_tagline_translations');
 
         $failed = false;
 
-        foreach ($simpleFields as $key) {
-            if (! isset($idMap[$key])) {
-                continue;
+        // Save site_name (supporting translations if available)
+        if (isset($idMap['site_name'])) {
+            $value = is_string($payload['site_name'] ?? null) ? (string) $payload['site_name'] : '';
+            $updateData = ['setting_value' => $value];
+            if (is_array($siteNameTranslations)) {
+                $translations = [];
+                foreach ($siteNameTranslations as $langId => $val) {
+                    $translations[] = [
+                        'language_id' => (int) $langId,
+                        'setting_value' => (string) $val,
+                    ];
+                }
+                $updateData['translations'] = $translations;
+                $updateData['setting_value'] = (string) ($siteNameTranslations[1] ?? array_values($siteNameTranslations)[0] ?? $value);
             }
-            $value  = is_string($payload[$key] ?? null) ? (string) $payload[$key] : '';
-            $result = $this->settingService->update($idMap[$key], ['setting_value' => $value]);
+            $result = $this->settingService->update($idMap['site_name'], $updateData);
+            if (! ($result['ok'] ?? false)) {
+                $failed = true;
+            }
+        }
+
+        // Save site_tagline (supporting translations if available)
+        if (isset($idMap['site_tagline'])) {
+            $value = is_string($payload['site_tagline'] ?? null) ? (string) $payload['site_tagline'] : '';
+            $updateData = ['setting_value' => $value];
+            if (is_array($siteTaglineTranslations)) {
+                $translations = [];
+                foreach ($siteTaglineTranslations as $langId => $val) {
+                    $translations[] = [
+                        'language_id' => (int) $langId,
+                        'setting_value' => (string) $val,
+                    ];
+                }
+                $updateData['translations'] = $translations;
+                $updateData['setting_value'] = (string) ($siteTaglineTranslations[1] ?? array_values($siteTaglineTranslations)[0] ?? $value);
+            }
+            $result = $this->settingService->update($idMap['site_tagline'], $updateData);
             if (! ($result['ok'] ?? false)) {
                 $failed = true;
             }

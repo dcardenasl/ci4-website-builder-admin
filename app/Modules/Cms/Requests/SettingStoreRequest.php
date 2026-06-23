@@ -45,23 +45,57 @@ class SettingStoreRequest extends BaseFormRequest
     public function payload(): array
     {
         $type = $this->postString('setting_type') ?: 'string';
-        $settingValue = $this->settingValueForType($type);
+        $isTranslatable = $this->postBool('is_translatable');
+        $postTranslations = $this->request->getPost('translations');
+
+        if ($isTranslatable && is_array($postTranslations)) {
+            // Find a main setting value from translation inputs
+            $settingValue = (string) ($postTranslations[1] ?? array_values($postTranslations)[0] ?? '');
+        } else {
+            $settingValue = $this->settingValueForType($type);
+        }
+
+        // Retrieve active languages dynamically to seed translations payload
+        $languages = [];
+        try {
+            $langService = service('languageApiService');
+            $langsRes = $langService->list(['is_active' => 1]);
+            if ($langsRes['ok'] ?? false) {
+                $languages = $langsRes['data']['items'] ?? $langsRes['data'] ?? [];
+            }
+        } catch (\Throwable) {
+            $languages = [];
+        }
+
+        if (empty($languages)) {
+            $languages = [['id' => 1, 'code' => 'es']];
+        }
+
+        $translations = [];
+        foreach ($languages as $lang) {
+            $langId = (int) ($lang['id'] ?? 1);
+            if ($isTranslatable && is_array($postTranslations) && isset($postTranslations[$langId])) {
+                $translations[] = [
+                    'language_id' => $langId,
+                    'setting_value' => (string) $postTranslations[$langId],
+                ];
+            } else {
+                $translations[] = [
+                    'language_id' => $langId,
+                    'setting_value' => $settingValue,
+                ];
+            }
+        }
 
         return [
             'setting_key' => $this->postString('setting_key'),
             'setting_value' => $settingValue,
             'setting_type' => $type,
             'setting_group' => $this->postString('setting_group'),
-            'is_translatable' => $this->postBool('is_translatable') ? '1' : '0',
+            'is_translatable' => $isTranslatable ? '1' : '0',
             'sort_order' => $this->postInt('sort_order', 0),
             'description' => $this->postString('description'),
-            // The settings API currently rejects empty translations arrays during
-            // create/update validation. We seed the default locale with the base
-            // value so the CRUD can complete without a dedicated translation UI.
-            'translations' => [[
-                'language_id' => 1,
-                'setting_value' => $settingValue,
-            ]],
+            'translations' => $translations,
         ];
     }
 

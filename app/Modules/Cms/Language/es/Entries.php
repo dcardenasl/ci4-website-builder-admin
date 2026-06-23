@@ -102,6 +102,7 @@ return [
     'translation_meta_description_label' => 'Descripción Meta SEO',
     'translation_meta_description_placeholder' => 'Ingrese la descripción SEO',
     'translation_meta_description_help' => 'Ingrese la descripción meta SEO para este idioma.',
+    'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la entrada para cada locale.',
 
     'categories_title'              => 'Categorías',
     'tags_title'                    => 'Etiquetas',

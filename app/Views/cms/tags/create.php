@@ -2,10 +2,8 @@
     <a href="<?= route_to('admin.cms.tags') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Tags.tags_create')) ?></h3>
-
-    <form method="post" action="<?= route_to('admin.cms.tags.store') ?>" class="mt-4 space-y-4">
+<?php ob_start(); ?>
+<form method="post" action="<?= route_to('admin.cms.tags.store') ?>" class="space-y-6">
         <?= csrf_field() ?>
 
         <?= view('components/form/boolean', [
@@ -61,4 +59,9 @@
             <a href="<?= route_to('admin.cms.tags') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
         </div>
     </form>
-</section>
+<?php $sectionContent = ob_get_clean(); ?>
+<?= view('components/display/form_section', [
+    'title' => 'Tags.tags_create',
+    'description' => 'Tags.tags_details',
+    'content' => $sectionContent,
+]) ?>

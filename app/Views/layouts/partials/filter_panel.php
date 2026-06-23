@@ -87,6 +87,16 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
             >
             <?= esc(lang('App.no_filters_active')) ?>
         </p>
+        <div x-show="hasActiveFilters()" class="mt-3 flex flex-wrap gap-2" x-cloak>
+            <template x-for="key in Object.keys(query).filter(k => !ignoredFilterKeys.has(k) && query[k] !== '' && query[k] !== filterDefaults[k])" :key="key">
+                <span class="inline-flex items-center gap-1 rounded-full bg-brand-50 border border-brand-200 px-2.5 py-1 text-xs font-semibold text-brand-700">
+                    <span x-text="`${key}: ${query[key]}`" class="capitalize"></span>
+                    <button type="button" @click="query[key] = filterDefaults[key] || ''; applyQueryToForm(); fetchData(true);" class="text-brand-500 hover:text-brand-700 focus:outline-none">
+                        <?= ui_icon('x', 'h-3 w-3') ?>
+                    </button>
+                </span>
+            </template>
+        </div>
     <?php endif; ?>
 
     <p

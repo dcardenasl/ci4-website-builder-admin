@@ -59,6 +59,12 @@ return [
     'schema_template_cta'                    => 'CTA block (label, URL, style)',
     'schema_btn_format'                      => 'Format',
     'schema_btn_validate'                    => 'Validate',
+    'step1_title'                            => 'Step 1 - Choose a design',
+    'step1_desc'                             => 'Each design defines the visual template used on the public site.',
+    'step2_title'                            => 'Step 2 - Configure the block',
+    'step2_desc'                             => 'Customize the name and the fields this block type will expose.',
+    'advanced_title'                         => 'Advanced options',
+    'advanced_desc'                          => 'Operational details, availability, and container behavior.',
 
     'field_is_active'              => 'Is Active',
     'field_is_active_help'          => 'Toggle Is Active.',

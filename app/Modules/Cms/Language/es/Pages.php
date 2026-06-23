@@ -94,6 +94,7 @@ return [
     'translation_meta_description_label' => 'Meta descripción SEO',
     'translation_meta_description_placeholder' => 'Ingrese la descripción SEO',
     'translation_meta_description_help' => 'Descripción opcional usada por buscadores.',
+    'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la página para cada locale.',
 
     // Bloques (generales)
     'manage_blocks'               => 'Administrar Bloques',
@@ -121,6 +122,8 @@ return [
     'block_update_button'         => 'Actualizar Bloque',
     'block_add_button'            => 'Añadir Bloque',
     'block_back_to_blocks'        => 'Volver a Bloques',
+    'block_editor_title'          => 'Editor de Bloques',
+    'block_editor_desc'           => 'Revisa el tipo de bloque, su estructura y todo el contenido antes de guardar.',
     'block_config_section'        => 'Configuración',
     'block_config_desc'           => 'Ajustes estructurales del bloque (no se traducen).',
     'block_content_section'       => 'Contenido',

@@ -6,6 +6,7 @@ return [
     'page_title'           => 'File Metadata Translations',
     'sidebar_label'        => 'File Translations',
     'section_intro'        => 'Alt text, caption, title, and credit for each language.',
+    'editor_section'       => 'Translation editor',
     'back_to_file'         => 'Back to file',
     'no_languages'         => 'No active languages found. Add a language first.',
     'field_alt_text'       => 'Alt text',

@@ -100,8 +100,12 @@ class SettingController extends BaseWebController
             return $deny;
         }
 
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+
         return $this->render('cms/settings/create', [
-            'title' => lang('Settings.settings_create'),
+            'title'     => lang('Settings.settings_create'),
+            'languages' => $languages,
         ]);
     }
 
@@ -140,9 +144,13 @@ class SettingController extends BaseWebController
             return $this->withError(lang('Settings.settings_not_found'), route_to('admin.cms.settings'));
         }
 
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+
         return $this->render('cms/settings/edit', [
-            'title' => lang('Settings.settings_edit'),
-            'item'  => $this->extractData($response),
+            'title'     => lang('Settings.settings_edit'),
+            'item'      => $this->extractData($response),
+            'languages' => $languages,
         ]);
     }
 

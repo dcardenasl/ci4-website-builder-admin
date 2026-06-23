@@ -18,6 +18,8 @@ return [
     'settings_loading'         => 'Loading settings...',
     'settings_search_placeholder' => 'Search settings...',
     'settings_translations'    => 'Translations',
+    'settings_value_section'   => 'Value settings',
+    'settings_metadata_section' => 'Setting details',
 
     'field_setting_key'           => 'Setting key',
     'field_setting_key_placeholder' => 'site.name',

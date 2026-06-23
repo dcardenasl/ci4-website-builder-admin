@@ -31,7 +31,7 @@
         'submitLabel' => lang('App.search'),
     ]) ?>
 
-    <template x-if="loading">
+    <template x-if="loading && rows.length === 0">
         <?= view('components/display/loading_state', [
             'title'       => 'Entries.entries_loading',
             'description' => 'App.loading_refreshing',
@@ -48,8 +48,14 @@
             'actionLabel' => 'App.create',
         ]) ?>
     </template>
-    <template x-if="!loading && !error && rows.length > 0">
-        <div class="<?= esc(table_wrapper_class()) ?>">
+    <template x-if="!error && rows.length > 0">
+        <div class="<?= esc(table_wrapper_class()) ?> relative">
+            <div x-show="loading" class="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center transition-all duration-200" x-cloak>
+                <div class="flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 shadow-sm border border-gray-100">
+                    <?= ui_icon('refresh-ccw', 'h-4 w-4 animate-spin text-brand-600') ?>
+                    <span class="text-xs font-semibold text-gray-700"><?= esc(lang('App.loading_refreshing')) ?></span>
+                </div>
+            </div>
             <div class="<?= esc(table_scroll_class()) ?>">
             <table class="<?= esc(table_class()) ?>">
                 <thead class="<?= esc(table_head_class()) ?>">

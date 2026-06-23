@@ -102,7 +102,7 @@ foreach ($languages as $l) {
 
                 <!-- Group 4: Destructive -->
                 <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemId) ?>"
-                      onsubmit="return confirm('<?= esc(confirm_delete_message($page['title'] ?? $page['slug'] ?? null), 'js') ?>');">
+                      x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($page['title'] ?? $page['slug'] ?? null), 'js') ?>', () => $el.submit())">
                     <?= csrf_field() ?>
                     <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
                         <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
@@ -319,7 +319,7 @@ foreach ($languages as $l) {
                                 </a>
                                 <?php if (has_permission('cms.pages.write')): ?>
                                 <form method="post" action="<?= route_to('admin.cms.pages.blocks.delete', $itemId, $blockId) ?>"
-                                      onsubmit="return confirm('<?= esc(confirm_delete_message($blockTypeData['name'] ?? $blockTypeData['block_key'] ?? $blockId), 'js') ?>');">
+                                      x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockTypeData['name'] ?? $blockTypeData['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
                                     <?= csrf_field() ?>
                                     <button type="submit" class="<?= esc(action_button_class('danger')) ?> !text-xs !py-1 !px-2">
                                         <?= ui_icon('trash', 'h-3 w-3') ?>

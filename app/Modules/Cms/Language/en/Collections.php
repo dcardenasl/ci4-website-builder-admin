@@ -82,5 +82,6 @@ return [
     'translation_description_label' => 'Description',
     'translation_description_placeholder' => 'Enter collection description',
     'translation_description_help' => 'Enter the collection description for this language.',
+    'translations_help'              => 'Use the language tabs to complete the collection content for each locale.',
     'collections_entries' => 'View Entries',
 ];

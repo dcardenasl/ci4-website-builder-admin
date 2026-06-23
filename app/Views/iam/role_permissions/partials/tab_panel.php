@@ -5,13 +5,23 @@ $assignedIds = $assignedIds ?? [];
 $roleId = (string) ($role['id'] ?? '');
 ?>
 
-<form method="post" action="<?= route_to('admin.iam.role_permissions.save', $roleId) ?>" class="space-y-4">
+<form method="post" action="<?= route_to('admin.iam.role_permissions.save', $roleId) ?>" class="space-y-4" x-data="{ search: '' }">
     <?= csrf_field() ?>
     <input type="hidden" name="code" value="<?= esc((string) ($role['code'] ?? '')) ?>">
     <input type="hidden" name="name" value="<?= esc((string) ($role['name'] ?? '')) ?>">
     <input type="hidden" name="description" value="<?= esc((string) ($role['description'] ?? '')) ?>">
     <input type="hidden" name="application_id" value="<?= esc((string) ($role['application_id'] ?? '')) ?>">
     <input type="hidden" name="permission_ids[]" value="">
+
+    <div class="flex items-center gap-2 max-w-md">
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <?= ui_icon('search', 'h-4 w-4') ?>
+            </span>
+            <input type="text" x-model="search" placeholder="<?= esc(lang('Iam.permissions_search_placeholder')) ?>" class="pl-9 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+        </div>
+        <button type="button" x-show="search !== ''" @click="search = ''" class="text-xs text-gray-500 hover:text-gray-700" x-cloak><?= esc(lang('App.clear') ?? 'Clear') ?></button>
+    </div>
 
     <?php foreach ($applications as $application): ?>
         <?php $permissions = $application['permissions'] ?? []; ?>
@@ -23,7 +33,9 @@ $roleId = (string) ($role['id'] ?? '');
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                 <?php foreach ($permissions as $permission): ?>
                     <?php $permissionId = (string) ($permission['id'] ?? ''); ?>
-                    <label class="inline-flex items-start gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50">
+                    <label class="inline-flex items-start gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+                        x-show="search === '' || '<?= esc(strtolower((string) $permission['code'])) ?>'.includes(search.toLowerCase()) || '<?= esc(strtolower((string) $permission['description'])) ?>'.includes(search.toLowerCase())"
+                        x-cloak>
                         <input type="checkbox" name="permission_ids[]" value="<?= esc($permissionId) ?>"
                             <?= in_array($permissionId, $assignedIds, true) ? 'checked' : '' ?>
                             class="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500">

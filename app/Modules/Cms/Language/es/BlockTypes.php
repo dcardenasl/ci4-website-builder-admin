@@ -59,6 +59,12 @@ return [
     'schema_template_cta'                    => 'Bloque CTA (etiqueta, URL, estilo)',
     'schema_btn_format'                      => 'Formatear',
     'schema_btn_validate'                    => 'Validar',
+    'step1_title'                            => 'Paso 1 - Elige un diseño',
+    'step1_desc'                             => 'Cada diseño define la plantilla visual que se usará en el sitio público.',
+    'step2_title'                            => 'Paso 2 - Configura el bloque',
+    'step2_desc'                             => 'Personaliza el nombre y los campos que expondrá este tipo de bloque.',
+    'advanced_title'                         => 'Opciones avanzadas',
+    'advanced_desc'                          => 'Detalles operativos, disponibilidad y comportamiento de contenedor.',
 
     'field_is_active'              => 'Está Activo',
     'field_is_active_help'          => 'Alternar Está Activo.',

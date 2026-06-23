@@ -42,6 +42,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
     </a>
 </div>
 
+<?php ob_start(); ?>
 <div class="max-w-3xl space-y-5">
 
     <!-- Block type identity card (readonly) -->
@@ -392,6 +393,14 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
         </form>
     </section>
 </div>
+<?php $blockEditContent = ob_get_clean(); ?>
+
+<?= view('components/display/form_section', [
+    'title' => 'Pages.block_editor_title',
+    'description' => 'Pages.block_editor_desc',
+    'content' => $blockEditContent,
+    'bodyClass' => 'space-y-5',
+]) ?>
 
 <!-- File Picker Modal (global for this page) -->
 <div x-data="globalFilePicker()"

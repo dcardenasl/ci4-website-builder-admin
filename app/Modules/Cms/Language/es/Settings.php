@@ -18,6 +18,8 @@ return [
     'settings_loading'         => 'Cargando configuración...',
     'settings_search_placeholder' => 'Buscar configuración...',
     'settings_translations'    => 'Traducciones',
+    'settings_value_section'   => 'Valores de la configuración',
+    'settings_metadata_section' => 'Detalles de la configuración',
 
     'field_setting_key'           => 'Clave de configuración',
     'field_setting_key_placeholder' => 'sitio.nombre',

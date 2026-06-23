@@ -44,6 +44,7 @@ return [
     'translate_from_default' => 'Auto-traducir',
     'translate_all'          => 'Traducir todos los idiomas',
     'translating'            => 'Traduciendo…',
+    'form_core'              => 'Campos principales',
     'back'            => 'Volver',
     'select'          => 'Seleccionar…',
     'yes'             => 'Sí',

@@ -6,6 +6,7 @@ return [
     'page_title'           => 'Traducciones de metadatos del archivo',
     'sidebar_label'        => 'Traducciones de archivos',
     'section_intro'        => 'Texto alternativo, pie de foto, título y crédito por idioma.',
+    'editor_section'       => 'Editor de traducciones',
     'back_to_file'         => 'Volver al archivo',
     'no_languages'         => 'No se encontraron idiomas activos. Agrega un idioma primero.',
     'field_alt_text'       => 'Texto alternativo (alt)',

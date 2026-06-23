@@ -6,6 +6,8 @@ return [
     'sidebar_label'  => 'Identidad del sitio',
     'page_title'     => 'Identidad del sitio',
     'section_intro'  => 'Configura el nombre, logo, tagline y favicon del sitio.',
+    'core_section'   => 'Identidad principal',
+    'assets_section' => 'Activos de marca',
     'field_site_name'    => 'Nombre del sitio',
     'field_site_tagline' => 'Tagline',
     'field_site_logo'    => 'Logo del sitio',

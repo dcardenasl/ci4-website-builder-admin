@@ -6,6 +6,8 @@ return [
     'sidebar_label'  => 'Site Identity',
     'page_title'     => 'Site Identity',
     'section_intro'  => 'Configure the site name, logo, tagline, and favicon.',
+    'core_section'   => 'Core identity',
+    'assets_section' => 'Brand assets',
     'field_site_name'    => 'Site Name',
     'field_site_tagline' => 'Tagline',
     'field_site_logo'    => 'Site Logo',

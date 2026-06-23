@@ -44,6 +44,7 @@ return [
     'translate_from_default' => 'Auto-translate',
     'translate_all'          => 'Translate all languages',
     'translating'            => 'Translating…',
+    'form_core'              => 'Core fields',
     'back'            => 'Back',
     'select'          => 'Select…',
     'yes'             => 'Yes',

@@ -10,12 +10,9 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
 </div>
 
 <div x-data="blockTypeDesigner(<?= esc($templatesJs, 'attr') ?>)" class="space-y-6 max-w-4xl">
+    <?php ob_start(); ?>
 
-    <!-- ── PASO 1: Galería de diseños ──────────────────────────────────────── -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-1">Paso 1 — Elige un diseño</h3>
-        <p class="text-sm text-gray-500 mb-5">Cada diseño determina la plantilla visual que se usará para renderizar este bloque en el sitio público.</p>
-
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <template x-for="tpl in templates" :key="tpl.key">
                 <button type="button"
@@ -73,14 +70,18 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
             </div>
         </div>
     </section>
+    <?php $step1Content = ob_get_clean(); ?>
 
-    <!-- ── PASO 2: Configuración (visible tras selección) ──────────────────── -->
+    <?= view('components/display/form_section', [
+        'title' => 'BlockTypes.step1_title',
+        'description' => 'BlockTypes.step1_desc',
+        'content' => $step1Content,
+        'bodyClass' => 'space-y-4'
+    ]) ?>
+
+    <?php ob_start(); ?>
     <section x-show="selectedTemplate || customMode" x-cloak class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-5">
-            <div>
-                <h3 class="text-base font-semibold text-gray-900">Paso 2 — Configura el bloque</h3>
-                <p class="text-sm text-gray-500 mt-0.5">Personaliza el nombre y los campos que tendrá este tipo de bloque.</p>
-            </div>
+        <div class="flex items-center justify-end mb-5">
             <button type="button"
                 @click="openPreview()"
                 class="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 border border-brand-200 hover:border-brand-400 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors">
@@ -229,5 +230,13 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
             </div>
         </form>
     </section>
+    <?php $step2Content = ob_get_clean(); ?>
+
+    <?= view('components/display/form_section', [
+        'title' => 'BlockTypes.step2_title',
+        'description' => 'BlockTypes.step2_desc',
+        'content' => $step2Content,
+        'bodyClass' => 'space-y-6'
+    ]) ?>
 
 </div>

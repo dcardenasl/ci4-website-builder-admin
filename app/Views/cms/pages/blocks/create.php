@@ -48,55 +48,50 @@ $parentIdJs    = json_encode($parentInstanceId);
 </div>
 
 <div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>)" class="space-y-6 max-w-4xl">
+    <?php ob_start(); ?>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <template x-for="bt in blockTypes" :key="bt.id">
+            <button type="button"
+                @click="selectBlockType(bt)"
+                :class="selectedBlockType?.id === bt.id
+                    ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-400'
+                    : 'border-gray-200 bg-white hover:border-brand-400 hover:bg-brand-50/30'"
+                class="relative flex flex-col items-center gap-2 p-4 border-2 rounded-xl text-center cursor-pointer transition-all">
 
-    <!-- ── PASO 1: Selector visual de tipo de bloque ─────────────────────── -->
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-1"><?= esc(lang('Pages.block_step1_title')) ?></h3>
-        <p class="text-sm text-gray-500 mb-5"><?= esc(lang('Pages.block_step1_desc')) ?></p>
+                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500"
+                     :class="selectedBlockType?.id === bt.id ? 'bg-brand-100 text-brand-600' : ''">
+                    <i :data-lucide="bt.icon || 'layout-template'" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-800 leading-tight" x-text="bt.name"></span>
+                <code class="text-[10px] text-gray-400 font-mono" x-text="bt.block_key"></code>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            <template x-for="bt in blockTypes" :key="bt.id">
-                <button type="button"
-                    @click="selectBlockType(bt)"
-                    :class="selectedBlockType?.id === bt.id
-                        ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-400'
-                        : 'border-gray-200 bg-white hover:border-brand-400 hover:bg-brand-50/30'"
-                    class="relative flex flex-col items-center gap-2 p-4 border-2 rounded-xl text-center cursor-pointer transition-all">
+                <span x-show="selectedBlockType?.id === bt.id"
+                      class="absolute top-2 right-2 w-4 h-4 bg-brand-600 rounded-full flex items-center justify-center">
+                    <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 0 1.473 1.473 0 0 1 0 2.104L6.555 12.64 1.127 7.212a1.473 1.473 0 0 1 0-2.104 1.474 1.474 0 0 1 2.104 0l3.324 3.324 6.93-6.94z"/>
+                    </svg>
+                </span>
+            </button>
+        </template>
+    </div>
 
-                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500"
-                         :class="selectedBlockType?.id === bt.id ? 'bg-brand-100 text-brand-600' : ''">
-                        <i :data-lucide="bt.icon || 'layout-template'" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-800 leading-tight" x-text="bt.name"></span>
-                    <code class="text-[10px] text-gray-400 font-mono" x-text="bt.block_key"></code>
+    <div x-show="selectedBlockType" x-cloak class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-sm text-brand-800 flex items-start gap-2">
+        <svg class="w-4 h-4 mt-0.5 shrink-0 text-brand-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+        </svg>
+        <span x-text="selectedBlockType?.description || ''"></span>
+    </div>
+    <?php $step1Content = ob_get_clean(); ?>
+    <?= view('components/display/form_section', [
+        'title' => 'Pages.block_step1_title',
+        'description' => 'Pages.block_step1_desc',
+        'content' => $step1Content,
+        'bodyClass' => 'space-y-4',
+    ]) ?>
 
-                    <span x-show="selectedBlockType?.id === bt.id"
-                          class="absolute top-2 right-2 w-4 h-4 bg-brand-600 rounded-full flex items-center justify-center">
-                        <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 0 1.473 1.473 0 0 1 0 2.104L6.555 12.64 1.127 7.212a1.473 1.473 0 0 1 0-2.104 1.474 1.474 0 0 1 2.104 0l3.324 3.324 6.93-6.94z"/>
-                        </svg>
-                    </span>
-                </button>
-            </template>
-        </div>
-
-        <!-- Descripción del tipo seleccionado -->
-        <div x-show="selectedBlockType" x-cloak class="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg text-sm text-brand-800 flex items-start gap-2">
-            <svg class="w-4 h-4 mt-0.5 shrink-0 text-brand-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
-            </svg>
-            <span x-text="selectedBlockType?.description || ''"></span>
-        </div>
-    </section>
-
-    <!-- ── PASO 2: Contenido del bloque (visible tras selección) ──────────── -->
-    <section x-show="selectedBlockType" x-cloak class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h3 class="text-base font-semibold text-gray-900"><?= esc(lang('Pages.block_step2_title')) ?></h3>
-                <p class="text-sm text-gray-500 mt-0.5"><?= esc(lang('Pages.block_step2_desc')) ?></p>
-            </div>
+    <div x-show="selectedBlockType" x-cloak>
+        <?php ob_start(); ?>
+        <div class="flex items-center justify-end mb-5">
             <button type="button"
                 @click="openPreview()"
                 class="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 border border-brand-200 hover:border-brand-400 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors">
@@ -115,7 +110,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                 <input type="hidden" name="parent_instance_id" value="<?= esc((string) $parentInstanceId) ?>">
             <?php endif; ?>
 
-            <!-- Opciones globales -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-gray-100">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1"><?= esc(lang('Pages.block_sort_order_label')) ?> <span class="text-red-500">*</span></label>
@@ -130,7 +124,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                 </div>
             </div>
 
-            <!-- Campos de Configuración (schema-driven) -->
             <div x-show="configFields && Object.keys(configFields).length > 0" x-cloak>
                 <h4 class="text-sm font-semibold text-gray-800 mb-3">Configuración del Diseño</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
@@ -140,7 +133,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <span x-text="field.label || key"></span>
                             </label>
 
-                            <!-- Select type -->
                             <template x-if="field.type === 'select'">
                                 <select :name="`block_config[${key}]`"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
@@ -150,14 +142,12 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 </select>
                             </template>
 
-                            <!-- Boolean type -->
                             <template x-if="field.type === 'boolean'">
                                 <input type="checkbox" :name="`block_config[${key}]`" value="1"
                                        :checked="field.default == '1' || field.default === true"
                                        class="h-4 w-4 rounded border-gray-300 text-brand-600">
                             </template>
 
-                            <!-- Default: text input -->
                             <template x-if="field.type !== 'select' && field.type !== 'boolean'">
                                 <input type="text" :name="`block_config[${key}]`"
                                        :value="field.default || ''"
@@ -171,11 +161,9 @@ $parentIdJs    = json_encode($parentInstanceId);
                 </div>
             </div>
 
-            <!-- Campos de Contenido (por idioma) -->
             <div x-show="contentFields && Object.keys(contentFields).length > 0" x-cloak>
                 <h4 class="text-sm font-semibold text-gray-800 mb-3">Contenido por Idioma</h4>
 
-                <!-- Tabs de idioma -->
                 <div class="flex border-b border-gray-200 mb-4" role="tablist">
                     <template x-for="(lang, index) in languages" :key="lang.id">
                         <button type="button"
@@ -190,7 +178,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                     </template>
                 </div>
 
-                <!-- Contenido de tabs -->
                 <template x-for="(lang, langIndex) in languages" :key="lang.id">
                     <div x-show="activeLangId == lang.id" class="space-y-4">
                         <input type="hidden" :name="`translations[${langIndex}][language_id]`" :value="lang.id">
@@ -203,7 +190,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                     <span x-show="field.required && lang.is_default == 1" class="text-red-500 ml-0.5">*</span>
                                 </label>
 
-                                <!-- richtext / text / textarea -->
                                 <template x-if="field.type === 'richtext'">
                                     <textarea :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                               rows="6"
@@ -216,23 +202,17 @@ $parentIdJs    = json_encode($parentInstanceId);
                                               :required="field.required && lang.is_default == 1"
                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"></textarea>
                                 </template>
-
-                                <!-- url -->
                                 <template x-if="field.type === 'url'">
                                     <input type="url" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
                                            placeholder="https://"
                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                 </template>
-
-                                <!-- integer -->
                                 <template x-if="field.type === 'integer' || field.type === 'int'">
                                     <input type="number" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                 </template>
-
-                                <!-- select -->
                                 <template x-if="field.type === 'select'">
                                     <select :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                             :required="field.required && lang.is_default == 1"
@@ -242,8 +222,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                         </template>
                                     </select>
                                 </template>
-
-                                <!-- file: file picker -->
                                 <template x-if="field.type === 'file'">
                                     <div class="space-y-2">
                                         <input type="hidden"
@@ -273,8 +251,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                         </button>
                                     </div>
                                 </template>
-
-                                <!-- repeater: dynamic list of sub-items -->
                                 <template x-if="field.type === 'repeater'">
                                     <div class="space-y-3">
                                         <template x-for="(item, itemIdx) in repeaterList(lang.id, fieldKey)" :key="itemIdx">
@@ -290,7 +266,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                 <template x-for="(subField, subKey) in (field.item_fields || {})" :key="subKey">
                                                     <div class="space-y-1">
                                                         <label class="block text-xs font-medium text-gray-600" x-text="subField.label || subKey"></label>
-                                                        <!-- file sub-field -->
                                                         <template x-if="subField.type === 'file'">
                                                             <div class="space-y-1.5">
                                                                 <input type="hidden"
@@ -319,7 +294,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                 </button>
                                                             </div>
                                                         </template>
-                                                        <!-- url sub-field -->
                                                         <template x-if="subField.type === 'url'">
                                                             <input type="url"
                                                                    :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
@@ -327,14 +301,12 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                    placeholder="https://"
                                                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                                         </template>
-                                                        <!-- text/textarea sub-field -->
                                                         <template x-if="subField.type === 'text' || subField.type === 'textarea'">
                                                             <textarea :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                                       x-model="item[subKey]"
                                                                       rows="3"
                                                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"></textarea>
                                                         </template>
-                                                        <!-- default string sub-field -->
                                                         <template x-if="!['file','url','text','textarea'].includes(subField.type)">
                                                             <input type="text"
                                                                    :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
@@ -355,8 +327,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                                         </button>
                                     </div>
                                 </template>
-
-                                <!-- default: string -->
                                 <template x-if="!['richtext','text','textarea','url','integer','int','select','file','repeater'].includes(field.type)">
                                     <input type="text" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
@@ -370,7 +340,6 @@ $parentIdJs    = json_encode($parentInstanceId);
                 </template>
             </div>
 
-            <!-- Sin campos de contenido (bloque estructural como contenedor) -->
             <div x-show="selectedBlockType && Object.keys(contentFields).length === 0" x-cloak
                  class="p-4 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 text-center">
                 <?= esc(lang('Pages.block_structural_note')) ?>
@@ -381,7 +350,14 @@ $parentIdJs    = json_encode($parentInstanceId);
                 <a href="<?= route_to($ownerBlocksRoute, (string)$page['id']) ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
             </div>
         </form>
-    </section>
+        <?php $step2Content = ob_get_clean(); ?>
+        <?= view('components/display/form_section', [
+            'title' => 'Pages.block_step2_title',
+            'description' => 'Pages.block_step2_desc',
+            'content' => $step2Content,
+            'bodyClass' => 'space-y-6',
+        ]) ?>
+    </div>
 
     <!-- File Picker Modal -->
     <div x-show="filePickerOpen" x-cloak

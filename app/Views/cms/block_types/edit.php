@@ -19,7 +19,7 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
 
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-    <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" onsubmit="return confirm('<?= esc(confirm_delete_message($item['name'] ?? $item['block_key'] ?? null), 'js') ?>');">
+    <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['block_key'] ?? null), 'js') ?>', () => $el.submit())">
         <?= csrf_field() ?>
         <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
             <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
@@ -29,17 +29,15 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
 </div>
 
 <div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>, <?= ($item['is_container'] ?? false) ? 'true' : 'false' ?>)" class="max-w-4xl">
+    <?php ob_start(); ?>
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
 
         <div class="flex items-start justify-between mb-6">
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('BlockTypes.block_types_edit')) ?></h3>
-                <div class="flex items-center gap-2 mt-1">
-                    <code class="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded"><?= esc($item['block_key'] ?? '') ?></code>
-                    <?php if ($isSystem): ?>
-                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Diseño del sistema</span>
-                    <?php endif; ?>
-                </div>
+            <div class="flex items-center gap-2">
+                <code class="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded"><?= esc($item['block_key'] ?? '') ?></code>
+                <?php if ($isSystem): ?>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Diseño del sistema</span>
+                <?php endif; ?>
             </div>
             <button type="button"
                 @click="window.dispatchEvent(new CustomEvent('block-preview-open', { detail: { blockKey: '<?= esc($currentKey) ?>', blockConfig: <?= esc($configSampleJs, 'attr') ?>, blockData: {} } }))"
@@ -172,4 +170,12 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
             </div>
         </form>
     </section>
+    <?php $blockTypeFormContent = ob_get_clean(); ?>
+
+    <?= view('components/display/form_section', [
+        'title' => 'BlockTypes.block_types_edit',
+        'description' => 'BlockTypes.block_types_details',
+        'content' => $blockTypeFormContent,
+        'bodyClass' => 'space-y-6'
+    ]) ?>
 </div>
