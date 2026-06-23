@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Form submissions module** — new admin interface to manage form submissions with status tracking (new, read, replied, spam, archived) and submission details view
+- **Collections and menus UI enhancements** — improved form fields, validation, and sidebar navigation for better UX
 - **File translation module** — new admin interface to manage file translations with localized URLs, MIME types, and metadata
 - **Site identity module** — new admin interface for managing site-wide identity settings, branding, and metadata
 - **Menu item linking** — support entries and collections as menu link targets alongside pages and custom URLs
@@ -17,7 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Slug availability validation** — `checkSlug()` method to validate page slug uniqueness across languages
 
 ### Changed
-- **Block UI and confirm modal enhancements** — improve block list item layout, enhance confirm modal with better state tracking and safety timeout, add "unsaved changes" warning notification
+- **Confirm modal — accepting state with spinner** — `$store.confirm.accept()` now sets `accepting: true` before calling the callback; the "Confirmar" button shows an animated spinner and is disabled while accepting; backdrop and Escape key blocked during action; 5-second safety timeout auto-closes if navigation does not occur (`app.js`, `confirm_modal.php`)
+- **Destructive confirmations — 4 views migrated to modal pattern** — `cms/pages/blocks/index.php`, `cms/pages/blocks/children/index.php`, `cms/menus/show.php`, and `admin/universal/index.php` replaced native `onsubmit="return confirm()"` with `@submit.prevent="$store.confirm.show(...)"` using the exact resource name
+- **Role-permissions matrix — orientation and change tracking** — added a per-role orientation callout with reactive permissions counter (`selectedCount`) updated on every checkbox change; `isDirty` flag shows "Tienes cambios sin guardar" warning next to the save button; new language keys `role_permissions_hint`, `role_permissions_selected_label`, `unsaved_changes` added in `es`/`en` (`Iam.php`, `App.php`)
+- **Block list — expandable block type preview** — each block row in `blocks/index.php` now has a chevron toggle that reveals a larger icon, description, category badge, and block_key for the block type; new language keys `blocks_action_preview`, `blocks_action_collapse` in `Pages.php`
+- **Applications index — read-only clarity** — removed duplicate subtitle text; `empty_state` now uses `Iam.applications_empty` and `Iam.applications_managed_server_side` as title/description instead of generic defaults
 
 ### Fixed
 - **CMS request validation** — strengthen translation normalization in `CategoryStoreRequest`, `CollectionStoreRequest`, `EntryStoreRequest`, and `PageStoreRequest` with proper trimming and empty-value filtering
