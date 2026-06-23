@@ -209,6 +209,68 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         $result->assertRedirectTo(site_url('admin/cms/pages/1/blocks'));
     }
 
+    public function testUpdateValidationFailureKeepsFieldErrorsInSession(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->expects($this->once())
+            ->method('get')
+            ->with('1', 'page', '10')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'id' => 10,
+                    'block_id' => 5,
+                    'parent_instance_id' => null,
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        $blockMock->expects($this->once())
+            ->method('update')
+            ->with('1', 'page', '10', $this->callback(static fn (array $payload): bool => ($payload['sort_order'] ?? null) === 2))
+            ->willReturn([
+                'ok' => false,
+                'status' => 422,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => ['validationFailed'],
+                'fieldErrors' => [
+                    'sort_order' => 'Sort order is required',
+                    'translations.0.block_data.title' => 'Title is required',
+                ],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
+        ])->post('/admin/cms/pages/1/blocks/10', [
+            csrf_token() => csrf_hash(),
+            'block_id' => '5',
+            'sort_order' => '2',
+            'is_active' => '1',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'block_data' => ['title' => ''],
+                    'is_published' => '1',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+        $result->assertSessionHas('fieldErrors');
+        $result->assertSessionMissing('error');
+    }
+
     public function testDeleteRedirects(): void
     {
         $blockMock = $this->createMock(BlockInstanceApiService::class);

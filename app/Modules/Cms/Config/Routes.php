@@ -124,6 +124,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('collections', '\App\Modules\Cms\Controllers\CollectionController::index', ['as' => 'admin.cms.collections', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/data', '\App\Modules\Cms\Controllers\CollectionController::data', ['as' => 'admin.cms.collections.data', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/create', '\App\Modules\Cms\Controllers\CollectionController::create', ['as' => 'admin.cms.collections.create', 'filter' => 'permission:cms.collections.write']);
+    $routes->get('collections/check-slug', '\App\Modules\Cms\Controllers\CollectionController::checkSlug', ['as' => 'admin.cms.collections.check_slug', 'filter' => 'permission:cms.collections.read']);
     $routes->post('collections', '\App\Modules\Cms\Controllers\CollectionController::store', ['as' => 'admin.cms.collections.store', 'filter' => 'permission:cms.collections.write']);
     $routes->get('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::show/$1', ['as' => 'admin.cms.collections.show', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/(:segment)/edit', '\App\Modules\Cms\Controllers\CollectionController::edit/$1', ['as' => 'admin.cms.collections.edit', 'filter' => 'permission:cms.collections.write']);

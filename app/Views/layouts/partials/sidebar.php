@@ -1,3 +1,14 @@
+<?php
+$navItemClass = 'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors';
+$navItemIdleClass = 'text-gray-300 hover:bg-gray-800 hover:text-white';
+$navItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
+$navSectionLabelClass = 'px-3 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500';
+$navGroupButtonClass = 'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800 hover:text-white';
+$navGroupBodyClass = 'mt-1 space-y-0.5 border-l border-gray-800/70 pl-3';
+$navSubItemClass = 'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors';
+$navSubItemIdleClass = 'text-gray-300 hover:bg-gray-800 hover:text-white';
+$navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
+?>
 <aside id="app-sidebar" class="bg-gray-900 text-gray-200 w-72 fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:translate-x-0 flex flex-col"
     :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
     <div class="h-16 px-4 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
@@ -7,16 +18,16 @@
         </button>
     </div>
 
-    <nav class="p-3 space-y-1 flex-1 overflow-y-auto">
-        <a href="<?= route_to('dashboard') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('dashboard') ?>">
+    <nav class="p-3 space-y-1 flex-1 overflow-y-auto overscroll-contain">
+        <a href="<?= route_to('dashboard') ?>" class="<?= $navItemClass ?> <?= active_nav('dashboard', $navItemActiveClass) ?> <?= url_is('dashboard') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
             <?= ui_icon('dashboard') ?>
             <span><?= lang('App.dashboard') ?></span>
         </a>
-        <a href="<?= route_to('profile') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('profile') ?>">
+        <a href="<?= route_to('profile') ?>" class="<?= $navItemClass ?> <?= active_nav('profile', $navItemActiveClass) ?> <?= url_is('profile') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
             <?= ui_icon('profile') ?>
             <span><?= lang('App.profile') ?></span>
         </a>
-        <a href="<?= route_to('files') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('files') ?>">
+        <a href="<?= route_to('files') ?>" class="<?= $navItemClass ?> <?= active_nav('files', $navItemActiveClass) ?> <?= url_is('files') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
             <?= ui_icon('files') ?>
             <span><?= lang('App.files') ?></span>
         </a>
@@ -26,27 +37,27 @@
         ?>
 
         <?php if ($hasAdminItem): ?>
-            <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500"><?= lang('App.administration') ?></div>
+            <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4"><?= lang('App.administration') ?></div>
             <?php if (has_permission('users.read')): ?>
-                <a href="<?= route_to('admin.users') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/users*') ?>">
+                <a href="<?= route_to('admin.users') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/users*', $navItemActiveClass) ?> <?= url_is('admin/users*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('users') ?>
                     <span><?= lang('App.users') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('audit.read')): ?>
-                <a href="<?= route_to('admin.audit') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/audit*') ?>">
+                <a href="<?= route_to('admin.audit') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/audit*', $navItemActiveClass) ?> <?= url_is('admin/audit*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('audit') ?>
                     <span><?= lang('App.audit') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('apikeys.read')): ?>
-                <a href="<?= route_to('admin.api_keys') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/api-keys*') ?>">
+                <a href="<?= route_to('admin.api_keys') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/api-keys*', $navItemActiveClass) ?> <?= url_is('admin/api-keys*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('api_keys') ?>
                     <span><?= lang('App.api_keys') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('metrics.read')): ?>
-                <a href="<?= route_to('admin.metrics') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/metrics') ?>">
+                <a href="<?= route_to('admin.metrics') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/metrics', $navItemActiveClass) ?> <?= url_is('admin/metrics') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('metrics') ?>
                     <span><?= lang('App.metrics') ?></span>
                 </a>
@@ -54,20 +65,20 @@
         <?php endif; ?>
 
         <?php if (has_permission('iam.superadmin-access')): ?>
-            <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500"><?= lang('App.identity_access') ?></div>
-            <a href="<?= route_to('admin.iam.roles') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/iam/roles*') ?>">
+            <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4"><?= lang('App.identity_access') ?></div>
+            <a href="<?= route_to('admin.iam.roles') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/iam/roles*', $navItemActiveClass) ?> <?= url_is('admin/iam/roles*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                 <?= ui_icon('shield') ?>
                 <span><?= lang('App.roles') ?></span>
             </a>
-            <a href="<?= route_to('admin.iam.role_permissions') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/iam/role-permissions*') ?>">
+            <a href="<?= route_to('admin.iam.role_permissions') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/iam/role-permissions*', $navItemActiveClass) ?> <?= url_is('admin/iam/role-permissions*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                 <?= ui_icon('shield') ?>
                 <span><?= lang('Iam.role_permissions_title') ?></span>
             </a>
-            <a href="<?= route_to('admin.iam.permissions') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/iam/permissions*') ?>">
+            <a href="<?= route_to('admin.iam.permissions') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/iam/permissions*', $navItemActiveClass) ?> <?= url_is('admin/iam/permissions*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                 <?= ui_icon('lock') ?>
                 <span><?= lang('App.permissions') ?></span>
             </a>
-            <a href="<?= route_to('admin.iam.applications') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/iam/applications*') ?>">
+            <a href="<?= route_to('admin.iam.applications') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/iam/applications*', $navItemActiveClass) ?> <?= url_is('admin/iam/applications*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                 <?= ui_icon('layers') ?>
                 <span><?= lang('Iam.applications_title') ?></span>
             </a>
@@ -86,7 +97,7 @@
                 || has_permission('cms.submissions.read');
         ?>
         <?php if ($hasCmsItem): ?>
-            <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500 tracking-wider px-3">CMS</div>
+            <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4">CMS</div>
 
             <?php
             // ── CMS group: Contenido ───────────────────────────────────────────
@@ -100,35 +111,37 @@
                 || url_is('admin/cms/form-submissions*');
             ?>
             <?php if ($hasContentGroup): ?>
-            <div x-data="{ open: <?= $contentActive ? 'true' : "localStorage.getItem('cms-g-content') !== 'false'" ?> }">
+            <div x-data="{ open: <?= $contentActive ? 'true' : "localStorage.getItem('cms-g-content') !== 'false'" ?> }" class="space-y-1">
                 <button type="button"
                         @click="open = !open; localStorage.setItem('cms-g-content', open)"
-                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        class="<?= $navGroupButtonClass ?>"
                         :aria-expanded="open">
                     <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_content') ?></span>
-                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                    <span class="inline-flex items-center justify-center transition-transform duration-200" :class="{ 'rotate-180': open }">
+                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>
+                    </span>
                 </button>
-                <div x-show="open" class="mt-0.5 space-y-0.5">
+                <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
                     <?php if (has_permission('cms.pages.read')): ?>
-                        <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
+                        <a href="<?= site_url('admin/cms/pages') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/pages*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/pages*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-page') ?>
                             <span><?= lang('Pages.pages_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.entries.read')): ?>
-                        <a href="<?= site_url('admin/cms/entries') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/entries*') ?>">
+                        <a href="<?= site_url('admin/cms/entries') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/entries*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/entries*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-entry') ?>
                             <span><?= lang('Entries.entries_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.collections.read')): ?>
-                        <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
+                        <a href="<?= site_url('admin/cms/collections') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/collections*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/collections*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-collection') ?>
                             <span><?= lang('Collections.collections_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.submissions.read')): ?>
-                        <a href="<?= site_url('admin/cms/form-submissions') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/form-submissions*') ?>">
+                        <a href="<?= site_url('admin/cms/form-submissions') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/form-submissions*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/form-submissions*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('mail') ?>
                             <span><?= lang('FormSubmissions.sidebar_label') ?></span>
                         </a>
@@ -147,29 +160,31 @@
                 || url_is('admin/cms/redirects*');
             ?>
             <?php if ($hasStructureGroup): ?>
-            <div x-data="{ open: <?= $structureActive ? 'true' : "localStorage.getItem('cms-g-structure') !== 'false'" ?> }">
+            <div x-data="{ open: <?= $structureActive ? 'true' : "localStorage.getItem('cms-g-structure') !== 'false'" ?> }" class="space-y-1">
                 <button type="button"
                         @click="open = !open; localStorage.setItem('cms-g-structure', open)"
-                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        class="<?= $navGroupButtonClass ?>"
                         :aria-expanded="open">
                     <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_structure') ?></span>
-                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                    <span class="inline-flex items-center justify-center transition-transform duration-200" :class="{ 'rotate-180': open }">
+                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>
+                    </span>
                 </button>
-                <div x-show="open" class="mt-0.5 space-y-0.5">
+                <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
                     <?php if (has_permission('cms.menus.read')): ?>
-                        <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
+                        <a href="<?= site_url('admin/cms/menus') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/menus*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/menus*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-menu') ?>
                             <span><?= lang('Menus.menus_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.blocks.read')): ?>
-                        <a href="<?= site_url('admin/cms/block-types') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/block-types*') ?>">
+                        <a href="<?= site_url('admin/cms/block-types') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/block-types*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/block-types*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-block-type') ?>
                             <span><?= lang('BlockTypes.block_types_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.redirects.read')): ?>
-                        <a href="<?= site_url('admin/cms/redirects') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/redirects*') ?>">
+                        <a href="<?= site_url('admin/cms/redirects') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/redirects*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/redirects*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-redirect') ?>
                             <span><?= lang('Redirects.redirects_title') ?></span>
                         </a>
@@ -186,23 +201,25 @@
                 || url_is('admin/cms/tags*');
             ?>
             <?php if ($hasTaxonomyGroup): ?>
-            <div x-data="{ open: <?= $taxonomyActive ? 'true' : "localStorage.getItem('cms-g-taxonomy') !== 'false'" ?> }">
+            <div x-data="{ open: <?= $taxonomyActive ? 'true' : "localStorage.getItem('cms-g-taxonomy') !== 'false'" ?> }" class="space-y-1">
                 <button type="button"
                         @click="open = !open; localStorage.setItem('cms-g-taxonomy', open)"
-                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        class="<?= $navGroupButtonClass ?>"
                         :aria-expanded="open">
                     <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_taxonomy') ?></span>
-                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                    <span class="inline-flex items-center justify-center transition-transform duration-200" :class="{ 'rotate-180': open }">
+                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>
+                    </span>
                 </button>
-                <div x-show="open" class="mt-0.5 space-y-0.5">
+                <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
                     <?php if (has_permission('cms.categories.read')): ?>
-                        <a href="<?= site_url('admin/cms/categories') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/categories*') ?>">
+                        <a href="<?= site_url('admin/cms/categories') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/categories*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/categories*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('folder-open') ?>
                             <span><?= lang('Categories.categories_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.tags.read')): ?>
-                        <a href="<?= site_url('admin/cms/tags') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/tags*') ?>">
+                        <a href="<?= site_url('admin/cms/tags') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/tags*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/tags*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('tag') ?>
                             <span><?= lang('Tags.tags_title') ?></span>
                         </a>
@@ -222,33 +239,35 @@
                 || url_is('admin/cms/settings*');
             ?>
             <?php if ($hasConfigGroup): ?>
-            <div x-data="{ open: <?= $configActive ? 'true' : "localStorage.getItem('cms-g-config') !== 'false'" ?> }">
+            <div x-data="{ open: <?= $configActive ? 'true' : "localStorage.getItem('cms-g-config') !== 'false'" ?> }" class="space-y-1">
                 <button type="button"
                         @click="open = !open; localStorage.setItem('cms-g-config', open)"
-                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        class="<?= $navGroupButtonClass ?>"
                         :aria-expanded="open">
                     <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_configuration') ?></span>
-                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                    <span class="inline-flex items-center justify-center transition-transform duration-200" :class="{ 'rotate-180': open }">
+                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>
+                    </span>
                 </button>
-                <div x-show="open" class="mt-0.5 space-y-0.5">
+                <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
                     <?php if (has_permission('cms.languages.read')): ?>
-                        <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
+                        <a href="<?= site_url('admin/cms/languages') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/languages*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/languages*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-language') ?>
                             <span><?= lang('CmsLanguages.languages_title') ?></span>
                         </a>
-                        <a href="<?= site_url('admin/cms/translations/audit') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/translations/audit*') ?>">
+                        <a href="<?= site_url('admin/cms/translations/audit') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/translations/audit*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/translations/audit*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('languages') ?>
                             <span><?= lang('Translations.audit_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.settings.write')): ?>
-                        <a href="<?= site_url('admin/cms/site-identity') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/site-identity*') ?>">
+                        <a href="<?= site_url('admin/cms/site-identity') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/site-identity*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/site-identity*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('image') ?>
                             <span><?= lang('SiteIdentity.sidebar_label') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.settings.read')): ?>
-                        <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
+                        <a href="<?= site_url('admin/cms/settings') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/settings*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/settings*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('settings') ?>
                             <span><?= lang('Settings.settings_title') ?></span>
                         </a>

@@ -115,4 +115,5 @@ return [
     'back_to_dashboard' => 'Back to Dashboard',
     'components_title'  => 'Component Library',
     'visible_help'      => 'Visible inside platform search engines.',
+    'details'           => 'Details',
 ];
