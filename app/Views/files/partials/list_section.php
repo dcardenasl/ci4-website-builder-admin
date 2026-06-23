@@ -119,7 +119,10 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
             </button>
         </div>
         <form method="post" action="<?= route_to('files.bulk') ?>"
-              @submit="return confirm('<?= esc(lang('Files.bulk_confirm_delete')) ?>')">
+              @submit.prevent="$store.confirm.show(
+                  '<?= esc(lang('Files.bulk_confirm_delete'), 'js') ?>',
+                  () => $el.submit()
+              )">
             <input type="hidden" :name="csrf.name" :value="csrf.hash">
             <input type="hidden" name="action" value="delete">
             <template x-for="id in selectedIds" :key="id">
@@ -218,12 +221,19 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
                                     <a :href="fileDownloadUrl(row.id)" class="<?= esc(action_button_class()) ?>" :title="'<?= esc(lang('App.download')) ?>'">
                                         <?= ui_icon('download', 'h-3.5 w-3.5') ?>
                                     </a>
-                                    <form method="post" :action="fileDeleteUrl(row.id)" @submit="return confirm(confirmDelete)">
-                                        <input type="hidden" :name="csrf.name" :value="csrf.hash">
-                                        <button type="submit" class="<?= esc(action_button_class('danger')) ?>" :title="'<?= esc(lang('App.delete')) ?>'">
-                                            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                        @click="$store.confirm.show(confirmDelete, () => {
+                                            const f = document.createElement('form');
+                                            f.method = 'post';
+                                            f.action = fileDeleteUrl(row.id);
+                                            const c = document.createElement('input');
+                                            c.type = 'hidden'; c.name = csrf.name; c.value = csrf.hash;
+                                            f.appendChild(c); document.body.appendChild(f); f.submit();
+                                        })"
+                                        class="<?= esc(action_button_class('danger')) ?>"
+                                        :title="'<?= esc(lang('App.delete')) ?>'">
+                                        <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

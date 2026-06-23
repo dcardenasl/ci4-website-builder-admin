@@ -35,23 +35,12 @@ $sortableLocal = file_exists(FCPATH . 'assets/vendor/sortable.min.js');
 <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.539.0/dist/umd/lucide.min.js" integrity="sha384-Ui80VKnKTTUky8NmDUdXcnOrP66fD6bYHb7J1+kL+Zx517BmW5a6kvGDwY3BKt+w" crossorigin="anonymous"></script>
 <?php endif; ?>
 <style <?= csp_style_nonce() ?>>
+    /* Brand tokens live in src/css/app.css (@theme) — compiled into the
+       CSS custom properties below at build time. This block only carries
+       the Alpine x-cloak rule, which must be available before the first
+       Alpine paint to suppress FOUC. */
     [x-cloak] {
         display: none !important;
-    }
-
-    :root {
-        --color-brand-50: rgb(239 246 255);
-        --color-brand-100: rgb(219 234 254);
-        --color-brand-200: rgb(191 219 254);
-        --color-brand-300: rgb(147 197 253);
-        --color-brand-400: rgb(96 165 250);
-        --color-brand-500: rgb(59 130 246);
-        --color-brand-600: rgb(37 99 235);
-        --color-brand-700: rgb(29 78 216);
-        --color-brand-800: rgb(30 64 175);
-        --color-brand-900: rgb(30 58 138);
-        --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-        --font-mono: "JetBrains Mono", ui-monospace, monospace;
     }
 </style>
 <?php // tailwind.config script removed as we now use compiled CSS?>

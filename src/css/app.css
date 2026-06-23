@@ -37,3 +37,34 @@
         appearance: none;
     }
 }
+
+@layer components {
+    /* Semantic button classes — mirror the PHP action_button_class() helpers.
+       Use in Blade-free contexts (emails, error pages compiled with Tailwind). */
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500;
+    }
+
+    /* Surface card — mirrors the bg-white/border/rounded-xl/shadow-sm pattern. */
+    .card {
+        @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    }
+
+    /* Standard text input — mirrors input_class() without error-state variant. */
+    .form-input {
+        @apply mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus:border-brand-500 focus:ring-brand-500;
+    }
+
+    /* Status/label badge base — apply color utilities on top. */
+    .badge {
+        @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    }
+}

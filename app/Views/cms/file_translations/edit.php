@@ -48,8 +48,8 @@ foreach ($languages as $l) {
         <?php foreach ($languages as $index => $lang): ?>
             <?php
                 $langId  = (int) ($lang['id'] ?? 0);
-                $trans   = $translations[$langId] ?? [];
-                $existId = isset($trans['id']) ? (string) $trans['id'] : '';
+            $trans   = $translations[$langId] ?? [];
+            $existId = isset($trans['id']) ? (string) $trans['id'] : '';
             ?>
             <div x-show="isActive(<?= $langId ?>)" class="space-y-4">
                 <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= $langId ?>">

@@ -162,6 +162,34 @@ if (! function_exists('has_active_filters')) {
     }
 }
 
+if (! function_exists('section_heading_class')) {
+    /**
+     * Consistent page-section heading. Use for H2/H3 inside cards or
+     * section dividers — always `text-lg font-semibold text-gray-900`.
+     */
+    function section_heading_class(): string
+    {
+        return 'text-lg font-semibold text-gray-900';
+    }
+}
+
+if (! function_exists('card_class')) {
+    /**
+     * Surface card wrapper — mirrors the `.card` CSS component class.
+     * Optional $padding follows: 'sm' = p-4, 'md' = p-5 (default), 'none' = no padding.
+     */
+    function card_class(string $padding = 'md'): string
+    {
+        $pad = match ($padding) {
+            'sm'   => ' p-4',
+            'none' => '',
+            default => ' p-5',
+        };
+
+        return 'bg-white border border-gray-200 rounded-xl shadow-sm' . $pad;
+    }
+}
+
 if (! function_exists('table_wrapper_class')) {
     function table_wrapper_class(): string
     {
@@ -307,6 +335,11 @@ if (! function_exists('ui_icon')) {
             'cms-language'    => 'globe',
             'cms-redirect'    => 'corner-up-right',
             'cms-collection'  => 'archive',
+            'languages'       => 'languages',
+            'chevron-down'    => 'chevron-down',
+            'chevron-right'   => 'chevron-right',
+            'external-link'   => 'external-link',
+            'copy'            => 'copy',
         ];
 
         if (! isset($icons[$name])) {

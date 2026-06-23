@@ -86,75 +86,166 @@
         ?>
         <?php if ($hasCmsItem): ?>
             <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500 tracking-wider px-3">CMS</div>
-            <?php if (has_permission('cms.languages.read')): ?>
-                <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
-                    <?= ui_icon('cms-language') ?>
-                    <span><?= lang('CmsLanguages.languages_title') ?></span>
-                </a>
-                <a href="<?= site_url('admin/cms/translations/audit') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/translations/audit*') ?>">
-                    <?= ui_icon('languages') ?>
-                    <span><?= lang('Translations.audit_title') ?></span>
-                </a>
+
+            <?php
+            // ── CMS group: Contenido ───────────────────────────────────────────
+            $hasContentGroup = has_permission('cms.pages.read')
+                || has_permission('cms.entries.read')
+                || has_permission('cms.collections.read');
+            $contentActive = url_is('admin/cms/pages*')
+                || url_is('admin/cms/entries*')
+                || url_is('admin/cms/collections*');
+            ?>
+            <?php if ($hasContentGroup): ?>
+            <div x-data="{ open: <?= $contentActive ? 'true' : "localStorage.getItem('cms-g-content') !== 'false'" ?> }">
+                <button type="button"
+                        @click="open = !open; localStorage.setItem('cms-g-content', open)"
+                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        :aria-expanded="open">
+                    <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_content') ?></span>
+                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                </button>
+                <div x-show="open" class="mt-0.5 space-y-0.5">
+                    <?php if (has_permission('cms.pages.read')): ?>
+                        <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
+                            <?= ui_icon('cms-page') ?>
+                            <span><?= lang('Pages.pages_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.entries.read')): ?>
+                        <a href="<?= site_url('admin/cms/entries') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/entries*') ?>">
+                            <?= ui_icon('cms-entry') ?>
+                            <span><?= lang('Entries.entries_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.collections.read')): ?>
+                        <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
+                            <?= ui_icon('cms-collection') ?>
+                            <span><?= lang('Collections.collections_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php endif; ?>
-            <?php if (has_permission('cms.settings.write')): ?>
-                <a href="<?= site_url('admin/cms/site-identity') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/site-identity*') ?>">
-                    <?= ui_icon('image') ?>
-                    <span><?= lang('SiteIdentity.sidebar_label') ?></span>
-                </a>
+
+            <?php
+            // ── CMS group: Estructura ─────────────────────────────────────────
+            $hasStructureGroup = has_permission('cms.menus.read')
+                || has_permission('cms.blocks.read')
+                || has_permission('cms.redirects.read');
+            $structureActive = url_is('admin/cms/menus*')
+                || url_is('admin/cms/block-types*')
+                || url_is('admin/cms/redirects*');
+            ?>
+            <?php if ($hasStructureGroup): ?>
+            <div x-data="{ open: <?= $structureActive ? 'true' : "localStorage.getItem('cms-g-structure') !== 'false'" ?> }">
+                <button type="button"
+                        @click="open = !open; localStorage.setItem('cms-g-structure', open)"
+                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        :aria-expanded="open">
+                    <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_structure') ?></span>
+                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                </button>
+                <div x-show="open" class="mt-0.5 space-y-0.5">
+                    <?php if (has_permission('cms.menus.read')): ?>
+                        <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
+                            <?= ui_icon('cms-menu') ?>
+                            <span><?= lang('Menus.menus_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.blocks.read')): ?>
+                        <a href="<?= site_url('admin/cms/block-types') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/block-types*') ?>">
+                            <?= ui_icon('cms-block-type') ?>
+                            <span><?= lang('BlockTypes.block_types_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.redirects.read')): ?>
+                        <a href="<?= site_url('admin/cms/redirects') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/redirects*') ?>">
+                            <?= ui_icon('cms-redirect') ?>
+                            <span><?= lang('Redirects.redirects_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php endif; ?>
-            <?php if (has_permission('cms.settings.read')): ?>
-                <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
-                    <?= ui_icon('settings') ?>
-                    <span><?= lang('Settings.settings_title') ?></span>
-                </a>
+
+            <?php
+            // ── CMS group: Taxonomía ──────────────────────────────────────────
+            $hasTaxonomyGroup = has_permission('cms.categories.read')
+                || has_permission('cms.tags.read');
+            $taxonomyActive = url_is('admin/cms/categories*')
+                || url_is('admin/cms/tags*');
+            ?>
+            <?php if ($hasTaxonomyGroup): ?>
+            <div x-data="{ open: <?= $taxonomyActive ? 'true' : "localStorage.getItem('cms-g-taxonomy') !== 'false'" ?> }">
+                <button type="button"
+                        @click="open = !open; localStorage.setItem('cms-g-taxonomy', open)"
+                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        :aria-expanded="open">
+                    <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_taxonomy') ?></span>
+                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                </button>
+                <div x-show="open" class="mt-0.5 space-y-0.5">
+                    <?php if (has_permission('cms.categories.read')): ?>
+                        <a href="<?= site_url('admin/cms/categories') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/categories*') ?>">
+                            <?= ui_icon('folder-open') ?>
+                            <span><?= lang('Categories.categories_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.tags.read')): ?>
+                        <a href="<?= site_url('admin/cms/tags') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/tags*') ?>">
+                            <?= ui_icon('tag') ?>
+                            <span><?= lang('Tags.tags_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php endif; ?>
-            <?php if (has_permission('cms.pages.read')): ?>
-                <a href="<?= site_url('admin/cms/pages') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/pages*') ?>">
-                    <?= ui_icon('cms-page') ?>
-                    <span><?= lang('Pages.pages_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.menus.read')): ?>
-                <a href="<?= site_url('admin/cms/menus') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/menus*') ?>">
-                    <?= ui_icon('cms-menu') ?>
-                    <span><?= lang('Menus.menus_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.blocks.read')): ?>
-                <a href="<?= site_url('admin/cms/block-types') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/block-types*') ?>">
-                    <?= ui_icon('cms-block-type') ?>
-                    <span><?= lang('BlockTypes.block_types_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.collections.read')): ?>
-                <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
-                    <?= ui_icon('cms-collection') ?>
-                    <span><?= lang('Collections.collections_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.entries.read')): ?>
-                <a href="<?= site_url('admin/cms/entries') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/entries*') ?>">
-                    <?= ui_icon('cms-entry') ?>
-                    <span><?= lang('Entries.entries_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.categories.read')): ?>
-                <a href="<?= site_url('admin/cms/categories') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/categories*') ?>">
-                    <?= ui_icon('folder-open') ?>
-                    <span><?= lang('Categories.categories_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.tags.read')): ?>
-                <a href="<?= site_url('admin/cms/tags') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/tags*') ?>">
-                    <?= ui_icon('tag') ?>
-                    <span><?= lang('Tags.tags_title') ?></span>
-                </a>
-            <?php endif; ?>
-            <?php if (has_permission('cms.redirects.read')): ?>
-                <a href="<?= site_url('admin/cms/redirects') ?>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/redirects*') ?>">
-                    <?= ui_icon('cms-redirect') ?>
-                    <span><?= lang('Redirects.redirects_title') ?></span>
-                </a>
+
+            <?php
+            // ── CMS group: Configuración ──────────────────────────────────────
+            $hasConfigGroup = has_permission('cms.languages.read')
+                || has_permission('cms.settings.write')
+                || has_permission('cms.settings.read');
+            $configActive = url_is('admin/cms/languages*')
+                || url_is('admin/cms/translations/audit*')
+                || url_is('admin/cms/site-identity*')
+                || url_is('admin/cms/settings*');
+            ?>
+            <?php if ($hasConfigGroup): ?>
+            <div x-data="{ open: <?= $configActive ? 'true' : "localStorage.getItem('cms-g-config') !== 'false'" ?> }">
+                <button type="button"
+                        @click="open = !open; localStorage.setItem('cms-g-config', open)"
+                        class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-gray-800"
+                        :aria-expanded="open">
+                    <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_configuration') ?></span>
+                    <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500 transition-transform duration-200') ?>
+                </button>
+                <div x-show="open" class="mt-0.5 space-y-0.5">
+                    <?php if (has_permission('cms.languages.read')): ?>
+                        <a href="<?= site_url('admin/cms/languages') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/languages*') ?>">
+                            <?= ui_icon('cms-language') ?>
+                            <span><?= lang('CmsLanguages.languages_title') ?></span>
+                        </a>
+                        <a href="<?= site_url('admin/cms/translations/audit') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/translations/audit*') ?>">
+                            <?= ui_icon('languages') ?>
+                            <span><?= lang('Translations.audit_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.settings.write')): ?>
+                        <a href="<?= site_url('admin/cms/site-identity') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/site-identity*') ?>">
+                            <?= ui_icon('image') ?>
+                            <span><?= lang('SiteIdentity.sidebar_label') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.settings.read')): ?>
+                        <a href="<?= site_url('admin/cms/settings') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/settings*') ?>">
+                            <?= ui_icon('settings') ?>
+                            <span><?= lang('Settings.settings_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php endif; ?>
         <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
