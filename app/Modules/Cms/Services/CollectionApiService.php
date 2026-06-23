@@ -13,6 +13,14 @@ class CollectionApiService extends ResourceApiService implements CollectionApiSe
         return '/cms/collections';
     }
 
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
+    {
+        $params = ['slug' => $slug, 'language_id' => $languageId];
 
+        if ($currentId !== '') {
+            $params['current_id'] = $currentId;
+        }
 
+        return $this->apiClient->get('/cms/collections/check-slug', $params);
+    }
 }

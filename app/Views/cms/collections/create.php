@@ -5,6 +5,7 @@
 <?php ob_start(); ?>
 <form method="post" action="<?= route_to('admin.cms.collections.store') ?>" class="space-y-6">
         <?= csrf_field() ?>
+        <?php $checkSlugBase = route_to('admin.cms.collections.check_slug'); ?>
 
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
             <div>
@@ -12,27 +13,15 @@
                 <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_key_help')) ?></p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <?= view('components/form/text', [
-                    'name' => 'collection_key',
-                    'label' => 'Collections.field_collection_key',
-                    'required' => true,
-                    'value' => $item['collection_key'] ?? '',
-                    'placeholder' => 'Collections.field_collection_key_placeholder',
-                    'help' => 'Collections.field_collection_key_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-
-                <?= view('components/form/text', [
-                    'name' => 'url_prefix',
-                    'label' => 'Collections.field_url_prefix',
-                    'required' => true,
-                    'value' => $item['url_prefix'] ?? '',
-                    'placeholder' => 'Collections.field_url_prefix_placeholder',
-                    'help' => 'Collections.field_url_prefix_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-            </div>
+            <?= view('components/form/text', [
+                'name' => 'collection_key',
+                'label' => 'Collections.field_collection_key',
+                'required' => true,
+                'value' => $item['collection_key'] ?? '',
+                'placeholder' => 'Collections.field_collection_key_placeholder',
+                'help' => 'Collections.field_collection_key_help',
+                'errors' => $errors ?? []
+            ]) ?>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <?= view('components/form/boolean', [
@@ -168,17 +157,6 @@
                             <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
 
                             <?= view('components/form/text', [
-                                'name' => "translations[{$index}][slug]",
-                                'label' => 'Collections.translation_slug_label',
-                                'required' => true,
-                                'placeholder' => 'Collections.translation_slug_placeholder',
-                                'help' => 'Collections.translation_slug_help',
-                                'value' => old("translations.{$index}.slug") ?? '',
-                                'maxlength' => 150,
-                                'errors' => $errors ?? []
-                            ]) ?>
-
-                            <?= view('components/form/text', [
                                 'name' => "translations[{$index}][name]",
                                 'label' => 'Collections.translation_name_label',
                                 'required' => !empty($lang['is_default']),
@@ -186,6 +164,18 @@
                                 'help' => 'Collections.translation_name_help',
                                 'value' => old("translations.{$index}.name") ?? '',
                                 'maxlength' => 150,
+                                'errors' => $errors ?? []
+                            ]) ?>
+
+                            <?= view('components/form/slug', [
+                                'name' => "translations[{$index}][slug]",
+                                'label' => 'Collections.translation_slug_label',
+                                'required' => !empty($lang['is_default']),
+                                'sourceId' => sprintf('[name="translations[%d][name]"]', $index),
+                                'checkUrl' => $checkSlugBase . '?language_id=' . (int) $lang['id'],
+                                'placeholder' => 'Collections.translation_slug_placeholder',
+                                'help' => 'Collections.translation_slug_help',
+                                'value' => old("translations.{$index}.slug") ?? '',
                                 'errors' => $errors ?? []
                             ]) ?>
 

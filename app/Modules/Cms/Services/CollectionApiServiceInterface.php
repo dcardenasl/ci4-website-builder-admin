@@ -33,6 +33,9 @@ interface CollectionApiServiceInterface
     /** @return ApiResponse */
     public function delete(int|string $id): array;
 
+    /** @return ApiResponse */
+    public function checkSlug(string $slug, int $languageId, string $currentId = ''): array;
+
 
 
 }

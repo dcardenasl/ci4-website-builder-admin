@@ -140,6 +140,26 @@ class CollectionController extends BaseWebController
         return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_delete_success'));
     }
 
+    public function checkSlug(): ResponseInterface
+    {
+        $slugRaw = $this->request->getGet('slug');
+        $languageIdRaw = $this->request->getGet('language_id');
+        $currentIdRaw = $this->request->getGet('current_id');
+
+        $slug = is_scalar($slugRaw) ? (string) $slugRaw : '';
+        $languageId = is_scalar($languageIdRaw) ? (int) $languageIdRaw : 0;
+        $currentId = is_scalar($currentIdRaw) ? (string) $currentIdRaw : '';
+
+        if ($slug === '' || $languageId === 0) {
+            return $this->response->setJSON(['available' => false]);
+        }
+
+        $result = $this->safeApiCall(fn () => $this->collectionService->checkSlug($slug, $languageId, $currentId));
+        $data = $this->extractData($result);
+
+        return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
+    }
+
 
 
 
