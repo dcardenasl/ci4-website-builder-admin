@@ -146,13 +146,13 @@ unset($actionButtons[$status]);
                 <?php endif; ?>
                 <?php if (! empty($submission['form_key'])): ?>
                     <div>
-                        <dt class="text-gray-500">Form key</dt>
+                        <dt class="text-gray-500"><?= lang('FormSubmissions.field_form_key') ?></dt>
                         <dd class="text-gray-900 font-mono text-xs"><?= esc($submission['form_key']) ?></dd>
                     </div>
                 <?php endif; ?>
                 <?php if (! empty($submission['page_id'])): ?>
                     <div>
-                        <dt class="text-gray-500">Page ID</dt>
+                        <dt class="text-gray-500"><?= lang('FormSubmissions.field_page_id') ?></dt>
                         <dd class="text-gray-900"><?= esc((string) $submission['page_id']) ?></dd>
                     </div>
                 <?php endif; ?>

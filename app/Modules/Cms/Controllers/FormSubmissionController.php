@@ -39,10 +39,8 @@ class FormSubmissionController extends BaseWebController
 
     public function data(): ResponseInterface
     {
-        $status = (string) ($this->request->getGet('status') ?? '');
-
         return $this->tableDataResponse(
-            ['status' => $status ?: null],
+            ['status', 'form_key'],
             ['created_at'],
             fn (array $params) => $this->submissionService->list($params),
         );

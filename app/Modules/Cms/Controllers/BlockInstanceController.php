@@ -323,7 +323,7 @@ class BlockInstanceController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->create($ownerId, $ownerType, $payload));
 
         if (!$response['ok']) {
-            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Pages.block_add_failed')));
+            return $this->failApi($response, lang('Pages.block_add_failed'));
         }
 
         if ($parentInstanceId !== null) {
@@ -464,7 +464,7 @@ class BlockInstanceController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, $payload));
 
         if (!$response['ok']) {
-            return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Pages.block_update_failed')));
+            return $this->failApi($response, lang('Pages.block_update_failed'));
         }
 
         if ($parentInstanceId !== null) {

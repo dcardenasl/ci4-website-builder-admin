@@ -18,6 +18,32 @@ $ownerUpdateRoute = $ownerUpdateRoute ?? 'admin.cms.pages.blocks.update';
 $ownerDeleteRoute = $ownerDeleteRoute ?? 'admin.cms.pages.blocks.delete';
 $ownerChildrenRoute = $ownerChildrenRoute ?? 'admin.cms.pages.blocks.children';
 
+$submittedBlockConfig = old('block_config', $blockConfig);
+if (! is_array($submittedBlockConfig)) {
+    $submittedBlockConfig = $blockConfig;
+}
+
+$submittedTranslations = old('translations', $block['translations'] ?? []);
+if (! is_array($submittedTranslations)) {
+    $submittedTranslations = [];
+}
+
+$translationsByLanguage = [];
+foreach ($submittedTranslations as $translation) {
+    if (! is_array($translation)) {
+        continue;
+    }
+
+    $languageId = (int) ($translation['language_id'] ?? 0);
+    if ($languageId > 0) {
+        $translationsByLanguage[$languageId] = $translation;
+    }
+}
+
+$sortOrderValue = old('sort_order', $block['sort_order'] ?? 0);
+$isActiveValue  = (bool) old('is_active', ! empty($block['is_active']));
+$blockIdValue   = old('block_id', (string) ($block['block_id'] ?? ''));
+
 $defaultLangId = 0;
 foreach ($languages as $l) {
     if (! empty($l['is_default'])) {
@@ -73,7 +99,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
               action="<?= route_to($ownerUpdateRoute, (string) $page['id'], (string) $block['id']) ?>"
               class="space-y-6">
             <?= csrf_field() ?>
-            <input type="hidden" name="block_id" value="<?= esc((string) ($block['block_id'] ?? '')) ?>">
+            <input type="hidden" name="block_id" value="<?= esc((string) $blockIdValue) ?>">
 
             <!-- Sort order + active -->
             <div class="grid grid-cols-2 gap-4">
@@ -81,14 +107,14 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                     'name'     => 'sort_order',
                     'label'    => 'Pages.block_sort_order_label',
                     'required' => true,
-                    'value'    => $block['sort_order'] ?? 0,
+                    'value'    => $sortOrderValue,
                     'help'     => 'Pages.block_sort_order_help',
                     'errors'   => $errors ?? [],
                 ]) ?>
                 <div class="flex items-end pb-1">
                     <label class="flex items-center gap-2 cursor-pointer select-none">
                         <input type="checkbox" name="is_active" value="1"
-                               <?= ! empty($block['is_active']) ? 'checked' : '' ?>
+                               <?= $isActiveValue ? 'checked' : '' ?>
                                class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                         <span class="text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></span>
                     </label>
@@ -105,9 +131,10 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         $cfType    = $cf['type']     ?? 'string';
                         $cfLabel   = $cf['label']    ?? $cfKey;
                         $cfDefault = $cf['default']  ?? '';
-                        $cfVal     = $blockConfig[$cfKey] ?? $cfDefault;
+                        $cfVal     = $submittedBlockConfig[$cfKey] ?? $cfDefault;
                         $cfOptions = isset($cf['options']) ? (array) $cf['options'] : [];
                         $cfReq     = ! empty($cf['required']);
+                        $cfFieldName = "block_config[{$cfKey}]";
                         ?>
                     <div class="space-y-1">
                         <label class="block text-xs font-semibold text-gray-700">
@@ -116,13 +143,13 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         </label>
                         <?php if ($cfType === 'boolean'): ?>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="block_config[<?= esc($cfKey) ?>]" value="1"
+                                <input type="checkbox" name="<?= esc($cfFieldName, 'attr') ?>" value="1"
                                        <?= ! empty($cfVal) ? 'checked' : '' ?>
                                        class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                 <span class="text-sm text-gray-600"><?= esc($cfLabel) ?></span>
                             </label>
                         <?php elseif ($cfType === 'select' && ! empty($cfOptions)): ?>
-                            <select name="block_config[<?= esc($cfKey) ?>]"
+                            <select name="<?= esc($cfFieldName, 'attr') ?>"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                     <?= $cfReq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
@@ -134,11 +161,12 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             </select>
                         <?php else: ?>
                             <input type="<?= $cfType === 'url' ? 'url' : ($cfType === 'integer' ? 'number' : 'text') ?>"
-                                   name="block_config[<?= esc($cfKey) ?>]"
+                                   name="<?= esc($cfFieldName, 'attr') ?>"
                                    value="<?= esc((string) $cfVal) ?>"
                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                    <?= $cfReq ? 'required' : '' ?>>
                         <?php endif; ?>
+                        <?= render_field_error($cfFieldName) ?>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -172,13 +200,15 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
                 <!-- Tab panels -->
                 <?php foreach ($languages as $idx => $lang):
-                    $transRow = [];
+                    $langId = (int) $lang['id'];
+                    $currentRow = [];
                     foreach ($block['translations'] ?? [] as $t) {
-                        if (is_array($t) && (int) ($t['language_id'] ?? 0) === (int) $lang['id']) {
-                            $transRow = $t;
+                        if (is_array($t) && (int) ($t['language_id'] ?? 0) === $langId) {
+                            $currentRow = $t;
                             break;
                         }
                     }
+                    $transRow = $translationsByLanguage[$langId] ?? $currentRow;
                     $isDefault = ! empty($lang['is_default']);
                     ?>
                 <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
@@ -191,6 +221,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         $freq     = ! empty($field['required']) && $isDefault;
                         $fval     = $transRow['block_data'][$fieldKey] ?? '';
                         $foptions = isset($field['options']) ? (array) $field['options'] : [];
+                        $fieldName = "translations[{$idx}][block_data][{$fieldKey}]";
                         ?>
                     <div class="space-y-1">
                         <?php if ($ft !== 'file' && $ft !== 'repeater'): ?>
@@ -200,17 +231,19 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         </label>
                         <?php endif; ?>
                         <?php if ($ft === 'richtext'): ?>
-                            <textarea name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
+                            <textarea name="<?= esc($fieldName, 'attr') ?>"
                                       rows="6"
                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm font-mono"
                                       placeholder="HTML permitido…"
-                                      <?= $freq ? 'required' : '' ?>><?= esc((string) $fval) ?></textarea>
+                                      <?= $freq ? 'required' : '' ?>><?= esc((string) old($fieldName, $fval)) ?></textarea>
                             <p class="text-[10px] text-gray-400">Soporta HTML</p>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif (in_array($ft, ['text', 'textarea'])): ?>
-                            <textarea name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
+                            <textarea name="<?= esc($fieldName, 'attr') ?>"
                                       rows="4"
                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
-                                      <?= $freq ? 'required' : '' ?>><?= esc((string) $fval) ?></textarea>
+                                      <?= $freq ? 'required' : '' ?>><?= esc((string) old($fieldName, $fval)) ?></textarea>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'url'): ?>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -219,42 +252,46 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                     </svg>
                                 </span>
                                 <input type="url"
-                                       name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
-                                       value="<?= esc((string) $fval) ?>"
+                                       name="<?= esc($fieldName, 'attr') ?>"
+                                       value="<?= esc((string) old($fieldName, $fval)) ?>"
                                        placeholder="https://"
                                        class="block w-full pl-9 rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                        <?= $freq ? 'required' : '' ?>>
                             </div>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'integer'): ?>
                             <input type="number"
-                                   name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
-                                   value="<?= esc((string) $fval) ?>"
+                                   name="<?= esc($fieldName, 'attr') ?>"
+                                   value="<?= esc((string) old($fieldName, $fval)) ?>"
                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                    <?= $freq ? 'required' : '' ?>>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'boolean'): ?>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox"
-                                       name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
+                                       name="<?= esc($fieldName, 'attr') ?>"
                                        value="1"
-                                       <?= ! empty($fval) ? 'checked' : '' ?>
+                                       <?= ! empty(old($fieldName, $fval)) ? 'checked' : '' ?>
                                        class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                 <span class="text-sm text-gray-600"><?= esc($flabel) ?></span>
                             </label>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'select' && ! empty($foptions)): ?>
-                            <select name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
+                            <select name="<?= esc($fieldName, 'attr') ?>"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                     <?= $freq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
                                 <?php foreach ($foptions as $opt): ?>
-                                    <option value="<?= esc((string) $opt) ?>" <?= (string) $fval === (string) $opt ? 'selected' : '' ?>>
+                                    <option value="<?= esc((string) $opt) ?>" <?= (string) old($fieldName, $fval) === (string) $opt ? 'selected' : '' ?>>
                                         <?= esc((string) $opt) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'file'): ?>
                             <?php
-                            $existingFileId  = $transRow['block_data'][$fieldKey . '_file_id'] ?? '';
-                            $existingFileUrl = $transRow['block_data'][$fieldKey . '_url'] ?? '';
+                            $existingFileId  = old($fieldName . '_file_id', $transRow['block_data'][$fieldKey . '_file_id'] ?? '');
+                            $existingFileUrl = old($fieldName . '_url', $transRow['block_data'][$fieldKey . '_url'] ?? '');
                             $existingFileIdJs  = json_encode((string) $existingFileId);
                             $existingFileUrlJs = json_encode((string) $existingFileUrl);
                             $faccept = (string) ($field['accept'] ?? 'image');
@@ -266,10 +303,10 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             </label>
                             <div x-data="fileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
                                 <input type="hidden"
-                                       name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>_file_id]"
+                                       name="<?= esc($fieldName . '_file_id', 'attr') ?>"
                                        x-model="fileId">
                                 <input type="hidden"
-                                       name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>_url]"
+                                       name="<?= esc($fieldName . '_url', 'attr') ?>"
                                        x-model="fileUrl">
                                 <div x-show="previewUrl">
                                     <template x-if="accept === 'video'">
@@ -288,9 +325,13 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                     <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
                                 </button>
                             </div>
+                            <?= render_field_error($fieldName) ?>
+                            <?= render_field_error($fieldName . '_file_id') ?>
+                            <?= render_field_error($fieldName . '_url') ?>
                         <?php elseif ($ft === 'repeater'): ?>
                             <?php
-                            $existingItems   = is_array($fval) ? $fval : [];
+                            $existingItems   = old($fieldName, $fval);
+                            $existingItems   = is_array($existingItems) ? $existingItems : [];
                             $itemFields      = $field['item_fields'] ?? [];
                             $existingItemsJs = json_encode(array_values($existingItems), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                             $itemFieldsJs    = json_encode($itemFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -374,10 +415,11 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             </div>
                         <?php else: ?>
                             <input type="text"
-                                   name="translations[<?= $idx ?>][block_data][<?= esc($fieldKey) ?>]"
-                                   value="<?= esc((string) $fval) ?>"
+                                   name="<?= esc($fieldName, 'attr') ?>"
+                                   value="<?= esc((string) old($fieldName, $fval)) ?>"
                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                    <?= $freq ? 'required' : '' ?>>
+                            <?= render_field_error($fieldName) ?>
                         <?php endif; ?>
                     </div>
                     <?php endforeach; ?>

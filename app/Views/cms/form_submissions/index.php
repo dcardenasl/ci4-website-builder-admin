@@ -116,15 +116,24 @@ $dataUrl = route_to('admin.cms.form_submissions.data') . ($activeStatus !== '' ?
                             <td class="<?= esc(table_td_class('muted')) ?>"
                                 x-text="String((row.form_data && row.form_data.email) ? row.form_data.email : '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
+                                <?php
+                                $statusLabels = json_encode([
+                                    'new'      => lang('FormSubmissions.status_new'),
+                                    'read'     => lang('FormSubmissions.status_read'),
+                                    'replied'  => lang('FormSubmissions.status_replied'),
+                                    'spam'     => lang('FormSubmissions.status_spam'),
+                                    'archived' => lang('FormSubmissions.status_archived'),
+                                ]);
+                                ?>
                                 <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                                     :class="{
-                                        'bg-blue-50 text-blue-700 ring-blue-600/20':   row.status === 'new',
-                                        'bg-gray-50 text-gray-600 ring-gray-500/10':   row.status === 'read',
-                                        'bg-green-50 text-green-700 ring-green-600/20': row.status === 'replied',
-                                        'bg-red-50 text-red-700 ring-red-600/20':      row.status === 'spam',
+                                        'bg-blue-50 text-blue-700 ring-blue-600/20':      row.status === 'new',
+                                        'bg-gray-50 text-gray-600 ring-gray-500/10':      row.status === 'read',
+                                        'bg-green-50 text-green-700 ring-green-600/20':   row.status === 'replied',
+                                        'bg-red-50 text-red-700 ring-red-600/20':         row.status === 'spam',
                                         'bg-yellow-50 text-yellow-800 ring-yellow-600/20': row.status === 'archived',
                                     }"
-                                    x-text="row.status">
+                                    x-text="(<?= htmlspecialchars($statusLabels, ENT_QUOTES) ?>)[row.status] ?? row.status">
                                 </span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>
