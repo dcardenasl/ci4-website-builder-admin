@@ -101,66 +101,119 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
                     }
                 }
                 ?>
+            <?php
+                $blockDesc     = (string) ($blockType['description'] ?? '');
+                $blockCategory = (string) ($blockType['category'] ?? '');
+            ?>
             <div data-block-id="<?= esc($blockId) ?>"
-                 class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group">
+                 x-data="{ expanded: false }"
+                 class="border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group">
 
-                <!-- Drag handle -->
-                <div data-drag-handle
-                     class="cursor-grab active:cursor-grabbing shrink-0 text-gray-300 hover:text-gray-500 transition-colors select-none">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-                    </svg>
-                </div>
+                <!-- Main row -->
+                <div class="flex items-center gap-3 p-4">
 
-                <!-- Block type icon -->
-                <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
-                    <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-5 h-5"></i>
-                </div>
+                    <!-- Drag handle -->
+                    <div data-drag-handle
+                         class="cursor-grab active:cursor-grabbing shrink-0 text-gray-300 hover:text-gray-500 transition-colors select-none">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                        </svg>
+                    </div>
 
-                <!-- Info -->
-                <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-gray-900 text-sm truncate"><?= esc($blockType['name'] ?? '') ?></h4>
-                    <p class="text-xs text-gray-500 font-mono mt-0.5"><?= esc($blockType['block_key'] ?? '') ?></p>
-                    <?php if ($previewText !== ''): ?>
-                        <p class="text-xs text-gray-400 mt-0.5 truncate italic"><?= esc($previewText) ?></p>
-                    <?php endif; ?>
-                </div>
+                    <!-- Block type icon -->
+                    <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
+                        <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-5 h-5"></i>
+                    </div>
 
-                <!-- Status badge -->
-                <div class="shrink-0">
-                    <?php if ($isActive): ?>
-                        <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                            <?= esc(lang('Pages.blocks_status_active')) ?>
-                        </span>
-                    <?php else: ?>
-                        <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                            <?= esc(lang('Pages.blocks_status_inactive')) ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold text-gray-900 text-sm truncate"><?= esc($blockType['name'] ?? '') ?></h4>
+                        <p class="text-xs text-gray-500 font-mono mt-0.5"><?= esc($blockType['block_key'] ?? '') ?></p>
+                        <?php if ($previewText !== ''): ?>
+                            <p class="text-xs text-gray-400 mt-0.5 truncate italic"><?= esc($previewText) ?></p>
+                        <?php endif; ?>
+                    </div>
 
-                <!-- Actions -->
-                <div class="flex items-center gap-2 shrink-0">
-                    <?php if (!empty($blockType['is_container'])): ?>
-                    <a href="<?= route_to($ownerChildrenRoute, (string) $page['id'], $blockId) ?>"
-                       class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
-                        <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-                        <?= esc(lang('Pages.blocks_action_slides')) ?>
-                    </a>
-                    <?php endif; ?>
-                    <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"
-                       class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
-                        <?= esc(lang('Pages.blocks_action_edit')) ?>
-                    </a>
-                    <form method="post"
-                          action="<?= route_to($ownerDeleteRoute, (string) $page['id'], $blockId) ?>"
-                          onsubmit="return confirm('<?= esc(confirm_delete_message($blockType['name'] ?? $blockType['block_key'] ?? $blockId), 'js') ?>');">
-                        <?= csrf_field() ?>
-                        <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
-                            <?= esc(lang('Pages.blocks_action_delete')) ?>
+                    <!-- Status badge -->
+                    <div class="shrink-0">
+                        <?php if ($isActive): ?>
+                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                <?= esc(lang('Pages.blocks_status_active')) ?>
+                            </span>
+                        <?php else: ?>
+                            <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                <?= esc(lang('Pages.blocks_status_inactive')) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <?php if (!empty($blockType['is_container'])): ?>
+                        <a href="<?= route_to($ownerChildrenRoute, (string) $page['id'], $blockId) ?>"
+                           class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
+                            <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('Pages.blocks_action_slides')) ?>
+                        </a>
+                        <?php endif; ?>
+                        <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"
+                           class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
+                            <?= esc(lang('Pages.blocks_action_edit')) ?>
+                        </a>
+                        <form method="post"
+                              action="<?= route_to($ownerDeleteRoute, (string) $page['id'], $blockId) ?>"
+                              x-data
+                              @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockType['name'] ?? $blockType['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
+                                <?= esc(lang('Pages.blocks_action_delete')) ?>
+                            </button>
+                        </form>
+                        <?php if ($blockDesc !== '' || $blockCategory !== ''): ?>
+                        <button type="button"
+                                @click="expanded = !expanded"
+                                :aria-expanded="expanded"
+                                class="shrink-0 rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                :title="expanded ? '<?= esc(lang('Pages.blocks_action_collapse'), 'js') ?>' : '<?= esc(lang('Pages.blocks_action_preview'), 'js') ?>'">
+                            <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
+                            </svg>
                         </button>
-                    </form>
+                        <?php endif; ?>
+                    </div>
                 </div>
+
+                <!-- Expanded preview panel -->
+                <?php if ($blockDesc !== '' || $blockCategory !== ''): ?>
+                <div x-show="expanded" x-cloak
+                     class="border-t border-gray-100 px-4 pb-4 pt-3">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-brand-100 text-brand-700 p-3 rounded-xl border border-brand-200 shrink-0">
+                            <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-7 h-7"></i>
+                        </div>
+                        <div class="space-y-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-semibold text-sm text-gray-900"><?= esc($blockType['name'] ?? '') ?></span>
+                                <?php if ($blockCategory !== ''): ?>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                                        <?= esc($blockCategory) ?>
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!empty($blockType['is_container'])): ?>
+                                    <span class="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200">
+                                        <?= esc(lang('Pages.blocks_action_slides')) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <code class="text-xs text-gray-500 font-mono"><?= esc($blockType['block_key'] ?? '') ?></code>
+                            <?php if ($blockDesc !== ''): ?>
+                                <p class="text-xs text-gray-500 mt-1"><?= esc($blockDesc) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>

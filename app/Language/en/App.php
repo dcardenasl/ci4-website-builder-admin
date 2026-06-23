@@ -79,6 +79,7 @@ return [
     'go_login'        => 'Go to Login',
     'go_back'         => 'Go Back',
     'readonly_notice'  => 'This screen is read-only.',
+    'unsaved_changes'  => 'You have unsaved changes.',
     'status'          => 'Status',
     'pending'         => 'Pending',
     'id'              => 'ID',

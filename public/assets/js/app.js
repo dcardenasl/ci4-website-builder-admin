@@ -510,11 +510,13 @@ document.addEventListener('alpine:init', () => {
      */
     Alpine.store('confirm', {
         open: false,
+        accepting: false,
         title: text.confirmAction,
         message: '',
         onAccept: null,
         show(message, onAccept, title = text.confirmAction) {
             this.open = true;
+            this.accepting = false;
             this.message = message;
             this.title = title;
             this.onAccept = onAccept;
@@ -535,14 +537,18 @@ document.addEventListener('alpine:init', () => {
         },
         close() {
             this.open = false;
+            this.accepting = false;
             this.message = '';
             this.onAccept = null;
         },
         accept() {
+            this.accepting = true;
             if (typeof this.onAccept === 'function') {
                 this.onAccept();
             }
-            this.close();
+            // Safety: close after 5s if the action did not cause page navigation
+            const self = this;
+            setTimeout(() => { if (self.accepting) { self.close(); } }, 5000);
         },
         handleTab(event, container) {
             if (!(container instanceof HTMLElement)) {

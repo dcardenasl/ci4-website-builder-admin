@@ -14,7 +14,6 @@
         'title' => lang('Iam.applications_title'),
     ]) ?>
 
-    <p class="mt-2 text-xs text-gray-500"><?= esc(lang('Iam.applications_managed_server_side')) ?></p>
     <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
         <p class="font-semibold"><?= esc(lang('App.readonly_notice')) ?></p>
         <p class="mt-1 text-xs text-blue-800"><?= esc(lang('Iam.applications_managed_server_side')) ?></p>
@@ -43,7 +42,11 @@
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
-        <?= view('components/display/empty_state', ['icon' => 'layers']) ?>
+        <?= view('components/display/empty_state', [
+            'title'       => 'Iam.applications_empty',
+            'description' => 'Iam.applications_managed_server_side',
+            'icon'        => 'layers',
+        ]) ?>
     </template>
     <template x-if="!error && rows.length > 0">
         <div class="<?= esc(table_wrapper_class()) ?> relative">

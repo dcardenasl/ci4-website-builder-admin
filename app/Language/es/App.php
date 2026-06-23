@@ -79,6 +79,7 @@ return [
     'go_login'        => 'Ir al Ingreso',
     'go_back'         => 'Regresar',
     'readonly_notice'  => 'Esta pantalla es de solo lectura.',
+    'unsaved_changes'  => 'Tienes cambios sin guardar.',
     'status'          => 'Estado',
     'pending'         => 'Pendiente',
     'id'              => 'ID',

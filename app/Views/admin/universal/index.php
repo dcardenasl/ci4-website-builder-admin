@@ -86,7 +86,7 @@
                             <td class="<?= esc(table_td_class() ?? 'px-6 py-4 whitespace-nowrap text-sm text-gray-600') ?>">
                                 <div class="flex items-center gap-2">
                                     <a :href="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/edit'" class="text-xs text-indigo-600 hover:text-indigo-900 font-semibold">Edit</a>
-                                    <form :action="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/delete'" method="post" @submit="if(!confirm(window.confirmDeleteMessage(deleteLabel(row)))) $event.preventDefault()">
+                                    <form :action="'/admin/universal/<?= esc($resource) ?>/' + row.id + '/delete'" method="post" @submit.prevent="$store.confirm.show(window.confirmDeleteMessage(deleteLabel(row)), () => $el.submit())">
                                         <button type="submit" class="text-xs text-red-600 hover:text-red-900 font-semibold bg-transparent border-0 p-0 cursor-pointer">Delete</button>
                                     </form>
                                 </div>

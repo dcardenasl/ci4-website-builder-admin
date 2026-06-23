@@ -88,6 +88,8 @@ return [
     'permissions_edit_link'                 => 'Editar',
     'role_permissions_title'                => 'Roles × permisos',
     'role_permissions_help'                 => 'Administra las asignaciones de permisos por rol.',
+    'role_permissions_hint'                 => 'Marca los permisos que debe tener este rol y guarda para aplicar los cambios.',
+    'role_permissions_selected_label'       => 'permisos seleccionados',
     'role_permissions_load_failed'          => 'No se pudo cargar la matriz de roles y permisos.',
     'role_permissions_save_failed'          => 'No se pudieron guardar los permisos del rol.',
     'role_permissions_save_success'         => 'Permisos del rol actualizados correctamente.',

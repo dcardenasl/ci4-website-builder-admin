@@ -5,13 +5,36 @@ $assignedIds = $assignedIds ?? [];
 $roleId = (string) ($role['id'] ?? '');
 ?>
 
-<form method="post" action="<?= route_to('admin.iam.role_permissions.save', $roleId) ?>" class="space-y-4" x-data="{ search: '' }">
+<?php
+$initialSelected = count($assignedIds);
+?>
+<form method="post" action="<?= route_to('admin.iam.role_permissions.save', $roleId) ?>" class="space-y-4"
+      x-data="{
+          search: '',
+          isDirty: false,
+          selectedCount: <?= $initialSelected ?>,
+          updateCount() {
+              this.selectedCount = Array.from(this.$el.querySelectorAll('input[name=\'permission_ids[]\']:checked')).length;
+          }
+      }"
+      @change="isDirty = true; updateCount()">
     <?= csrf_field() ?>
     <input type="hidden" name="code" value="<?= esc((string) ($role['code'] ?? '')) ?>">
     <input type="hidden" name="name" value="<?= esc((string) ($role['name'] ?? '')) ?>">
     <input type="hidden" name="description" value="<?= esc((string) ($role['description'] ?? '')) ?>">
     <input type="hidden" name="application_id" value="<?= esc((string) ($role['application_id'] ?? '')) ?>">
     <input type="hidden" name="permission_ids[]" value="">
+
+    <!-- Orientation callout -->
+    <div class="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 flex items-center justify-between gap-4">
+        <p>
+            <strong><?= esc((string) ($role['name'] ?? $role['code'] ?? '')) ?></strong>
+            &mdash; <?= esc(lang('Iam.role_permissions_hint')) ?>
+        </p>
+        <span class="shrink-0 text-xs font-semibold text-blue-700 tabular-nums">
+            <span x-text="selectedCount"></span> <?= esc(lang('Iam.role_permissions_selected_label')) ?>
+        </span>
+    </div>
 
     <div class="flex items-center gap-2 max-w-md">
         <div class="relative flex-1">
@@ -49,5 +72,11 @@ $roleId = (string) ($role['id'] ?? '');
         </div>
     <?php endforeach; ?>
 
-    <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.save')) ?></button>
+    <div class="flex items-center gap-3">
+        <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.save')) ?></button>
+        <p x-show="isDirty" x-cloak class="text-xs font-medium text-yellow-700 flex items-center gap-1">
+            <?= ui_icon('triangle-alert', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('App.unsaved_changes')) ?>
+        </p>
+    </div>
 </form>
