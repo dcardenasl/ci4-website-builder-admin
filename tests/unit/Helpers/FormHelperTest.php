@@ -42,6 +42,21 @@ final class FormHelperTest extends CIUnitTestCase
         $this->assertSame('Password must be at least 8 characters', $passwordError);
     }
 
+    public function testGetFieldErrorResolvesNestedArrayNotation(): void
+    {
+        $session = session();
+        $session->set('fieldErrors', [
+            'translations.0.block_data.title' => 'Title is required',
+            'block_config.hero_image'         => 'Image is required',
+        ]);
+
+        $titleError = get_field_error('translations[0][block_data][title]');
+        $imageError = get_field_error('block_config[hero_image]');
+
+        $this->assertSame('Title is required', $titleError);
+        $this->assertSame('Image is required', $imageError);
+    }
+
     public function testGetFieldErrorReturnsEmptyWhenFieldMissing(): void
     {
         $session = session();
