@@ -1,0 +1,98 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Cms\Controllers;
+
+use App\Controllers\BaseWebController;
+use App\Modules\Cms\Services\FormSubmissionApiServiceInterface;
+use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+
+class FormSubmissionController extends BaseWebController
+{
+    protected FormSubmissionApiServiceInterface $submissionService;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
+    {
+        parent::initController($request, $response, $logger);
+        $this->submissionService = service('formSubmissionApiService');
+    }
+
+    public function index(): string
+    {
+        $status = (string) ($this->request->getGet('status') ?? '');
+
+        // Load count badges for tab navigation
+        $countsResponse = $this->safeApiCall(fn () => $this->submissionService->counts());
+        $counts = $this->extractData($countsResponse) ?: ['new' => 0, 'read' => 0, 'replied' => 0, 'spam' => 0, 'archived' => 0];
+
+        return $this->render('cms/form_submissions/index', [
+            'title'        => lang('FormSubmissions.title'),
+            'limitOptions' => [10, 25, 50],
+            'activeStatus' => $status,
+            'counts'       => $counts,
+        ]);
+    }
+
+    public function data(): ResponseInterface
+    {
+        $status = (string) ($this->request->getGet('status') ?? '');
+
+        return $this->tableDataResponse(
+            ['status' => $status ?: null],
+            ['created_at'],
+            fn (array $params) => $this->submissionService->list($params),
+        );
+    }
+
+    public function show(string $id): string|RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->submissionService->get($id));
+
+        if (! $response['ok']) {
+            return $this->withError(
+                lang('FormSubmissions.not_found'),
+                route_to('admin.cms.form_submissions')
+            );
+        }
+
+        $submission = $this->extractData($response);
+
+        // Auto-mark as read when opened
+        if (($submission['status'] ?? '') === 'new') {
+            $this->safeApiCall(fn () => $this->submissionService->updateStatus($id, 'read'));
+            $submission['status'] = 'read';
+        }
+
+        return $this->render('cms/form_submissions/show', [
+            'title'      => lang('FormSubmissions.detail_title'),
+            'submission' => $submission,
+        ]);
+    }
+
+    public function updateStatus(string $id): RedirectResponse
+    {
+        $status = (string) ($this->request->getPost('status') ?? '');
+
+        $allowed = ['new', 'read', 'replied', 'spam', 'archived'];
+        if (! in_array($status, $allowed, true)) {
+            return $this->withError(lang('FormSubmissions.invalid_status'), route_to('admin.cms.form_submissions'));
+        }
+
+        $response = $this->safeApiCall(fn () => $this->submissionService->updateStatus($id, $status));
+
+        if (! $response['ok']) {
+            return $this->withError(
+                $this->firstMessage($response, lang('FormSubmissions.update_failed')),
+                route_to('admin.cms.form_submissions.show', $id)
+            );
+        }
+
+        return redirect()
+            ->to(route_to('admin.cms.form_submissions.show', $id))
+            ->with('success', lang('FormSubmissions.update_success'));
+    }
+}
