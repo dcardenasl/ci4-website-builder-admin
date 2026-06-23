@@ -20,6 +20,8 @@ return [
     'settings_translations'    => 'Traducciones',
     'settings_value_section'   => 'Valores de la configuración',
     'settings_metadata_section' => 'Detalles de la configuración',
+    'field_base_value'         => 'Valor base',
+    'field_base_value_help'    => 'Este es el valor canónico que usa el sistema como fuente de verdad.',
 
     'field_setting_key'           => 'Clave de configuración',
     'field_setting_key_placeholder' => 'sitio.nombre',

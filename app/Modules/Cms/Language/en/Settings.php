@@ -20,6 +20,8 @@ return [
     'settings_translations'    => 'Translations',
     'settings_value_section'   => 'Value settings',
     'settings_metadata_section' => 'Setting details',
+    'field_base_value'         => 'Base value',
+    'field_base_value_help'    => 'This is the canonical value the system treats as the source of truth.',
 
     'field_setting_key'           => 'Setting key',
     'field_setting_key_placeholder' => 'site.name',

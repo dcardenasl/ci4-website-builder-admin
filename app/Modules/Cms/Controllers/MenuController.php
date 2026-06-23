@@ -43,9 +43,16 @@ class MenuController extends BaseWebController
             ['menu_key', 'created_at'],
             function (array $params) {
                 $response = $this->menuService->list($params);
-                if (isset($response['ok']) && $response['ok'] && isset($response['data']['items'])) {
+                $menusPayload = isset($response['data']) && is_array($response['data']) ? $response['data'] : [];
+                $menus = $this->extractItems($response);
+
+                if ($menus !== []) {
                     // Fetch all items to count them
-                    $itemsResponse = $this->menuService->listItems(['limit' => 1000]);
+                    $itemsResponse = $this->menuService->listItems([
+                        'page' => 1,
+                        'per_page' => 100,
+                        'sort' => 'sort_order',
+                    ]);
                     $items = $this->extractItems($itemsResponse);
 
                     // Group/count items by menu_id
@@ -58,9 +65,21 @@ class MenuController extends BaseWebController
                     }
 
                     // Inject count into each menu item
-                    foreach ($response['data']['items'] as &$menu) {
+                    foreach ($menus as &$menu) {
                         $menu['items_count'] = $counts[$menu['id']] ?? 0;
                     }
+                    unset($menu);
+
+                    if (isset($menusPayload['data']) && is_array($menusPayload['data'])) {
+                        $menusPayload['data'] = $menus;
+                        $response['data'] = $menusPayload;
+                    } else {
+                        $response['data'] = $menus;
+                    }
+
+                    // Force the modified payload to be serialized instead of returning the
+                    // original raw API body, which would skip our injected counts.
+                    $response['raw'] = '';
                 }
                 return $response;
             }

@@ -81,8 +81,7 @@ final class SettingFlowTest extends CIUnitTestCase
                     && ($payload['is_translatable'] ?? null) === '0'
                     && ($payload['description'] ?? null) === 'Header title'
                     && ! array_key_exists('sort_order', $payload)
-                    && ($payload['translations'][0]['language_id'] ?? null) === 1
-                    && ($payload['translations'][0]['setting_value'] ?? null) === 'Updated title';
+                    && ! array_key_exists('translations', $payload);
             }))
             ->willReturn([
                 'ok' => true,

@@ -51,11 +51,13 @@ class SiteIdentityController extends BaseWebController
         // Get languages list for the translation inputs
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $baseLanguageId = $this->resolveBaseLanguageId($languages);
 
         return $this->render('cms/site-identity/show', [
             'title'       => lang('SiteIdentity.page_title'),
             'settingsMap' => $settingsMap,
             'languages'   => $languages,
+            'baseLanguageId' => $baseLanguageId,
         ]);
     }
 
@@ -75,6 +77,9 @@ class SiteIdentityController extends BaseWebController
 
         $identityResponse = $this->settingService->getByGroup('identity');
         $items            = $this->extractItems($identityResponse);
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $baseLanguageId = $this->resolveBaseLanguageId($languages);
 
         /** @var array<string, int> $idMap keyed by setting_key → setting id */
         $idMap = [];
@@ -100,13 +105,22 @@ class SiteIdentityController extends BaseWebController
             if (is_array($siteNameTranslations)) {
                 $translations = [];
                 foreach ($siteNameTranslations as $langId => $val) {
+                    $langId = (int) $langId;
+                    if ($baseLanguageId !== null && $langId === $baseLanguageId) {
+                        continue;
+                    }
+                    $val = is_string($val) ? trim($val) : '';
+                    if ($val === '') {
+                        continue;
+                    }
                     $translations[] = [
-                        'language_id' => (int) $langId,
-                        'setting_value' => (string) $val,
+                        'language_id' => $langId,
+                        'setting_value' => $val,
                     ];
                 }
-                $updateData['translations'] = $translations;
-                $updateData['setting_value'] = (string) ($siteNameTranslations[1] ?? array_values($siteNameTranslations)[0] ?? $value);
+                if ($translations !== []) {
+                    $updateData['translations'] = $translations;
+                }
             }
             $result = $this->settingService->update($idMap['site_name'], $updateData);
             if (! ($result['ok'] ?? false)) {
@@ -121,13 +135,22 @@ class SiteIdentityController extends BaseWebController
             if (is_array($siteTaglineTranslations)) {
                 $translations = [];
                 foreach ($siteTaglineTranslations as $langId => $val) {
+                    $langId = (int) $langId;
+                    if ($baseLanguageId !== null && $langId === $baseLanguageId) {
+                        continue;
+                    }
+                    $val = is_string($val) ? trim($val) : '';
+                    if ($val === '') {
+                        continue;
+                    }
                     $translations[] = [
-                        'language_id' => (int) $langId,
-                        'setting_value' => (string) $val,
+                        'language_id' => $langId,
+                        'setting_value' => $val,
                     ];
                 }
-                $updateData['translations'] = $translations;
-                $updateData['setting_value'] = (string) ($siteTaglineTranslations[1] ?? array_values($siteTaglineTranslations)[0] ?? $value);
+                if ($translations !== []) {
+                    $updateData['translations'] = $translations;
+                }
             }
             $result = $this->settingService->update($idMap['site_tagline'], $updateData);
             if (! ($result['ok'] ?? false)) {

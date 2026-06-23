@@ -102,10 +102,12 @@ class SettingController extends BaseWebController
 
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $baseLanguageId = $this->resolveBaseLanguageId($languages);
 
         return $this->render('cms/settings/create', [
             'title'     => lang('Settings.settings_create'),
             'languages' => $languages,
+            'baseLanguageId' => $baseLanguageId,
         ]);
     }
 
@@ -122,6 +124,11 @@ class SettingController extends BaseWebController
         if ($invalid !== null) {
             return $invalid;
         }
+
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $request->setLanguages($languages);
+        $request->setBaseLanguageId($this->resolveBaseLanguageId($languages));
 
         $response = $this->safeApiCall(fn () => $this->settingService->create($request->payload()));
 
@@ -146,11 +153,13 @@ class SettingController extends BaseWebController
 
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $baseLanguageId = $this->resolveBaseLanguageId($languages);
 
         return $this->render('cms/settings/edit', [
             'title'     => lang('Settings.settings_edit'),
             'item'      => $this->extractData($response),
             'languages' => $languages,
+            'baseLanguageId' => $baseLanguageId,
         ]);
     }
 
@@ -167,6 +176,11 @@ class SettingController extends BaseWebController
         if ($invalid !== null) {
             return $invalid;
         }
+
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $request->setLanguages($languages);
+        $request->setBaseLanguageId($this->resolveBaseLanguageId($languages));
 
         $response = $this->safeApiCall(fn () => $this->settingService->update($id, $request->payload()));
 

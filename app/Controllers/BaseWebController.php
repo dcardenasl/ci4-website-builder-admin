@@ -167,6 +167,39 @@ abstract class BaseWebController extends BaseController
     }
 
     /**
+     * Resolve the canonical base language from an active language list.
+     *
+     * The base language is the one that owns the canonical setting_value.
+     * If no explicit default exists, fall back to the first language in the list.
+     *
+     * @param array<int, array<string, mixed>> $languages
+     */
+    protected function resolveBaseLanguageId(array $languages): ?int
+    {
+        foreach ($languages as $language) {
+            if (! is_array($language)) {
+                continue;
+            }
+
+            if (! empty($language['is_default']) && isset($language['id']) && is_numeric($language['id'])) {
+                return (int) $language['id'];
+            }
+        }
+
+        foreach ($languages as $language) {
+            if (! is_array($language)) {
+                continue;
+            }
+
+            if (isset($language['id']) && is_numeric($language['id'])) {
+                return (int) $language['id'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param array<string, mixed> $response
      * @return array<string, string>
      */

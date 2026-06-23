@@ -8,6 +8,22 @@ use App\Support\Requests\BaseFormRequest;
 
 class SettingStoreRequest extends BaseFormRequest
 {
+    /** @var array<mixed> */
+    private array $resolvedLanguages = [];
+
+    private ?int $baseLanguageId = null;
+
+    /** @param array<mixed> $languages */
+    public function setLanguages(array $languages): void
+    {
+        $this->resolvedLanguages = $languages;
+    }
+
+    public function setBaseLanguageId(?int $languageId): void
+    {
+        $this->baseLanguageId = $languageId;
+    }
+
     protected function fields(): array
     {
         return [
@@ -44,59 +60,94 @@ class SettingStoreRequest extends BaseFormRequest
 
     public function payload(): array
     {
-        $type = $this->postString('setting_type') ?: 'string';
+        $type           = $this->postString('setting_type') ?: 'string';
         $isTranslatable = $this->postBool('is_translatable');
-        $postTranslations = $this->request->getPost('translations');
+        $settingValue   = $this->settingValueForType($type);
 
-        if ($isTranslatable && is_array($postTranslations)) {
-            // Find a main setting value from translation inputs
-            $settingValue = (string) ($postTranslations[1] ?? array_values($postTranslations)[0] ?? '');
-        } else {
-            $settingValue = $this->settingValueForType($type);
+        $payload = [
+            'setting_key'     => $this->postString('setting_key'),
+            'setting_value'   => $settingValue,
+            'setting_type'    => $type,
+            'setting_group'   => $this->postString('setting_group'),
+            'is_translatable' => $isTranslatable ? '1' : '0',
+            'sort_order'      => $this->postInt('sort_order', 0),
+            'description'     => $this->postString('description'),
+        ];
+
+        if (!$isTranslatable) {
+            return $payload;
         }
 
-        // Retrieve active languages dynamically to seed translations payload
-        $languages = [];
-        try {
-            $langService = service('languageApiService');
-            $langsRes = $langService->list(['is_active' => 1]);
-            if ($langsRes['ok'] ?? false) {
-                $languages = $langsRes['data']['items'] ?? $langsRes['data'] ?? [];
-            }
-        } catch (\Throwable) {
-            $languages = [];
-        }
-
+        $languages = $this->resolvedLanguages;
         if (empty($languages)) {
-            $languages = [['id' => 1, 'code' => 'es']];
+            return $payload;
+        }
+
+        $postTranslations = $this->request->getPost('translations');
+        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        if ($this->baseLanguageId !== null) {
+            $baseLanguageId = $this->baseLanguageId;
+        }
+
+        if ($payload['setting_value'] === '' && is_array($postTranslations) && $baseLanguageId !== null && isset($postTranslations[$baseLanguageId])) {
+            $payload['setting_value'] = (string) $postTranslations[$baseLanguageId];
         }
 
         $translations = [];
         foreach ($languages as $lang) {
-            $langId = (int) ($lang['id'] ?? 1);
-            if ($isTranslatable && is_array($postTranslations) && isset($postTranslations[$langId])) {
-                $translations[] = [
-                    'language_id' => $langId,
-                    'setting_value' => (string) $postTranslations[$langId],
-                ];
-            } else {
-                $translations[] = [
-                    'language_id' => $langId,
-                    'setting_value' => $settingValue,
-                ];
+            $langId = (int) ($lang['id'] ?? 0);
+            if ($langId <= 0 || ($baseLanguageId !== null && $langId === $baseLanguageId)) {
+                continue;
+            }
+
+            if (! is_array($postTranslations) || ! array_key_exists($langId, $postTranslations)) {
+                continue;
+            }
+
+            $translationValue = (string) $postTranslations[$langId];
+            if ($translationValue === '') {
+                continue;
+            }
+
+            $translations[] = [
+                'language_id'   => $langId,
+                'setting_value' => $translationValue,
+            ];
+        }
+
+        if (!empty($translations)) {
+            $payload['translations'] = $translations;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @param array<mixed> $languages
+     */
+    private function resolveBaseLanguageId(array $languages): ?int
+    {
+        foreach ($languages as $language) {
+            if (! is_array($language)) {
+                continue;
+            }
+
+            if (! empty($language['is_default']) && isset($language['id']) && is_numeric($language['id'])) {
+                return (int) $language['id'];
             }
         }
 
-        return [
-            'setting_key' => $this->postString('setting_key'),
-            'setting_value' => $settingValue,
-            'setting_type' => $type,
-            'setting_group' => $this->postString('setting_group'),
-            'is_translatable' => $isTranslatable ? '1' : '0',
-            'sort_order' => $this->postInt('sort_order', 0),
-            'description' => $this->postString('description'),
-            'translations' => $translations,
-        ];
+        foreach ($languages as $language) {
+            if (! is_array($language)) {
+                continue;
+            }
+
+            if (isset($language['id']) && is_numeric($language['id'])) {
+                return (int) $language['id'];
+            }
+        }
+
+        return null;
     }
 
     private function settingValueForType(string $type): string
@@ -107,10 +158,11 @@ class SettingStoreRequest extends BaseFormRequest
         }
 
         return match ($type) {
-            'int' => $this->postString('setting_value_int'),
+            'int'  => $this->postString('setting_value_int'),
             'bool' => $this->postBool('setting_value_bool') ? '1' : '0',
             'json' => $this->postString('setting_value_json'),
             default => $this->postString('setting_value_string'),
         };
     }
+
 }

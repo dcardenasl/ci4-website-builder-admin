@@ -31,9 +31,17 @@ final class SettingStoreRequestTest extends CIUnitTestCase
             'is_translatable' => '1',
             'sort_order' => '3',
             'description' => 'Header title',
+            'translations' => [
+                2 => 'Translated title',
+            ],
         ]);
 
         $formRequest = new SettingStoreRequest($request, service('validation'));
+        $formRequest->setLanguages([
+            ['id' => 1, 'code' => 'es', 'is_default' => 1],
+            ['id' => 2, 'code' => 'en', 'is_default' => 0],
+        ]);
+        $formRequest->setBaseLanguageId(1);
         $payload = $formRequest->payload();
 
         $this->assertSame('New title', $payload['setting_value']);
@@ -41,8 +49,8 @@ final class SettingStoreRequestTest extends CIUnitTestCase
         $this->assertSame(3, $payload['sort_order']);
         $this->assertSame([
             [
-                'language_id' => 1,
-                'setting_value' => 'New title',
+                'language_id' => 2,
+                'setting_value' => 'Translated title',
             ],
         ], $payload['translations']);
     }

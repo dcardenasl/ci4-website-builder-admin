@@ -37,11 +37,6 @@ final class SettingUpdateRequestTest extends CIUnitTestCase
 
         $this->assertSame('Updated title', $payload['setting_value']);
         $this->assertArrayNotHasKey('sort_order', $payload);
-        $this->assertSame([
-            [
-                'language_id' => 1,
-                'setting_value' => 'Updated title',
-            ],
-        ], $payload['translations']);
+        $this->assertArrayNotHasKey('translations', $payload);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 $item = $item ?? [];
 $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
+$baseLanguageId = isset($baseLanguageId) && is_numeric($baseLanguageId) ? (int) $baseLanguageId : null;
+$isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? false);
 ?>
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= route_to('admin.cms.settings') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
@@ -16,7 +18,7 @@ $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
 <div class="space-y-6"
     x-data="{ 
         settingType: '<?= esc($selectedSettingType, 'js') ?>',
-        isTranslatable: <?= (old('is_translatable', $item['is_translatable'] ?? false)) ? 'true' : 'false' ?>
+        isTranslatable: <?= $isTranslatable ? 'true' : 'false' ?>
     }">
     
     <div class="flex items-center justify-between">
@@ -27,67 +29,65 @@ $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
         <?= csrf_field() ?>
 
         <div class="lg:col-span-2 space-y-6">
-            <div x-show="!isTranslatable" x-cloak>
-                <?php ob_start(); ?>
-                <div class="space-y-4">
-                    <div x-show="settingType === 'string' || settingType === 'file_id'">
-                        <?= view('components/form/text', [
-                            'name' => 'setting_value_string',
-                            'label' => 'Settings.field_setting_value',
-                            'required' => false,
-                            'value' => in_array($selectedSettingType, ['string', 'file_id'], true) ? ($item['setting_value'] ?? '') : '',
-                            'placeholder' => 'Settings.field_setting_value_placeholder',
-                            'errors' => $errors ?? [],
-                            'attributes' => [':name' => "(!isTranslatable && (settingType === 'string' || settingType === 'file_id')) ? 'setting_value' : ''"]
-                        ]) ?>
-                    </div>
-                    <div x-show="settingType === 'int'" x-cloak>
-                        <?= view('components/form/number', [
-                            'name' => 'setting_value_int',
-                            'label' => 'Settings.field_setting_value',
-                            'required' => false,
-                            'value' => $selectedSettingType === 'int' ? ($item['setting_value'] ?? '') : '',
-                            'placeholder' => 'Settings.field_setting_value_placeholder',
-                            'errors' => $errors ?? [],
-                            'attributes' => [':name' => "(!isTranslatable && settingType === 'int') ? 'setting_value' : ''"]
-                        ]) ?>
-                    </div>
-                    <div x-show="settingType === 'bool'" x-cloak>
-                        <?= view('components/form/boolean', [
-                            'name' => 'setting_value_bool',
-                            'label' => 'Settings.field_setting_value',
-                            'value' => $selectedSettingType === 'bool' ? filter_var($item['setting_value'] ?? false, FILTER_VALIDATE_BOOLEAN) : false,
-                            'on_label' => 'App.yes',
-                            'off_label' => 'App.no',
-                            'errors' => $errors ?? [],
-                            'attributes' => [':name' => "(!isTranslatable && settingType === 'bool') ? 'setting_value' : ''"]
-                        ]) ?>
-                    </div>
-                    <div x-show="settingType === 'json'" x-cloak>
-                        <?= view('components/form/textarea', [
-                            'name' => 'setting_value_json',
-                            'label' => 'Settings.field_setting_value',
-                            'required' => false,
-                            'value' => $selectedSettingType === 'json' ? ($item['setting_value'] ?? '') : '',
-                            'placeholder' => 'Settings.field_setting_value_placeholder',
-                            'errors' => $errors ?? [],
-                            'rows' => 8,
-                            'class' => 'font-mono text-sm bg-gray-50 border-gray-300 focus:bg-white',
-                            'attributes' => [':name' => "(!isTranslatable && settingType === 'json') ? 'setting_value' : ''"]
-                        ]) ?>
-                    </div>
+            <?php ob_start(); ?>
+            <div class="space-y-4">
+                <div x-show="settingType === 'string' || settingType === 'file_id'">
+                    <?= view('components/form/text', [
+                        'name' => 'setting_value_string',
+                        'label' => 'Settings.field_setting_value',
+                        'required' => false,
+                        'value' => in_array($selectedSettingType, ['string', 'file_id'], true) ? ($item['setting_value'] ?? '') : '',
+                        'placeholder' => 'Settings.field_setting_value_placeholder',
+                        'errors' => $errors ?? [],
+                        'attributes' => [':name' => "(settingType === 'string' || settingType === 'file_id') ? 'setting_value' : ''"]
+                    ]) ?>
                 </div>
-                <?= render_field_error('setting_value') ?>
-                <?php $nonTranslatableContent = ob_get_clean(); ?>
-
-                <?= view('components/display/form_section', [
-                    'title' => 'Settings.settings_value_section',
-                    'description' => 'Settings.field_setting_type_help',
-                    'badge' => 'Settings.field_is_translatable_off',
-                    'content' => $nonTranslatableContent,
-                    'bodyClass' => 'space-y-4'
-                ]) ?>
+                <div x-show="settingType === 'int'" x-cloak>
+                    <?= view('components/form/number', [
+                        'name' => 'setting_value_int',
+                        'label' => 'Settings.field_setting_value',
+                        'required' => false,
+                        'value' => $selectedSettingType === 'int' ? ($item['setting_value'] ?? '') : '',
+                        'placeholder' => 'Settings.field_setting_value_placeholder',
+                        'errors' => $errors ?? [],
+                        'attributes' => [':name' => "settingType === 'int' ? 'setting_value' : ''"]
+                    ]) ?>
+                </div>
+                <div x-show="settingType === 'bool'" x-cloak>
+                    <?= view('components/form/boolean', [
+                        'name' => 'setting_value_bool',
+                        'label' => 'Settings.field_setting_value',
+                        'value' => $selectedSettingType === 'bool' ? filter_var($item['setting_value'] ?? false, FILTER_VALIDATE_BOOLEAN) : false,
+                        'on_label' => 'App.yes',
+                        'off_label' => 'App.no',
+                        'errors' => $errors ?? [],
+                        'attributes' => [':name' => "settingType === 'bool' ? 'setting_value' : ''"]
+                    ]) ?>
+                </div>
+                <div x-show="settingType === 'json'" x-cloak>
+                    <?= view('components/form/textarea', [
+                        'name' => 'setting_value_json',
+                        'label' => 'Settings.field_setting_value',
+                        'required' => false,
+                        'value' => $selectedSettingType === 'json' ? ($item['setting_value'] ?? '') : '',
+                        'placeholder' => 'Settings.field_setting_value_placeholder',
+                        'errors' => $errors ?? [],
+                        'rows' => 8,
+                        'class' => 'font-mono text-sm bg-gray-50 border-gray-300 focus:bg-white',
+                        'attributes' => [':name' => "settingType === 'json' ? 'setting_value' : ''"]
+                    ]) ?>
+                </div>
             </div>
+            <?= render_field_error('setting_value') ?>
+            <?php $baseValueContent = ob_get_clean(); ?>
+
+            <?= view('components/display/form_section', [
+                'title' => 'Settings.settings_value_section',
+                'description' => $isTranslatable ? 'Settings.field_base_value_help' : 'Settings.field_setting_type_help',
+                'badge' => $isTranslatable ? 'Settings.field_base_value' : 'Settings.field_is_translatable_off',
+                'content' => $baseValueContent,
+                'bodyClass' => 'space-y-4'
+            ]) ?>
 
             <?php if (!empty($languages)): ?>
                 <div x-show="isTranslatable" x-cloak>
@@ -96,17 +96,20 @@ $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
                         <?php foreach ($languages as $lang): ?>
                             <?php
                                 $langId = (int) $lang['id'];
-                            $langName = esc($lang['native_name'] ?? $lang['name']);
-                            $langCode = esc(strtoupper($lang['code']));
-                            $transValue = '';
-                            if (!empty($item['translations'])) {
-                                foreach ($item['translations'] as $t) {
-                                    if ((int) ($t['language_id'] ?? 0) === $langId) {
-                                        $transValue = $t['setting_value'] ?? '';
-                                        break;
+                                if ($baseLanguageId !== null && $langId === $baseLanguageId) {
+                                    continue;
+                                }
+                                $langName = esc($lang['native_name'] ?? $lang['name']);
+                                $langCode = esc(strtoupper($lang['code']));
+                                $transValue = '';
+                                if (!empty($item['translations'])) {
+                                    foreach ($item['translations'] as $t) {
+                                        if ((int) ($t['language_id'] ?? 0) === $langId) {
+                                            $transValue = $t['setting_value'] ?? '';
+                                            break;
+                                        }
                                     }
                                 }
-                            }
                             ?>
                             <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
                                 <div class="flex items-center gap-2">
@@ -116,19 +119,19 @@ $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
                                     <span class="text-xs font-bold text-gray-700"><?= $langName ?></span>
                                 </div>
                                 <div x-show="settingType === 'string' || settingType === 'file_id'">
-                                    <input type="text" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable" placeholder="Escriba valor en <?= strtolower($langName) ?>...">
+                                    <input type="text" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable || !(settingType === 'string' || settingType === 'file_id')" placeholder="<?= esc(lang('Settings.field_setting_value_placeholder')) ?> (<?= strtolower($langName) ?>)">
                                 </div>
                                 <div x-show="settingType === 'int'" x-cloak>
-                                    <input type="number" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable" placeholder="0">
+                                    <input type="number" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable || settingType !== 'int'" placeholder="0">
                                 </div>
                                 <div x-show="settingType === 'bool'" x-cloak>
-                                    <select name="translations[<?= $langId ?>]" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable">
+                                    <select name="translations[<?= $langId ?>]" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable || settingType !== 'bool'">
                                         <option value="1" <?= $transValue === '1' || $transValue === 'true' || $transValue === true ? 'selected' : '' ?>><?= lang('App.yes') ?></option>
                                         <option value="0" <?= $transValue === '0' || $transValue === 'false' || $transValue === false || $transValue === '' || $transValue === null ? 'selected' : '' ?>><?= lang('App.no') ?></option>
                                     </select>
                                 </div>
                                 <div x-show="settingType === 'json'" x-cloak>
-                                    <textarea name="translations[<?= $langId ?>]" rows="5" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm font-mono bg-white" :disabled="!isTranslatable" placeholder="{}"><?= esc($transValue) ?></textarea>
+                                    <textarea name="translations[<?= $langId ?>]" rows="5" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm font-mono bg-white" :disabled="!isTranslatable || settingType !== 'json'" placeholder="{}"><?= esc($transValue) ?></textarea>
                                 </div>
                             </div>
                         <?php endforeach; ?>
