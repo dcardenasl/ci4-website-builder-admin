@@ -1,6 +1,10 @@
-<?php $item = $item ?? []; ?>
+<?php
+$item = $item ?? [];
+$itemId = (string) ($item['id'] ?? '');
+$showUrl = $itemId !== '' ? route_to('admin.cms.menus.show', $itemId) : route_to('admin.cms.menus');
+?>
 <div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.cms.menus') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
+    <a href="<?= esc($showUrl) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('Menus.menus_back_to_detail')) ?></a>
     <form method="post" action="<?= route_to('admin.cms.menus.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['menu_key'] ?? null), 'js') ?>', () => $el.submit())">
         <?= csrf_field() ?>
         <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
@@ -46,7 +50,7 @@
 
         <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-            <a href="<?= route_to('admin.cms.menus') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
+            <a href="<?= esc($showUrl) ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
         </div>
     </form>
 <?php $sectionContent = ob_get_clean(); ?>

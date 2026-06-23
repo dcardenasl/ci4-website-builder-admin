@@ -3,7 +3,7 @@
 /** @var array<string, mixed> $data */
 $sectionTitle  = esc($data['section_title'] ?? 'Últimas Noticias');
 $viewAllLabel  = esc($data['view_all_label'] ?? 'Ver todas las noticias');
-$viewAllUrl    = esc($data['view_all_url'] ?? '#');
+$viewAllUrl    = esc($data['view_all_url'] ?? '/news');
 $collectionKey = esc($config['collection_key'] ?? 'noticias');
 $cssClass      = esc($config['css_class'] ?? '');
 

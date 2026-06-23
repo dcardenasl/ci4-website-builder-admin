@@ -36,6 +36,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_categories' => 'permit_empty|in_list[0,1]',
             'enables_tags' => 'permit_empty|in_list[0,1]',
             'translations' => 'permit_empty',
+            'translations.*.slug' => 'required_with[translations]|string|min_length[1]|max_length[150]',
         ];
     }
 
@@ -56,15 +57,17 @@ class CollectionStoreRequest extends BaseFormRequest
                 continue;
             }
 
+            $slug = isset($trans['slug']) ? trim((string) $trans['slug'], " \t\n\r\0\x0B/") : '';
             $name = isset($trans['name']) ? trim((string) $trans['name']) : '';
             $description = isset($trans['description']) ? trim((string) $trans['description']) : '';
 
-            if ($name === '' && $description === '') {
+            if ($slug === '' && $name === '' && $description === '') {
                 continue;
             }
 
             $translations[] = [
                 'language_id' => (int) $trans['language_id'],
+                'slug' => $slug !== '' ? $slug : null,
                 'name' => $name,
                 'description' => $description !== '' ? $description : null,
             ];

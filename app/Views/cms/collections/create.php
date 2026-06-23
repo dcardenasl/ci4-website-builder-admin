@@ -168,6 +168,17 @@
                             <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
 
                             <?= view('components/form/text', [
+                                'name' => "translations[{$index}][slug]",
+                                'label' => 'Collections.translation_slug_label',
+                                'required' => true,
+                                'placeholder' => 'Collections.translation_slug_placeholder',
+                                'help' => 'Collections.translation_slug_help',
+                                'value' => old("translations.{$index}.slug") ?? '',
+                                'maxlength' => 150,
+                                'errors' => $errors ?? []
+                            ]) ?>
+
+                            <?= view('components/form/text', [
                                 'name' => "translations[{$index}][name]",
                                 'label' => 'Collections.translation_name_label',
                                 'required' => !empty($lang['is_default']),

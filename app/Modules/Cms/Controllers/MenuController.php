@@ -87,6 +87,9 @@ class MenuController extends BaseWebController
             'menu' => $this->extractData($response),
             'items' => $items,
             'languages' => $this->getLanguages(),
+            'pages' => $this->pagesOptions(),
+            'entries' => $this->entriesOptions(),
+            'collections' => $this->collectionsOptions(),
         ]);
     }
 
@@ -113,7 +116,11 @@ class MenuController extends BaseWebController
             return $this->failApi($response, lang('Menus.menus_create_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Menus.menus_create_success'));
+        $createdMenu = $this->extractData($response);
+        $newId = (string) ($createdMenu['id'] ?? '');
+        $redirectTo = $newId !== '' ? route_to('admin.cms.menus.show', $newId) : route_to('admin.cms.menus');
+
+        return redirect()->to($redirectTo)->with('success', lang('Menus.menus_create_success'));
     }
 
     public function edit(string $id): string|RedirectResponse
@@ -145,7 +152,7 @@ class MenuController extends BaseWebController
             return $this->failApi($response, lang('Menus.menus_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.menus'))->with('success', lang('Menus.menus_update_success'));
+        return redirect()->to(route_to('admin.cms.menus.show', $id))->with('success', lang('Menus.menus_update_success'));
     }
 
     public function delete(string $id): RedirectResponse

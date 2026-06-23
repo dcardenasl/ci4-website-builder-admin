@@ -168,6 +168,12 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('tags/(:segment)', '\App\Modules\Cms\Controllers\TagController::update/$1', ['as' => 'admin.cms.tags.update', 'filter' => 'permission:cms.tags.write']);
     $routes->post('tags/(:segment)/delete', '\App\Modules\Cms\Controllers\TagController::delete/$1', ['as' => 'admin.cms.tags.delete', 'filter' => 'permission:cms.tags.write']);
 
+    // Form Submissions
+    $routes->get('form-submissions', '\App\Modules\Cms\Controllers\FormSubmissionController::index', ['as' => 'admin.cms.form_submissions', 'filter' => 'permission:cms.submissions.read']);
+    $routes->get('form-submissions/data', '\App\Modules\Cms\Controllers\FormSubmissionController::data', ['as' => 'admin.cms.form_submissions.data', 'filter' => 'permission:cms.submissions.read']);
+    $routes->get('form-submissions/(:num)', '\App\Modules\Cms\Controllers\FormSubmissionController::show/$1', ['as' => 'admin.cms.form_submissions.show', 'filter' => 'permission:cms.submissions.read']);
+    $routes->post('form-submissions/(:num)/status', '\App\Modules\Cms\Controllers\FormSubmissionController::updateStatus/$1', ['as' => 'admin.cms.form_submissions.update_status', 'filter' => 'permission:cms.submissions.write']);
+
     // Redirect
     $routes->get('redirects', '\App\Modules\Cms\Controllers\RedirectController::index', ['as' => 'admin.cms.redirects', 'filter' => 'permission:cms.redirects.read']);
     $routes->get('redirects/data', '\App\Modules\Cms\Controllers\RedirectController::data', ['as' => 'admin.cms.redirects.data', 'filter' => 'permission:cms.redirects.read']);

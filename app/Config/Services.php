@@ -403,4 +403,12 @@ class Services extends BaseService
         }
         return new FileTranslationApiService(static::domainApiClient());
     }
+
+    public static function formSubmissionApiService(bool $getShared = true): \App\Modules\Cms\Services\FormSubmissionApiServiceInterface
+    {
+        if ($getShared) {
+            return static::getSharedInstance('formSubmissionApiService');
+        }
+        return new \App\Modules\Cms\Services\FormSubmissionApiService(static::domainApiClient());
+    }
 }

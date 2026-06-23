@@ -4,145 +4,195 @@ $linkType = old('link_type', 'page');
 $selectedPageId = old('page_id', '');
 $selectedEntryId = old('entry_id', '');
 $selectedCollectionId = old('collection_id', '');
+
+// Build ordered parent options with indentation
+function buildParentOptions(array $items, ?int $parentId = null, int $depth = 0): array
+{
+    $options = [];
+    foreach ($items as $item) {
+        $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
+        if ($pid === $parentId) {
+            $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
+            $label = $item['translations'][0]['label'] ?? $item['label'] ?? 'Item #' . $item['id'];
+            $options[] = ['id' => (string) $item['id'], 'label' => $prefix . $label];
+            $children = buildParentOptions($items, (int) $item['id'], $depth + 1);
+            foreach ($children as $child) {
+                $options[] = $child;
+            }
+        }
+    }
+    return $options;
+}
+$parentOptions = buildParentOptions($items);
+$suggestedSortOrder = count($items);
 ?>
-<div class="mb-4">
-    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Menus.menus_details') ?></a>
+
+<div class="mb-4 flex items-center gap-2 text-sm">
+    <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('Menus.menus_back_to_detail')) ?></a>
+    <span class="text-gray-400">/</span>
+    <span class="text-gray-500 font-mono"><?= esc($menu['menu_key'] ?? '') ?></span>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl" x-data="{ linkType: '<?= esc($linkType) ?>' }">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4"><?= esc(lang('Menus.items_create_title')) ?> (Menu: <?= esc($menu['menu_key'] ?? '') ?>)</h3>
-
-    <?php if (session()->has('error')) : ?>
-        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
-            <?= esc(session('error')) ?>
+<div class="max-w-2xl">
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" x-data="{ linkType: '<?= esc($linkType) ?>' }">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-base font-semibold text-gray-900"><?= esc(lang('Menus.items_create_title')) ?></h3>
         </div>
-    <?php endif; ?>
 
-    <form action="<?= route_to('admin.cms.menus.items.store', $menuId) ?>" method="post" class="space-y-4">
-        <?= csrf_field() ?>
-        <input type="hidden" name="menu_id" value="<?= esc($menuId) ?>">
+        <?php if (session()->has('error')) : ?>
+            <div class="mx-6 mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                <?= esc(session('error')) ?>
+            </div>
+        <?php endif; ?>
 
-        <!-- Translations Fields (Labels & URL for Custom) -->
-        <div class="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2"><?= esc(lang('Menus.items_translations_title')) ?></h4>
-            <?php foreach ($languages as $key => $lang): ?>
-                <?php
-                $lang = is_array($lang) ? $lang : [];
-                $langId = isset($lang['id']) ? (int) $lang['id'] : (is_numeric($key) ? (int) $key : 0);
-                if ($langId <= 0) {
-                    continue;
-                }
-                $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
-                ?>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-gray-700"><?= esc(lang('Menus.items_label_label')) ?> (<?= esc($langName) ?>) <span class="text-red-500">*</span></label>
-                    <input type="text" name="translations[<?= esc($langId) ?>][label]" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_label_placeholder')) ?>">
-                    
-                    <div x-show="linkType === 'custom_url'" x-cloak class="mt-2 space-y-1">
-                        <label class="block text-[11px] font-semibold text-gray-600"><?= esc(lang('Menus.items_custom_url_label')) ?> (<?= esc($langName) ?>)</label>
-                        <input type="text" name="translations[<?= esc($langId) ?>][custom_url]" x-bind:disabled="linkType !== 'custom_url'" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-xs text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_custom_url_placeholder')) ?>">
-                    </div>
+        <form action="<?= route_to('admin.cms.menus.items.store', $menuId) ?>" method="post" class="p-6 space-y-6">
+            <?= csrf_field() ?>
+            <input type="hidden" name="menu_id" value="<?= esc($menuId) ?>">
+
+            <!-- Translations: labels per language -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                    <?= ui_icon('languages', 'h-4 w-4 text-gray-400') ?>
+                    <h4 class="text-sm font-semibold text-gray-700"><?= esc(lang('Menus.items_translations_title')) ?></h4>
                 </div>
-            <?php endforeach; ?>
-        </div>
+                <div class="rounded-xl border border-gray-200 bg-gray-50 divide-y divide-gray-200 overflow-hidden">
+                    <?php foreach ($languages as $key => $lang): ?>
+                        <?php
+                        $lang = is_array($lang) ? $lang : [];
+                        $langId = isset($lang['id']) ? (int) $lang['id'] : (is_numeric($key) ? (int) $key : 0);
+                        if ($langId <= 0) { continue; }
+                        $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
+                        ?>
+                        <div class="p-4 space-y-3">
+                            <span class="inline-flex items-center rounded-md bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 text-xs font-semibold font-mono"><?= esc($langName) ?></span>
 
-        <!-- Link Type Selector -->
-        <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_link_type_label')) ?></label>
-            <select name="link_type" x-model="linkType" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value="page"><?= esc(lang('Menus.items_link_type_page')) ?></option>
-                <option value="entry"><?= esc(lang('Menus.items_link_type_entry')) ?></option>
-                <option value="collection_listing"><?= esc(lang('Menus.items_link_type_collection_listing')) ?></option>
-                <option value="custom_url"><?= esc(lang('Menus.items_link_type_custom_url')) ?></option>
-                <option value="no_link"><?= esc(lang('Menus.items_link_type_no_link')) ?></option>
-            </select>
-        </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">
+                                    <?= esc(lang('Menus.items_label_label')) ?> <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="translations[<?= esc($langId) ?>][label]" required
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                    placeholder="<?= esc(lang('Menus.items_label_placeholder')) ?>">
+                            </div>
 
-        <!-- Page Selector (visible only when linkType === 'page') -->
-        <div x-show="linkType === 'page'" x-cloak class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_target_page_label')) ?> <span class="text-red-500">*</span></label>
-            <select name="page_id" x-bind:disabled="linkType !== 'page'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value=""><?= esc(lang('Menus.items_target_page_placeholder')) ?></option>
-                <?php foreach ($pages as $id => $title): ?>
-                    <option value="<?= esc($id) ?>" <?= (string) $selectedPageId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+                            <div x-show="linkType === 'custom_url'" x-cloak>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">
+                                    <?= esc(lang('Menus.items_custom_url_label')) ?>
+                                </label>
+                                <input type="text" name="translations[<?= esc($langId) ?>][custom_url]"
+                                    x-bind:disabled="linkType !== 'custom_url'"
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                    placeholder="<?= esc(lang('Menus.items_custom_url_placeholder')) ?>">
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
-        <!-- Entry Selector -->
-        <div x-show="linkType === 'entry'" x-cloak class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_target_entry_label')) ?> <span class="text-red-500">*</span></label>
-            <select name="entry_id" x-bind:disabled="linkType !== 'entry'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value=""><?= esc(lang('Menus.items_target_entry_placeholder')) ?></option>
-                <?php foreach ($entries as $id => $title): ?>
-                    <option value="<?= esc($id) ?>" <?= (string) $selectedEntryId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <!-- Collection Listing Selector -->
-        <div x-show="linkType === 'collection_listing'" x-cloak class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_target_collection_label')) ?> <span class="text-red-500">*</span></label>
-            <select name="collection_id" x-bind:disabled="linkType !== 'collection_listing'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value=""><?= esc(lang('Menus.items_target_collection_placeholder')) ?></option>
-                <?php foreach ($collections as $id => $title): ?>
-                    <option value="<?= esc($id) ?>" <?= (string) $selectedCollectionId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <!-- Parent Item (Optional) -->
-        <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_parent_label')) ?></label>
-            <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
-                <?php foreach ($items as $item): ?>
-                    <option value="<?= esc((string)$item['id']) ?>"><?= esc($item['translations'][0]['label'] ?? $item['label'] ?? 'Item #' . $item['id']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <!-- Link Target -->
+            <!-- Link Type -->
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_link_target_label')) ?></label>
-                <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                    <option value="_self"><?= esc(lang('Menus.items_link_target_same')) ?></option>
-                    <option value="_blank"><?= esc(lang('Menus.items_link_target_new')) ?></option>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_type_label')) ?></label>
+                <select name="link_type" x-model="linkType" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <option value="page"><?= esc(lang('Menus.items_link_type_page')) ?></option>
+                    <option value="entry"><?= esc(lang('Menus.items_link_type_entry')) ?></option>
+                    <option value="collection_listing"><?= esc(lang('Menus.items_link_type_collection_listing')) ?></option>
+                    <option value="custom_url"><?= esc(lang('Menus.items_link_type_custom_url')) ?></option>
+                    <option value="no_link"><?= esc(lang('Menus.items_link_type_no_link')) ?></option>
                 </select>
             </div>
 
-            <!-- Sort Order -->
-            <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
-                <input type="number" name="sort_order" value="0" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <!-- Icon -->
-            <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_icon_label')) ?></label>
-                <input type="text" name="icon" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_icon_placeholder')) ?>">
+            <!-- Target selectors (conditional) -->
+            <div x-show="linkType === 'page'" x-cloak>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_page_label')) ?> <span class="text-red-500">*</span></label>
+                <select name="page_id" x-bind:disabled="linkType !== 'page'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <option value=""><?= esc(lang('Menus.items_target_page_placeholder')) ?></option>
+                    <?php foreach ($pages as $id => $title): ?>
+                        <option value="<?= esc($id) ?>" <?= (string) $selectedPageId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
-            <!-- CSS Class -->
-            <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_css_class_label')) ?></label>
-                <input type="text" name="css_class" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="<?= esc(lang('Menus.items_css_class_placeholder')) ?>">
+            <div x-show="linkType === 'entry'" x-cloak>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_entry_label')) ?> <span class="text-red-500">*</span></label>
+                <select name="entry_id" x-bind:disabled="linkType !== 'entry'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <option value=""><?= esc(lang('Menus.items_target_entry_placeholder')) ?></option>
+                    <?php foreach ($entries as $id => $title): ?>
+                        <option value="<?= esc($id) ?>" <?= (string) $selectedEntryId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-        </div>
 
-        <!-- Active Toggle -->
-        <div class="flex items-center gap-2 pt-2">
-            <input type="checkbox" name="is_active" value="1" checked id="is_active" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-            <label for="is_active" class="text-sm font-medium text-gray-700"><?= esc(lang('Menus.items_is_active_label')) ?></label>
-        </div>
+            <div x-show="linkType === 'collection_listing'" x-cloak>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_collection_label')) ?> <span class="text-red-500">*</span></label>
+                <select name="collection_id" x-bind:disabled="linkType !== 'collection_listing'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <option value=""><?= esc(lang('Menus.items_target_collection_placeholder')) ?></option>
+                    <?php foreach ($collections as $id => $title): ?>
+                        <option value="<?= esc($id) ?>" <?= (string) $selectedCollectionId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <!-- Form Actions -->
-        <div class="flex items-center justify-end gap-2 pt-4 border-t border-gray-150">
-            <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="px-4 py-2 text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm"><?= esc(lang('Menus.items_cancel')) ?></a>
-            <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm"><?= esc(lang('Menus.items_add')) ?></button>
-        </div>
-    </form>
-</section>
+            <!-- Structure: parent + sort order -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_parent_label')) ?></label>
+                    <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                        <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
+                        <?php foreach ($parentOptions as $opt): ?>
+                            <option value="<?= esc($opt['id']) ?>"><?= esc($opt['label']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_parent_help')) ?></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
+                    <input type="number" name="sort_order" value="<?= esc((string) $suggestedSortOrder) ?>" min="0" required
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_sort_order_help')) ?></p>
+                </div>
+            </div>
+
+            <!-- Appearance: link target + icon + css class -->
+            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+                <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wider">Appearance</h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_target_label')) ?></label>
+                        <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                            <option value="_self"><?= esc(lang('Menus.items_link_target_same')) ?></option>
+                            <option value="_blank"><?= esc(lang('Menus.items_link_target_new')) ?></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_icon_label')) ?></label>
+                        <input type="text" name="icon"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                            placeholder="<?= esc(lang('Menus.items_icon_placeholder')) ?>">
+                        <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_icon_help')) ?></p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_css_class_label')) ?></label>
+                    <input type="text" name="css_class"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                        placeholder="<?= esc(lang('Menus.items_css_class_placeholder')) ?>">
+                </div>
+            </div>
+
+            <!-- Active toggle -->
+            <?= view('components/form/boolean', [
+                'name'      => 'is_active',
+                'label'     => 'Menus.items_is_active_label',
+                'value'     => true,
+                'on_label'  => 'Menus.field_is_active_on',
+                'off_label' => 'Menus.field_is_active_off',
+            ]) ?>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+                <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('Menus.items_cancel')) ?></a>
+                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('Menus.items_add')) ?></button>
+            </div>
+        </form>
+    </section>
+</div>

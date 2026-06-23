@@ -85,4 +85,16 @@ return [
     'field_is_active_help'          => 'Toggle Is Active.',
     'field_is_active_on'            => 'Active',
     'field_is_active_off'           => 'Inactive',
+
+    'menus_item_new_tab'           => 'Opens in new tab',
+    'menus_item_sort_order'        => 'Sort order',
+    'menus_filter_is_active'       => 'Status',
+    'menus_filter_all_statuses'    => 'All statuses',
+    'menus_details_location'       => 'Location',
+    'menus_details_updated_at'     => 'Last updated',
+    'menus_items_count_badge'      => '{0} items',
+    'items_icon_help'              => 'Lucide icon name (e.g. home, mail, arrow-right). See lucide.dev for the full list.',
+    'items_sort_order_help'        => 'Lower numbers appear first. Items with the same order are sorted alphabetically.',
+    'items_parent_help'            => 'Leave empty to place this item at the root level.',
+    'menus_back_to_detail'         => 'Back to menu',
 ];

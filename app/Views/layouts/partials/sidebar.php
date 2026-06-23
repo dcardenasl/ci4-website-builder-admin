@@ -82,7 +82,8 @@
                 || has_permission('cms.entries.read')
                 || has_permission('cms.categories.read')
                 || has_permission('cms.tags.read')
-                || has_permission('cms.redirects.read');
+                || has_permission('cms.redirects.read')
+                || has_permission('cms.submissions.read');
         ?>
         <?php if ($hasCmsItem): ?>
             <div class="pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500 tracking-wider px-3">CMS</div>
@@ -91,10 +92,12 @@
             // ── CMS group: Contenido ───────────────────────────────────────────
             $hasContentGroup = has_permission('cms.pages.read')
                 || has_permission('cms.entries.read')
-                || has_permission('cms.collections.read');
+                || has_permission('cms.collections.read')
+                || has_permission('cms.submissions.read');
             $contentActive = url_is('admin/cms/pages*')
                 || url_is('admin/cms/entries*')
-                || url_is('admin/cms/collections*');
+                || url_is('admin/cms/collections*')
+                || url_is('admin/cms/form-submissions*');
             ?>
             <?php if ($hasContentGroup): ?>
             <div x-data="{ open: <?= $contentActive ? 'true' : "localStorage.getItem('cms-g-content') !== 'false'" ?> }">
@@ -122,6 +125,12 @@
                         <a href="<?= site_url('admin/cms/collections') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/collections*') ?>">
                             <?= ui_icon('cms-collection') ?>
                             <span><?= lang('Collections.collections_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.submissions.read')): ?>
+                        <a href="<?= site_url('admin/cms/form-submissions') ?>" class="flex items-center gap-2 rounded-lg pl-5 pr-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('admin/cms/form-submissions*') ?>">
+                            <?= ui_icon('mail') ?>
+                            <span><?= lang('FormSubmissions.sidebar_label') ?></span>
                         </a>
                     <?php endif; ?>
                 </div>

@@ -66,6 +66,9 @@
                                 <span aria-hidden="true" x-text="sortIcon('menu_key')"></span>
                             </button>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('Menus.field_location') ?></span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Menus.field_is_active')])) ?>">
                                 <span><?= lang('Menus.field_is_active') ?></span>
@@ -87,22 +90,30 @@
                 <tbody class="<?= esc(table_body_class()) ?>">
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.menu_key ?? '-')" class="font-medium text-gray-950"></td>
                             <td class="<?= esc(table_td_class()) ?>">
-                                <span class="inline-flex items-center">
-                                    <template x-if="row.is_active">
-                                        <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </template>
-                                    <template x-if="!row.is_active">
-                                        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </template>
+                                <span class="font-medium text-gray-900 font-mono text-sm" x-text="String(row.menu_key ?? '-')"></span>
+                            </td>
+                            <td class="<?= esc(table_td_class('muted')) ?>">
+                                <template x-if="row.location">
+                                    <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-mono text-gray-700" x-text="row.location"></span>
+                                </template>
+                                <template x-if="!row.location">
+                                    <span class="text-gray-400">—</span>
+                                </template>
+                            </td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <span
+                                    x-text="row.is_active ? '<?= esc(lang('Menus.field_is_active_on')) ?>' : '<?= esc(lang('Menus.field_is_active_off')) ?>'"
+                                    :class="row.is_active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'"
+                                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold"
+                                ></span>
+                            </td>
+                            <td class="<?= esc(table_td_class('muted')) ?>">
+                                <span class="inline-flex items-center gap-1">
+                                    <?= ui_icon('list', 'h-3.5 w-3.5 text-gray-400') ?>
+                                    <span x-text="String(row.items_count ?? '0')"></span>
                                 </span>
                             </td>
-                            <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.items_count ?? '0')"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <div class="flex items-center gap-2">
