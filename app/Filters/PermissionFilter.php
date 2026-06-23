@@ -35,9 +35,7 @@ class PermissionFilter implements FilterInterface
                     ->setJSON(['ok' => false, 'message' => lang('Auth.noPermission')]);
             }
 
-            return service('response')
-                ->setStatusCode(403)
-                ->setBody(view('errors/html/error_403'));
+            return redirect()->to(site_url('dashboard'))->with('error', lang('Auth.noPermission'));
         }
 
         return null;

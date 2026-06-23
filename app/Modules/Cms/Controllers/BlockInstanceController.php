@@ -259,7 +259,7 @@ class BlockInstanceController extends BaseWebController
         $sortOrder     = is_scalar($sortOrderRaw) ? (int) $sortOrderRaw : 0;
         $isActive      = ! empty($isActiveRaw);
 
-        // Parse config: accepts array (schema-driven form inputs) or JSON string (legacy)
+        // Parse config: accepts array (schema-driven form inputs) or JSON string
         $blockConfigRaw = $this->request->getPost('block_config');
         $blockConfig = [];
         if (is_array($blockConfigRaw)) {
