@@ -411,4 +411,12 @@ class Services extends BaseService
         }
         return new \App\Modules\Cms\Services\FormSubmissionApiService(static::domainApiClient());
     }
+
+    public static function analyticsApiService(bool $getShared = true): \App\Modules\Analytics\Services\AnalyticsApiServiceInterface
+    {
+        if ($getShared) {
+            return static::getSharedInstance('analyticsApiService');
+        }
+        return new \App\Modules\Analytics\Services\AnalyticsApiService(static::domainApiClient());
+    }
 }

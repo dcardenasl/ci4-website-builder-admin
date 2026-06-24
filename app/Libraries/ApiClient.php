@@ -46,6 +46,9 @@ class ApiClient implements ApiClientInterface
     /** @param array<string, mixed> $query */
     public function get(string $path, array $query = []): array
     {
+        if (isset($query['limit']) && ! isset($query['per_page'])) {
+            $query['per_page'] = $query['limit'];
+        }
         return $this->request('GET', $path, ['query' => $query], true);
     }
 
@@ -81,6 +84,9 @@ class ApiClient implements ApiClientInterface
     /** @param array<string, mixed> $query */
     public function publicGet(string $path, array $query = []): array
     {
+        if (isset($query['limit']) && ! isset($query['per_page'])) {
+            $query['per_page'] = $query['limit'];
+        }
         return $this->request('GET', $path, ['query' => $query], false);
     }
 
