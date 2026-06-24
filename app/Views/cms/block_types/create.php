@@ -9,7 +9,7 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
 </div>
 
-<div x-data="blockTypeDesigner(<?= esc($templatesJs, 'attr') ?>)" class="space-y-6 max-w-4xl">
+<div x-data="blockTypeDesigner(<?= esc($templatesJs, 'attr') ?>)" class="space-y-6">
     <?php ob_start(); ?>
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
@@ -93,13 +93,14 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
             </button>
         </div>
 
-        <form method="post" action="<?= route_to('admin.cms.block_types.store') ?>" class="space-y-6"
+        <form method="post" action="<?= route_to('admin.cms.block_types.store') ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3"
               @submit="rebuildJson()">
             <?= csrf_field() ?>
 
             <!-- Single hidden input that always carries the effective block_key -->
             <input type="hidden" name="block_key" :value="effectiveBlockKey">
 
+            <div class="space-y-6 lg:col-span-2">
             <!-- Visible text input only in custom mode — no name attr, bound to customBlockKey -->
             <div x-show="customMode" x-cloak class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">
@@ -223,11 +224,14 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
                     <?= view('components/form/text', ['name' => 'sort_order', 'label' => 'BlockTypes.field_sort_order', 'required' => false, 'value' => '0', 'errors' => $errors ?? []]) ?>
                 </div>
             </details>
-
-            <div class="flex items-center gap-3 pt-2">
-                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
-                <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
             </div>
+
+            <aside class="space-y-6">
+                <?= view('components/display/admin_actions_panel', [
+                    'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('App.create')) . '</button>'
+                        . '<a href="' . esc(route_to('admin.cms.block_types'), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('App.cancel')) . '</a>',
+                ]) ?>
+            </aside>
         </form>
     </section>
     <?php $step2Content = ob_get_clean(); ?>

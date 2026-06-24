@@ -36,7 +36,8 @@ foreach ($languages as $l) {
 <?php elseif (! empty($page)): ?>
     <?php $itemId = (string) ($page['id'] ?? ''); ?>
 
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-4xl">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
 
         <!-- Header: title + actions -->
         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -48,7 +49,7 @@ foreach ($languages as $l) {
             </div>
 
             <!-- Action buttons — grouped by intent -->
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="hidden">
 
                 <!-- Group 1: View / navigate -->
                 <?php if ($previewUrl !== ''): ?>
@@ -113,7 +114,7 @@ foreach ($languages as $l) {
         </div>
 
         <!-- Page metadata -->
-        <dl class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm border-t border-gray-100 pt-5">
+        <dl class="hidden">
             <?= view('components/display/field_row', [
                 'label' => 'Pages.field_page_type',
                 'value' => ! empty($page['page_type'])
@@ -340,4 +341,72 @@ foreach ($languages as $l) {
         </div>
 
     </section>
+
+    <aside class="space-y-6">
+        <?= view('components/display/admin_meta_panel', [
+            'title' => 'Pages.pages_details',
+            'items' => [
+                ['label' => 'Pages.field_page_type', 'value' => $page['page_type'] ?? '—'],
+                ['label' => 'Pages.field_status', 'value' => ! empty($page['status']) ? cms_status_badge($page['status']) : '—', 'isHtml' => true],
+                ['label' => 'Pages.field_parent_id', 'value' => ($pages[(string) ($page['parent_id'] ?? '')] ?? ($page['parent_id'] ?? '—'))],
+                ['label' => 'Pages.field_is_in_sitemap', 'value' => view('components/table/boolean_cell', ['value' => $page['is_in_sitemap'] ?? false]), 'isHtml' => true],
+                ['label' => 'Pages.field_sitemap_priority', 'value' => $page['sitemap_priority'] ?? '—'],
+                ['label' => 'Pages.field_published_at', 'value' => $page['published_at'] ?? '—'],
+                ['label' => 'Pages.field_scheduled_at', 'value' => $page['scheduled_at'] ?? '—'],
+                ['label' => 'TableColumns.created_at', 'value' => (string) ($page['created_at'] ?? '-')],
+            ],
+        ]) ?>
+
+        <?php ob_start(); ?>
+        <?php if ($previewUrl !== ''): ?>
+            <a href="<?= esc($previewUrl) ?>" target="_blank" rel="noopener noreferrer" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+                <?= ui_icon('external-link', 'h-3.5 w-3.5') ?>
+                <span><?= esc(lang('Pages.blocks_view_page')) ?></span>
+            </a>
+        <?php endif; ?>
+        <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <span><?= lang('App.edit') ?></span>
+        </a>
+        <a href="<?= route_to('admin.cms.pages.blocks', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+            <span><?= esc(lang('Pages.manage_blocks')) ?></span>
+        </a>
+        <?php if ($status !== 'published'): ?>
+            <form method="post" action="<?= route_to('admin.cms.pages.publish', $itemId) ?>">
+                <?= csrf_field() ?>
+                <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                    <?= ui_icon('globe', 'h-3.5 w-3.5') ?>
+                    <span><?= esc(lang('Pages.pages_publish')) ?></span>
+                </button>
+            </form>
+        <?php endif; ?>
+        <?php if ($status !== 'archived'): ?>
+            <form method="post" action="<?= route_to('admin.cms.pages.archive', $itemId) ?>">
+                <?= csrf_field() ?>
+                <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                    <?= ui_icon('archive', 'h-3.5 w-3.5') ?>
+                    <span><?= esc(lang('Pages.pages_archive')) ?></span>
+                </button>
+            </form>
+        <?php endif; ?>
+        <?php $actionsContent = ob_get_clean(); ?>
+
+        <?php ob_start(); ?>
+        <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemId) ?>"
+              x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($page['title'] ?? $page['slug'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <span><?= esc(lang('App.delete')) ?></span>
+            </button>
+        </form>
+        <?php $dangerContent = ob_get_clean(); ?>
+
+        <?= view('components/display/admin_actions_panel', [
+            'content' => $actionsContent,
+            'dangerContent' => $dangerContent,
+        ]) ?>
+    </aside>
+    </div>
 <?php endif; ?>

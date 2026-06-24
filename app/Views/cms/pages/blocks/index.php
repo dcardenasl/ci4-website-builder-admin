@@ -41,7 +41,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
     </div>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-4xl"
+<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6"
          x-data="blockSorter('<?= esc($reorderUrl) ?>')">
 
     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">

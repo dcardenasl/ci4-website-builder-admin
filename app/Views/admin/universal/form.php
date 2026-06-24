@@ -1,13 +1,17 @@
-<div class="mb-4">
-    <a href="/admin/universal/<?= esc($resource) ?>" class="text-sm text-indigo-600 hover:text-indigo-700 font-semibold">&larr; Back to <?= esc($schema['title'] ?? ucfirst($resource)) ?> List</a>
-</div>
+<?= view('components/display/admin_page_header', [
+    'backUrl' => '/admin/universal/' . rawurlencode((string) $resource),
+    'backLabel' => 'Back to ' . (string) ($schema['title'] ?? ucfirst((string) $resource)) . ' List',
+    'eyebrow' => 'Zero-Code Dynamic Administrative CRUD Console',
+    'title' => (string) $title,
+]) ?>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl">
-    <h3 class="text-lg font-bold text-gray-900"><?= esc($title) ?></h3>
-    <p class="text-xs text-gray-500 mt-1">Zero-Code Dynamic Administrative CRUD Console</p>
+<form method="post" action="<?= $mode === 'create' ? "/admin/universal/" . esc($resource) : "/admin/universal/" . esc($resource) . "/" . esc($recordId) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <?= csrf_field() ?>
 
-    <form method="post" action="<?= $mode === 'create' ? "/admin/universal/" . esc($resource) : "/admin/universal/" . esc($resource) . "/" . esc($recordId) ?>" class="mt-6 space-y-5">
-        <?= csrf_field() ?>
+    <div class="lg:col-span-2">
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-bold text-gray-900"><?= esc($title) ?></h3>
+            <div class="mt-6 space-y-5">
 
         <?php foreach ($schema['fields'] ?? [] as $field): ?>
             <?php
@@ -49,14 +53,14 @@
                 <?= render_field_error($name) ?>
             </div>
         <?php endforeach; ?>
+            </div>
+        </section>
+    </div>
 
-        <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
-            <button type="submit" class="rounded-lg bg-indigo-600 text-white px-4 py-2 text-sm font-semibold hover:bg-indigo-700">
-                <?= $mode === 'create' ? 'Create' : 'Save Changes' ?>
-            </button>
-            <a href="/admin/universal/<?= esc($resource) ?>" class="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 font-semibold hover:bg-gray-50">
-                Cancel
-            </a>
-        </div>
-    </form>
-</section>
+    <aside class="space-y-6">
+        <?= view('components/display/admin_actions_panel', [
+            'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc($mode === 'create' ? 'Create' : 'Save Changes') . '</button>'
+                . '<a href="/admin/universal/' . esc((string) $resource, 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">Cancel</a>',
+        ]) ?>
+    </aside>
+</form>

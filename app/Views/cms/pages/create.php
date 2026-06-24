@@ -3,8 +3,9 @@
 </div>
 
 <?php ob_start(); ?>
-<form method="post" action="<?= route_to('admin.cms.pages.store') ?>" class="space-y-6">
+<form method="post" action="<?= route_to('admin.cms.pages.store') ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <?= csrf_field() ?>
+        <div class="lg:col-span-2 space-y-6">
 
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
             <div>
@@ -313,10 +314,14 @@
             </div>
         <?php endif; ?>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
-            <a href="<?= route_to('admin.cms.pages') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
         </div>
+        <aside class="space-y-6">
+            <?php ob_start(); ?>
+            <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.create')) ?></button>
+            <a href="<?= route_to('admin.cms.pages') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
+            <?php $actionsContent = ob_get_clean(); ?>
+            <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
+        </aside>
     </form>
 <?php $sectionContent = ob_get_clean(); ?>
 <?= view('components/display/form_section', [

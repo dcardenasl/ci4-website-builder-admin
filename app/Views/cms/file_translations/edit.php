@@ -21,7 +21,7 @@ foreach ($languages as $l) {
 </div>
 
 <?php if (empty($languages)): ?>
-    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm max-w-3xl">
+    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('FileTranslations.page_title')) ?></h3>
         <p class="mt-1 text-sm text-gray-500"><?= esc(lang('FileTranslations.section_intro')) ?></p>
         <p class="mt-4 text-sm text-gray-500"><?= esc(lang('FileTranslations.no_languages')) ?></p>

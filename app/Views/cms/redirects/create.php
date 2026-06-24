@@ -1,11 +1,17 @@
-<div class="mb-4">
-    <a href="<?= route_to('admin.cms.redirects') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-</div>
+<?php $item = $item ?? []; ?>
 
-<?php ob_start(); ?>
-<form method="post" action="<?= route_to('admin.cms.redirects.store') ?>" class="space-y-6">
-        <?= csrf_field() ?>
+<?= view('components/display/admin_page_header', [
+    'backUrl' => route_to('admin.cms.redirects'),
+    'backLabel' => 'App.back',
+    'eyebrow' => 'Redirects.redirects_details',
+    'title' => 'Redirects.redirects_create',
+]) ?>
 
+<form method="post" action="<?= route_to('admin.cms.redirects.store') ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <?= csrf_field() ?>
+
+    <div class="lg:col-span-2 space-y-6">
+        <?php ob_start(); ?>
         <?= view('components/form/text', [
             'name' => 'old_path',
             'label' => 'Redirects.field_old_path',
@@ -26,6 +32,27 @@
             'errors' => $errors ?? []
         ]) ?>
 
+        <?= view('components/form/textarea', [
+            'name' => 'note',
+            'label' => 'Redirects.field_note',
+            'required' => false,
+            'value' => $item['note'] ?? '',
+            'placeholder' => 'Redirects.field_note_placeholder',
+            'help' => 'Redirects.field_note_help',
+            'errors' => $errors ?? []
+        ]) ?>
+        <?php $mainFields = ob_get_clean(); ?>
+
+        <?= view('components/display/form_section', [
+            'title' => 'Redirects.redirects_create',
+            'description' => 'Redirects.redirects_details',
+            'content' => $mainFields,
+            'bodyClass' => 'space-y-4',
+        ]) ?>
+    </div>
+
+    <aside class="space-y-6">
+        <?php ob_start(); ?>
         <?= view('components/form/select', [
             'name' => 'redirect_type',
             'label' => 'Redirects.field_redirect_type',
@@ -40,16 +67,6 @@
             'errors' => $errors ?? []
         ]) ?>
 
-        <?= view('components/form/textarea', [
-            'name' => 'note',
-            'label' => 'Redirects.field_note',
-            'required' => false,
-            'value' => $item['note'] ?? '',
-            'placeholder' => 'Redirects.field_note_placeholder',
-            'help' => 'Redirects.field_note_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
         <?= view('components/form/boolean', [
             'name' => 'is_active',
             'label' => 'Redirects.field_is_active',
@@ -59,15 +76,21 @@
             'help' => 'Redirects.field_is_active_help',
             'errors' => $errors ?? []
         ]) ?>
+        <?php $metaFields = ob_get_clean(); ?>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.create')) ?></button>
-            <a href="<?= route_to('admin.cms.redirects') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
-        </div>
-    </form>
-<?php $sectionContent = ob_get_clean(); ?>
-<?= view('components/display/form_section', [
-    'title' => 'Redirects.redirects_create',
-    'description' => 'Redirects.redirects_details',
-    'content' => $sectionContent,
-]) ?>
+        <?= view('components/display/form_section', [
+            'title' => 'Redirects.redirects_details',
+            'content' => $metaFields,
+            'bodyClass' => 'space-y-4',
+        ]) ?>
+
+        <?php ob_start(); ?>
+        <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.create')) ?></button>
+        <a href="<?= route_to('admin.cms.redirects') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
+        <?php $actionsContent = ob_get_clean(); ?>
+
+        <?= view('components/display/admin_actions_panel', [
+            'content' => $actionsContent,
+        ]) ?>
+    </aside>
+</form>

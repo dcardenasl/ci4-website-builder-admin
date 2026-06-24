@@ -69,7 +69,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 </div>
 
 <?php ob_start(); ?>
-<div class="max-w-3xl space-y-5">
+<div class="space-y-5">
 
     <!-- Block type identity card (readonly) -->
     <div class="bg-brand-50 border border-brand-200 rounded-xl p-4 flex items-start gap-4">

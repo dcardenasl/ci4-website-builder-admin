@@ -17,18 +17,15 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
 ?>
 <meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
 
-<div class="mb-4 flex items-center justify-between">
+<div class="mb-4">
     <a href="<?= route_to('admin.cms.block_types') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-    <form method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['block_key'] ?? null), 'js') ?>', () => $el.submit())">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
 </div>
 
-<div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>, <?= ($item['is_container'] ?? false) ? 'true' : 'false' ?>)" class="max-w-4xl">
+<form id="block-type-delete-form" method="post" action="<?= route_to('admin.cms.block_types.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['block_key'] ?? null), 'js') ?>', () => $el.submit())">
+    <?= csrf_field() ?>
+</form>
+
+<div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>, <?= ($item['is_container'] ?? false) ? 'true' : 'false' ?>)" class="space-y-6">
     <?php ob_start(); ?>
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
 
@@ -51,10 +48,11 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
         </div>
 
         <form method="post" action="<?= route_to('admin.cms.block_types.update', (string) ($item['id'] ?? '')) ?>"
-              class="space-y-6"
+              class="grid grid-cols-1 gap-6 lg:grid-cols-3"
               @submit="rebuildJson()">
             <?= csrf_field() ?>
 
+            <div class="space-y-6 lg:col-span-2">
             <!-- block_key: readonly si es sistema, editable si es custom -->
             <?= view('components/form/text', [
                 'name'        => 'block_key',
@@ -163,11 +161,16 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
                     <?= view('components/form/text', ['name' => 'sort_order',       'label' => 'BlockTypes.field_sort_order',       'required' => false, 'value' => (string)($item['sort_order'] ?? '0'),                              'errors' => $errors ?? []]) ?>
                 </div>
             </details>
-
-            <div class="flex items-center gap-3 pt-2">
-                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-                <a href="<?= route_to('admin.cms.block_types') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
             </div>
+
+            <aside class="space-y-6">
+                <?= view('components/display/admin_actions_panel', [
+                    'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('App.update')) . '</button>'
+                        . '<a href="' . esc(route_to('admin.cms.block_types'), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('App.cancel')) . '</a>',
+                    'dangerContent' => '<button type="submit" form="block-type-delete-form" class="' . esc(action_button_class('danger'), 'attr') . '">'
+                        . ui_icon('trash', 'h-3.5 w-3.5') . esc(lang('App.delete')) . '</button>',
+                ]) ?>
+            </aside>
         </form>
     </section>
     <?php $blockTypeFormContent = ob_get_clean(); ?>

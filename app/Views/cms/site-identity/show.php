@@ -44,7 +44,7 @@ $faviconUrl    = is_array($faviconMeta) ? (string) ($faviconMeta['url'] ?? '') :
 $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ?? '') : '';
 ?>
 
-<div class="max-w-4xl space-y-6">
+<div class="space-y-6">
 
     <!-- Page header -->
     <div>

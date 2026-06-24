@@ -1,14 +1,19 @@
 <?php $uid = (string) ($editUser['id'] ?? ''); ?>
 
-<div class="mb-4">
-    <a href="<?= route_to('admin.users.show', $uid) ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Users.back_to_details') ?></a>
-</div>
+<?= view('components/display/admin_page_header', [
+    'backUrl' => route_to('admin.users.show', $uid),
+    'backLabel' => 'Users.back_to_details',
+    'eyebrow' => 'Users.title',
+    'title' => 'Users.edit_user',
+]) ?>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-2xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Users.edit_user') ?></h3>
+<form method="post" action="<?= route_to('admin.users.update', $uid) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <?= csrf_field() ?>
 
-    <form method="post" action="<?= route_to('admin.users.update', $uid) ?>" class="mt-4 space-y-4">
-        <?= csrf_field() ?>
+    <div class="lg:col-span-2">
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Users.edit_user') ?></h3>
+            <div class="mt-4 space-y-4">
         <input type="hidden" name="original_email" value="<?= esc(old('original_email', $editUser['email'] ?? '')) ?>">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,9 +80,14 @@ $hiddenLockedRoleIds = array_diff($oldRoleIdsStr, $assignableIds);
             <?= render_field_error('role_ids') ?>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm hover:bg-brand-700"><?= lang('App.save') ?></button>
-            <a href="<?= route_to('admin.users.show', $uid) ?>" class="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><?= lang('App.cancel') ?></a>
-        </div>
-    </form>
-</section>
+            </div>
+        </section>
+    </div>
+
+    <aside class="space-y-6">
+        <?= view('components/display/admin_actions_panel', [
+            'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('App.save')) . '</button>'
+                . '<a href="' . esc(route_to('admin.users.show', $uid), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('App.cancel')) . '</a>',
+        ]) ?>
+    </aside>
+</form>

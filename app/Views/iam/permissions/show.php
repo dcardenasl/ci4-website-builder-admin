@@ -1,7 +1,4 @@
 <?php $permission = $permission ?? []; ?>
-<div class="mb-4">
-    <a href="<?= route_to('admin.iam.permissions') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('Iam.permissions_title') ?></a>
-</div>
 
 <?php if (! empty($error)): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
@@ -10,55 +7,68 @@
 <?php elseif (! empty($permission)): ?>
     <?php $itemId = (string) ($permission['id'] ?? ''); ?>
 
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900"><?= lang('Iam.permissions_details') ?></h3>
-            <div class="flex items-center gap-2">
-                <?php if (is_superadmin()): ?>
-                    <a href="<?= route_to('admin.iam.permissions.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
-                    <form method="post" action="<?= route_to('admin.iam.permissions.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($permission['code'] ?? $permission['resource'] ?? null), 'js') ?>', () => $el.submit())">
-                        <?= csrf_field() ?>
-                        <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
-                            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                            <?= esc(lang('App.delete')) ?>
-                        </button>
-                    </form>
-                <?php endif; ?>
-            </div>
-        </div>
+    <?= view('components/display/admin_page_header', [
+        'backUrl' => route_to('admin.iam.permissions'),
+        'backLabel' => 'Iam.permissions_title',
+        'eyebrow' => 'Iam.permissions_details',
+        'title' => (string) ($permission['code'] ?? '—'),
+        'subtitle' => (string) ($permission['description'] ?? ''),
+    ]) ?>
 
-        <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            <div>
+    <?php ob_start(); ?>
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Iam.permissions_details') ?></h3>
+        <dl class="mt-4 divide-y divide-gray-100 text-sm">
+            <div class="py-3 first:pt-0">
                 <dt class="text-gray-500"><?= lang('Iam.field_code') ?></dt>
                 <dd class="mt-1 text-gray-900"><code class="text-xs"><?= esc((string) ($permission['code'] ?? '-')) ?></code></dd>
             </div>
-            <div>
-                <dt class="text-gray-500"><?= lang('Iam.field_application') ?></dt>
-                <dd class="mt-1 text-gray-900">
-                    <?= esc((string) ($permission['application_name'] ?? '')) ?>
-                    <?php if (! empty($permission['application_id'])): ?>
-                        <span class="text-gray-500 text-xs">(#<?= (int) $permission['application_id'] ?>)</span>
-                    <?php else: ?>
-                        -
-                    <?php endif; ?>
-                </dd>
-            </div>
-            <div>
-                <dt class="text-gray-500"><?= lang('Iam.field_resource') ?></dt>
-                <dd class="mt-1 text-gray-900"><?= esc((string) ($permission['resource'] ?? '-')) ?></dd>
-            </div>
-            <div>
-                <dt class="text-gray-500"><?= lang('Iam.field_action') ?></dt>
-                <dd class="mt-1 text-gray-900"><?= esc((string) ($permission['action'] ?? '-')) ?></dd>
-            </div>
-            <div class="md:col-span-2">
+            <div class="py-3">
                 <dt class="text-gray-500"><?= lang('Iam.field_description') ?></dt>
                 <dd class="mt-1 text-gray-900 whitespace-pre-line"><?= esc((string) ($permission['description'] ?? '-')) ?></dd>
             </div>
-            <div>
-                <dt class="text-gray-500"><?= lang('TableColumns.created_at') ?></dt>
-                <dd class="mt-1 text-gray-900"><?= esc((string) ($permission['created_at'] ?? '-')) ?></dd>
-            </div>
         </dl>
     </section>
+    <?php $mainContent = ob_get_clean(); ?>
+
+    <?php ob_start(); ?>
+    <?= view('components/display/admin_meta_panel', [
+        'title' => 'Iam.permissions_details',
+        'items' => [
+            ['label' => 'Iam.field_application', 'value' => trim((string) ($permission['application_name'] ?? '')) !== '' ? (string) $permission['application_name'] . (! empty($permission['application_id']) ? ' (#' . (int) $permission['application_id'] . ')' : '') : '-'],
+            ['label' => 'Iam.field_resource', 'value' => (string) ($permission['resource'] ?? '-')],
+            ['label' => 'Iam.field_action', 'value' => (string) ($permission['action'] ?? '-')],
+            ['label' => 'TableColumns.created_at', 'value' => (string) ($permission['created_at'] ?? '-')],
+        ],
+    ]) ?>
+
+    <?php if (is_superadmin()): ?>
+        <?php ob_start(); ?>
+        <a href="<?= route_to('admin.iam.permissions.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <?= lang('App.edit') ?>
+        </a>
+        <?php $actionsContent = ob_get_clean(); ?>
+
+        <?php ob_start(); ?>
+        <form method="post" action="<?= route_to('admin.iam.permissions.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($permission['code'] ?? $permission['resource'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+        <?php $dangerContent = ob_get_clean(); ?>
+
+        <?= view('components/display/admin_actions_panel', [
+            'content' => $actionsContent,
+            'dangerContent' => $dangerContent,
+        ]) ?>
+    <?php endif; ?>
+    <?php $asideContent = ob_get_clean(); ?>
+
+    <?= view('components/display/admin_resource_layout', [
+        'main' => $mainContent,
+        'aside' => $asideContent,
+    ]) ?>
 <?php endif; ?>

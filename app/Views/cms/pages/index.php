@@ -1,4 +1,24 @@
-<?php /** @var array $limitOptions */ ?>
+<?php
+/** @var array $limitOptions */
+
+$languageBadges = [];
+foreach ($languages ?? [] as $key => $language) {
+    $language = is_array($language) ? $language : ['id' => $key, 'name' => (string) $language];
+    $langId   = isset($language['id']) && is_numeric($language['id']) ? (int) $language['id'] : (is_numeric($key) ? (int) $key : 0);
+
+    if ($langId <= 0) {
+        continue;
+    }
+
+    $langCode = (string) ($language['code'] ?? (is_string($key) && ! is_numeric($key) ? $key : $langId));
+
+    $languageBadges[] = [
+        'id'   => $langId,
+        'name' => (string) ($language['name'] ?? $language['label'] ?? $langCode),
+        'code' => $langCode,
+    ];
+}
+?>
 
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5"
     x-data="remoteTable({
@@ -106,7 +126,7 @@
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <div class="flex items-center gap-1.5">
-                                    <?php foreach ($languages as $lang): ?>
+                                    <?php foreach ($languageBadges as $lang): ?>
                                         <?php $langId = (int) $lang['id']; ?>
                                         <template x-init="
                                             const t = row.translations ? row.translations.find(t => parseInt(t.language_id) === <?= $langId ?>) : null;

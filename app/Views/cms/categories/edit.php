@@ -11,8 +11,9 @@
 </div>
 
 <?php ob_start(); ?>
-<form method="post" action="<?= route_to('admin.cms.categories.update', (string) ($item['id'] ?? '')) ?>" class="space-y-6">
+<form method="post" action="<?= route_to('admin.cms.categories.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <?= csrf_field() ?>
+        <div class="lg:col-span-2 space-y-6">
 
         <?= view('components/form/relation', [
             'name' => 'collection_id',
@@ -182,10 +183,14 @@
             </div>
         <?php endif; ?>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-            <a href="<?= route_to('admin.cms.categories') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
         </div>
+        <aside class="space-y-6">
+            <?php ob_start(); ?>
+            <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.update')) ?></button>
+            <a href="<?= route_to('admin.cms.categories') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
+            <?php $actionsContent = ob_get_clean(); ?>
+            <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
+        </aside>
     </form>
 <?php $sectionContent = ob_get_clean(); ?>
 <?= view('components/display/form_section', [

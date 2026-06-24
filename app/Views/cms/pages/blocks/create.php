@@ -47,7 +47,7 @@ $parentIdJs    = json_encode($parentInstanceId);
     <?php endif; ?>
 </div>
 
-<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>)" class="space-y-6 max-w-4xl">
+<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>)" class="space-y-6">
     <?php ob_start(); ?>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <template x-for="bt in blockTypes" :key="bt.id">

@@ -74,7 +74,7 @@ $csrfHash = csrf_hash();
                 </button>
             </form>
             <form method="post" action="<?= route_to('files.bulk') ?>"
-                  @submit="return confirm('<?= esc(lang('Files.bulk_confirm_force')) ?>')">
+                  @submit.prevent="$store.confirm.show('<?= esc(lang('Files.bulk_confirm_force'), 'js') ?>', () => $el.submit())">
                 <input type="hidden" :name="csrf.name" :value="csrf.hash">
                 <input type="hidden" name="action" value="force">
                 <template x-for="id in selectedIds" :key="id">
@@ -162,7 +162,7 @@ $csrfHash = csrf_hash();
                                         </button>
                                     </form>
                                     <form method="post" :action="'<?= route_to('files') ?>/' + (row.id ?? '') + '/force'"
-                                          @submit="return confirm('<?= esc(lang('Files.confirm_force_delete')) ?>')">
+                                          @submit.prevent="$store.confirm.show('<?= esc(lang('Files.confirm_force_delete'), 'js') ?>', () => $el.submit())">
                                         <input type="hidden" :name="csrf.name" :value="csrf.hash">
                                         <button type="submit" class="<?= esc(action_button_class('danger')) ?>" :title="'<?= esc(lang('Files.force_delete')) ?>'">
                                             <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

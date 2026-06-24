@@ -32,6 +32,7 @@ final class SettingCreateViewTest extends CIUnitTestCase
             'errors' => [],
         ]);
 
-        $this->assertStringContainsString("x-data=\"{ settingType: 'int' }\"", $html);
+        $this->assertStringContainsString("settingType: 'int'", $html);
+        $this->assertStringContainsString('isTranslatable:', $html);
     }
 }

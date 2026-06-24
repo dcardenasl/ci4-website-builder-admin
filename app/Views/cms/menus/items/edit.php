@@ -41,8 +41,7 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
     <span class="text-gray-500 font-mono"><?= esc($menu['menu_key'] ?? '') ?></span>
 </div>
 
-<div class="max-w-2xl">
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" x-data="{ linkType: '<?= esc($linkType) ?>' }">
+<section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" x-data="{ linkType: '<?= esc($linkType) ?>' }">
         <div class="px-6 py-4 border-b border-gray-100">
             <h3 class="text-base font-semibold text-gray-900"><?= esc(lang('Menus.items_edit_title')) ?></h3>
         </div>
@@ -53,10 +52,11 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
             </div>
         <?php endif; ?>
 
-        <form action="<?= route_to('admin.cms.menus.items.update', $menuId, $itemId) ?>" method="post" class="p-6 space-y-6">
+        <form action="<?= route_to('admin.cms.menus.items.update', $menuId, $itemId) ?>" method="post" class="grid grid-cols-1 gap-6 p-6 lg:grid-cols-3">
             <?= csrf_field() ?>
             <input type="hidden" name="menu_id" value="<?= esc($menuId) ?>">
 
+            <div class="space-y-6 lg:col-span-2">
             <!-- Translations: labels per language -->
             <div class="space-y-4">
                 <div class="flex items-center gap-2">
@@ -98,7 +98,9 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                     <?php endforeach; ?>
                 </div>
             </div>
+            </div>
 
+            <aside class="space-y-6">
             <!-- Link Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_type_label')) ?></label>
@@ -199,10 +201,10 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
             ]) ?>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-                <a href="<?= route_to('admin.cms.menus.show', $menuId) ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('Menus.items_cancel')) ?></a>
-                <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('Menus.items_save')) ?></button>
-            </div>
+            <?= view('components/display/admin_actions_panel', [
+                'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('Menus.items_save')) . '</button>'
+                    . '<a href="' . esc(route_to('admin.cms.menus.show', $menuId), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('Menus.items_cancel')) . '</a>',
+            ]) ?>
+            </aside>
         </form>
     </section>
-</div>

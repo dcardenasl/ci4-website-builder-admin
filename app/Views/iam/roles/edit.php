@@ -18,28 +18,31 @@ $grantableIds       = array_map(
 $assignedIdsStr     = array_map('strval', $assignedPermissionIds);
 $lockedAssignedIds  = array_values(array_diff($assignedIdsStr, $grantableIds));
 ?>
-<div class="mb-4 flex items-center justify-between">
-    <a href="<?= route_to('admin.iam.roles') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-    <?php if (! $isSystem): ?>
-        <form method="post" action="<?= route_to('admin.iam.roles.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['code'] ?? null), 'js') ?>', () => $el.submit())">
-            <?= csrf_field() ?>
-            <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
-                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                <?= esc(lang('App.delete')) ?>
-            </button>
-        </form>
-    <?php endif; ?>
-</div>
+<?= view('components/display/admin_page_header', [
+    'backUrl' => route_to('admin.iam.roles'),
+    'backLabel' => 'App.back',
+    'eyebrow' => 'Iam.roles_title',
+    'title' => 'Iam.roles_edit',
+]) ?>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Iam.roles_edit')) ?></h3>
-
-    <?php if ($isSystem): ?>
-        <p class="mt-2 text-sm text-amber-700"><?= esc(lang('Iam.system_role_notice')) ?></p>
-    <?php endif; ?>
-
-    <form method="post" action="<?= route_to('admin.iam.roles.update', (string) ($item['id'] ?? '')) ?>" class="mt-4 space-y-4">
+<?php if (! $isSystem): ?>
+    <form id="role-delete-form" method="post" action="<?= route_to('admin.iam.roles.delete', (string) ($item['id'] ?? '')) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($item['name'] ?? $item['code'] ?? null), 'js') ?>', () => $el.submit())">
         <?= csrf_field() ?>
+    </form>
+<?php endif; ?>
+
+<form method="post" action="<?= route_to('admin.iam.roles.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <?= csrf_field() ?>
+
+    <div class="lg:col-span-2">
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Iam.roles_edit')) ?></h3>
+
+            <?php if ($isSystem): ?>
+                <p class="mt-2 text-sm text-amber-700"><?= esc(lang('Iam.system_role_notice')) ?></p>
+            <?php endif; ?>
+
+            <div class="mt-4 space-y-4">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -118,9 +121,18 @@ $lockedAssignedIds  = array_values(array_diff($assignedIdsStr, $grantableIds));
             <?= render_field_error('permission_ids') ?>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>"><?= esc(lang('App.update')) ?></button>
-            <a href="<?= route_to('admin.iam.roles') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
-        </div>
-    </form>
-</section>
+            </div>
+        </section>
+    </div>
+
+    <aside class="space-y-6">
+        <?= view('components/display/admin_actions_panel', [
+            'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('App.update')) . '</button>'
+                . '<a href="' . esc(route_to('admin.iam.roles'), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('App.cancel')) . '</a>',
+            'dangerContent' => ! $isSystem
+                ? '<button type="submit" form="role-delete-form" class="' . esc(action_button_class('danger'), 'attr') . '">'
+                    . ui_icon('trash', 'h-3.5 w-3.5') . esc(lang('App.delete')) . '</button>'
+                : '',
+        ]) ?>
+    </aside>
+</form>

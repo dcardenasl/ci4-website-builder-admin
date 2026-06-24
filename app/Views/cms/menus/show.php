@@ -27,7 +27,7 @@ foreach ($languages as $lang) {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Left column: details + translations -->
-        <div class="lg:col-span-1 space-y-6">
+        <div class="lg:col-span-1 space-y-6 lg:order-2">
 
             <!-- Menu Details Card -->
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -110,7 +110,7 @@ foreach ($languages as $lang) {
         </div>
 
         <!-- Right column: menu items tree -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-2 lg:order-1">
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <div class="flex items-center gap-2">
