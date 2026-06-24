@@ -292,16 +292,16 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <?php
                             $existingFileId  = old($fieldName . '_file_id', $transRow['block_data'][$fieldKey . '_file_id'] ?? '');
                             $existingFileUrl = old($fieldName . '_url', $transRow['block_data'][$fieldKey . '_url'] ?? '');
-                            $existingFileIdJs  = json_encode((string) $existingFileId);
-                            $existingFileUrlJs = json_encode((string) $existingFileUrl);
+                            $existingFileIdJs  = esc(json_encode((string) $existingFileId));
+                            $existingFileUrlJs = esc(json_encode((string) $existingFileUrl));
                             $faccept = (string) ($field['accept'] ?? 'image');
-                            $facceptJs = json_encode($faccept);
+                            $facceptJs = esc(json_encode($faccept));
                             ?>
                             <label class="block text-xs font-semibold text-gray-700">
                                 <?= esc($flabel) ?>
                                 <?php if ($freq): ?><span class="text-red-500 ml-0.5">*</span><?php endif; ?>
                             </label>
-                            <div x-data="fileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
+                            <div x-data="blockFileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
                                 <input type="hidden"
                                        name="<?= esc($fieldName . '_file_id', 'attr') ?>"
                                        x-model="fileId">
@@ -317,7 +317,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                     </template>
                                 </div>
                                 <button type="button"
-                                        @click="openPicker"
+                                        @click="openPicker()"
                                         class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
@@ -333,15 +333,15 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             $existingItems   = old($fieldName, $fval);
                             $existingItems   = is_array($existingItems) ? $existingItems : [];
                             $itemFields      = $field['item_fields'] ?? [];
-                            $existingItemsJs = json_encode(array_values($existingItems), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                            $itemFieldsJs    = json_encode($itemFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                            $fieldKeyJs      = json_encode($fieldKey);
-                            $langIdxJs       = json_encode($idx);
+                            $existingItemsJs = esc(json_encode(array_values($existingItems), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                            $itemFieldsJs    = esc(json_encode($itemFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                            $fieldKeyJs      = esc(json_encode($fieldKey));
+                            $langIdxJs       = esc(json_encode($idx));
                             ?>
                             <label class="block text-xs font-semibold text-gray-700 mb-2">
                                 <?= esc($flabel) ?>
                             </label>
-                            <div x-data="repeaterField(<?= $existingItemsJs ?>, <?= $itemFieldsJs ?>, <?= $fieldKeyJs ?>, <?= $langIdxJs ?>)"
+                            <div x-data="blockRepeaterField(<?= $existingItemsJs ?>, <?= $itemFieldsJs ?>, <?= $fieldKeyJs ?>, <?= $langIdxJs ?>)"
                                  class="space-y-3">
                                 <template x-for="(item, itemIdx) in items" :key="itemIdx">
                                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
@@ -444,187 +444,3 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
     'bodyClass' => 'space-y-5',
 ]) ?>
 
-<!-- File Picker Modal (global for this page) -->
-<div x-data="globalFilePicker()"
-     @file-picker-open.window="openWith($event.detail.callback, $event.detail.accept)"
-     @keydown.escape.window="if(open) { open = false; }"
-     x-show="open" x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl flex flex-col" style="max-height:85vh">
-        <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-            <h3 class="text-base font-semibold text-gray-900" x-text="pickerTitle"></h3>
-            <button type="button" @click="open = false"
-                    class="rounded-md p-1 text-gray-400 hover:text-gray-600">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="px-5 py-3 border-b border-gray-100">
-            <input type="text" x-model="search" @input.debounce.300ms="load()"
-                   placeholder="Buscar archivos..."
-                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-        </div>
-        <div class="flex-1 overflow-y-auto p-5">
-            <div x-show="loading" class="flex items-center justify-center py-12 text-gray-400 text-sm">Cargando...</div>
-            <div x-show="!loading && files.length === 0"
-                 class="flex items-center justify-center py-12 text-gray-400 text-sm">No hay archivos disponibles.</div>
-            <div x-show="!loading" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-                <template x-for="file in files" :key="file.id">
-                    <button type="button" @click="pick(file)"
-                            class="group relative aspect-square overflow-hidden rounded-lg border-2 border-transparent hover:border-brand-500 bg-gray-100 transition-all">
-                        <template x-if="file.mime_type && file.mime_type.startsWith('video/')">
-                            <video :src="file.url" class="h-full w-full object-cover" muted preload="metadata"></video>
-                        </template>
-                        <template x-if="!(file.mime_type && file.mime_type.startsWith('video/'))">
-                            <img :src="file.thumbnail_url || file.url" :alt="file.original_name || ''"
-                                 class="h-full w-full object-cover">
-                        </template>
-                        <div class="absolute inset-0 bg-brand-600/0 group-hover:bg-brand-600/10 transition-colors"></div>
-                    </button>
-                </template>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function langTabs(defaultLangId) {
-    return {
-        activeTabId: defaultLangId,
-        setTab(id) { this.activeTabId = id; },
-        isActive(id) { return this.activeTabId === id; }
-    };
-}
-
-const pickerLabels = {
-    image:    { select: 'Seleccionar imagen',    change: 'Cambiar imagen'    },
-    video:    { select: 'Seleccionar video',     change: 'Cambiar video'     },
-    document: { select: 'Seleccionar documento', change: 'Cambiar documento' },
-    any:      { select: 'Seleccionar archivo',   change: 'Cambiar archivo'   },
-};
-
-function globalFilePicker() {
-    return {
-        open: false,
-        loading: false,
-        files: [],
-        search: '',
-        accept: 'image',
-        callback: null,
-
-        get pickerTitle() {
-            const map = { image: 'Seleccionar imagen', video: 'Seleccionar video', document: 'Seleccionar documento', any: 'Seleccionar archivo' };
-            return map[this.accept] || 'Seleccionar archivo';
-        },
-
-        openWith(cb, accept) {
-            this.callback = cb;
-            this.accept = accept || 'image';
-            this.open = true;
-            this.load();
-        },
-
-        async load() {
-            this.loading = true;
-            try {
-                const params = new URLSearchParams({ per_page: 30 });
-                if (this.accept && this.accept !== 'any') params.set('type', this.accept);
-                if (this.search) params.set('search', this.search);
-                const resp = await fetch(`/files/picker-data?${params}`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                const json = await resp.json();
-                this.files = json.data || [];
-            } catch (e) {
-                this.files = [];
-            }
-            this.loading = false;
-        },
-
-        pick(file) {
-            if (this.callback) this.callback(file);
-            this.open = false;
-            this.callback = null;
-        },
-    };
-}
-
-function fileField(initialId, initialUrl, accept) {
-    return {
-        fileId: initialId,
-        fileUrl: initialUrl,
-        previewUrl: initialUrl,
-        accept: accept || 'image',
-        pickerLabels,
-        openPicker() {
-            const self = this;
-            window.dispatchEvent(new CustomEvent('file-picker-open', {
-                detail: {
-                    accept: self.accept,
-                    callback(file) {
-                        self.fileId = file.id;
-                        self.fileUrl = file.url;
-                        self.previewUrl = file.thumbnail_url || file.url;
-                    }
-                }
-            }));
-        }
-    };
-}
-
-function repeaterField(existingItems, itemFields, fieldKey, langIdx) {
-    const initItems = (existingItems || []).map(item => {
-        const out = {};
-        Object.keys(itemFields || {}).forEach(subKey => {
-            if ((itemFields[subKey] || {}).type === 'file') {
-                out[subKey + '_file_id']      = item[subKey + '_file_id'] || '';
-                out[subKey + '_preview_url']  = '';
-                out[subKey + '_url']          = item[subKey + '_url'] || '';
-            } else {
-                out[subKey] = item[subKey] || '';
-            }
-        });
-        return out;
-    });
-
-    return {
-        items: initItems,
-        itemFields: itemFields || {},
-        fieldKey,
-        langIdx,
-
-        addItem() {
-            const item = {};
-            Object.keys(this.itemFields).forEach(subKey => {
-                if ((this.itemFields[subKey] || {}).type === 'file') {
-                    item[subKey + '_file_id']     = '';
-                    item[subKey + '_preview_url'] = '';
-                    item[subKey + '_url']         = '';
-                } else {
-                    item[subKey] = '';
-                }
-            });
-            this.items.push(item);
-        },
-
-        removeItem(idx) {
-            this.items.splice(idx, 1);
-        },
-
-        openPickerForItem(itemIdx, subKey, accept) {
-            const self = this;
-            window.dispatchEvent(new CustomEvent('file-picker-open', {
-                detail: {
-                    accept: accept || 'image',
-                    callback(file) {
-                        self.items[itemIdx][subKey + '_file_id']    = file.id;
-                        self.items[itemIdx][subKey + '_url']        = file.url;
-                        self.items[itemIdx][subKey + '_preview_url'] = file.thumbnail_url || file.url;
-                    }
-                }
-            }));
-        },
-    };
-}
-</script>

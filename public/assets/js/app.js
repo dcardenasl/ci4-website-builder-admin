@@ -1651,7 +1651,131 @@ document.addEventListener('alpine:init', () => {
                 },
             });
         },
+
+        clearFile() {
+            this.fileId = '';
+            this.fileInfo = {
+                original_name: '',
+                mime_type: '',
+                category: '',
+                is_image: false,
+                url: '',
+                human_size: '',
+            };
+        },
     }));
+
+    /**
+     * File field component for block editors.
+     * Stores fileId + fileUrl (both submitted as hidden inputs) and a previewUrl for display.
+     * Uses the global $store.filePicker — no separate modal needed.
+     *
+     * Usage: x-data="blockFileField(initialId, initialUrl, accept)"
+     *   accept: 'image' | 'video' | 'document' | 'audio' | 'any' | 'image/*' | …
+     */
+    Alpine.data('blockFileField', (initialId = '', initialUrl = '', accept = 'image') => ({
+        fileId:     String(initialId),
+        fileUrl:    String(initialUrl),
+        previewUrl: String(initialUrl),
+        accept:     String(accept),
+        pickerLabels: {
+            image:    { select: 'Seleccionar imagen',    change: 'Cambiar imagen' },
+            video:    { select: 'Seleccionar video',     change: 'Cambiar video' },
+            document: { select: 'Seleccionar documento', change: 'Cambiar documento' },
+            audio:    { select: 'Seleccionar audio',     change: 'Cambiar audio' },
+            any:      { select: 'Seleccionar archivo',   change: 'Cambiar archivo' },
+        },
+
+        openPicker() {
+            const filterTypeMap = { video: 'video', document: 'document', audio: 'audio' };
+            const filterType = filterTypeMap[this.accept] ?? 'image';
+            const mimeAccept = this.accept === 'any' ? ''
+                : this.accept.includes('/') ? this.accept
+                : this.accept + '/*';
+            Alpine.store('filePicker').show({
+                filterType,
+                accept: mimeAccept,
+                multi:  false,
+                onSelect: (file) => {
+                    this.fileId     = String(file.id ?? '');
+                    this.fileUrl    = String(file.url ?? '');
+                    this.previewUrl = String(file.variants?.thumb || file.url || '');
+                },
+            });
+        },
+
+        clearFile() {
+            this.fileId     = '';
+            this.fileUrl    = '';
+            this.previewUrl = '';
+        },
+    }));
+
+    /**
+     * Repeater field component for block editors.
+     * Each item can have sub-fields of type 'file', 'url', 'text', etc.
+     * File sub-fields use the global $store.filePicker.
+     *
+     * Usage: x-data="blockRepeaterField(existingItems, itemFields, fieldKey, langIdx)"
+     */
+    Alpine.data('blockRepeaterField', (existingItems = [], itemFields = {}, fieldKey = '', langIdx = 0) => {
+        const initItems = (existingItems || []).map((item) => {
+            const out = {};
+            Object.keys(itemFields || {}).forEach((subKey) => {
+                if ((itemFields[subKey] || {}).type === 'file') {
+                    out[subKey + '_file_id']     = String(item[subKey + '_file_id'] || '');
+                    out[subKey + '_preview_url'] = '';
+                    out[subKey + '_url']         = String(item[subKey + '_url'] || '');
+                } else {
+                    out[subKey] = item[subKey] ?? '';
+                }
+            });
+            return out;
+        });
+
+        return {
+            items: initItems,
+            itemFields: itemFields || {},
+            fieldKey,
+            langIdx,
+
+            addItem() {
+                const item = {};
+                Object.keys(this.itemFields).forEach((subKey) => {
+                    if ((this.itemFields[subKey] || {}).type === 'file') {
+                        item[subKey + '_file_id']     = '';
+                        item[subKey + '_preview_url'] = '';
+                        item[subKey + '_url']         = '';
+                    } else {
+                        item[subKey] = '';
+                    }
+                });
+                this.items.push(item);
+            },
+
+            removeItem(idx) {
+                this.items.splice(idx, 1);
+            },
+
+            openPickerForItem(itemIdx, subKey, accept) {
+                const filterTypeMap = { video: 'video', document: 'document', audio: 'audio' };
+                const filterType = filterTypeMap[accept] ?? 'image';
+                const mimeAccept = accept === 'any' ? ''
+                    : accept.includes('/') ? accept
+                    : accept + '/*';
+                Alpine.store('filePicker').show({
+                    filterType,
+                    accept: mimeAccept,
+                    multi:  false,
+                    onSelect: (file) => {
+                        this.items[itemIdx][subKey + '_file_id']     = String(file.id ?? '');
+                        this.items[itemIdx][subKey + '_url']         = String(file.url ?? '');
+                        this.items[itemIdx][subKey + '_preview_url'] = String(file.variants?.thumb || file.url || '');
+                    },
+                });
+            },
+        };
+    });
 
      
     Alpine.data('adminMetadataField', (config = {}) => ({

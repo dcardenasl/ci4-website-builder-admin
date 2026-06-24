@@ -179,11 +179,16 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
             fileUrl: <?= esc(json_encode($logoUrl), 'attr') ?>,
             fileMime: <?= esc(json_encode($logoMime), 'attr') ?>,
             open() {
-                openFilePicker((file) => {
-                    this.fileId = file.id;
-                    this.fileUrl = file.url || file.thumbnail_url || '';
-                    this.fileMime = file.mime_type || '';
-                }, 'image');
+                Alpine.store('filePicker').show({
+                    filterType: 'image',
+                    accept: 'image/*',
+                    multi: false,
+                    onSelect: (file) => {
+                        this.fileId   = file.id;
+                        this.fileUrl  = file.variants?.thumb || file.url || '';
+                        this.fileMime = file.mime_type || '';
+                    },
+                });
             },
             remove() { this.fileId = 0; this.fileUrl = ''; this.fileMime = ''; }
         }">
@@ -222,11 +227,16 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
             fileUrl: <?= esc(json_encode($faviconUrl), 'attr') ?>,
             fileMime: <?= esc(json_encode($faviconMime), 'attr') ?>,
             open() {
-                openFilePicker((file) => {
-                    this.fileId = file.id;
-                    this.fileUrl = file.url || file.thumbnail_url || '';
-                    this.fileMime = file.mime_type || '';
-                }, 'image');
+                Alpine.store('filePicker').show({
+                    filterType: 'image',
+                    accept: 'image/*',
+                    multi: false,
+                    onSelect: (file) => {
+                        this.fileId   = file.id;
+                        this.fileUrl  = file.variants?.thumb || file.url || '';
+                        this.fileMime = file.mime_type || '';
+                    },
+                });
             },
             remove() { this.fileId = 0; this.fileUrl = ''; this.fileMime = ''; }
         }">

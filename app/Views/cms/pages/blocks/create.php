@@ -359,51 +359,6 @@ $parentIdJs    = json_encode($parentInstanceId);
         ]) ?>
     </div>
 
-    <!-- File Picker Modal -->
-    <div x-show="filePickerOpen" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-         @keydown.escape.window="filePickerOpen = false">
-        <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl flex flex-col" style="max-height:85vh">
-            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-                <h3 class="text-base font-semibold text-gray-900" x-text="pickerTitle"></h3>
-                <button type="button" @click="filePickerOpen = false"
-                        class="rounded-md p-1 text-gray-400 hover:text-gray-600">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="px-5 py-3 border-b border-gray-100">
-                <input type="text" x-model="filePickerSearch" @input.debounce.300ms="loadPickerFiles()"
-                       placeholder="Buscar archivos..."
-                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-            </div>
-            <div class="flex-1 overflow-y-auto p-5">
-                <div x-show="filePickerLoading" class="flex items-center justify-center py-12 text-gray-400 text-sm">Cargando...</div>
-                <div x-show="!filePickerLoading && filePickerFiles.length === 0"
-                     class="flex items-center justify-center py-12 text-gray-400 text-sm">
-                    No hay archivos disponibles.
-                </div>
-                <div x-show="!filePickerLoading" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-                    <template x-for="file in filePickerFiles" :key="file.id">
-                        <button type="button"
-                                @click="selectPickerFile(file)"
-                                class="group relative aspect-square overflow-hidden rounded-lg border-2 border-transparent hover:border-brand-500 bg-gray-100 transition-all">
-                            <template x-if="file.mime_type && file.mime_type.startsWith('video/')">
-                                <video :src="file.url" class="h-full w-full object-cover" muted preload="metadata"></video>
-                            </template>
-                            <template x-if="!(file.mime_type && file.mime_type.startsWith('video/'))">
-                                <img :src="file.thumbnail_url || file.url"
-                                     :alt="file.original_name || ''"
-                                     class="h-full w-full object-cover">
-                            </template>
-                            <div class="absolute inset-0 bg-brand-600/0 group-hover:bg-brand-600/10 transition-colors"></div>
-                        </button>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </div>
 
@@ -423,22 +378,10 @@ function blockInstanceBuilder(blockTypes, languages) {
         // Repeater state: keyed by `${langId}_${fieldKey}`
         repeaterItems: {},
 
-        // File picker state
-        filePickerOpen: false,
-        filePickerCallback: null,
-        filePickerFiles: [],
-        filePickerLoading: false,
-        filePickerSearch: '',
-        filePickerAccept: 'image',
         pickerSelectLabels,
         pickerChangeLabels,
         // Picked file metadata keyed by `${langId}_${fieldKey}` (top-level file fields)
         pickedFilesMap: {},
-
-        get pickerTitle() {
-            const map = { image: 'Seleccionar imagen', video: 'Seleccionar video', document: 'Seleccionar documento', any: 'Seleccionar archivo' };
-            return map[this.filePickerAccept] || 'Seleccionar archivo';
-        },
 
         init() {
             const def = this.languages.find(l => l.is_default == 1);
@@ -493,47 +436,31 @@ function blockInstanceBuilder(blockTypes, languages) {
         },
 
         openFilePicker(callback, accept) {
-            this.filePickerCallback = callback;
-            this.filePickerAccept = accept || 'image';
-            this.filePickerOpen = true;
-            this.loadPickerFiles();
+            const filterTypeMap = { video: 'video', document: 'document', audio: 'audio' };
+            const filterType = filterTypeMap[accept] ?? 'image';
+            const mimeAccept = (!accept || accept === 'any') ? ''
+                : accept.includes('/') ? accept
+                : accept + '/*';
+            Alpine.store('filePicker').show({
+                filterType,
+                accept: mimeAccept,
+                multi: false,
+                onSelect: (file) => callback(file),
+            });
         },
 
-        async loadPickerFiles() {
-            this.filePickerLoading = true;
-            try {
-                const params = new URLSearchParams({ per_page: 30 });
-                if (this.filePickerAccept && this.filePickerAccept !== 'any') params.set('type', this.filePickerAccept);
-                if (this.filePickerSearch) params.set('search', this.filePickerSearch);
-                const resp = await fetch(`/files/picker-data?${params}`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                });
-                const json = await resp.json();
-                this.filePickerFiles = json.data || [];
-            } catch (e) {
-                this.filePickerFiles = [];
-            }
-            this.filePickerLoading = false;
-        },
-
-        selectPickerFile(file) {
-            if (this.filePickerCallback) this.filePickerCallback(file);
-            this.filePickerOpen = false;
-            this.filePickerCallback = null;
-        },
-
-        // pickFile is called by the openFilePicker callback
+        // pickFile is called by the openFilePicker callback.
         // For top-level file fields: langId, fieldKey, itemIdx=null, subKey=null
         // For repeater sub-fields: all four are set
         pickFile(langId, fieldKey, itemIdx, subKey, file) {
             if (itemIdx === null) {
-                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: file.thumbnail_url || file.url };
+                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: file.variants?.thumb || file.url };
             } else {
                 const k = `${langId}_${fieldKey}`;
                 if (this.repeaterItems[k] && this.repeaterItems[k][itemIdx]) {
-                    this.repeaterItems[k][itemIdx][subKey + '_file_id']    = file.id;
-                    this.repeaterItems[k][itemIdx][subKey + '_url']        = file.url;
-                    this.repeaterItems[k][itemIdx][subKey + '_preview_url'] = file.thumbnail_url || file.url;
+                    this.repeaterItems[k][itemIdx][subKey + '_file_id']     = file.id;
+                    this.repeaterItems[k][itemIdx][subKey + '_url']         = file.url;
+                    this.repeaterItems[k][itemIdx][subKey + '_preview_url'] = file.variants?.thumb || file.url;
                 }
             }
         },
