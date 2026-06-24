@@ -33,7 +33,7 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
         </a>
 
         <?php
-            $hasAdminItem = has_permission('users.read') || has_permission('audit.read') || has_permission('apikeys.read') || has_permission('metrics.read');
+            $hasAdminItem = has_permission('users.read') || has_permission('audit.read') || has_permission('apikeys.read') || has_permission('metrics.read') || has_permission('cms.analytics.read');
         ?>
 
         <?php if ($hasAdminItem): ?>
@@ -60,6 +60,12 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                 <a href="<?= route_to('admin.metrics') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/metrics', $navItemActiveClass) ?> <?= url_is('admin/metrics') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('metrics') ?>
                     <span><?= lang('App.metrics') ?></span>
+                </a>
+            <?php endif; ?>
+            <?php if (has_permission('cms.analytics.read')): ?>
+                <a href="<?= route_to('admin.analytics') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/analytics*', $navItemActiveClass) ?> <?= url_is('admin/analytics*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
+                    <?= ui_icon('bar-chart-2') ?>
+                    <span><?= lang('Analytics.nav_label') ?></span>
                 </a>
             <?php endif; ?>
         <?php endif; ?>
