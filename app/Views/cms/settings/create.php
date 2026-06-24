@@ -108,7 +108,7 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                                 </div>
 
                                 <div x-show="settingType === 'string' || settingType === 'file_id'">
-                                    <input type="text" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable || !(settingType === 'string' || settingType === 'file_id')" placeholder="Escriba valor en <?= strtolower($langName) ?>...">
+                                    <input type="text" name="translations[<?= $langId ?>]" value="<?= esc($transValue) ?>" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm" :disabled="!isTranslatable || !(settingType === 'string' || settingType === 'file_id')" placeholder="<?= esc(lang('Settings.field_setting_value_placeholder')) ?> (<?= strtolower($langName) ?>)">
                                 </div>
 
                                 <div x-show="settingType === 'int'" x-cloak>

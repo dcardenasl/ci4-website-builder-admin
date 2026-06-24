@@ -74,77 +74,6 @@
             </div>
         </div>
 
-        <details class="group rounded-xl border border-gray-200 bg-white">
-            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
-                <span><?= esc(lang('Pages.section_publishing')) ?></span>
-                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-            </summary>
-            <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
-                <?= view('components/form/datetime', [
-                    'name' => 'published_at',
-                    'label' => 'Pages.field_published_at',
-                    'required' => false,
-                    'value' => $item['published_at'] ?? '',
-                    'placeholder' => 'Pages.field_published_at_placeholder',
-                    'help' => 'Pages.field_published_at_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/datetime', [
-                    'name' => 'scheduled_at',
-                    'label' => 'Pages.field_scheduled_at',
-                    'required' => false,
-                    'value' => $item['scheduled_at'] ?? '',
-                    'placeholder' => 'Pages.field_scheduled_at_placeholder',
-                    'help' => 'Pages.field_scheduled_at_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-            </div>
-        </details>
-
-        <details class="group rounded-xl border border-gray-200 bg-white">
-            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
-                <span><?= esc(lang('Pages.section_seo_sitemap')) ?></span>
-                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-            </summary>
-            <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
-                <?= view('components/form/boolean', [
-                    'name' => 'is_in_sitemap',
-                    'label' => 'Pages.field_is_in_sitemap',
-                    'value' => $item['is_in_sitemap'] ?? true,
-                    'on_label' => 'Pages.field_is_in_sitemap_on',
-                    'off_label' => 'Pages.field_is_in_sitemap_off',
-                    'help' => 'Pages.field_is_in_sitemap_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/text', [
-                    'name' => 'sitemap_priority',
-                    'label' => 'Pages.field_sitemap_priority',
-                    'required' => false,
-                    'value' => $item['sitemap_priority'] ?? '',
-                    'placeholder' => 'Pages.field_sitemap_priority_placeholder',
-                    'help' => 'Pages.field_sitemap_priority_help',
-                    'errors' => $errors ?? []
-                ]) ?>
-                <?= view('components/form/select', [
-                    'name' => 'sitemap_changefreq',
-                    'label' => 'Pages.field_sitemap_changefreq',
-                    'required' => false,
-                    'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
-                    'help' => 'Pages.field_sitemap_changefreq_help',
-                    'options' => [
-                        'always' => lang('Pages.sitemap_changefreq_always'),
-                        'hourly' => lang('Pages.sitemap_changefreq_hourly'),
-                        'daily' => lang('Pages.sitemap_changefreq_daily'),
-                        'weekly' => lang('Pages.sitemap_changefreq_weekly'),
-                        'monthly' => lang('Pages.sitemap_changefreq_monthly'),
-                        'yearly' => lang('Pages.sitemap_changefreq_yearly'),
-                        'never' => lang('Pages.sitemap_changefreq_never'),
-                    ],
-                    'value' => $item['sitemap_changefreq'] ?? 'weekly',
-                    'errors' => $errors ?? []
-                ]) ?>
-            </div>
-        </details>
 
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
@@ -321,6 +250,79 @@
             <a href="<?= route_to('admin.cms.pages') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
             <?php $actionsContent = ob_get_clean(); ?>
             <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
+
+            <!-- Publishing & Scheduling -->
+            <details class="group rounded-xl border border-gray-200 bg-white">
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                    <span><?= esc(lang('Pages.section_publishing')) ?></span>
+                    <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                    <?= view('components/form/datetime', [
+                        'name' => 'published_at',
+                        'label' => 'Pages.field_published_at',
+                        'required' => false,
+                        'value' => $item['published_at'] ?? '',
+                        'placeholder' => 'Pages.field_published_at_placeholder',
+                        'help' => 'Pages.field_published_at_help',
+                        'errors' => $errors ?? []
+                    ]) ?>
+                    <?= view('components/form/datetime', [
+                        'name' => 'scheduled_at',
+                        'label' => 'Pages.field_scheduled_at',
+                        'required' => false,
+                        'value' => $item['scheduled_at'] ?? '',
+                        'placeholder' => 'Pages.field_scheduled_at_placeholder',
+                        'help' => 'Pages.field_scheduled_at_help',
+                        'errors' => $errors ?? []
+                    ]) ?>
+                </div>
+            </details>
+
+            <details class="group rounded-xl border border-gray-200 bg-white">
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                    <span><?= esc(lang('Pages.section_seo_sitemap')) ?></span>
+                    <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                    <?= view('components/form/boolean', [
+                        'name' => 'is_in_sitemap',
+                        'label' => 'Pages.field_is_in_sitemap',
+                        'value' => $item['is_in_sitemap'] ?? true,
+                        'on_label' => 'Pages.field_is_in_sitemap_on',
+                        'off_label' => 'Pages.field_is_in_sitemap_off',
+                        'help' => 'Pages.field_is_in_sitemap_help',
+                        'errors' => $errors ?? []
+                    ]) ?>
+                    <?= view('components/form/text', [
+                        'name' => 'sitemap_priority',
+                        'label' => 'Pages.field_sitemap_priority',
+                        'required' => false,
+                        'value' => $item['sitemap_priority'] ?? '',
+                        'placeholder' => 'Pages.field_sitemap_priority_placeholder',
+                        'help' => 'Pages.field_sitemap_priority_help',
+                        'errors' => $errors ?? []
+                    ]) ?>
+                    <?= view('components/form/select', [
+                        'name' => 'sitemap_changefreq',
+                        'label' => 'Pages.field_sitemap_changefreq',
+                        'required' => false,
+                        'placeholder' => 'Pages.field_sitemap_changefreq_placeholder',
+                        'help' => 'Pages.field_sitemap_changefreq_help',
+                        'options' => [
+                            'always' => lang('Pages.sitemap_changefreq_always'),
+                            'hourly' => lang('Pages.sitemap_changefreq_hourly'),
+                            'daily' => lang('Pages.sitemap_changefreq_daily'),
+                            'weekly' => lang('Pages.sitemap_changefreq_weekly'),
+                            'monthly' => lang('Pages.sitemap_changefreq_monthly'),
+                            'yearly' => lang('Pages.sitemap_changefreq_yearly'),
+                            'never' => lang('Pages.sitemap_changefreq_never'),
+                        ],
+                        'value' => $item['sitemap_changefreq'] ?? 'weekly',
+                        'errors' => $errors ?? []
+                    ]) ?>
+                </div>
+            </details>
         </aside>
     </form>
 <?php $sectionContent = ob_get_clean(); ?>
