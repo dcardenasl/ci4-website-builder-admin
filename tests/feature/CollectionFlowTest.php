@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\BlockCatalogServiceInterface;
 use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
@@ -103,7 +104,46 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertLessThan($slugPos, $namePos);
         $this->assertStringContainsString('data-slug-check-url="', $body);
         $this->assertStringContainsString('data-slug-current-id="10"', $body);
+        $this->assertStringContainsString('name="current_id" value="10"', $body);
         $this->assertStringNotContainsString('name="url_prefix"', $body);
+    }
+
+    public function testCreateRendersBlockTemplateBuilder(): void
+    {
+        $catalogMock = $this->createMock(BlockCatalogServiceInterface::class);
+        $catalogMock->method('all')
+            ->willReturn([
+                [
+                    'id' => 1,
+                    'block_key' => 'rich_text',
+                    'name' => 'Texto Enriquecido',
+                    'description' => 'Bloque de contenido',
+                    'icon' => 'align-left',
+                ],
+            ]);
+        Services::injectMock('blockCatalogService', $catalogMock);
+
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->get('/admin/cms/collections/create');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
+        $this->assertStringContainsString('name="block_template"', $body);
+        $this->assertStringContainsString('collectionBlockTemplateBuilder(', $body);
+        $this->assertStringContainsString('rich_text', $body);
     }
 
     public function testStoreValidationFailureRedirectsBack(): void
@@ -114,6 +154,47 @@ final class CollectionFlowTest extends CIUnitTestCase
             'permissions_refreshed_at' => time(),
         ])->post('/admin/cms/collections', [
             csrf_token() => csrf_hash(),
+        ]);
+
+        $result->assertRedirect();
+    }
+
+    public function testUpdateAllowsKeepingTheSameCollectionKey(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->expects($this->once())
+            ->method('update')
+            ->with('10', $this->callback(static function (array $payload): bool {
+                return ($payload['collection_key'] ?? null) === 'news';
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections/10', [
+            csrf_token() => csrf_hash(),
+            'current_id' => '10',
+            'collection_key' => 'news',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'News',
+                    'slug' => 'news',
+                    'description' => '',
+                ],
+            ],
         ]);
 
         $result->assertRedirect();

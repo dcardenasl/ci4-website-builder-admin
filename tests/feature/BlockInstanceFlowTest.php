@@ -174,6 +174,112 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
     }
 
+    public function testEditRendersRelativeUrlInputsAsText(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('get')
+            ->with('1', 'page', '10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'block_id' => 2,
+                    'is_active' => true,
+                    'sort_order' => 1,
+                    'translations' => [
+                        [
+                            'language_id' => 1,
+                            'block_data' => [
+                                'cta_url' => '/nosotros',
+                                'heading' => 'Bienvenidos',
+                                'subtitle' => 'Texto',
+                                'cta_label' => 'Conocer más',
+                            ],
+                            'is_published' => true,
+                        ],
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('get')
+            ->with(2)
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 2,
+                    'block_key' => 'slide_banner',
+                    'schema_definition' => [
+                        'fields' => [
+                            'cta_url' => [
+                                'type' => 'url',
+                                'label' => 'URL del botón',
+                            ],
+                            'heading' => [
+                                'type' => 'text',
+                                'label' => 'Título',
+                                'required' => true,
+                            ],
+                        ],
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $langMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
+        ])->get('/admin/cms/pages/1/blocks/10/edit');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
+        $this->assertStringContainsString('placeholder="https:// o /ruta"', $body);
+        $this->assertStringContainsString('inputmode="url"', $body);
+        $this->assertStringContainsString('name="translations[0][block_data][cta_url]"', $body);
+        $this->assertStringContainsString('type="text"', $body);
+        $this->assertStringNotContainsString('name="translations[0][block_data][cta_url]" type="url"', $body);
+    }
+
     public function testStoreSuccessfullyRedirects(): void
     {
         $blockMock = $this->createMock(BlockInstanceApiService::class);
