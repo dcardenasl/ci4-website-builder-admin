@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Automatic form field translation** — new `buildTranslateTargets()` helper and Alpine.js integration for automatic synchronization of field values between language tabs in CMS form editors
 - **Forms module** — new admin interface to manage CMS forms with field configuration, multilingual support, and form submission tracking (CMS-012)
 - **Analytics module** — new admin dashboard to view page view analytics with customizable period filters (1h, 24h, 7d, 30d), overview charts, and traffic insights; integrates with domain CMS analytics API
 - **Form submissions module** — new admin interface to manage form submissions with status tracking (new, read, replied, spam, archived) and submission details view
