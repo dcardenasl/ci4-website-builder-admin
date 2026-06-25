@@ -164,13 +164,12 @@
 
                     <?php foreach ($languages as $index => $lang): ?>
                         <?php
-                            $transValue = [];
-                        if (!empty($item['translations']) && is_array($item['translations'])) {
-                            foreach ($item['translations'] as $t) {
-                                if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                                    $transValue = $t;
-                                    break;
-                                }
+                        $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
+                        $transValue = [];
+                        foreach ($translations as $translation) {
+                            if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
+                                $transValue = $translation;
+                                break;
                             }
                         }
                         ?>
@@ -183,7 +182,7 @@
                                 'required' => !empty($lang['is_default']),
                                 'placeholder' => 'Collections.translation_name_placeholder',
                                 'help' => 'Collections.translation_name_help',
-                                'value' => old("translations.{$index}.name") ?? $transValue['name'] ?? '',
+                                'value' => old("translations.{$index}.name", $transValue['name'] ?? ''),
                                 'maxlength' => 150,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -197,7 +196,7 @@
                                 'currentId' => $currentCollectionId,
                                 'placeholder' => 'Collections.translation_slug_placeholder',
                                 'help' => 'Collections.translation_slug_help',
-                                'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',
+                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
                                 'errors' => $errors ?? []
                             ]) ?>
 
@@ -207,7 +206,7 @@
                                 'required' => false,
                                 'placeholder' => 'Collections.translation_description_placeholder',
                                 'help' => 'Collections.translation_description_help',
-                                'value' => old("translations.{$index}.description") ?? $transValue['description'] ?? '',
+                                'value' => old("translations.{$index}.description", $transValue['description'] ?? ''),
                                 'errors' => $errors ?? []
                             ]) ?>
                         </div>

@@ -81,7 +81,7 @@
                 <tbody class="<?= esc(table_body_class()) ?>">
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? (row.translations[0].name ?? row.translations[0].slug ?? '-') : '-'))"></td>
+                            <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? ((row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.name || (row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.slug || '-') : '-'))"></td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span
                                     :class="row.is_active ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"
@@ -94,7 +94,7 @@
                                     <a :href="showUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.view') ?></a>
                                     <a :href="editUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
                                     <button type="button" class="<?= esc(action_button_class('danger')) ?>"
-                                        @click="$store.confirm.show(window.confirmDeleteMessage(String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? (row.translations[0].name ?? row.translations[0].slug ?? '') : ''))), () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.tags'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
+                                        @click="$store.confirm.show(window.confirmDeleteMessage(String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? ((row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.name || (row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.slug || '') : ''))), () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.tags'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
                                     ><?= lang('App.delete') ?></button>
                                 </div>
                             </td>

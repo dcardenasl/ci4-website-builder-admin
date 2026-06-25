@@ -133,7 +133,7 @@
                         </div>
                         <?php if (!empty($allTargets)): ?>
                         <button type="button"
-                            @click="autoTranslateAll(<?= json_encode($allTargets) ?>)"
+                            @click="autoTranslateAll(<?= esc(json_encode($allTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
                             class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                             <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
@@ -165,7 +165,7 @@
                             <?php if (!$isDefault): ?>
                             <div class="flex justify-end">
                                 <button type="button"
-                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= json_encode($fields) ?>)"
+                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
                                     :disabled="translating"
                                     class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                                     <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
@@ -180,7 +180,7 @@
                                 'required' => $isDefault,
                                 'placeholder' => 'Pages.translation_title_placeholder',
                                 'help' => 'Pages.translation_title_help',
-                                'value' => old("translations.{$index}.title") ?? '',
+                                'value' => old("translations.{$index}.title", ''),
                                 'maxlength' => 255,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -191,7 +191,7 @@
                                 'required' => $isDefault,
                                 'sourceId' => sprintf('[name="translations[%d][title]"]', $index),
                                 'checkUrl' => $checkUrl,
-                                'value' => old("translations.{$index}.slug") ?? '',
+                                'value' => old("translations.{$index}.slug", ''),
                                 'help' => 'Pages.translation_slug_help',
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -202,7 +202,7 @@
                                 'required' => false,
                                 'placeholder' => 'Pages.translation_excerpt_placeholder',
                                 'help' => 'Pages.translation_excerpt_help',
-                                'value' => old("translations.{$index}.excerpt") ?? '',
+                                'value' => old("translations.{$index}.excerpt", ''),
                                 'maxlength' => 500,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -220,7 +220,7 @@
                                         'required' => false,
                                         'placeholder' => 'Pages.translation_meta_title_placeholder',
                                         'help' => 'Pages.translation_meta_title_help',
-                                        'value' => old("translations.{$index}.meta_title") ?? '',
+                                        'value' => old("translations.{$index}.meta_title", ''),
                                         'maxlength' => 255,
                                         'errors' => $errors ?? []
                                     ]) ?>
@@ -230,7 +230,7 @@
                                         'required' => false,
                                         'placeholder' => 'Pages.translation_meta_description_placeholder',
                                         'help' => 'Pages.translation_meta_description_help',
-                                        'value' => old("translations.{$index}.meta_description") ?? '',
+                                        'value' => old("translations.{$index}.meta_description", ''),
                                         'maxlength' => 500,
                                         'rows' => 3,
                                         'errors' => $errors ?? []

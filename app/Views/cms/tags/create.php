@@ -31,7 +31,7 @@
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Tags.translation_name_placeholder',
                             'help' => 'Tags.translation_name_help',
-                            'value' => old("translations.{$index}.name") ?? '',
+                            'value' => old("translations.{$index}.name", ''),
                             'errors' => $errors ?? []
                         ]) ?>
 
@@ -41,7 +41,7 @@
                             'required' => !empty($lang['is_default']),
                             'placeholder' => 'Tags.translation_slug_placeholder',
                             'help' => 'Tags.translation_slug_help',
-                            'value' => old("translations.{$index}.slug") ?? '',
+                            'value' => old("translations.{$index}.slug", ''),
                             'errors' => $errors ?? []
                         ]) ?>
                     </div>

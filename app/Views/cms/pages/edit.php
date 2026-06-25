@@ -2,6 +2,19 @@
 $item        = $item        ?? [];
 $focusLangId = $focusLangId ?? 0;
 $itemIdStr   = (string) ($item['id'] ?? '');
+$translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
+
+$resolveTranslation = static function (array $lang) use ($translations): array {
+    $langId = (int) ($lang['id'] ?? 0);
+
+    foreach ($translations as $translation) {
+        if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === $langId) {
+            return $translation;
+        }
+    }
+
+    return [];
+};
 ?>
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= $itemIdStr !== '' ? route_to('admin.cms.pages.show', $itemIdStr) : route_to('admin.cms.pages') ?>"
@@ -30,15 +43,7 @@ $itemIdStr   = (string) ($item['id'] ?? '');
 $issueDetails = [];
 if (!empty($languages)) {
     foreach ($languages as $lang) {
-        $transValue = [];
-        if (!empty($item['translations']) && is_array($item['translations'])) {
-            foreach ($item['translations'] as $t) {
-                if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                    $transValue = $t;
-                    break;
-                }
-            }
-        }
+        $transValue = $resolveTranslation($lang);
         if (empty($transValue)) {
             $hasTranslationIssues = true;
             $issueDetails[] = strtoupper($lang['code']) . ' (Missing)';
@@ -179,15 +184,7 @@ if (!empty($languages)) {
                         <div class="flex gap-0.5" role="tablist">
                             <?php foreach ($languages as $lang): ?>
                                 <?php
-                                    $transValue = [];
-                                if (!empty($item['translations']) && is_array($item['translations'])) {
-                                    foreach ($item['translations'] as $t) {
-                                        if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                                            $transValue = $t;
-                                            break;
-                                        }
-                                    }
-                                }
+                                    $transValue = $resolveTranslation($lang);
                                 $t_status = 'missing';
                                 if (!empty($transValue)) {
                                     $t_status = (!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete';
@@ -215,7 +212,7 @@ if (!empty($languages)) {
                         </div>
                         <?php if (!empty($allTargets)): ?>
                         <button type="button"
-                            @click="autoTranslateAll(<?= json_encode($allTargets) ?>)"
+                        @click="autoTranslateAll(<?= esc(json_encode($allTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
                             class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                             <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
@@ -230,15 +227,7 @@ if (!empty($languages)) {
                     <!-- Tab panels -->
                     <?php foreach ($languages as $index => $lang): ?>
                         <?php
-                            $transValue = [];
-                        if (!empty($item['translations']) && is_array($item['translations'])) {
-                            foreach ($item['translations'] as $t) {
-                                if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {
-                                    $transValue = $t;
-                                    break;
-                                }
-                            }
-                        }
+                            $transValue = $resolveTranslation($lang);
                         $isDefault = !empty($lang['is_default']);
                         $langCode  = strtoupper($lang['code'] ?? '');
                         $fields = [
@@ -254,7 +243,7 @@ if (!empty($languages)) {
                             <?php if (!$isDefault): ?>
                             <div class="flex justify-end">
                                 <button type="button"
-                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= json_encode($fields) ?>)"
+                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
                                     :disabled="translating"
                                     class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                                     <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
@@ -269,7 +258,7 @@ if (!empty($languages)) {
                                 'required' => !empty($lang['is_default']),
                                 'placeholder' => 'Pages.translation_title_placeholder',
                                 'help' => 'Pages.translation_title_help',
-                                'value' => old("translations.{$index}.title") ?? $transValue['title'] ?? '',
+                                'value' => old("translations.{$index}.title", $transValue['title'] ?? ''),
                                 'maxlength' => 255,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -281,7 +270,7 @@ if (!empty($languages)) {
                                 'sourceId' => sprintf('[name="translations[%d][title]"]', $index),
                                 'checkUrl' => route_to('admin.cms.pages.check_slug') . '?language_id=' . (int)$lang['id'],
                                 'currentId' => $item['id'] ?? '',
-                                'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',
+                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
                                 'help' => 'Pages.translation_slug_help',
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -292,7 +281,7 @@ if (!empty($languages)) {
                                 'required' => false,
                                 'placeholder' => 'Pages.translation_excerpt_placeholder',
                                 'help' => 'Pages.translation_excerpt_help',
-                                'value' => old("translations.{$index}.excerpt") ?? $transValue['excerpt'] ?? '',
+                                'value' => old("translations.{$index}.excerpt", $transValue['excerpt'] ?? ''),
                                 'maxlength' => 500,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -310,7 +299,7 @@ if (!empty($languages)) {
                                         'required' => false,
                                         'placeholder' => 'Pages.translation_meta_title_placeholder',
                                         'help' => 'Pages.translation_meta_title_help',
-                                        'value' => old("translations.{$index}.meta_title") ?? $transValue['meta_title'] ?? '',
+                                        'value' => old("translations.{$index}.meta_title", $transValue['meta_title'] ?? ''),
                                         'maxlength' => 255,
                                         'errors' => $errors ?? []
                                     ]) ?>
@@ -320,7 +309,7 @@ if (!empty($languages)) {
                                         'required' => false,
                                         'placeholder' => 'Pages.translation_meta_description_placeholder',
                                         'help' => 'Pages.translation_meta_description_help',
-                                        'value' => old("translations.{$index}.meta_description") ?? $transValue['meta_description'] ?? '',
+                                        'value' => old("translations.{$index}.meta_description", $transValue['meta_description'] ?? ''),
                                         'maxlength' => 500,
                                         'rows' => 3,
                                         'errors' => $errors ?? []

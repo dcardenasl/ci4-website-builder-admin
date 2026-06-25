@@ -66,12 +66,6 @@
             ]) ?>
         </div>
 
-        <?php if (isset($item['view_count'])): ?>
-            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                <span class="font-medium text-gray-900"><?= esc(lang('Entries.field_view_count')) ?></span>
-                <span class="ml-2 text-gray-500"><?= (int) $item['view_count'] ?></span>
-            </div>
-        <?php endif; ?>
 
 
 
@@ -131,7 +125,7 @@
                         </div>
                         <?php if (!empty($allTargets)): ?>
                         <button type="button"
-                            @click="autoTranslateAll(<?= json_encode($allTargets) ?>)"
+                            @click="autoTranslateAll(<?= esc(json_encode($allTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
                             class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                             <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
@@ -169,7 +163,7 @@
                             <?php if (!$isDefault): ?>
                             <div class="flex justify-end">
                                 <button type="button"
-                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= json_encode($fields) ?>)"
+                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
                                     :disabled="translating"
                                     class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                                     <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
@@ -184,7 +178,7 @@
                                 'required' => !empty($lang['is_default']),
                                 'placeholder' => 'Entries.translation_name_placeholder',
                                 'help' => 'Entries.translation_name_help',
-                                'value' => old("translations.{$index}.title") ?? $transValue['title'] ?? '',
+                                'value' => old("translations.{$index}.title", $transValue['title'] ?? ''),
                                 'maxlength' => 255,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -196,7 +190,7 @@
                                 'sourceId' => sprintf('[name="translations[%d][title]"]', $index),
                                 'checkUrl' => route_to('admin.cms.entries.check_slug') . '?language_id=' . (int)$lang['id'],
                                 'currentId' => $item['id'] ?? '',
-                                'value' => old("translations.{$index}.slug") ?? $transValue['slug'] ?? '',
+                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
                                 'help' => 'Entries.translation_slug_help',
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -207,7 +201,7 @@
                                 'required' => false,
                                 'placeholder' => 'Entries.translation_excerpt_placeholder',
                                 'help' => 'Entries.translation_excerpt_help',
-                                'value' => old("translations.{$index}.excerpt") ?? $transValue['excerpt'] ?? '',
+                                'value' => old("translations.{$index}.excerpt", $transValue['excerpt'] ?? ''),
                                 'maxlength' => 500,
                                 'errors' => $errors ?? []
                             ]) ?>
@@ -224,7 +218,7 @@
                                         'required' => false,
                                         'placeholder' => 'Entries.translation_meta_title_placeholder',
                                         'help' => 'Entries.translation_meta_title_help',
-                                        'value' => old("translations.{$index}.meta_title") ?? $transValue['meta_title'] ?? '',
+                                        'value' => old("translations.{$index}.meta_title", $transValue['meta_title'] ?? ''),
                                         'maxlength' => 255,
                                         'errors' => $errors ?? []
                                     ]) ?>
@@ -234,7 +228,7 @@
                                         'required' => false,
                                         'placeholder' => 'Entries.translation_meta_description_placeholder',
                                         'help' => 'Entries.translation_meta_description_help',
-                                        'value' => old("translations.{$index}.meta_description") ?? $transValue['meta_description'] ?? '',
+                                        'value' => old("translations.{$index}.meta_description", $transValue['meta_description'] ?? ''),
                                         'maxlength' => 500,
                                         'rows' => 3,
                                         'errors' => $errors ?? []
@@ -254,6 +248,15 @@
             <a href="<?= route_to('admin.cms.entries') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
             <?php $actionsContent = ob_get_clean(); ?>
             <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
+
+            <?php if (isset($item['view_count'])): ?>
+                <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="font-medium text-gray-500"><?= esc(lang('Entries.field_view_count')) ?></span>
+                        <span class="font-semibold text-gray-950 bg-gray-100 px-2.5 py-0.5 rounded-md text-xs"><?= (int) $item['view_count'] ?></span>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Publishing & Scheduling -->
             <details class="group rounded-xl border border-gray-200 bg-white" <?= (!empty($item['published_at']) || !empty($item['scheduled_at'])) ? 'open' : '' ?>>

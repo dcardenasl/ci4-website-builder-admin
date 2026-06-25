@@ -4,9 +4,20 @@ $item = $item ?? [];
 $itemTranslations = [];
 if (! empty($item['translations']) && is_array($item['translations'])) {
     foreach ($item['translations'] as $t) {
+        if (! is_array($t)) {
+            continue;
+        }
         $itemTranslations[(int) $t['language_id']] = $t;
     }
 }
+$resolveItemTranslation = static function (array $lang) use ($itemTranslations): array {
+    $langId = (int) ($lang['id'] ?? 0);
+    if (isset($itemTranslations[$langId])) {
+        return $itemTranslations[$langId];
+    }
+
+    return [];
+};
 $linkType = old('link_type', $item['link_type'] ?? 'page');
 $selectedPageId = old('page_id', (string) ($item['page_id'] ?? ''));
 $selectedEntryId = old('entry_id', (string) ($item['entry_id'] ?? ''));
@@ -23,7 +34,15 @@ function buildParentOptionsEdit(array $items, string $excludeId, ?int $parentId 
         $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
         if ($pid === $parentId) {
             $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
-            $label = $item['translations'][0]['label'] ?? $item['label'] ?? 'Item #' . $item['id'];
+            $label = $item['label'] ?? 'Item #' . $item['id'];
+            if (! empty($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $translation) {
+                    if (is_array($translation) && ! empty($translation['label'])) {
+                        $label = (string) $translation['label'];
+                        break;
+                    }
+                }
+            }
             $options[] = ['id' => (string) $item['id'], 'label' => $prefix . $label];
             $children = buildParentOptionsEdit($items, $excludeId, (int) $item['id'], $depth + 1);
             foreach ($children as $child) {
@@ -74,8 +93,9 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                             continue;
                         }
                         $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
-                        $labelVal = $itemTranslations[$langId]['label'] ?? '';
-                        $urlVal = $itemTranslations[$langId]['custom_url'] ?? '';
+                        $translation = $resolveItemTranslation($lang);
+                        $labelVal = old("translations.{$langId}.label", $translation['label'] ?? '');
+                        $urlVal = old("translations.{$langId}.custom_url", $translation['custom_url'] ?? '');
                         ?>
                         <div class="p-4 space-y-3">
                             <span class="inline-flex items-center rounded-md bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 text-xs font-semibold font-mono"><?= esc($langName) ?></span>

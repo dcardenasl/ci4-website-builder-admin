@@ -101,7 +101,7 @@
                         </div>
                         <?php if (!empty($allTargets)): ?>
                         <button type="button"
-                            @click="autoTranslateAll(<?= json_encode($allTargets) ?>)"
+                            @click="autoTranslateAll(<?= esc(json_encode($allTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
                             class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                             <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
@@ -129,7 +129,7 @@
                             <?php if (!$isDefault): ?>
                             <div class="flex justify-end">
                                 <button type="button"
-                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= json_encode($fields) ?>)"
+                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
                                     :disabled="translating"
                                     class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                                     <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
@@ -139,26 +139,26 @@
                             <?php endif; ?>
 
                             <?= view('components/form/text', [
-                                'name' => "translations[{$index}][name]",
-                                'label' => 'Categories.translation_name_label',
-                                'required' => !empty($lang['is_default']),
-                                'placeholder' => 'Categories.translation_name_placeholder',
-                                'help' => 'Categories.translation_name_help',
-                                'value' => old("translations.{$index}.name") ?? '',
-                                'maxlength' => 150,
-                                'errors' => $errors ?? []
-                            ]) ?>
+                            'name' => "translations[{$index}][name]",
+                            'label' => 'Categories.translation_name_label',
+                            'required' => !empty($lang['is_default']),
+                            'placeholder' => 'Categories.translation_name_placeholder',
+                            'help' => 'Categories.translation_name_help',
+                            'value' => old("translations.{$index}.name", ''),
+                            'maxlength' => 150,
+                            'errors' => $errors ?? []
+                        ]) ?>
 
                             <?= view('components/form/slug', [
                                 'name' => "translations[{$index}][slug]",
                                 'label' => 'Categories.translation_slug_label',
                                 'required' => !empty($lang['is_default']),
-                                'sourceId' => sprintf('[name="translations[%d][name]"]', $index),
-                                'checkUrl' => route_to('admin.cms.categories.check_slug') . '?language_id=' . (int)$lang['id'],
-                                'value' => old("translations.{$index}.slug") ?? '',
-                                'help' => 'Categories.translation_slug_help',
-                                'errors' => $errors ?? []
-                            ]) ?>
+                            'sourceId' => sprintf('[name="translations[%d][name]"]', $index),
+                            'checkUrl' => route_to('admin.cms.categories.check_slug') . '?language_id=' . (int)$lang['id'],
+                            'value' => old("translations.{$index}.slug", ''),
+                            'help' => 'Categories.translation_slug_help',
+                            'errors' => $errors ?? []
+                        ]) ?>
                         </div>
                     <?php endforeach; ?>
                 </div>

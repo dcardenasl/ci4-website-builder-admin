@@ -20,7 +20,7 @@
             }
 
             if (Array.isArray(row.translations) && row.translations.length > 0) {
-                const translation = row.translations.find((item) => item && item.name) || row.translations[0];
+                const translation = row.translations.find((item) => item && item.name) || row.translations.find((item) => item && item.slug) || row.translations.find((item) => item);
                 return String(translation?.name || row.form_key || '-');
             }
 

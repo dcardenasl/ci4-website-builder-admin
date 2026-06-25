@@ -1,5 +1,23 @@
 <?php
 $menu = $menu ?? [];
+$item = $item ?? [];
+$itemTranslations = [];
+if (! empty($item['translations']) && is_array($item['translations'])) {
+    foreach ($item['translations'] as $t) {
+        if (! is_array($t)) {
+            continue;
+        }
+        $itemTranslations[(int) $t['language_id']] = $t;
+    }
+}
+$resolveItemTranslation = static function (array $lang) use ($itemTranslations): array {
+    $langId = (int) ($lang['id'] ?? 0);
+    if (isset($itemTranslations[$langId])) {
+        return $itemTranslations[$langId];
+    }
+
+    return [];
+};
 $linkType = old('link_type', 'page');
 $selectedPageId = old('page_id', '');
 $selectedEntryId = old('entry_id', '');
@@ -13,7 +31,15 @@ function buildParentOptions(array $items, ?int $parentId = null, int $depth = 0)
         $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
         if ($pid === $parentId) {
             $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
-            $label = $item['translations'][0]['label'] ?? $item['label'] ?? 'Item #' . $item['id'];
+            $label = $item['label'] ?? 'Item #' . $item['id'];
+            if (! empty($item['translations']) && is_array($item['translations'])) {
+                foreach ($item['translations'] as $translation) {
+                    if (is_array($translation) && ! empty($translation['label'])) {
+                        $label = (string) $translation['label'];
+                        break;
+                    }
+                }
+            }
             $options[] = ['id' => (string) $item['id'], 'label' => $prefix . $label];
             $children = buildParentOptions($items, (int) $item['id'], $depth + 1);
             foreach ($children as $child) {
@@ -64,6 +90,7 @@ $suggestedSortOrder = count($items);
                             continue;
                         }
                         $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
+                        $translation = $resolveItemTranslation($lang);
                         ?>
                         <div class="p-4 space-y-3">
                             <span class="inline-flex items-center rounded-md bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 text-xs font-semibold font-mono"><?= esc($langName) ?></span>
@@ -72,7 +99,7 @@ $suggestedSortOrder = count($items);
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     <?= esc(lang('Menus.items_label_label')) ?> <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" name="translations[<?= esc($langId) ?>][label]" required
+                                <input type="text" name="translations[<?= esc($langId) ?>][label]" value="<?= esc(old("translations.{$langId}.label", $translation['label'] ?? '')) ?>" required
                                     class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
                                     placeholder="<?= esc(lang('Menus.items_label_placeholder')) ?>">
                             </div>
@@ -81,7 +108,7 @@ $suggestedSortOrder = count($items);
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     <?= esc(lang('Menus.items_custom_url_label')) ?>
                                 </label>
-                                <input type="text" name="translations[<?= esc($langId) ?>][custom_url]"
+                                <input type="text" name="translations[<?= esc($langId) ?>][custom_url]" value="<?= esc(old("translations.{$langId}.custom_url", $translation['custom_url'] ?? '')) ?>"
                                     x-bind:disabled="linkType !== 'custom_url'"
                                     class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
                                     placeholder="<?= esc(lang('Menus.items_custom_url_placeholder')) ?>">
@@ -150,7 +177,7 @@ $suggestedSortOrder = count($items);
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
-                    <input type="number" name="sort_order" value="<?= esc((string) $suggestedSortOrder) ?>" min="0" required
+                    <input type="number" name="sort_order" value="<?= esc(old('sort_order', (string) $suggestedSortOrder)) ?>" min="0" required
                         class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
                     <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_sort_order_help')) ?></p>
                 </div>
@@ -163,13 +190,13 @@ $suggestedSortOrder = count($items);
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_target_label')) ?></label>
                         <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
-                            <option value="_self"><?= esc(lang('Menus.items_link_target_same')) ?></option>
-                            <option value="_blank"><?= esc(lang('Menus.items_link_target_new')) ?></option>
+                            <option value="_self" <?= old('link_target', '_self') === '_self' ? 'selected' : '' ?>><?= esc(lang('Menus.items_link_target_same')) ?></option>
+                            <option value="_blank" <?= old('link_target', '_self') === '_blank' ? 'selected' : '' ?>><?= esc(lang('Menus.items_link_target_new')) ?></option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_icon_label')) ?></label>
-                        <input type="text" name="icon"
+                        <input type="text" name="icon" value="<?= esc(old('icon', '')) ?>"
                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
                             placeholder="<?= esc(lang('Menus.items_icon_placeholder')) ?>">
                         <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_icon_help')) ?></p>
@@ -177,7 +204,7 @@ $suggestedSortOrder = count($items);
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_css_class_label')) ?></label>
-                    <input type="text" name="css_class"
+                    <input type="text" name="css_class" value="<?= esc(old('css_class', '')) ?>"
                         class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
                         placeholder="<?= esc(lang('Menus.items_css_class_placeholder')) ?>">
                 </div>
@@ -187,7 +214,7 @@ $suggestedSortOrder = count($items);
             <?= view('components/form/boolean', [
                 'name'      => 'is_active',
                 'label'     => 'Menus.items_is_active_label',
-                'value'     => true,
+                'value'     => old('is_active', '1') !== '0',
                 'on_label'  => 'Menus.field_is_active_on',
                 'off_label' => 'Menus.field_is_active_off',
             ]) ?>

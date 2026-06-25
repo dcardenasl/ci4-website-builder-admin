@@ -122,7 +122,7 @@ foreach ($languages ?? [] as $key => $language) {
                 <tbody class="<?= esc(table_body_class()) ?>">
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class()) ?> font-semibold text-gray-900" x-text="row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations[0]).title : (row.title || row.name || row.slug || '-')">
+                            <td class="<?= esc(table_td_class()) ?> font-semibold text-gray-900" x-text="row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations.find(t => t.slug) || row.translations.find(t => t)).title : (row.title || row.name || row.slug || '-')">
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <div class="flex items-center gap-1.5">
@@ -176,7 +176,7 @@ foreach ($languages ?? [] as $key => $language) {
                                     <a :href="showUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.view') ?></a>
                                     <a :href="editUrl(row.id)" class="<?= esc(action_button_class()) ?>"><?= lang('App.edit') ?></a>
                                     <button type="button" class="<?= esc(action_button_class('danger')) ?>"
-                                        @click="$store.confirm.show(window.confirmDeleteMessage(String(row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations[0]).title : (row.title || row.name || row.slug || ''))), () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.pages'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
+                                        @click="$store.confirm.show(window.confirmDeleteMessage(String(row.translations && row.translations.length > 0 ? (row.translations.find(t => t.title) || row.translations.find(t => t.slug) || row.translations.find(t => t)).title : (row.title || row.name || row.slug || ''))), () => { const f = document.createElement('form'); f.method = 'post'; f.action = `<?= rtrim(route_to('admin.cms.pages'), '/') ?>/${row.id}/delete`; const i=document.createElement('input');i.type='hidden';i.name='<?= csrf_token() ?>';i.value='<?= csrf_hash() ?>';f.appendChild(i); document.body.appendChild(f); f.submit(); })"
                                     ><?= lang('App.delete') ?></button>
                                 </div>
                             </td>

@@ -158,15 +158,15 @@
                             <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
 
                             <?= view('components/form/text', [
-                                'name' => "translations[{$index}][name]",
-                                'label' => 'Collections.translation_name_label',
-                                'required' => !empty($lang['is_default']),
-                                'placeholder' => 'Collections.translation_name_placeholder',
-                                'help' => 'Collections.translation_name_help',
-                                'value' => old("translations.{$index}.name") ?? '',
-                                'maxlength' => 150,
-                                'errors' => $errors ?? []
-                            ]) ?>
+                            'name' => "translations[{$index}][name]",
+                            'label' => 'Collections.translation_name_label',
+                            'required' => !empty($lang['is_default']),
+                            'placeholder' => 'Collections.translation_name_placeholder',
+                            'help' => 'Collections.translation_name_help',
+                            'value' => old("translations.{$index}.name", ''),
+                            'maxlength' => 150,
+                            'errors' => $errors ?? []
+                        ]) ?>
 
                             <?= view('components/form/slug', [
                                 'name' => "translations[{$index}][slug]",
@@ -176,7 +176,7 @@
                                 'checkUrl' => $checkSlugBase . '?language_id=' . (int) $lang['id'],
                                 'placeholder' => 'Collections.translation_slug_placeholder',
                                 'help' => 'Collections.translation_slug_help',
-                                'value' => old("translations.{$index}.slug") ?? '',
+                                'value' => old("translations.{$index}.slug", ''),
                                 'errors' => $errors ?? []
                             ]) ?>
 
@@ -186,7 +186,7 @@
                                 'required' => false,
                                 'placeholder' => 'Collections.translation_description_placeholder',
                                 'help' => 'Collections.translation_description_help',
-                                'value' => old("translations.{$index}.description") ?? '',
+                                'value' => old("translations.{$index}.description", ''),
                                 'errors' => $errors ?? []
                             ]) ?>
                         </div>

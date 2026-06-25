@@ -287,7 +287,7 @@ foreach ($languages as $l) {
                         <li data-id="<?= esc($blockId) ?>"
                             class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow">
                             <!-- Drag handle -->
-                            <span class="text-gray-300 hover:text-gray-500 flex-shrink-0">
+                            <span data-drag-handle class="text-gray-300 hover:text-gray-500 flex-shrink-0 cursor-grab">
                                 <?= ui_icon('grip-vertical', 'h-4 w-4') ?>
                             </span>
 
