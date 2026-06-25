@@ -63,47 +63,81 @@
     </div>
 
     <?php if (!empty($languages)): ?>
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm" x-data="{ activeTab: '<?= esc($languages[0]['code'] ?? 'es') ?>' }">
+        <?php
+            $defaultLangId = 0;
+            $defaultLangCode = '';
+            $defaultLangIndex = 0;
+            foreach ($languages as $i => $l) {
+                if (!empty($l['is_default'])) {
+                    $defaultLangId = (int) $l['id'];
+                    $defaultLangCode = $l['code'] ?? '';
+                    $defaultLangIndex = $i;
+                    break;
+                }
+            }
+            $translateUrl = route_to('admin.cms.translate');
+        ?>
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-base font-semibold text-gray-800"><?= lang('Forms.section_translations') ?></h2>
-            <div class="mb-4 flex gap-1 border-b border-gray-200">
-                <?php foreach ($languages as $lang): ?>
+
+            <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                <div class="mb-4 flex items-center justify-between border-b border-gray-200">
+                    <div class="flex gap-1">
+                        <?php foreach ($languages as $lang): ?>
+                            <button type="button"
+                                    role="tab"
+                                    @click="setTab(<?= (int) $lang['id'] ?>)"
+                                    :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
+                                    :class="isActive(<?= (int) $lang['id'] ?>) ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                    class="border-b-2 px-4 py-2 text-sm font-medium transition-colors">
+                                <?= esc(strtoupper($lang['code'])) ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php if (!empty($translateTargets)): ?>
                     <button type="button"
-                            @click="activeTab = '<?= esc($lang['code']) ?>'"
-                            :class="activeTab === '<?= esc($lang['code']) ?>' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                            class="border-b-2 px-4 py-2 text-sm font-medium transition-colors">
-                        <?= esc(strtoupper($lang['code'])) ?>
+                        @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
+                        :disabled="translating || translatingAll"
+                        class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
+                        <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
+                        <span x-show="translatingAll" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <span x-text="translateAllProgress"></span></span>
                     </button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Translate error message -->
+                <p x-show="translateError !== ''" x-text="translateError" x-cloak class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
+
+                <?php foreach ($languages as $idx => $language): ?>
+                    <div x-show="isActive(<?= (int) $language['id'] ?>)" class="space-y-4">
+                        <input type="hidden" name="translations[<?= (int) $language['id'] ?>][language_id]" value="<?= (int) $language['id'] ?>">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_name') ?> <span class="text-red-500">*</span></label>
+                                <input type="text" name="translations[<?= (int) $language['id'] ?>][name]" class="form-input w-full" required>
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_submit_label') ?></label>
+                                <input type="text" name="translations[<?= (int) $language['id'] ?>][submit_label]" class="form-input w-full" value="Enviar">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_description') ?></label>
+                            <textarea name="translations[<?= (int) $language['id'] ?>][description]" rows="2" class="form-input block w-full resize-none"></textarea>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_success_message') ?></label>
+                                <textarea name="translations[<?= (int) $language['id'] ?>][success_message]" rows="2" class="form-input block w-full resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_error_message') ?></label>
+                                <textarea name="translations[<?= (int) $language['id'] ?>][error_message]" rows="2" class="form-input block w-full resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
-            <?php foreach ($languages as $idx => $language): ?>
-                <div x-show="activeTab === '<?= esc($language['code']) ?>'" class="space-y-4">
-                    <input type="hidden" name="translations[<?= (int) $language['id'] ?>][language_id]" value="<?= (int) $language['id'] ?>">
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_name') ?> <span class="text-red-500">*</span></label>
-                            <input type="text" name="translations[<?= (int) $language['id'] ?>][name]" class="form-input w-full" required>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_submit_label') ?></label>
-                            <input type="text" name="translations[<?= (int) $language['id'] ?>][submit_label]" class="form-input w-full" value="Enviar">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_description') ?></label>
-                        <textarea name="translations[<?= (int) $language['id'] ?>][description]" rows="2" class="form-input block w-full resize-none"></textarea>
-                    </div>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_success_message') ?></label>
-                            <textarea name="translations[<?= (int) $language['id'] ?>][success_message]" rows="2" class="form-input block w-full resize-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_error_message') ?></label>
-                            <textarea name="translations[<?= (int) $language['id'] ?>][error_message]" rows="2" class="form-input block w-full resize-none"></textarea>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
         </div>
     <?php endif; ?>
 

@@ -96,10 +96,18 @@ class PageController extends BaseWebController
 
     public function create(): string
     {
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['title', 'excerpt', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/pages/create', [
-            'title' => lang('Pages.pages_create'),
-            'pages' => $this->pagesOptions(),
-            'languages' => $this->getLanguages(),
+            'title'            => lang('Pages.pages_create'),
+            'pages'            => $this->pagesOptions(),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -133,12 +141,20 @@ class PageController extends BaseWebController
             ? (int) $focusLangRaw
             : 0;
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['title', 'excerpt', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/pages/edit', [
-            'title'       => lang('Pages.pages_edit'),
-            'item'        => $this->extractData($response),
-            'pages'       => $this->pagesOptions($id),
-            'languages'   => $this->getLanguages(),
-            'focusLangId' => $focusLangId,
+            'title'            => lang('Pages.pages_edit'),
+            'item'             => $this->extractData($response),
+            'pages'            => $this->pagesOptions($id),
+            'languages'        => $languages,
+            'focusLangId'      => $focusLangId,
+            'translateTargets' => $translateTargets,
         ]);
     }
 

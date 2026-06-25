@@ -366,12 +366,30 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+
+        // Extract translatable fields (exclude file, repeater, boolean, integer, select)
+        $allFields = is_array($blockType['fields'] ?? null) ? $blockType['fields'] : [];
+        $translatableFieldNames = [];
+        foreach ($allFields as $fieldKey => $field) {
+            $fieldType = $field['type'] ?? 'string';
+            if (!in_array($fieldType, ['file', 'repeater', 'boolean', 'integer', 'select'], true)) {
+                $translatableFieldNames[] = "block_data][{$fieldKey}";
+            }
+        }
+
+        // Build translation targets using the centralized method
+        $translateTargets = ($defaultLangId > 0 && !empty($translatableFieldNames))
+            ? $this->buildTranslateTargets($languages, $translatableFieldNames, $defaultLangId, 'translations')
+            : [];
+
         return $this->render('cms/pages/blocks/edit', [
             'title'        => lang('Pages.block_edit_title'),
             'page'         => $page,
             'block'        => $block,
             'blockType'    => $blockType,
             'languages'    => $languages,
+            'translateTargets' => $translateTargets,
             'ownerType'    => $ownerType,
             'ownerLabel'   => $this->ownerLabel($ownerType),
             'ownerBlocksRoute' => $this->ownerRoutes($ownerType)['index'],
@@ -719,6 +737,15 @@ class BlockInstanceController extends BaseWebController
         $blockType['schema_definition'] = $schema;
     }
 
+    /**
+     * Build translation targets for Alpine autoTranslateAll() method.
+     * Generates field pairs for each language to translate from the default language.
+     *
+     * @param array $languages
+     * @param array $fields
+     * @param int $defaultLangId
+     * @return array
+     */
     /**
      * @return array<string, int> Map of collection_key => collection_id
      */

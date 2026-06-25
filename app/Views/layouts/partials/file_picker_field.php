@@ -58,11 +58,11 @@ $fpFilter = $filterType ?? '';
 
         <div class="flex flex-shrink-0 flex-col gap-1">
             <button type="button" @click="openPicker()"
-                    class="rounded px-2 py-1 text-xs bg-brand-50 text-brand-700 hover:bg-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    class="<?= action_button_class() ?>">
                 <?= esc(lang('Files.picker_change')) ?>
             </button>
             <button type="button" @click="clearFile()"
-                    class="rounded px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    class="<?= action_button_class('danger') ?>">
                 <?= esc(lang('App.remove')) ?>
             </button>
         </div>

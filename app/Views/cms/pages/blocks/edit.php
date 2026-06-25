@@ -171,27 +171,42 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
             <!-- Content fields by language -->
             <?php if (! empty($fields)): ?>
-            <div class="border-t border-gray-100 pt-5" x-data="langTabs(<?= $defaultLangId ?>)">
+            <div class="border-t border-gray-100 pt-5"
+                 x-ref="langTabs"
+                 x-data="langTabs(<?= $defaultLangId ?>, '<?= esc(route_to('admin.cms.translate'), 'attr') ?>', 'ES')">
                 <h4 class="text-sm font-semibold text-gray-800 mb-1"><?= esc(lang('Pages.block_content_section')) ?></h4>
                 <p class="text-xs text-gray-500 mb-4"><?= esc(lang('Pages.block_content_desc')) ?></p>
 
                 <!-- Tab bar -->
-                <div class="flex border-b border-gray-200 mb-4" role="tablist">
-                    <?php foreach ($languages as $lang): ?>
-                        <button type="button"
-                                role="tab"
-                                @click="setTab(<?= (int) $lang['id'] ?>)"
-                                :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
-                                :class="isActive(<?= (int) $lang['id'] ?>)
-                                    ? 'border-brand-600 text-brand-700 bg-brand-50/40'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
-                            <?= esc(strtoupper((string) ($lang['code'] ?? ''))) ?>
-                            <?php if (! empty($lang['is_default'])): ?>
-                                <span class="ml-1 text-brand-400">★</span>
-                            <?php endif; ?>
-                        </button>
-                    <?php endforeach; ?>
+                <div class="flex items-center justify-between border-b border-gray-200 mb-4">
+                    <div class="flex" role="tablist">
+                        <?php foreach ($languages as $lang): ?>
+                            <button type="button"
+                                    role="tab"
+                                    @click="setTab(<?= (int) $lang['id'] ?>)"
+                                    :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
+                                    :class="isActive(<?= (int) $lang['id'] ?>)
+                                        ? 'border-brand-600 text-brand-700 bg-brand-50/40'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
+                                <?= esc(strtoupper((string) ($lang['code'] ?? ''))) ?>
+                                <?php if (! empty($lang['is_default'])): ?>
+                                    <span class="ml-1 text-brand-400">★</span>
+                                <?php endif; ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Translate All button -->
+                    <button type="button"
+                            @click="autoTranslateAll(<?= esc(json_encode($translateTargets ?? []), 'attr') ?>)"
+                            :disabled="translatingAll"
+                            class="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 shadow-sm hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621c0-.012 0-.024 0-.036V3.75a2.25 2.25 0 0 1 2.25-2.25h15a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 20.25 21H3.75A2.25 2.25 0 0 1 1.5 18.75Zm12.621-4.72l-6.89 7.72m0 0l-6.89-7.72m6.89 7.72l6.89-7.72m-6.89 7.72l-6.89 7.72"/>
+                        </svg>
+                        <span x-text="translatingAll ? 'Traduciendo...' : 'Traducir automáticamente'"></span>
+                    </button>
                 </div>
 
                 <!-- Tab panels -->
@@ -291,8 +306,10 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'file'): ?>
                             <?php
-                            $existingFileId  = old($fieldName . '_file_id', $transRow['block_data'][$fieldKey . '_file_id'] ?? '');
-                            $existingFileUrl = old($fieldName . '_url', $transRow['block_data'][$fieldKey . '_url'] ?? '');
+                            $fieldFileIdName = "translations[{$idx}][block_data][{$fieldKey}_file_id]";
+                            $fieldUrlName = "translations[{$idx}][block_data][{$fieldKey}_url]";
+                            $existingFileId  = old($fieldFileIdName, $transRow['block_data'][$fieldKey . '_file_id'] ?? '');
+                            $existingFileUrl = old($fieldUrlName, $transRow['block_data'][$fieldKey . '_url'] ?? '');
                             $existingFileIdJs  = esc(json_encode((string) $existingFileId));
                             $existingFileUrlJs = esc(json_encode((string) $existingFileUrl));
                             $faccept = (string) ($field['accept'] ?? 'image');
@@ -304,10 +321,12 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             </label>
                             <div x-data="blockFileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
                                 <input type="hidden"
-                                       name="<?= esc($fieldName . '_file_id', 'attr') ?>"
+                                       id="file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>"
+                                       name="<?= $fieldFileIdName ?>"
                                        x-model="fileId">
                                 <input type="hidden"
-                                       name="<?= esc($fieldName . '_url', 'attr') ?>"
+                                       id="file_url_lang_<?= $idx ?>_<?= esc($fieldKey) ?>"
+                                       name="<?= $fieldUrlName ?>"
                                        x-model="fileUrl">
                                 <div x-show="previewUrl">
                                     <template x-if="accept === 'video'">
@@ -317,14 +336,25 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                         <img :src="previewUrl" class="h-24 w-auto rounded border border-gray-200 object-cover">
                                     </template>
                                 </div>
-                                <button type="button"
-                                        @click="openPicker()"
-                                        class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
-                                    </svg>
-                                    <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
-                                </button>
+                                <div class="flex gap-2">
+                                    <button type="button"
+                                            @click="openPicker()"
+                                            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                        </svg>
+                                        <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                    </button>
+                                    <button type="button"
+                                            @click="$refs.langTabs?._x_dataStack?.[0]?.copyFileFieldToAll('#file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '#file_url_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '<?= esc($fieldKey) ?>')"
+                                            x-show="fileId"
+                                            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-100 transition-colors">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
+                                        </svg>
+                                        <span>Copiar a otros idiomas</span>
+                                    </button>
+                                </div>
                             </div>
                             <?= render_field_error($fieldName) ?>
                             <?= render_field_error($fieldName . '_file_id') ?>

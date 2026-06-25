@@ -48,6 +48,8 @@ final class FileUploadRequestTest extends CIUnitTestCase
         $this->assertStringContainsString('mime_in[file,', $rules);
         $this->assertStringContainsString('image/jpeg', $rules);
         $this->assertStringContainsString('application/pdf', $rules);
+        $this->assertStringContainsString('video/mp4', $rules);
+        $this->assertStringContainsString('audio/mpeg', $rules);
     }
 
     public function testCheckRealMimeAcceptsConsistentPng(): void

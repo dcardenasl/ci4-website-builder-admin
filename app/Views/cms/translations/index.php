@@ -59,6 +59,12 @@
                     'page' => lang('Translations.resource_page'),
                     'menu_item' => lang('Translations.resource_menu_item'),
                     'setting' => lang('Translations.resource_setting'),
+                    'category' => lang('Translations.resource_category'),
+                    'collection' => lang('Translations.resource_collection'),
+                    'tag' => lang('Translations.resource_tag'),
+                    'entry' => lang('Translations.resource_entry'),
+                    'form' => lang('Translations.resource_form'),
+                    'block_instance' => lang('Translations.resource_block_instance'),
                 ],
                 'statuses' => [
                     'missing' => lang('Translations.status_missing'),
@@ -73,6 +79,8 @@
                     'slug' => lang('Translations.field_slug'),
                     'label' => lang('Translations.field_label'),
                     'setting_value' => lang('Translations.field_setting_value'),
+                    'name' => lang('Translations.field_name'),
+                    'block_data' => lang('Translations.field_block_data'),
                 ]
             ])) ?>,
             translateResource(res) {
@@ -168,6 +176,36 @@
                                         </template>
                                         <template x-if="row.resource === 'setting'">
                                             <a :href="'<?= route_to('admin.cms.settings') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'category'">
+                                            <a :href="'<?= route_to('admin.cms.categories') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'tag'">
+                                            <a :href="'<?= route_to('admin.cms.tags') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'collection'">
+                                            <a :href="'<?= route_to('admin.cms.collections') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'entry'">
+                                            <a :href="'<?= route_to('admin.cms.entries') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'form'">
+                                            <a :href="'<?= route_to('admin.cms.forms') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'block_instance'">
+                                            <a :href="row.extra_data.owner_type === 'page' ? '<?= route_to('admin.cms.pages') ?>/' + row.extra_data.owner_id + '/blocks/' + row.resource_id + '/edit' : '<?= route_to('admin.cms.entries') ?>/' + row.extra_data.owner_id + '/blocks/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
                                                 <?= esc(lang('Translations.action_translate')) ?>
                                             </a>
                                         </template>

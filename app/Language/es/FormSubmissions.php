@@ -12,6 +12,8 @@ return [
     'field_ip'       => 'Dirección IP',
     'field_message'  => 'Mensaje',
     'field_name'     => 'Nombre',
+    'field_phone'    => 'Teléfono',
+    'field_company'  => 'Empresa',
     'field_status'   => 'Estado',
     'field_form_key' => 'Formulario',
     'field_page_id'  => 'Página',

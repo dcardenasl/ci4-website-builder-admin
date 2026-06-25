@@ -30,7 +30,7 @@
     <div class="space-y-6">
         <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
             <h3 class="text-lg font-semibold text-gray-900"><?= lang('Forms.section_general') ?></h3>
-            <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <dl class="mt-4 divide-y divide-gray-100 text-sm">
                 <?= view('components/display/field_row', [
                     'label' => 'Forms.field_key',
                     'value' => '<code class="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700">' . esc($form['form_key'] ?? '') . '</code>',

@@ -12,6 +12,8 @@ return [
     'field_ip'       => 'IP Address',
     'field_message'  => 'Message',
     'field_name'     => 'Name',
+    'field_phone'    => 'Phone',
+    'field_company'  => 'Company',
     'field_status'   => 'Status',
     'field_form_key' => 'Form',
     'field_page_id'  => 'Page',

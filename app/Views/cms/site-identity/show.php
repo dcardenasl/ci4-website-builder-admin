@@ -185,7 +185,7 @@ $showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTra
                     multi: false,
                     onSelect: (file) => {
                         this.fileId   = file.id;
-                        this.fileUrl  = file.variants?.thumb || file.url || '';
+                        this.fileUrl  = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : (file.url || '');
                         this.fileMime = file.mime_type || '';
                     },
                 });
@@ -206,7 +206,10 @@ $showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTra
                         </svg>
                         <span x-text="fileId ? '<?= esc(lang('SiteIdentity.change_logo')) ?>' : '<?= esc(lang('SiteIdentity.select_logo')) ?>'"></span>
                     </button>
-                    <button type="button" x-show="fileId" @click="remove()" class="text-sm text-red-600 hover:text-red-700">
+                    <button type="button" x-show="fileId" @click="remove()" class="<?= action_button_class('danger') ?>">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18m-2 0-.75 12.75A2.25 2.25 0 0 1 15 21.75H9a2.25 2.25 0 0 1-2.25-2.25L6 6m3 0V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6m-6 0h6"/>
+                        </svg>
                         <?= lang('SiteIdentity.remove_logo') ?>
                     </button>
                 </div>
@@ -233,7 +236,7 @@ $showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTra
                     multi: false,
                     onSelect: (file) => {
                         this.fileId   = file.id;
-                        this.fileUrl  = file.variants?.thumb || file.url || '';
+                        this.fileUrl  = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : (file.url || '');
                         this.fileMime = file.mime_type || '';
                     },
                 });
@@ -254,7 +257,10 @@ $showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTra
                         </svg>
                         <span x-text="fileId ? '<?= esc(lang('SiteIdentity.change_favicon')) ?>' : '<?= esc(lang('SiteIdentity.select_favicon')) ?>'"></span>
                     </button>
-                    <button type="button" x-show="fileId" @click="remove()" class="text-sm text-red-600 hover:text-red-700">
+                    <button type="button" x-show="fileId" @click="remove()" class="<?= action_button_class('danger') ?>">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18m-2 0-.75 12.75A2.25 2.25 0 0 1 15 21.75H9a2.25 2.25 0 0 1-2.25-2.25L6 6m3 0V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6m-6 0h6"/>
+                        </svg>
                         <?= lang('SiteIdentity.remove_favicon') ?>
                     </button>
                 </div>

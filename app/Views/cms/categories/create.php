@@ -53,31 +53,17 @@
         <?php if (!empty($languages)): ?>
             <?php
                 $defaultLangId = 0;
-            $defaultLangCode = '';
-            $defaultLangIndex = 0;
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId = (int) $l['id'];
-                    $defaultLangCode = $l['code'] ?? '';
-                    $defaultLangIndex = $i;
-                    break;
+                $defaultLangCode = '';
+                $defaultLangIndex = 0;
+                foreach ($languages as $i => $l) {
+                    if (!empty($l['is_default'])) {
+                        $defaultLangId = (int) $l['id'];
+                        $defaultLangCode = $l['code'] ?? '';
+                        $defaultLangIndex = $i;
+                        break;
+                    }
                 }
-            }
-            $translateUrl = route_to('admin.cms.translate');
-            $allTargets = [];
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    continue;
-                }
-                $allTargets[] = [
-                    'langCode'   => strtoupper($l['code'] ?? ''),
-                    'fieldPairs' => [
-                        ['from' => sprintf('[name="translations[%d][name]"]', $defaultLangIndex),             'to' => sprintf('[name="translations[%d][name]"]', $i)],
-                        ['from' => sprintf('[name="translations[%d][meta_title]"]', $defaultLangIndex),       'to' => sprintf('[name="translations[%d][meta_title]"]', $i)],
-                        ['from' => sprintf('[name="translations[%d][meta_description]"]', $defaultLangIndex), 'to' => sprintf('[name="translations[%d][meta_description]"]', $i)],
-                    ],
-                ];
-            }
+                $translateUrl = route_to('admin.cms.translate');
             ?>
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="text-sm font-semibold text-gray-800 mb-3"><?= esc(lang('Categories.translations_title')) ?></h4>
@@ -99,9 +85,9 @@
                                 </button>
                             <?php endforeach; ?>
                         </div>
-                        <?php if (!empty($allTargets)): ?>
+                        <?php if (!empty($translateTargets)): ?>
                         <button type="button"
-                            @click="autoTranslateAll(<?= esc(json_encode($allTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
+                            @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
                             class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
                             <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>

@@ -69,10 +69,16 @@ class FormController extends BaseWebController
     {
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
         $languages    = $this->extractItems($langResponse) ?: [];
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'submit_label', 'description', 'success_message', 'error_message'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId, 'translations')
+            : [];
 
         return $this->render('cms/forms/create', [
-            'title'     => lang('Forms.create_title'),
-            'languages' => $languages,
+            'title'            => lang('Forms.create_title'),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -120,11 +126,17 @@ class FormController extends BaseWebController
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
         $languages    = $this->extractItems($langResponse) ?: [];
         $form         = $this->normalizeForm($this->extractData($formResponse));
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'submit_label', 'description', 'success_message', 'error_message'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId, 'translations')
+            : [];
 
         return $this->render('cms/forms/edit', [
-            'title'     => lang('Forms.edit_title'),
-            'form'      => $form,
-            'languages' => $languages,
+            'title'            => lang('Forms.edit_title'),
+            'form'             => $form,
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 

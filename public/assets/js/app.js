@@ -1,4 +1,4 @@
-/* global Sortable, confirm, alert */
+/* global Sortable, confirm, alert, HTMLTextAreaElement, Event */
 /**
  * CI4 Admin Starter — Application JavaScript
  *
@@ -1738,6 +1738,16 @@ document.addEventListener('alpine:init', () => {
     window.remoteTable = remoteTableFactory;
     window.formFieldBuilder = formFieldBuilderFactory;
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
+    window.bestFilePreviewUrl = (file) => {
+        const variants = isObject(file?.variants) ? file.variants : {};
+        return String(
+            variants.md?.url
+                || variants.sm?.url
+                || variants.thumb?.url
+                || file?.url
+                || ''
+        );
+    };
 
     /**
      * Global file picker store.
@@ -1924,9 +1934,13 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        confirm() {
+        async confirm() {
             if (typeof this._onSelectMulti === 'function') {
-                this._onSelectMulti([...this.selected]);
+                // Enrich all selected files with metadata (variants) before returning
+                const enrichedFiles = await Promise.all(
+                    this.selected.map(file => this._enrichFileWithMetadata(file))
+                );
+                this._onSelectMulti(enrichedFiles);
             }
             this.close();
         },
@@ -2090,7 +2104,7 @@ document.addEventListener('alpine:init', () => {
                         mime_type:     String(file.mime_type || ''),
                         category:      String(file.category || ''),
                         is_image:      Boolean(file.is_image),
-                        url:           String(file.url || ''),
+                        url:           String(window.bestFilePreviewUrl(file)),
                         human_size:    String(file.human_size || ''),
                     };
                 },
@@ -2142,9 +2156,12 @@ document.addEventListener('alpine:init', () => {
                 accept: mimeAccept,
                 multi:  false,
                 onSelect: (file) => {
-                    this.fileId     = String(file.id ?? '');
-                    this.fileUrl    = String(file.url ?? '');
-                    this.previewUrl = String(file.variants?.thumb || file.url || '');
+                    const fileId = String(file.id ?? '');
+                    // Use the /files/{id}/view endpoint which generates proper preview URLs
+                    const previewUrl = fileId ? String(window.location.origin) + '/files/' + fileId + '/view' : '';
+                    this.fileId     = fileId;
+                    this.fileUrl    = previewUrl;
+                    this.previewUrl = previewUrl;
                 },
             });
         },
@@ -2213,9 +2230,11 @@ document.addEventListener('alpine:init', () => {
                     accept: mimeAccept,
                     multi:  false,
                     onSelect: (file) => {
-                        this.items[itemIdx][subKey + '_file_id']     = String(file.id ?? '');
-                        this.items[itemIdx][subKey + '_url']         = String(file.url ?? '');
-                        this.items[itemIdx][subKey + '_preview_url'] = String(file.variants?.thumb || file.url || '');
+                        const fileId = String(file.id ?? '');
+                        const previewUrl = fileId ? String(window.location.origin) + '/files/' + fileId + '/view' : '';
+                        this.items[itemIdx][subKey + '_file_id']     = fileId;
+                        this.items[itemIdx][subKey + '_url']         = previewUrl;
+                        this.items[itemIdx][subKey + '_preview_url'] = previewUrl;
                     },
                 });
             },
@@ -2445,9 +2464,9 @@ document.addEventListener('alpine:init', () => {
                 const sourceEl = document.querySelector(pair.from);
                  
                 const targetEl = document.querySelector(pair.to);
-                // eslint-disable-next-line no-undef
+                 
                 if (!(sourceEl instanceof HTMLInputElement || sourceEl instanceof HTMLTextAreaElement)) continue;
-                // eslint-disable-next-line no-undef
+                 
                 if (!(targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement)) continue;
 
                 const sourceText = sourceEl.value.trim();
@@ -2464,7 +2483,7 @@ document.addEventListener('alpine:init', () => {
 
                 if (json && typeof json.translated === 'string') {
                     targetEl.value = json.translated;
-                    // eslint-disable-next-line no-undef
+                     
                     targetEl.dispatchEvent(new Event('input', { bubbles: true }));
                 } else if (json && json.error) {
                     throw new Error(json.error);
@@ -2511,6 +2530,84 @@ document.addEventListener('alpine:init', () => {
             } finally {
                 this.translatingAll = false;
             }
+        },
+
+        /**
+         * Copy a field value from the current language to all other languages.
+         * @param {string} sourceSelector - CSS selector for the source field
+         * @param {Array<string>} targetSelectors - CSS selectors for target fields
+         */
+        copyFieldToAll(sourceSelector, targetSelectors) {
+            const sourceEl = document.querySelector(sourceSelector);
+            if (!(sourceEl instanceof HTMLInputElement || sourceEl instanceof HTMLTextAreaElement)) {
+                return;
+            }
+
+            const sourceValue = sourceEl.value;
+            for (const targetSelector of targetSelectors) {
+                const targetEl = document.querySelector(targetSelector);
+                if (targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement) {
+                    targetEl.value = sourceValue;
+                    targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        },
+
+        /**
+         * Copy file field (both ID and URL) from one language to all others.
+         * @param {string} sourceFileIdSelector - CSS selector for source file ID input
+         * @param {string} sourceFileUrlSelector - CSS selector for source file URL input
+         * @param {string} fieldKeyPattern - Pattern to match other language tabs (e.g., "fieldKey")
+         */
+        copyFileFieldToAll(sourceFileIdSelector, sourceFileUrlSelector, fieldKeyPattern) {
+            const sourceFileId = document.querySelector(sourceFileIdSelector);
+            const sourceFileUrl = document.querySelector(sourceFileUrlSelector);
+
+            if (!sourceFileId || !sourceFileUrl) {
+                console.warn('[langTabs] Could not find source file elements');
+                return;
+            }
+
+            const fileId = sourceFileId.value;
+            const fileUrl = sourceFileUrl.value;
+
+            if (!fileId || !fileUrl) {
+                console.warn('[langTabs] Source file ID or URL is empty');
+                return;
+            }
+
+            // Find all other language tabs and copy the file
+            const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
+            const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
+
+            allFileIdInputs.forEach(input => {
+                if (input !== sourceFileId) {
+                    input.value = fileId;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Also update the Alpine component if it exists
+                    const blockFileFieldContainer = input.closest('[x-data*="blockFileField"]');
+                    const componentData = blockFileFieldContainer?._x_dataStack?.[0];
+                    if (componentData) {
+                        componentData.fileId = fileId;
+                    }
+                }
+            });
+
+            allFileUrlInputs.forEach(input => {
+                if (input !== sourceFileUrl) {
+                    input.value = fileUrl;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Also update the Alpine component if it exists
+                    const blockFileFieldContainer = input.closest('[x-data*="blockFileField"]');
+                    const componentData = blockFileFieldContainer?._x_dataStack?.[0];
+                    if (componentData) {
+                        componentData.fileUrl = fileUrl;
+                        componentData.previewUrl = fileUrl;
+                    }
+                }
+            });
         },
     }));
 

@@ -72,11 +72,19 @@ class EntryController extends BaseWebController
             $item['collection_id'] = (int) $collectionId;
         }
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['title', 'excerpt', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/entries/create', [
-            'title'       => lang('Entries.entries_create'),
-            'collections' => $this->collectionsOptions(),
-            'languages'   => $this->getLanguages(),
-            'item'        => $item,
+            'title'            => lang('Entries.entries_create'),
+            'collections'      => $this->collectionsOptions(),
+            'languages'        => $languages,
+            'item'             => $item,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -107,13 +115,20 @@ class EntryController extends BaseWebController
 
         $item           = $this->extractData($response);
         $blockTemplate  = $this->resolveBlockTemplate($item);
+        $languages      = $this->getLanguages();
+        $defaultLangId  = $this->resolveBaseLanguageId($languages);
+        $fieldMap       = ['title', 'excerpt', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
 
         return $this->render('cms/entries/edit', [
-            'title'           => lang('Entries.entries_edit'),
-            'item'            => $item,
-            'collections'     => $this->collectionsOptions(),
-            'languages'       => $this->getLanguages(),
-            'blockTemplate'   => $blockTemplate,
+            'title'            => lang('Entries.entries_edit'),
+            'item'             => $item,
+            'collections'      => $this->collectionsOptions(),
+            'languages'        => $languages,
+            'blockTemplate'    => $blockTemplate,
+            'translateTargets' => $translateTargets,
         ]);
     }
 

@@ -379,4 +379,71 @@ abstract class BaseWebController extends BaseController
 
         return $this->render($view, $data);
     }
+
+    /**
+     * Build translation targets for automatic translation functionality.
+     * Centralizado método que genera la configuración de traducción automática.
+     *
+     * @param array $languages Array de idiomas disponibles (cada uno debe tener 'id', 'code', 'is_default')
+     * @param array $fieldMap Mapa de campos a traducir: ['fieldName' => 'fieldKey', ...]
+     *                        Donde fieldKey es usado para construir el selector CSS
+     * @param int $defaultLangId ID del idioma por defecto
+     * @param string $prefix Prefijo para los selectores CSS (default: 'translations')
+     * @return array Array de targets compatible con Alpine.js autoTranslateAll()
+     *
+     * @example
+     *   $targets = $this->buildTranslateTargets(
+     *       $languages,
+     *       ['title' => 'title', 'excerpt' => 'excerpt'],
+     *       $defaultLangId
+     *   );
+     */
+    protected function buildTranslateTargets(
+        array $languages,
+        array $fieldMap,
+        int $defaultLangId,
+        string $prefix = 'translations',
+    ): array {
+        if (empty($fieldMap) || empty($languages)) {
+            return [];
+        }
+
+        $targets = [];
+        $defaultLangIndex = 0;
+
+        // Encontrar el índice del idioma por defecto
+        foreach ($languages as $idx => $lang) {
+            if ((int) ($lang['id'] ?? 0) === $defaultLangId) {
+                $defaultLangIndex = $idx;
+                break;
+            }
+        }
+
+        // Para cada idioma no-default, crear los field pairs
+        foreach ($languages as $idx => $lang) {
+            if ($idx === $defaultLangIndex) {
+                continue;
+            }
+
+            $langCode = strtoupper((string) ($lang['code'] ?? 'EN'));
+            $fieldPairs = [];
+
+            // Construir los selectores para cada campo
+            foreach ($fieldMap as $fieldName) {
+                $fieldPairs[] = [
+                    'from' => sprintf('[name="%s[%d][%s]"]', $prefix, $defaultLangIndex, $fieldName),
+                    'to'   => sprintf('[name="%s[%d][%s]"]', $prefix, $idx, $fieldName),
+                ];
+            }
+
+            if (!empty($fieldPairs)) {
+                $targets[] = [
+                    'langCode'   => $langCode,
+                    'fieldPairs' => $fieldPairs,
+                ];
+            }
+        }
+
+        return $targets;
+    }
 }

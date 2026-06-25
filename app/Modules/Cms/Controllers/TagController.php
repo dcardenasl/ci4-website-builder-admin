@@ -63,9 +63,17 @@ class TagController extends BaseWebController
 
     public function create(): string
     {
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'slug'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/tags/create', [
-            'title'     => lang('Tags.tags_create'),
-            'languages' => $this->getLanguages(),
+            'title'            => lang('Tags.tags_create'),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -94,10 +102,18 @@ class TagController extends BaseWebController
             return $this->withError(lang('Tags.tags_not_found'), route_to('admin.cms.tags'));
         }
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'slug'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/tags/edit', [
-            'title'     => lang('Tags.tags_edit'),
-            'item'      => $this->extractData($response),
-            'languages' => $this->getLanguages(),
+            'title'            => lang('Tags.tags_edit'),
+            'item'             => $this->extractData($response),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 

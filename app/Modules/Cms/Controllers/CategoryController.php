@@ -66,11 +66,19 @@ class CategoryController extends BaseWebController
 
     public function create(): string
     {
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/categories/create', [
-            'title'       => lang('Categories.categories_create'),
-            'collections' => $this->collectionsOptions(),
-            'categories'  => $this->categoriesOptions(),
-            'languages'   => $this->getLanguages(),
+            'title'            => lang('Categories.categories_create'),
+            'collections'      => $this->collectionsOptions(),
+            'categories'       => $this->categoriesOptions(),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -99,12 +107,20 @@ class CategoryController extends BaseWebController
             return $this->withError(lang('Categories.categories_not_found'), route_to('admin.cms.categories'));
         }
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $fieldMap = ['name', 'meta_title', 'meta_description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
+
         return $this->render('cms/categories/edit', [
-            'title'       => lang('Categories.categories_edit'),
-            'item'        => $this->extractData($response),
-            'collections' => $this->collectionsOptions(),
-            'categories'  => $this->categoriesOptions($id),
-            'languages'   => $this->getLanguages(),
+            'title'            => lang('Categories.categories_edit'),
+            'item'             => $this->extractData($response),
+            'collections'      => $this->collectionsOptions(),
+            'categories'       => $this->categoriesOptions($id),
+            'languages'        => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 

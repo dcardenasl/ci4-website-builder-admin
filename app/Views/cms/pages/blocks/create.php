@@ -478,13 +478,13 @@ function blockInstanceBuilder(blockTypes, languages) {
         // For repeater sub-fields: all four are set
         pickFile(langId, fieldKey, itemIdx, subKey, file) {
             if (itemIdx === null) {
-                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: file.variants?.thumb || file.url };
+                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : file.url };
             } else {
                 const k = `${langId}_${fieldKey}`;
                 if (this.repeaterItems[k] && this.repeaterItems[k][itemIdx]) {
                     this.repeaterItems[k][itemIdx][subKey + '_file_id']     = file.id;
                     this.repeaterItems[k][itemIdx][subKey + '_url']         = file.url;
-                    this.repeaterItems[k][itemIdx][subKey + '_preview_url'] = file.variants?.thumb || file.url;
+                    this.repeaterItems[k][itemIdx][subKey + '_preview_url'] = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : file.url;
                 }
             }
         },

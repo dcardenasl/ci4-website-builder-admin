@@ -137,7 +137,7 @@ if ($mediaRows === []) {
                             <button type="button" class="text-xs text-gray-500 hover:text-gray-900" x-show="row.hub_file_id" @click="clearFile(row)">
                                 <?= esc(safe_lang('Catalog.button_clear_media_file', 'Limpiar Archivo')) ?>
                             </button>
-                            <button type="button" class="text-xs text-red-600 hover:text-red-700 font-semibold" @click="removeRow(index)">
+                            <button type="button" class="<?= esc(action_button_class('danger')) ?>" @click="removeRow(index)">
                                 <?= esc(lang('App.remove') ?? 'Eliminar Fila') ?>
                             </button>
                         </div>
