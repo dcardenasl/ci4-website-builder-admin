@@ -88,8 +88,8 @@ unset($actionButtons[$status]);
         <?php /* Other form fields we don't know about (e.g., custom fields) */ ?>
         <?php
         $knownFields = ['name', 'email', 'phone', 'company', 'message'];
-        $extraFields = array_diff_key($formData, array_flip($knownFields));
-        ?>
+$extraFields = array_diff_key($formData, array_flip($knownFields));
+?>
         <?php if (! empty($extraFields)): ?>
             <div class="mt-5 pt-4 border-t border-gray-100">
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">

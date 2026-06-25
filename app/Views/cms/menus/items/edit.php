@@ -17,7 +17,9 @@ function buildParentOptionsEdit(array $items, string $excludeId, ?int $parentId 
 {
     $options = [];
     foreach ($items as $item) {
-        if ((string) $item['id'] === $excludeId) { continue; }
+        if ((string) $item['id'] === $excludeId) {
+            continue;
+        }
         $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
         if ($pid === $parentId) {
             $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
@@ -68,7 +70,9 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                         <?php
                         $lang = is_array($lang) ? $lang : [];
                         $langId = isset($lang['id']) ? (int) $lang['id'] : (is_numeric($key) ? (int) $key : 0);
-                        if ($langId <= 0) { continue; }
+                        if ($langId <= 0) {
+                            continue;
+                        }
                         $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
                         $labelVal = $itemTranslations[$langId]['label'] ?? '';
                         $urlVal = $itemTranslations[$langId]['custom_url'] ?? '';

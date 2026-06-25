@@ -68,11 +68,11 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
         <div class="space-y-6">
             <?php
                 $siteNameIsTrans = !empty($settingsMap['site_name']['is_translatable']);
-                $siteNameTrans = $settingsMap['site_name']['translations'] ?? [];
-                $siteTaglineIsTrans = !empty($settingsMap['site_tagline']['is_translatable']);
-                $siteTaglineTrans = $settingsMap['site_tagline']['translations'] ?? [];
-                $showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTrans);
-            ?>
+$siteNameTrans = $settingsMap['site_name']['translations'] ?? [];
+$siteTaglineIsTrans = !empty($settingsMap['site_tagline']['is_translatable']);
+$siteTaglineTrans = $settingsMap['site_tagline']['translations'] ?? [];
+$showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTrans);
+?>
 
             <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 space-y-4">
                 <div class="flex items-start justify-between gap-4">
@@ -120,15 +120,15 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
                             <div class="mt-1">
                                 <?php foreach ($translationLanguages as $lang): ?>
                                     <?php
-                                        $langId = (int) $lang['id'];
-                                        $langName = esc($lang['native_name'] ?? $lang['name']);
-                                        $val = '';
-                                        foreach ($siteNameTrans as $t) {
-                                            if ((int) ($t['language_id'] ?? 0) === $langId) {
-                                                $val = (string) ($t['setting_value'] ?? '');
-                                                break;
-                                            }
+                            $langId = (int) $lang['id'];
+                                    $langName = esc($lang['native_name'] ?? $lang['name']);
+                                    $val = '';
+                                    foreach ($siteNameTrans as $t) {
+                                        if ((int) ($t['language_id'] ?? 0) === $langId) {
+                                            $val = (string) ($t['setting_value'] ?? '');
+                                            break;
                                         }
+                                    }
                                     ?>
                                     <div x-show="activeLangId === <?= $langId ?>" x-cloak>
                                         <input type="text" name="site_name_translations[<?= $langId ?>]" value="<?= esc($val) ?>" class="<?= input_class("site_name_translations[$langId]") ?> text-sm" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_name')) ?> (<?= strtolower($langName) ?>)">
@@ -145,14 +145,14 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
                                 <?php foreach ($translationLanguages as $lang): ?>
                                     <?php
                                         $langId = (int) $lang['id'];
-                                        $langName = esc($lang['native_name'] ?? $lang['name']);
-                                        $val = '';
-                                        foreach ($siteTaglineTrans as $t) {
-                                            if ((int) ($t['language_id'] ?? 0) === $langId) {
-                                                $val = (string) ($t['setting_value'] ?? '');
-                                                break;
-                                            }
+                                    $langName = esc($lang['native_name'] ?? $lang['name']);
+                                    $val = '';
+                                    foreach ($siteTaglineTrans as $t) {
+                                        if ((int) ($t['language_id'] ?? 0) === $langId) {
+                                            $val = (string) ($t['setting_value'] ?? '');
+                                            break;
                                         }
+                                    }
                                     ?>
                                     <div x-show="activeLangId === <?= $langId ?>" x-cloak>
                                         <input type="text" name="site_tagline_translations[<?= $langId ?>]" value="<?= esc($val) ?>" class="<?= input_class("site_tagline_translations[$langId]") ?> text-sm" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_tagline')) ?> (<?= strtolower($langName) ?>)">

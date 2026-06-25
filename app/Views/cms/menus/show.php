@@ -36,9 +36,9 @@ foreach ($languages as $lang) {
                         <h3 class="text-base font-semibold text-gray-900"><?= lang('Menus.menus_details') ?></h3>
                         <?php
                         $isActive = ! empty($menu['is_active']);
-                        $badgeClass = $isActive ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200';
-                        $badgeLabel = $isActive ? lang('Menus.field_is_active_on') : lang('Menus.field_is_active_off');
-                        ?>
+    $badgeClass = $isActive ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200';
+    $badgeLabel = $isActive ? lang('Menus.field_is_active_on') : lang('Menus.field_is_active_off');
+    ?>
                         <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold <?= esc($badgeClass) ?>">
                             <?= esc($badgeLabel) ?>
                         </span>
@@ -129,10 +129,10 @@ foreach ($languages as $lang) {
 
                 <?php if (empty($items)): ?>
                     <?= view('components/display/empty_state', [
-                        'title' => 'Menus.menus_items_empty',
-                        'description' => 'Menus.menus_items_empty_desc',
-                        'actionUrl' => route_to('admin.cms.menus.items.create', $itemId),
-                        'actionLabel' => 'Menus.menus_items_create',
+    'title' => 'Menus.menus_items_empty',
+    'description' => 'Menus.menus_items_empty_desc',
+    'actionUrl' => route_to('admin.cms.menus.items.create', $itemId),
+    'actionLabel' => 'Menus.menus_items_create',
                     ]) ?>
                 <?php else: ?>
                     <!-- Legend -->
@@ -146,74 +146,78 @@ foreach ($languages as $lang) {
 
                     <div class="divide-y divide-gray-100">
                         <?php
-                        if (! function_exists('renderMenuTreeV2')):
-                            /**
-                             * @param array<int, array<string, mixed>> $items
-                             * @param array<string, string> $langMap
-                             * @param array<string, string> $pages
-                             * @param array<string, string> $entries
-                             * @param array<string, string> $collections
-                             */
-                            function renderMenuTreeV2(array $items, array $langMap, array $pages, array $entries, array $collections, ?int $parentId = null, int $depth = 0): void
-                            {
-                                $siblings = array_values(array_filter($items, static function (array $item) use ($parentId): bool {
-                                    $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
-                                    return $pid === $parentId;
-                                }));
-                                $total = count($siblings);
+    if (! function_exists('renderMenuTreeV2')):
+        /**
+         * @param array<int, array<string, mixed>> $items
+         * @param array<string, string> $langMap
+         * @param array<string, string> $pages
+         * @param array<string, string> $entries
+         * @param array<string, string> $collections
+         */
+        function renderMenuTreeV2(array $items, array $langMap, array $pages, array $entries, array $collections, ?int $parentId = null, int $depth = 0): void
+        {
+            $items = array_filter($items, 'is_array');
+            $siblings = array_values(array_filter($items, static function (array $item) use ($parentId): bool {
+                $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
+                return $pid === $parentId;
+            }));
+            $total = count($siblings);
 
-                                foreach ($siblings as $idx => $item) {
-                                    $isLast = ($idx === $total - 1);
+            foreach ($siblings as $idx => $item) {
+                $isLast = ($idx === $total - 1);
 
-                                    // Resolve label
-                                    $label = $item['label'] ?? '';
-                                    if ($label === '' && ! empty($item['translations']) && is_array($item['translations'])) {
-                                        foreach ($item['translations'] as $t) {
-                                            if (! empty($t['label'])) {
-                                                $label = $t['label'];
-                                                break;
-                                            }
-                                        }
-                                    }
+                // Resolve label
+                $label = $item['label'] ?? '';
+                if ($label === '' && ! empty($item['translations']) && is_array($item['translations'])) {
+                    foreach ($item['translations'] as $t) {
+                        if (! empty($t['label'])) {
+                            $label = $t['label'];
+                            break;
+                        }
+                    }
+                }
 
-                                    // Resolve link badge text & color
-                                    $linkBadge = '';
-                                    $linkBadgeClass = 'bg-gray-100 text-gray-500';
-                                    switch ($item['link_type'] ?? '') {
-                                        case 'page':
-                                            $name = $pages[(string) ($item['page_id'] ?? '')] ?? null;
-                                            $suffix = $name ? ': ' . $name : (! empty($item['page_id']) ? ' #' . $item['page_id'] : '');
-                                            $linkBadge = lang('Menus.items_link_type_page') . $suffix;
-                                            $linkBadgeClass = 'bg-blue-50 text-blue-700';
-                                            break;
-                                        case 'entry':
-                                            $name = $entries[(string) ($item['entry_id'] ?? '')] ?? null;
-                                            $suffix = $name ? ': ' . $name : (! empty($item['entry_id']) ? ' #' . $item['entry_id'] : '');
-                                            $linkBadge = lang('Menus.items_link_type_entry') . $suffix;
-                                            $linkBadgeClass = 'bg-purple-50 text-purple-700';
-                                            break;
-                                        case 'collection_listing':
-                                            $name = $collections[(string) ($item['collection_id'] ?? '')] ?? null;
-                                            $suffix = $name ? ': ' . $name : (! empty($item['collection_id']) ? ' #' . $item['collection_id'] : '');
-                                            $linkBadge = lang('Menus.items_link_type_collection_listing') . $suffix;
-                                            $linkBadgeClass = 'bg-orange-50 text-orange-700';
-                                            break;
-                                        case 'custom_url':
-                                            $url = '';
-                                            foreach ($item['translations'] ?? [] as $t) {
-                                                if (! empty($t['custom_url'])) { $url = $t['custom_url']; break; }
-                                            }
-                                            $linkBadge = lang('Menus.items_link_type_custom_url') . ($url ? ': ' . $url : '');
-                                            $linkBadgeClass = 'bg-green-50 text-green-700';
-                                            break;
-                                        default:
-                                            $linkBadge = lang('Menus.items_link_type_no_link');
-                                            $linkBadgeClass = 'bg-gray-100 text-gray-500';
-                                    }
+                // Resolve link badge text & color
+                $linkBadge = '';
+                $linkBadgeClass = 'bg-gray-100 text-gray-500';
+                switch ($item['link_type'] ?? '') {
+                    case 'page':
+                        $name = $pages[(string) ($item['page_id'] ?? '')] ?? null;
+                        $suffix = $name ? ': ' . $name : (! empty($item['page_id']) ? ' #' . $item['page_id'] : '');
+                        $linkBadge = lang('Menus.items_link_type_page') . $suffix;
+                        $linkBadgeClass = 'bg-blue-50 text-blue-700';
+                        break;
+                    case 'entry':
+                        $name = $entries[(string) ($item['entry_id'] ?? '')] ?? null;
+                        $suffix = $name ? ': ' . $name : (! empty($item['entry_id']) ? ' #' . $item['entry_id'] : '');
+                        $linkBadge = lang('Menus.items_link_type_entry') . $suffix;
+                        $linkBadgeClass = 'bg-purple-50 text-purple-700';
+                        break;
+                    case 'collection_listing':
+                        $name = $collections[(string) ($item['collection_id'] ?? '')] ?? null;
+                        $suffix = $name ? ': ' . $name : (! empty($item['collection_id']) ? ' #' . $item['collection_id'] : '');
+                        $linkBadge = lang('Menus.items_link_type_collection_listing') . $suffix;
+                        $linkBadgeClass = 'bg-orange-50 text-orange-700';
+                        break;
+                    case 'custom_url':
+                        $url = '';
+                        foreach ($item['translations'] ?? [] as $t) {
+                            if (! empty($t['custom_url'])) {
+                                $url = $t['custom_url'];
+                                break;
+                            }
+                        }
+                        $linkBadge = lang('Menus.items_link_type_custom_url') . ($url ? ': ' . $url : '');
+                        $linkBadgeClass = 'bg-green-50 text-green-700';
+                        break;
+                    default:
+                        $linkBadge = lang('Menus.items_link_type_no_link');
+                        $linkBadgeClass = 'bg-gray-100 text-gray-500';
+                }
 
-                                    $indentPx = 16 + ($depth * 24);
-                                    $connector = $depth > 0 ? ($isLast ? '└─' : '├─') : '';
-                                    ?>
+                $indentPx = 16 + ($depth * 24);
+                $connector = $depth > 0 ? ($isLast ? '└─' : '├─') : '';
+                ?>
                                     <div class="flex items-center justify-between py-3 pr-4 hover:bg-gray-50/70 transition-colors" style="padding-left: <?= $indentPx ?>px">
                                         <div class="flex items-center gap-2 min-w-0 flex-1">
                                             <?php if ($depth > 0): ?>
@@ -261,13 +265,13 @@ foreach ($languages as $lang) {
                                         </div>
                                     </div>
                                     <?php
-                                    renderMenuTreeV2($items, $langMap, $pages, $entries, $collections, (int) $item['id'], $depth + 1);
-                                }
-                            }
-                        endif;
+                renderMenuTreeV2($items, $langMap, $pages, $entries, $collections, (int) $item['id'], $depth + 1);
+            }
+        }
+    endif;
 
-                        renderMenuTreeV2($items, $langMap, $pages, $entries, $collections);
-                        ?>
+renderMenuTreeV2($items, $langMap, $pages, $entries, $collections);
+?>
                     </div>
                 <?php endif; ?>
             </section>

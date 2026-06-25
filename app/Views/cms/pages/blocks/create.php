@@ -109,19 +109,11 @@ $parentIdJs    = json_encode($parentInstanceId);
             <?php if ($parentInstanceId !== null): ?>
                 <input type="hidden" name="parent_instance_id" value="<?= esc((string) $parentInstanceId) ?>">
             <?php endif; ?>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b border-gray-100">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1"><?= esc(lang('Pages.block_sort_order_label')) ?> <span class="text-red-500">*</span></label>
-                    <input type="number" name="sort_order" value="0" min="0"
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
-                    <p class="text-xs text-gray-400 mt-1"><?= esc(lang('Pages.block_sort_order_help')) ?></p>
-                </div>
-                <div class="flex items-center pt-6">
-                    <input type="checkbox" name="is_active" id="is_active" value="1" checked
-                           class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                    <label for="is_active" class="ml-2 block text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></label>
-                </div>
+            <input type="hidden" name="sort_order" value="0">
+            <div class="flex items-center pb-4 border-b border-gray-100">
+                <input type="checkbox" name="is_active" id="is_active" value="1" checked
+                       class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                <label for="is_active" class="ml-2 block text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></label>
             </div>
 
             <div x-show="configFields && Object.keys(configFields).length > 0" x-cloak>

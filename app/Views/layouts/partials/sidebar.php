@@ -34,7 +34,7 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
 
         <?php
             $hasAdminItem = has_permission('users.read') || has_permission('audit.read') || has_permission('apikeys.read') || has_permission('metrics.read') || has_permission('cms.analytics.read');
-        ?>
+?>
 
         <?php if ($hasAdminItem): ?>
             <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4"><?= lang('App.administration') ?></div>
@@ -90,31 +90,34 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
             </a>
         <?php endif; ?>
         <?php
-            $hasCmsItem = has_permission('cms.languages.read')
-                || has_permission('cms.settings.read')
-                || has_permission('cms.pages.read')
-                || has_permission('cms.menus.read')
-                || has_permission('cms.blocks.read')
-                || has_permission('cms.collections.read')
-                || has_permission('cms.entries.read')
-                || has_permission('cms.categories.read')
-                || has_permission('cms.tags.read')
-                || has_permission('cms.redirects.read')
-                || has_permission('cms.submissions.read');
-        ?>
+    $hasCmsItem = has_permission('cms.languages.read')
+        || has_permission('cms.settings.read')
+        || has_permission('cms.pages.read')
+        || has_permission('cms.menus.read')
+        || has_permission('cms.blocks.read')
+        || has_permission('cms.collections.read')
+        || has_permission('cms.entries.read')
+        || has_permission('cms.categories.read')
+        || has_permission('cms.tags.read')
+        || has_permission('cms.redirects.read')
+        || has_permission('cms.submissions.read')
+        || has_permission('cms.forms.read');
+?>
         <?php if ($hasCmsItem): ?>
             <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4">CMS</div>
 
             <?php
-            // ── CMS group: Contenido ───────────────────────────────────────────
-            $hasContentGroup = has_permission('cms.pages.read')
-                || has_permission('cms.entries.read')
-                || has_permission('cms.collections.read')
-                || has_permission('cms.submissions.read');
+    // ── CMS group: Contenido ───────────────────────────────────────────
+    $hasContentGroup = has_permission('cms.pages.read')
+        || has_permission('cms.entries.read')
+        || has_permission('cms.collections.read')
+        || has_permission('cms.submissions.read')
+        || has_permission('cms.forms.read');
             $contentActive = url_is('admin/cms/pages*')
                 || url_is('admin/cms/entries*')
                 || url_is('admin/cms/collections*')
-                || url_is('admin/cms/form-submissions*');
+                || url_is('admin/cms/form-submissions*')
+                || url_is('admin/cms/forms*');
             ?>
             <?php if ($hasContentGroup): ?>
             <div x-data="{ open: <?= $contentActive ? 'true' : "localStorage.getItem('cms-g-content') !== 'false'" ?> }" class="space-y-1">
@@ -144,6 +147,12 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                         <a href="<?= site_url('admin/cms/collections') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/collections*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/collections*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-collection') ?>
                             <span><?= lang('Collections.collections_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.forms.read')): ?>
+                        <a href="<?= site_url('admin/cms/forms') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/forms*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/forms*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
+                            <?= ui_icon('clipboard-list') ?>
+                            <span><?= lang('Forms.title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.submissions.read')): ?>

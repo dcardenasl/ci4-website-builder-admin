@@ -60,7 +60,9 @@ $suggestedSortOrder = count($items);
                         <?php
                         $lang = is_array($lang) ? $lang : [];
                         $langId = isset($lang['id']) ? (int) $lang['id'] : (is_numeric($key) ? (int) $key : 0);
-                        if ($langId <= 0) { continue; }
+                        if ($langId <= 0) {
+                            continue;
+                        }
                         $langName = (string) ($lang['name'] ?? $lang['label'] ?? $langId);
                         ?>
                         <div class="p-4 space-y-3">

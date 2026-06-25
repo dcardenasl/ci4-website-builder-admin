@@ -19,10 +19,10 @@
 
 <?php
 $totalViews     = (int) ($overview['total_views']     ?? 0);
-$uniqueVisitors = (int) ($overview['unique_visitors'] ?? 0);
-$topPage        = (string) ($overview['top_page_title'] ?? $overview['top_page'] ?? '');
-$topReferrer    = (string) ($overview['top_referrer']  ?? '');
-?>
+    $uniqueVisitors = (int) ($overview['unique_visitors'] ?? 0);
+    $topPage        = (string) ($overview['top_page_title'] ?? $overview['top_page'] ?? '');
+    $topReferrer    = (string) ($overview['top_referrer']  ?? '');
+    ?>
 
 <!-- KPI Cards -->
 <section class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -99,9 +99,9 @@ $topReferrer    = (string) ($overview['top_referrer']  ?? '');
                                     <td class="<?= esc(table_td_class()) ?>">
                                         <span class="block truncate max-w-[200px]" title="<?= esc((string) ($page['url'] ?? '')) ?>">
                                             <?php
-                                            $pageLabel = (string) ($page['page_title'] ?? $page['url'] ?? '-');
-                                            $pageUrl   = (string) ($page['url'] ?? '');
-                                            ?>
+                                                $pageLabel = (string) ($page['page_title'] ?? $page['url'] ?? '-');
+                                $pageUrl   = (string) ($page['url'] ?? '');
+                                ?>
                                             <?= esc($pageLabel) ?>
                                             <?php if ($pageLabel !== $pageUrl && $pageUrl !== ''): ?>
                                                 <span class="block text-xs text-gray-400 truncate"><?= esc($pageUrl) ?></span>
@@ -163,24 +163,24 @@ $deviceMap = [
     'bot'     => lang('Analytics.device_bot'),
     'unknown' => lang('Analytics.device_unknown'),
 ];
-$deviceTotal = 0;
-foreach ($deviceMap as $key => $_label) {
-    $deviceTotal += (int) ($devices[$key] ?? 0);
-}
-?>
+    $deviceTotal = 0;
+    foreach ($deviceMap as $key => $_label) {
+        $deviceTotal += (int) ($devices[$key] ?? 0);
+    }
+    ?>
 <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
     <h3 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.device_title') ?></h3>
     <?php if ($deviceTotal > 0): ?>
         <div class="space-y-3">
             <?php foreach ($deviceMap as $key => $label): ?>
                 <?php
-                $count = (int) ($devices[$key] ?? 0);
+                    $count = (int) ($devices[$key] ?? 0);
                 $pct   = $deviceTotal > 0 ? round($count / $deviceTotal * 100, 1) : 0;
                 ?>
                 <div class="flex items-center gap-3">
                     <span class="w-20 text-sm text-gray-600 shrink-0"><?= esc($label) ?></span>
-                    <div class="flex-1 bg-gray-100 rounded-full h-2">
-                        <div class="bg-brand-500 h-2 rounded-full" style="width: <?= esc((string) $pct) ?>%"></div>
+                    <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-brand-500 h-full" style="width: <?= esc((string) $pct) ?>%"></div>
                     </div>
                     <span class="w-24 text-right text-sm text-gray-700 shrink-0"><?= esc(number_format($count)) ?> <span class="text-gray-400">(<?= esc((string) $pct) ?>%)</span></span>
                 </div>

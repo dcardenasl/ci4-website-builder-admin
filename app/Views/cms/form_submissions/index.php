@@ -13,7 +13,7 @@ $statusTabs = [
 ];
 
 $totalCount = array_sum($counts);
-$badgeClass = fn(string $color): string => match($color) {
+$badgeClass = fn (string $color): string => match($color) {
     'blue'   => 'bg-blue-50 text-blue-700 ring-blue-600/20',
     'green'  => 'bg-green-50 text-green-700 ring-green-600/20',
     'red'    => 'bg-red-50 text-red-700 ring-red-600/20',
@@ -124,7 +124,7 @@ $dataUrl = route_to('admin.cms.form_submissions.data') . ($activeStatus !== '' ?
                                     'spam'     => lang('FormSubmissions.status_spam'),
                                     'archived' => lang('FormSubmissions.status_archived'),
                                 ]);
-                                ?>
+?>
                                 <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
                                     :class="{
                                         'bg-blue-50 text-blue-700 ring-blue-600/20':      row.status === 'new',

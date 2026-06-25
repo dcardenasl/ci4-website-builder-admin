@@ -35,7 +35,7 @@
                     
                     <!-- Progress bar -->
                     <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: <?= esc($stat['percentage']) ?>%; background-color: #2563eb;"></div>
+                        <div class="bg-blue-600 h-full transition-all duration-500" style="width: <?= esc($stat['percentage']) ?>%; background-color: #2563eb;"></div>
                     </div>
                 </div>
 

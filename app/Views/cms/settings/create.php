@@ -92,12 +92,12 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                         <?php foreach ($languages as $lang): ?>
                             <?php
                                 $langId = (int) $lang['id'];
-                                if ($baseLanguageId !== null && $langId === $baseLanguageId) {
-                                    continue;
-                                }
-                                $langName = esc($lang['native_name'] ?? $lang['name']);
-                                $langCode = esc(strtoupper($lang['code']));
-                                $transValue = '';
+                            if ($baseLanguageId !== null && $langId === $baseLanguageId) {
+                                continue;
+                            }
+                            $langName = esc($lang['native_name'] ?? $lang['name']);
+                            $langCode = esc(strtoupper($lang['code']));
+                            $transValue = '';
                             ?>
                             <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
                                 <div class="flex items-center gap-2">

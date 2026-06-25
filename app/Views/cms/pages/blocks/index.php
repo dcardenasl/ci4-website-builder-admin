@@ -104,7 +104,12 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
             <?php
                 $blockDesc     = (string) ($blockType['description'] ?? '');
                 $blockCategory = (string) ($blockType['category'] ?? '');
-            ?>
+                $blockConfig   = is_array($block['block_config'] ?? null) ? $block['block_config'] : [];
+                $collectionKey = $blockConfig['collection_key'] ?? null;
+                $matchedCollectionId = ($collectionKey !== null && isset($collectionsMap[(string) $collectionKey]))
+                    ? $collectionsMap[(string) $collectionKey]
+                    : null;
+                ?>
             <div data-block-id="<?= esc($blockId) ?>"
                  x-data="{ expanded: false }"
                  class="border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group">
@@ -154,6 +159,18 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
                            class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
                             <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
                             <?= esc(lang('Pages.blocks_action_slides')) ?>
+                        </a>
+                        <?php endif; ?>
+                        <?php if (!empty($matchedCollectionId)): ?>
+                        <a href="<?= route_to('admin.cms.entries') . '?collection_id=' . $matchedCollectionId ?>"
+                           class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                            <?= ui_icon('list', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('Pages.blocks_action_collection_entries')) ?>
+                        </a>
+                        <a href="<?= route_to('admin.cms.entries.create') . '?collection_id=' . $matchedCollectionId ?>"
+                           class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                            <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('Pages.blocks_action_new_entry')) ?>
                         </a>
                         <?php endif; ?>
                         <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"

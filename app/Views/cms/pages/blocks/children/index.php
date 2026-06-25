@@ -108,6 +108,11 @@ $reorderUrl = route_to($ownerChildrenReorderRoute, $pageId, $instanceId);
                         break;
                     }
                 }
+                $blockConfig = is_array($child['block_config'] ?? null) ? $child['block_config'] : [];
+                $collectionKey = $blockConfig['collection_key'] ?? null;
+                $matchedCollectionId = ($collectionKey !== null && isset($collectionsMap[(string) $collectionKey]))
+                    ? $collectionsMap[(string) $collectionKey]
+                    : null;
                 ?>
                 <?php if ($previewImg !== ''): ?>
                     <div class="shrink-0 w-16 h-10 rounded overflow-hidden border border-gray-200">
@@ -138,6 +143,18 @@ $reorderUrl = route_to($ownerChildrenReorderRoute, $pageId, $instanceId);
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2 shrink-0">
+                    <?php if (!empty($matchedCollectionId)): ?>
+                    <a href="<?= route_to('admin.cms.entries') . '?collection_id=' . $matchedCollectionId ?>"
+                       class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                        <?= ui_icon('list', 'h-3.5 w-3.5') ?>
+                        <?= esc(lang('Pages.blocks_action_collection_entries')) ?>
+                    </a>
+                    <a href="<?= route_to('admin.cms.entries.create') . '?collection_id=' . $matchedCollectionId ?>"
+                       class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                        <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
+                        <?= esc(lang('Pages.blocks_action_new_entry')) ?>
+                    </a>
+                    <?php endif; ?>
                     <a href="<?= route_to($ownerType === 'entry' ? 'admin.cms.entries.blocks.edit' : 'admin.cms.pages.blocks.edit', $pageId, $childId) ?>"
                        class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
                         Editar

@@ -101,24 +101,15 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
             <?= csrf_field() ?>
             <input type="hidden" name="block_id" value="<?= esc((string) $blockIdValue) ?>">
 
-            <!-- Sort order + active -->
-            <div class="grid grid-cols-2 gap-4">
-                <?= view('components/form/number', [
-                    'name'     => 'sort_order',
-                    'label'    => 'Pages.block_sort_order_label',
-                    'required' => true,
-                    'value'    => $sortOrderValue,
-                    'help'     => 'Pages.block_sort_order_help',
-                    'errors'   => $errors ?? [],
-                ]) ?>
-                <div class="flex items-end pb-1">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" name="is_active" value="1"
-                               <?= $isActiveValue ? 'checked' : '' ?>
-                               class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                        <span class="text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></span>
-                    </label>
-                </div>
+            <!-- Hidden sort order and active checkbox -->
+            <input type="hidden" name="sort_order" value="<?= esc((string) $sortOrderValue) ?>">
+            <div class="flex items-center py-2">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" name="is_active" value="1"
+                           <?= $isActiveValue ? 'checked' : '' ?>
+                           class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                    <span class="text-sm font-medium text-gray-700"><?= esc(lang('Pages.block_active_label')) ?></span>
+                </label>
             </div>
 
             <!-- Schema-driven config fields -->
@@ -149,6 +140,11 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                 <span class="text-sm text-gray-600"><?= esc($cfLabel) ?></span>
                             </label>
                         <?php elseif ($cfType === 'select' && ! empty($cfOptions)): ?>
+                            <?php
+                            if ($cfVal !== '' && $cfVal !== null && is_scalar($cfVal) && ! in_array((string) $cfVal, array_map('strval', $cfOptions), true)) {
+                                $cfOptions[] = (string) $cfVal;
+                            }
+                            ?>
                             <select name="<?= esc($cfFieldName, 'attr') ?>"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                     <?= $cfReq ? 'required' : '' ?>>
