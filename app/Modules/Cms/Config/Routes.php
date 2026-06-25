@@ -186,4 +186,19 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('redirects/(:segment)/delete', '\App\Modules\Cms\Controllers\RedirectController::delete/$1', ['as' => 'admin.cms.redirects.delete', 'filter' => 'permission:cms.redirects.write']);
     $routes->get('redirects/export', '\App\Modules\Cms\Controllers\RedirectController::exportCsv', ['as' => 'admin.cms.redirects.export_csv', 'filter' => 'permission:cms.redirects.read']);
     $routes->post('redirects/import', '\App\Modules\Cms\Controllers\RedirectController::importCsv', ['as' => 'admin.cms.redirects.import_csv', 'filter' => 'permission:cms.redirects.write']);
+
+    // Forms (dynamic form builder)
+    $routes->get('forms', '\App\Modules\Cms\Controllers\FormController::index', ['as' => 'admin.cms.forms', 'filter' => 'permission:cms.forms.read']);
+    $routes->get('forms/data', '\App\Modules\Cms\Controllers\FormController::data', ['as' => 'admin.cms.forms.data', 'filter' => 'permission:cms.forms.read']);
+    $routes->get('forms/create', '\App\Modules\Cms\Controllers\FormController::create', ['as' => 'admin.cms.forms.create', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms', '\App\Modules\Cms\Controllers\FormController::store', ['as' => 'admin.cms.forms.store', 'filter' => 'permission:cms.forms.write']);
+    $routes->get('forms/(:num)', '\App\Modules\Cms\Controllers\FormController::show/$1', ['as' => 'admin.cms.forms.show', 'filter' => 'permission:cms.forms.read']);
+    $routes->get('forms/(:num)/edit', '\App\Modules\Cms\Controllers\FormController::edit/$1', ['as' => 'admin.cms.forms.edit', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms/(:num)', '\App\Modules\Cms\Controllers\FormController::update/$1', ['as' => 'admin.cms.forms.update', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms/(:num)/delete', '\App\Modules\Cms\Controllers\FormController::delete/$1', ['as' => 'admin.cms.forms.delete', 'filter' => 'permission:cms.forms.admin']);
+    // Field AJAX endpoints
+    $routes->post('forms/(:num)/fields', '\App\Modules\Cms\Controllers\FormController::storeField/$1', ['as' => 'admin.cms.forms.fields.store', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms/(:num)/fields/(:num)/update', '\App\Modules\Cms\Controllers\FormController::updateField/$1/$2', ['as' => 'admin.cms.forms.fields.update', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms/(:num)/fields/(:num)/delete', '\App\Modules\Cms\Controllers\FormController::deleteField/$1/$2', ['as' => 'admin.cms.forms.fields.delete', 'filter' => 'permission:cms.forms.write']);
+    $routes->post('forms/(:num)/fields/reorder', '\App\Modules\Cms\Controllers\FormController::reorderFields/$1', ['as' => 'admin.cms.forms.fields.reorder', 'filter' => 'permission:cms.forms.write']);
 });
