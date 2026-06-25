@@ -1,0 +1,106 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // Index
+    'title'    => 'Dynamic Forms',
+    'subtitle' => 'Manage your site contact and enquiry forms.',
+    'empty'    => 'No forms yet. Create your first form.',
+    'loading'  => 'Loading forms',
+    'search_placeholder' => 'Search by key or name...',
+
+    // Columns
+    'col_key'     => 'Key',
+    'col_name'    => 'Name',
+    'col_captcha' => 'CAPTCHA',
+    'col_fields'  => 'Fields',
+    'col_active'  => 'Active',
+    'col_actions' => 'Actions',
+
+    // Badges
+    'captcha_on' => 'On',
+    'captcha_off' => 'Off',
+
+    // Page titles
+    'create_title' => 'New Form',
+    'edit_title'   => 'Edit Form',
+
+    // Sections
+    'section_general'      => 'General',
+    'section_translations' => 'Translations',
+    'section_fields'       => 'Field Builder',
+
+    // Form fields — general
+    'field_key'           => 'Form Key',
+    'field_key_hint'      => 'Unique slug used in templates (e.g. contact). Alphanumeric, hyphens, underscores.',
+    'field_key_readonly'  => 'Form key cannot be changed after creation.',
+    'field_active'        => 'Active',
+    'field_captcha'       => 'Require CAPTCHA',
+    'field_captcha_hint'  => 'Enables validation for this form. reCAPTCHA keys are managed in CMS > Settings.',
+    'field_notify_email'  => 'Notification Email',
+    'field_notify_email_hint'       => 'Admin receives an email for every submission. Leave blank to disable.',
+    'field_autoreply'               => 'Send autoreply to user',
+    'field_autoreply_email_field'   => 'Email field key',
+    'field_autoreply_email_field_hint' => 'The field_key of the email field (e.g. email). Used to send the autoreply.',
+
+    // Form fields — translations
+    'field_name'            => 'Form Name',
+    'field_description'     => 'Description',
+    'field_submit_label'    => 'Submit Button Label',
+    'field_success_message' => 'Success Message',
+    'field_error_message'   => 'Generic Error Message',
+
+    // Field builder
+    'fields_empty'       => 'No fields yet. Add your first field.',
+    'btn_add_field'      => 'Add Field',
+    'required'           => 'Required',
+
+    // Field modal
+    'modal_create_field' => 'Add Field',
+    'modal_edit_field'   => 'Edit Field',
+
+    // Field form
+    'field_field_key'    => 'Field Key',
+    'field_field_type'   => 'Type',
+    'field_required'     => 'Required',
+    'field_key_required' => 'The field key is required.',
+    'field_label'        => 'Label',
+    'field_placeholder'  => 'Placeholder',
+    'field_help_text'    => 'Help Text',
+
+    // Field types
+    'field_type_text'     => 'Text',
+    'field_type_email'    => 'Email',
+    'field_type_phone'    => 'Phone',
+    'field_type_textarea' => 'Textarea',
+
+    // Buttons
+    'btn_create' => 'New Form',
+    'btn_save'   => 'Save',
+    'btn_cancel' => 'Cancel',
+    'btn_edit'   => 'Edit',
+    'btn_delete' => 'Delete',
+
+    // Confirmations
+    'confirm_delete'       => 'Delete this form? This action cannot be undone.',
+    'confirm_delete_field' => 'Delete this field? This cannot be undone.',
+
+    // Flash messages
+    'create_success' => 'Form created successfully.',
+    'create_failed'  => 'Could not create the form.',
+    'update_success' => 'Form updated successfully.',
+    'update_failed'  => 'Could not update the form.',
+    'delete_success' => 'Form deleted successfully.',
+    'delete_failed'  => 'Could not delete the form.',
+    'not_found'      => 'Form not found.',
+
+    // Field AJAX
+    'save_field_failed' => 'Could not save the field.',
+
+    // Show details page
+    'show_title'        => 'Form Details',
+    'translation_title' => 'Form Translations',
+    'fields_title'      => 'Form Fields',
+    'view_submissions'  => 'View Submissions',
+];
