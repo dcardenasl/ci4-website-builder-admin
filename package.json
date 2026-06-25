@@ -14,6 +14,10 @@
         "prepare": "husky"
     },
     "dependencies": {
+        "@tiptap/core": "^3.27.1",
+        "@tiptap/extension-link": "^3.27.1",
+        "@tiptap/extension-placeholder": "^3.27.1",
+        "@tiptap/starter-kit": "^3.27.1",
         "alpinejs": "^3.14.9",
         "lucide": "^1.16.0",
         "sortablejs": "^1.15.2"
@@ -21,6 +25,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@tailwindcss/cli": "^4.3.0",
+        "esbuild": "^0.28.1",
         "eslint": "^10.4.0",
         "husky": "^9.1.7",
         "lint-staged": "^17.0.5",
@@ -30,5 +35,8 @@
         "public/assets/js/**/*.js": [
             "eslint --fix"
         ]
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": ["esbuild", "@parcel/watcher"]
     }
 }

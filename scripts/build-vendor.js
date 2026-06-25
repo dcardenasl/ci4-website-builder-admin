@@ -24,3 +24,19 @@ filesToCopy.forEach(f => {
         process.exit(1);
     }
 });
+
+// Bundle Tiptap via esbuild JS API (avoids shell/pnpm interception)
+console.log('Bundling Tiptap...');
+const esbuild = require('esbuild');
+esbuild.build({
+    entryPoints: [path.join(__dirname, '../src/js/tiptap-bundle.js')],
+    bundle: true,
+    format: 'iife',
+    outfile: path.join(destDir, 'tiptap.bundle.js'),
+    minify: true,
+}).then(() => {
+    console.log('Successfully bundled Tiptap to public/assets/vendor/tiptap.bundle.js');
+}).catch(err => {
+    console.error('Error bundling Tiptap:', err);
+    process.exit(1);
+});

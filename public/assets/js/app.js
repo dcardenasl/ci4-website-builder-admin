@@ -3217,5 +3217,95 @@ window.handleGoogleCredentialResponse = (response) => {
     loginForm.submit();
 };
 
+/**
+ * Rich text editor component backed by Tiptap.
+ *
+ * Usage (PHP-rendered, static field name):
+ *   <div x-data="richTextEditor(initialHtml)" x-init="init()">
+ *     <input type="hidden" name="field_name" x-ref="hiddenInput" value="<?= $initial ?>">
+ *   </div>
+ *
+ * Usage (Alpine-rendered, dynamic field name):
+ *   <div x-data="richTextEditor('', `translations[${langIndex}][block_data][${fieldKey}]`)" x-init="init()">
+ *     <input type="hidden" :name="inputName" x-ref="hiddenInput">
+ *   </div>
+ *
+ * @param {string} initialContent - HTML content to pre-populate
+ * @param {string} [fieldName]    - Exposed as this.inputName for dynamic :name bindings
+ */
+window.richTextEditor = function richTextEditor(initialContent, fieldName) {
+    return {
+        editor: null,
+        inputName: fieldName || '',
+
+        init() {
+            if (typeof window.tiptap === 'undefined') {
+                // Tiptap bundle not loaded — leave the fallback textarea visible
+                return;
+            }
+
+            const { Editor, StarterKit, Link, Placeholder } = window.tiptap;
+
+            this.editor = new Editor({
+                element: this.$refs.editorEl,
+                extensions: [
+                    StarterKit,
+                    Link.configure({ openOnClick: false, autolink: true }),
+                    Placeholder.configure({ placeholder: 'Escribe aquí…' }),
+                ],
+                content: initialContent || '',
+                onUpdate: ({ editor }) => {
+                    const input = this.$refs.hiddenInput;
+                    if (input instanceof HTMLInputElement) {
+                        input.value = editor.getHTML();
+                    }
+                },
+            });
+
+            // Sync hidden input with initial content
+            const input = this.$refs.hiddenInput;
+            if (input instanceof HTMLInputElement) {
+                input.value = initialContent || '';
+            }
+        },
+
+        destroy() {
+            this.editor?.destroy();
+            this.editor = null;
+        },
+
+        // ── Toolbar helpers ───────────────────────────────────────────────
+
+        isActive(type, attrs) {
+            return this.editor?.isActive(type, attrs) ?? false;
+        },
+
+        bold()         { this.editor?.chain().focus().toggleBold().run(); },
+        italic()       { this.editor?.chain().focus().toggleItalic().run(); },
+        strike()       { this.editor?.chain().focus().toggleStrike().run(); },
+        code()         { this.editor?.chain().focus().toggleCode().run(); },
+        heading(level) { this.editor?.chain().focus().toggleHeading({ level }).run(); },
+        bulletList()   { this.editor?.chain().focus().toggleBulletList().run(); },
+        orderedList()  { this.editor?.chain().focus().toggleOrderedList().run(); },
+        blockquote()   { this.editor?.chain().focus().toggleBlockquote().run(); },
+        codeBlock()    { this.editor?.chain().focus().toggleCodeBlock().run(); },
+        hr()           { this.editor?.chain().focus().setHorizontalRule().run(); },
+        undo()         { this.editor?.chain().focus().undo().run(); },
+        redo()         { this.editor?.chain().focus().redo().run(); },
+        clearFormat()  { this.editor?.chain().focus().clearNodes().unsetAllMarks().run(); },
+
+        setLink() {
+            const prev = this.editor?.getAttributes('link').href || '';
+            const url  = window.prompt('URL del enlace:', prev);
+            if (url === null) return; // cancelled
+            if (url === '') {
+                this.editor?.chain().focus().extendMarkRange('link').unsetLink().run();
+                return;
+            }
+            this.editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        },
+    };
+};
+
 // End of IIFE — close the scope wrapper
 })();
