@@ -23,7 +23,8 @@ class FormSubmissionController extends BaseWebController
 
     public function index(): string
     {
-        $status = (string) ($this->request->getGet('status') ?? '');
+        $rawStatus = $this->request->getGet('status');
+        $status    = is_string($rawStatus) ? $rawStatus : '';
 
         // Load count badges for tab navigation
         $countsResponse = $this->safeApiCall(fn () => $this->submissionService->counts());
@@ -73,7 +74,8 @@ class FormSubmissionController extends BaseWebController
 
     public function updateStatus(string $id): RedirectResponse
     {
-        $status = (string) ($this->request->getPost('status') ?? '');
+        $rawStatus = $this->request->getPost('status');
+        $status    = is_string($rawStatus) ? $rawStatus : '';
 
         $allowed = ['new', 'read', 'replied', 'spam', 'archived'];
         if (! in_array($status, $allowed, true)) {

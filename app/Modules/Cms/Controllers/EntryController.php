@@ -63,10 +63,17 @@ class EntryController extends BaseWebController
 
     public function create(): string
     {
+        $collectionId = $this->request->getGet('collection_id');
+        $item = [];
+        if ($collectionId !== null && is_scalar($collectionId) && (int) $collectionId > 0) {
+            $item['collection_id'] = (int) $collectionId;
+        }
+
         return $this->render('cms/entries/create', [
             'title'       => lang('Entries.entries_create'),
             'collections' => $this->collectionsOptions(),
             'languages'   => $this->getLanguages(),
+            'item'        => $item,
         ]);
     }
 

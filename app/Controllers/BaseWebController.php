@@ -172,7 +172,7 @@ abstract class BaseWebController extends BaseController
      * The base language is the one that owns the canonical setting_value.
      * If no explicit default exists, fall back to the first language in the list.
      *
-     * @param array<int, array<string, mixed>> $languages
+     * @param array<mixed> $languages
      */
     protected function resolveBaseLanguageId(array $languages): ?int
     {
@@ -276,6 +276,10 @@ abstract class BaseWebController extends BaseController
      */
     protected function extractItems(array $response): array
     {
+        if (isset($response['ok']) && ! $response['ok']) {
+            return [];
+        }
+
         $payload = $response['data'] ?? [];
 
         // In paginated responses: { data: { data: [...], meta: {...} } }
@@ -296,6 +300,10 @@ abstract class BaseWebController extends BaseController
      */
     protected function extractData(array $response): array
     {
+        if (isset($response['ok']) && ! $response['ok']) {
+            return [];
+        }
+
         $payload = $response['data'] ?? [];
 
         // Avoid returning the nested 'data' array if the payload is a pagination wrapper,

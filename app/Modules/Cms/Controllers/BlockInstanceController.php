@@ -155,6 +155,7 @@ class BlockInstanceController extends BaseWebController
             'page'              => $page,
             'blocks'            => $blocks,
             'blockTypes'        => $typesIndexed,
+            'collectionsMap'    => $this->collectionsMap(),
             'publicSiteUrl'     => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
             'ownerType'         => $ownerType,
             'ownerLabel'        => $this->ownerLabel($ownerType),
@@ -195,6 +196,10 @@ class BlockInstanceController extends BaseWebController
                 cache()->save('cms_block_types_list', $types, 3600);
             }
         }
+        foreach ($types as &$bt) {
+            $this->injectDynamicFormOptions($bt);
+        }
+        unset($bt);
 
         // Fetch languages (cached)
         $languages = cache()->get('cms_active_languages');
@@ -352,7 +357,6 @@ class BlockInstanceController extends BaseWebController
         }
         $block = $this->extractData($blockResponse);
 
-        // Fetch schema from block type (cached)
         $typeCacheKey = 'cms_block_type_' . $block['block_id'];
         $blockType = cache()->get($typeCacheKey);
         if ($blockType === null) {
@@ -362,6 +366,7 @@ class BlockInstanceController extends BaseWebController
                 cache()->save($typeCacheKey, $blockType, 3600);
             }
         }
+        $this->injectDynamicFormOptions($blockType);
 
         // Fetch active languages (cached)
         $languages = cache()->get('cms_active_languages');
@@ -608,6 +613,7 @@ class BlockInstanceController extends BaseWebController
             'parentType'           => $parentType,
             'children'             => $children,
             'blockTypes'           => $typesIndexed,
+            'collectionsMap'       => $this->collectionsMap(),
             'ownerType'            => $ownerType,
             'ownerLabel'           => $this->ownerLabel($ownerType),
             'ownerBlocksRoute'     => $this->ownerRoutes($ownerType)['index'],
@@ -635,8 +641,120 @@ class BlockInstanceController extends BaseWebController
 
         $indexed = [];
         foreach ((array) $types as $t) {
+            $this->injectDynamicFormOptions($t);
             $indexed[(int) $t['id']] = $t;
         }
         return $indexed;
+    }
+
+    /**
+     * Dynamically inject active form keys as select options for contact_form blocks.
+     *
+     * @param array<string, mixed> $blockType
+     */
+    private function injectDynamicFormOptions(array &$blockType): void
+    {
+        $schema = is_array($blockType['schema_definition'] ?? [])
+            ? ($blockType['schema_definition'] ?? [])
+            : json_decode((string) ($blockType['schema_definition'] ?? '{}'), true);
+
+        $hasContactForm   = ($blockType['block_key'] ?? '') === 'contact_form';
+        $hasCollectionKey = isset($schema['config_fields']['collection_key']) || isset($blockType['config_fields']['collection_key']);
+
+        if (! $hasContactForm && ! $hasCollectionKey) {
+            return;
+        }
+
+        if ($hasContactForm) {
+            $forms = [];
+            try {
+                $formsResponse = $this->safeApiCall(
+                    fn () => service('formApiService')->list(['limit' => 100, 'is_active' => true])
+                );
+                if ($formsResponse['ok']) {
+                    $items = $this->extractItems($formsResponse);
+                    foreach ($items as $f) {
+                        if (! empty($f['form_key'])) {
+                            $forms[] = (string) $f['form_key'];
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[BlockInstanceController] Failed to fetch forms for options: ' . $e->getMessage());
+            }
+
+            if ($forms === []) {
+                $forms = ['contact'];
+            }
+
+            if (isset($schema['config_fields']['form_key'])) {
+                $schema['config_fields']['form_key']['type']    = 'select';
+                $schema['config_fields']['form_key']['options'] = $forms;
+            }
+
+            if (isset($blockType['config_fields']['form_key'])) {
+                $blockType['config_fields']['form_key']['type']    = 'select';
+                $blockType['config_fields']['form_key']['options'] = $forms;
+            }
+        }
+
+        if ($hasCollectionKey) {
+            $collections = [];
+            try {
+                $collectionsResponse = $this->safeApiCall(
+                    fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true])
+                );
+                if ($collectionsResponse['ok']) {
+                    $items = $this->extractItems($collectionsResponse);
+                    foreach ($items as $c) {
+                        if (! empty($c['collection_key'])) {
+                            $collections[] = (string) $c['collection_key'];
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[BlockInstanceController] Failed to fetch collections for options: ' . $e->getMessage());
+            }
+
+            if ($collections === []) {
+                $collections = ['noticias', 'cartelera'];
+            }
+
+            if (isset($schema['config_fields']['collection_key'])) {
+                $schema['config_fields']['collection_key']['type']    = 'select';
+                $schema['config_fields']['collection_key']['options'] = $collections;
+            }
+
+            if (isset($blockType['config_fields']['collection_key'])) {
+                $blockType['config_fields']['collection_key']['type']    = 'select';
+                $blockType['config_fields']['collection_key']['options'] = $collections;
+            }
+        }
+
+        $blockType['schema_definition'] = $schema;
+    }
+
+    /**
+     * @return array<string, int> Map of collection_key => collection_id
+     */
+    private function collectionsMap(): array
+    {
+        $collectionsMap = [];
+        try {
+            $collectionsResponse = $this->safeApiCall(
+                fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true])
+            );
+            if ($collectionsResponse['ok']) {
+                $items = $this->extractItems($collectionsResponse);
+                foreach ($items as $c) {
+                    if (! empty($c['collection_key']) && isset($c['id'])) {
+                        $collectionsMap[(string) $c['collection_key']] = (int) $c['id'];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[BlockInstanceController] Failed to fetch collections for map: ' . $e->getMessage());
+        }
+        return $collectionsMap;
     }
 }
