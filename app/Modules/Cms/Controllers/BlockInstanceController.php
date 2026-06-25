@@ -187,19 +187,8 @@ class BlockInstanceController extends BaseWebController
             return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
         }
 
-        // Fetch block types (cached)
-        $types = cache()->get('cms_block_types_list');
-        if ($types === null) {
-            $typesResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
-            $types = $typesResponse['ok'] ? $this->extractItems($typesResponse) : [];
-            if (! empty($types)) {
-                cache()->save('cms_block_types_list', $types, 3600);
-            }
-        }
-        foreach ($types as &$bt) {
-            $this->injectDynamicFormOptions($bt);
-        }
-        unset($bt);
+        $typesIndexed = $this->fetchBlockTypes();
+        $types = array_values($typesIndexed);
 
         // Fetch languages (cached)
         $languages = cache()->get('cms_active_languages');
@@ -223,7 +212,6 @@ class BlockInstanceController extends BaseWebController
                 $parentBlock = $this->extractData($parentResponse);
                 $parentBlockId = $parentBlock['block_id'] ?? null;
                 if ($parentBlockId) {
-                    $typesIndexed = $this->fetchBlockTypes();
                     $parentBlockType = $typesIndexed[$parentBlockId] ?? null;
                 }
             }
@@ -630,17 +618,14 @@ class BlockInstanceController extends BaseWebController
     /** @return array<int, array<string, mixed>> keyed by block type id */
     private function fetchBlockTypes(): array
     {
-        $types = cache()->get('cms_block_types_list');
-        if ($types === null) {
-            $typesResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
-            $types = $typesResponse['ok'] ? $this->extractItems($typesResponse) : [];
-            if (! empty($types)) {
-                cache()->save('cms_block_types_list', $types, 3600);
-            }
-        }
+        $types = service('blockCatalogService')->indexed();
 
         $indexed = [];
         foreach ((array) $types as $t) {
+            if (! is_array($t) || ! isset($t['id'])) {
+                continue;
+            }
+
             $this->injectDynamicFormOptions($t);
             $indexed[(int) $t['id']] = $t;
         }

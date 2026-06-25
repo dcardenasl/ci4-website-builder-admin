@@ -227,12 +227,15 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         </label>
                         <?php endif; ?>
                         <?php if ($ft === 'richtext'): ?>
-                            <textarea name="<?= esc($fieldName, 'attr') ?>"
-                                      rows="6"
-                                      class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm font-mono"
-                                      placeholder="HTML permitido…"
-                                      <?= $freq ? 'required' : '' ?>><?= esc((string) old($fieldName, $fval)) ?></textarea>
-                            <p class="text-[10px] text-gray-400">Soporta HTML</p>
+                            <?php $initialValue = (string) old($fieldName, $fval);
+                            $required = $freq;
+                            $dynamicName = false; ?>
+                            <?= view('partials/richtext_editor', [
+                                'fieldName'    => $fieldName,
+                                'initialValue' => $initialValue,
+                                'required'     => $required,
+                                'dynamicName'  => false,
+                            ]) ?>
                             <?= render_field_error($fieldName) ?>
                         <?php elseif (in_array($ft, ['text', 'textarea'])): ?>
                             <textarea name="<?= esc($fieldName, 'attr') ?>"
@@ -247,10 +250,12 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
                                     </svg>
                                 </span>
-                                <input type="url"
+                                <input type="text"
                                        name="<?= esc($fieldName, 'attr') ?>"
                                        value="<?= esc((string) old($fieldName, $fval)) ?>"
-                                       placeholder="https://"
+                                       placeholder="https:// o /ruta"
+                                       inputmode="url"
+                                       spellcheck="false"
                                        class="block w-full pl-9 rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
                                        <?= $freq ? 'required' : '' ?>>
                             </div>
@@ -378,10 +383,12 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                                     </div>
                                                 </template>
                                                 <template x-if="subField.type === 'url'">
-                                                    <input type="url"
+                                                    <input type="text"
                                                            :name="`translations[${langIdx}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                            x-model="item[subKey]"
-                                                           placeholder="https://"
+                                                           placeholder="https:// o /ruta"
+                                                           inputmode="url"
+                                                           spellcheck="false"
                                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
                                                 </template>
                                                 <template x-if="subField.type === 'text' || subField.type === 'textarea'">
@@ -439,4 +446,3 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
     'content' => $blockEditContent,
     'bodyClass' => 'space-y-5',
 ]) ?>
-

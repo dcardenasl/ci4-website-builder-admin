@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <details class="group rounded-xl border border-gray-200 bg-white">
+        <details class="group rounded-xl border border-gray-200 bg-white" open>
             <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
                 <span><?= esc(lang('Collections.section_taxonomy')) ?></span>
                 <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
@@ -205,6 +205,7 @@
                 <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_help')) ?></p>
                 <?= view('cms/collections/partials/block_template_editor', [
                     'value' => old('block_template', ''),
+                    'blockTypes' => $blockTypes ?? [],
                     'errors' => $errors ?? []
                 ]) ?>
             </div>

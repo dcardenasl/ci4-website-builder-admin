@@ -280,14 +280,8 @@ class PageController extends BaseWebController
      */
     private function fetchBlockTypesIndexed(): array
     {
-        $types = cache()->get('cms_block_types_list');
-        if ($types === null) {
-            $r     = $this->safeApiCall(fn () => service('blockTypeApiService')->list(['limit' => 100]));
-            $types = $r['ok'] ? $this->extractItems($r) : [];
-            if (! empty($types)) {
-                cache()->save('cms_block_types_list', $types, 3600);
-            }
-        }
+        $types = service('blockCatalogService')->indexed();
+
         $indexed = [];
         foreach ((array) $types as $t) {
             if (is_array($t) && isset($t['id'])) {

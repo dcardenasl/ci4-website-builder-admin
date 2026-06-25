@@ -1,172 +1,632 @@
 <?php
 /**
- * Reusable block_template JSON editor partial.
+ * Structured block template builder used by collection create/edit forms.
  *
  * Variables:
- *   $value   string  Current JSON value (empty = no template)
- *   $errors  array   Validation errors keyed by field name
+ *   $value       mixed  Existing template value (array or JSON string)
+ *   $blockTypes  array  Active block types from the CMS catalog
+ *   $errors      array  Validation errors keyed by field name
  */
-$value  = $value ?? '';
+
+$value = $value ?? '';
 $errors = $errors ?? [];
-$hasError = !empty($errors['block_template']);
+$blockTypes = $blockTypes ?? [];
+
+$availableBlockTypes = [];
+foreach ((array) $blockTypes as $blockType) {
+    if (! is_array($blockType) || empty($blockType['block_key'])) {
+        continue;
+    }
+
+    $availableBlockTypes[] = [
+        'id' => (int) ($blockType['id'] ?? 0),
+        'block_key' => (string) ($blockType['block_key'] ?? ''),
+        'name' => (string) ($blockType['name'] ?? $blockType['block_key'] ?? ''),
+        'description' => (string) ($blockType['description'] ?? ''),
+        'icon' => (string) ($blockType['icon'] ?? 'layout-template'),
+    ];
+}
+
+$blockTypeByKey = [];
+foreach ($availableBlockTypes as $blockType) {
+    $blockTypeByKey[$blockType['block_key']] = $blockType;
+}
+
+$toBoolean = static function (mixed $value, bool $default = false): bool {
+    if ($value === null || $value === '') {
+        return $default;
+    }
+
+    if (is_bool($value)) {
+        return $value;
+    }
+
+    if (is_int($value) || is_float($value)) {
+        return (int) $value !== 0;
+    }
+
+    if (is_string($value)) {
+        $normalized = strtolower(trim($value));
+        if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+            return true;
+        }
+
+        if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
+            return false;
+        }
+    }
+
+    return (bool) $value;
+};
+
+$toInteger = static function (mixed $value, int $default): int {
+    if ($value === null || $value === '') {
+        return $default;
+    }
+
+    if (is_int($value)) {
+        return $value;
+    }
+
+    if (is_float($value)) {
+        return (int) $value;
+    }
+
+    if (is_string($value) && is_numeric($value)) {
+        return (int) $value;
+    }
+
+    return $default;
+};
+
+$rawTemplate = old('block_template', $value);
+$template = null;
+if (is_array($rawTemplate)) {
+    $template = $rawTemplate;
+} elseif (is_string($rawTemplate) && trim($rawTemplate) !== '') {
+    $decoded = json_decode($rawTemplate, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        $template = $decoded;
+    }
+}
+
+if (! is_array($template)) {
+    $template = ['version' => '1.0', 'blocks' => []];
+}
+
+$template['version'] = (string) ($template['version'] ?? '1.0');
+$templateBlocks = is_array($template['blocks'] ?? null) ? $template['blocks'] : [];
+
+$normalizeDefaultValue = static function (mixed $value): array {
+    if (is_bool($value)) {
+        return ['type' => 'boolean', 'value' => $value ? '1' : '0'];
+    }
+
+    if (is_int($value) || is_float($value)) {
+        return ['type' => 'number', 'value' => (string) $value];
+    }
+
+    if ($value === null) {
+        return ['type' => 'string', 'value' => ''];
+    }
+
+    if (is_scalar($value)) {
+        return ['type' => 'string', 'value' => (string) $value];
+    }
+
+    return ['type' => 'string', 'value' => json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: ''];
+};
+
+$initialRows = [];
+foreach ($templateBlocks as $index => $block) {
+    if (! is_array($block)) {
+        continue;
+    }
+
+    $blockKey = (string) ($block['block_key'] ?? '');
+    if ($blockKey === '') {
+        continue;
+    }
+
+    $resolvedType = $blockTypeByKey[$blockKey] ?? null;
+    $defaults = [];
+    if (isset($block['block_config_defaults']) && is_array($block['block_config_defaults'])) {
+        foreach ($block['block_config_defaults'] as $defaultKey => $defaultValue) {
+            $normalized = $normalizeDefaultValue($defaultValue);
+            $defaults[] = [
+                'key' => (string) $defaultKey,
+                'type' => $normalized['type'],
+                'value' => $normalized['value'],
+            ];
+        }
+    }
+
+    $initialRows[] = [
+        'block_key' => $blockKey,
+        'label' => (string) ($block['label'] ?? ($resolvedType['name'] ?? $blockKey)),
+        'help_text' => (string) ($block['help_text'] ?? ($resolvedType['description'] ?? '')),
+        'sort_order' => $toInteger($block['sort_order'] ?? null, $index + 1),
+        'required' => $toBoolean($block['required'] ?? null, true),
+        'locked' => $toBoolean($block['locked'] ?? null, false),
+        'defaults' => $defaults,
+    ];
+}
+
+$initialJson = json_encode([
+    'version' => '1.0',
+    'blocks' => $initialRows,
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+if ($initialJson === false) {
+    $initialJson = '{"version":"1.0","blocks":[]}';
+}
+
+$blockTypesJson = json_encode($availableBlockTypes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+if ($blockTypesJson === false) {
+    $blockTypesJson = '[]';
+}
 ?>
-<div x-data="blockTemplateEditor(<?= esc(json_encode($value), 'attr') ?>)" class="space-y-3">
 
-    <textarea
-        name="block_template"
-        x-ref="editor"
-        x-model="raw"
-        @input="validate()"
-        rows="10"
-        :class="error ? 'border-red-300 focus:ring-red-500' : (valid ? 'border-green-300' : 'border-gray-300')"
-        class="w-full font-mono text-xs leading-relaxed p-3 rounded-lg border bg-white focus:outline-none focus:ring-1 transition-colors resize-y"
-        placeholder='{"version":"1.0","blocks":[{"block_key":"hero","sort_order":1,"required":true,"locked":false}]}'
-    ><?= esc($value) ?></textarea>
+<div x-data="collectionBlockTemplateBuilder(<?= esc($blockTypesJson, 'attr') ?>, <?= esc($initialJson, 'attr') ?>)" x-init="init()" class="space-y-6">
+    <input type="hidden" name="block_template" x-ref="blockTemplateInput" :value="json">
 
-    <!-- Server-side error -->
-    <?php if ($hasError): ?>
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_catalog_title') ?? 'Block catalog') ?></h5>
+                <p class="mt-1 text-xs text-gray-500">
+                    <?= esc(lang('Collections.block_template_builder_catalog_help') ?? 'Pick blocks from the catalog and build the collection template.') ?>
+                </p>
+            </div>
+            <div class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700">
+                <span><?= esc(lang('Collections.block_template_builder_count') ?? 'Template blocks') ?>:</span>
+                <span x-text="rows.length"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <template x-for="bt in blockTypes" :key="bt.id">
+                <button type="button"
+                    @click="addBlock(bt.block_key)"
+                    class="group relative flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-center transition-all hover:border-brand-400 hover:bg-brand-50/40">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-brand-100 group-hover:text-brand-600">
+                        <i :data-lucide="bt.icon || 'layout-template'" class="h-5 w-5"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-800" x-text="bt.name"></span>
+                    <code class="text-[10px] font-mono text-gray-400" x-text="bt.block_key"></code>
+                    <span class="text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100">
+                        <?= esc(lang('Collections.block_template_builder_add_block') ?? 'Add to template') ?>
+                    </span>
+                </button>
+            </template>
+        </div>
+
+        <div x-show="blockTypes.length === 0" x-cloak class="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+            <?= esc(lang('Collections.block_template_builder_no_blocks') ?? 'No active block types are available.') ?>
+        </div>
+    </section>
+
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" x-ref="templateList">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title') ?? 'Template structure') ?></h5>
+                <p class="mt-1 text-xs text-gray-500">
+                    <?= esc(lang('Collections.block_template_builder_template_help') ?? 'Use the template rows to define order, labels, defaults, and lock state.') ?>
+                </p>
+            </div>
+            <button type="button"
+                @click="sync()"
+                class="<?= esc(action_button_class()) ?> px-3 py-1.5 text-xs font-medium">
+                <?= esc(lang('App.save') ?? 'Save') ?>
+            </button>
+        </div>
+
+        <div class="mt-4 space-y-4">
+            <template x-for="(row, index) in rows" :key="`${row.block_key}-${index}-${row.sort_order}`">
+                <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-100 px-2 text-xs font-semibold text-brand-700" x-text="row.sort_order"></span>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900" x-text="blockTypeLabel(row.block_key)"></p>
+                                <code class="text-[10px] font-mono text-gray-500" x-text="row.block_key"></code>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button"
+                                @click="moveBlock(index, -1)"
+                                :disabled="index === 0"
+                                class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_up') ?? 'Move up', 'js') ?>' : ''">
+                                ↑
+                            </button>
+                            <button type="button"
+                                @click="moveBlock(index, 1)"
+                                :disabled="index === rows.length - 1"
+                                class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_down') ?? 'Move down', 'js') ?>' : ''">
+                                ↓
+                            </button>
+                            <button type="button"
+                                @click="removeBlock(index)"
+                                class="rounded-lg border border-red-200 bg-white px-2 py-1 text-xs text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
+                                <?= esc(lang('App.remove')) ?>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_label') ?? 'Label') ?></label>
+                            <input type="text"
+                                x-model="row.label"
+                                @input="sync()"
+                                class="<?= esc(input_class('block_template')) ?>"
+                                placeholder="<?= esc(lang('Collections.block_template_builder_block_label_placeholder') ?? 'Public label shown in admin') ?>">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_help') ?? 'Help text') ?></label>
+                            <input type="text"
+                                x-model="row.help_text"
+                                @input="sync()"
+                                class="<?= esc(input_class('block_template')) ?>"
+                                placeholder="<?= esc(lang('Collections.block_template_builder_block_help_placeholder') ?? 'Optional guidance for editors') ?>">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_key') ?? 'Block type') ?></label>
+                            <select x-model="row.block_key" @change="onBlockKeyChanged(index)" class="<?= esc(input_class('block_template')) ?>">
+                                <option value=""><?= esc(lang('App.select')) ?></option>
+                                <template x-for="bt in blockTypes" :key="bt.block_key">
+                                    <option :value="bt.block_key" x-text="`${bt.name} (${bt.block_key})`"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
+                                <input type="checkbox" x-model="row.required" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                <?= esc(lang('Collections.block_template_builder_required') ?? 'Required') ?>
+                            </label>
+                            <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
+                                <input type="checkbox" x-model="row.locked" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                <?= esc(lang('Collections.block_template_builder_locked') ?? 'Locked') ?>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-lg border border-gray-200 bg-white p-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <h6 class="text-xs font-semibold text-gray-700"><?= esc(lang('Collections.block_template_builder_defaults_title') ?? 'Default values') ?></h6>
+                                <p class="mt-0.5 text-[11px] text-gray-500"><?= esc(lang('Collections.block_template_builder_defaults_help') ?? 'Key/value pairs used to seed block_config.') ?></p>
+                            </div>
+                            <button type="button" @click="addDefault(index)" class="rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-700 transition-colors hover:bg-brand-100">
+                                <?= esc(lang('Collections.block_template_builder_add_default') ?? 'Add value') ?>
+                            </button>
+                        </div>
+
+                        <div class="mt-3 space-y-2">
+                            <template x-for="(defaultRow, defaultIndex) in row.defaults" :key="defaultIndex">
+                                <div class="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_10rem_minmax(0,1fr)_auto]">
+                                    <input type="text"
+                                        x-model="defaultRow.key"
+                                        @input="sync()"
+                                        class="<?= esc(input_class('block_template')) ?>"
+                                        placeholder="<?= esc(lang('Collections.block_template_builder_default_key_placeholder') ?? 'config_key') ?>">
+
+                                    <select x-model="defaultRow.type" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
+                                        <option value="string">string</option>
+                                        <option value="number">number</option>
+                                        <option value="boolean">boolean</option>
+                                    </select>
+
+                                    <template x-if="defaultRow.type === 'boolean'">
+                                        <select x-model="defaultRow.value" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
+                                            <option value="1"><?= esc(lang('App.yes')) ?></option>
+                                            <option value="0"><?= esc(lang('App.no')) ?></option>
+                                        </select>
+                                    </template>
+
+                                    <template x-if="defaultRow.type === 'number'">
+                                        <input type="number"
+                                            x-model="defaultRow.value"
+                                            @input="sync()"
+                                            class="<?= esc(input_class('block_template')) ?>"
+                                            placeholder="0">
+                                    </template>
+
+                                    <template x-if="defaultRow.type === 'string'">
+                                        <input type="text"
+                                            x-model="defaultRow.value"
+                                            @input="sync()"
+                                            class="<?= esc(input_class('block_template')) ?>"
+                                            placeholder="<?= esc(lang('Collections.block_template_builder_default_value_placeholder') ?? 'Default value') ?>">
+                                    </template>
+
+                                    <button type="button"
+                                        @click="removeDefault(index, defaultIndex)"
+                                        class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
+                                        <?= esc(lang('App.remove')) ?>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <p x-show="row.defaults.length === 0" x-cloak class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-400">
+                                <?= esc(lang('Collections.block_template_builder_defaults_empty') ?? 'No default values yet.') ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <p x-show="rows.length === 0" x-cloak class="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-sm text-gray-500">
+                <?= esc(lang('Collections.block_template_builder_empty') ?? 'Pick blocks from the catalog to start building the template.') ?>
+            </p>
+        </div>
+    </section>
+
+    <details class="rounded-xl border border-gray-200 bg-white p-4">
+        <summary class="cursor-pointer select-none text-sm font-medium text-gray-700">
+            <?= esc(lang('Collections.block_template_builder_preview_json') ?? 'Preview JSON') ?>
+        </summary>
+        <pre class="mt-3 max-h-80 overflow-auto rounded-lg bg-gray-950 p-4 text-xs leading-relaxed text-gray-100" x-text="json"></pre>
+    </details>
+
+    <?php if (! empty($errors['block_template'])): ?>
         <p class="text-xs text-red-600"><?= esc($errors['block_template']) ?></p>
     <?php endif; ?>
-
-    <!-- Client-side feedback -->
-    <div x-show="error" x-cloak class="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-        <svg class="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div>
-            <p class="text-xs font-medium text-red-900"><?= esc(lang('Collections.block_template_invalid_json')) ?></p>
-            <p class="text-xs text-red-700 mt-0.5" x-text="error"></p>
-        </div>
-    </div>
-
-    <div x-show="valid && !error" x-cloak class="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-lg">
-        <svg class="h-4 w-4 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        <p class="text-xs text-green-800">
-            <?= esc(lang('Collections.block_template_valid')) ?>
-            (<span x-text="blockCount"></span> <?= esc(lang('Collections.block_template_blocks')) ?>)
-        </p>
-    </div>
-
-    <div x-show="!raw || raw.trim() === ''" x-cloak class="text-xs text-gray-400 italic">
-        <?= esc(lang('Collections.block_template_empty_hint')) ?>
-    </div>
-
-    <!-- Reference -->
-    <details class="text-xs">
-        <summary class="cursor-pointer text-brand-600 hover:text-brand-700 select-none"><?= esc(lang('Collections.block_template_see_example')) ?></summary>
-        <div class="mt-2 rounded-lg border border-gray-200 bg-gray-900 text-gray-100 p-3 overflow-x-auto">
-<pre class="text-xs leading-relaxed">{
-  "version": "1.0",
-  "blocks": [
-    {
-      "block_key": "hero",
-      "label": "<?= esc(lang('Collections.block_template_example_hero')) ?>",
-      "sort_order": 1,
-      "required": true,
-      "locked": false,
-      "help_text": "<?= esc(lang('Collections.block_template_example_hero_help')) ?>",
-      "block_config_defaults": {}
-    },
-    {
-      "block_key": "rich_text",
-      "label": "<?= esc(lang('Collections.block_template_example_body')) ?>",
-      "sort_order": 2,
-      "required": true,
-      "locked": true
-    }
-  ]
-}</pre>
-        </div>
-        <p class="mt-1.5 text-gray-500"><?= esc(lang('Collections.block_template_field_reference')) ?></p>
-        <ul class="mt-1 ml-4 list-disc space-y-0.5 text-gray-500">
-            <li><strong>block_key</strong> — <?= esc(lang('Collections.block_template_ref_block_key')) ?></li>
-            <li><strong>sort_order</strong> — <?= esc(lang('Collections.block_template_ref_sort_order')) ?></li>
-            <li><strong>required</strong> — <?= esc(lang('Collections.block_template_ref_required')) ?></li>
-            <li><strong>locked</strong> — <?= esc(lang('Collections.block_template_ref_locked')) ?></li>
-            <li><strong>block_config_defaults</strong> — <?= esc(lang('Collections.block_template_ref_defaults')) ?></li>
-        </ul>
-    </details>
 </div>
 
 <script>
-function blockTemplateEditor(initial) {
+function collectionBlockTemplateBuilder(blockTypes, initialTemplate) {
     return {
-        raw: initial || '',
-        error: '',
+        blockTypes: Array.isArray(blockTypes) ? blockTypes : [],
+        rows: [],
+        json: '',
         valid: false,
-        blockCount: 0,
+        error: '',
+        initialTemplate: initialTemplate && typeof initialTemplate === 'object' ? initialTemplate : { version: '1.0', blocks: [] },
+        toBoolean(value, defaultValue = false) {
+            if (value === null || value === undefined || value === '') {
+                return defaultValue;
+            }
+
+            if (typeof value === 'boolean') {
+                return value;
+            }
+
+            if (typeof value === 'number') {
+                return value !== 0;
+            }
+
+            if (typeof value === 'string') {
+                const normalized = value.trim().toLowerCase();
+                if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+                    return true;
+                }
+                if (['0', 'false', 'no', 'off'].includes(normalized)) {
+                    return false;
+                }
+            }
+
+            return Boolean(value);
+        },
+
+        toInteger(value, defaultValue) {
+            const parsed = Number.parseInt(value, 10);
+            return Number.isFinite(parsed) ? parsed : defaultValue;
+        },
 
         init() {
-            if (this.raw.trim()) {
-                this.validate();
+            this.rows = this.normalizeRowsFromTemplate(this.initialTemplate);
+            this.sync();
+        },
+
+        blockTypeLabel(blockKey) {
+            const item = this.blockTypes.find((bt) => bt.block_key === blockKey);
+            return item ? item.name : (blockKey || 'Block');
+        },
+
+        blockTypeByKey(blockKey) {
+            return this.blockTypes.find((bt) => bt.block_key === blockKey) || null;
+        },
+
+        createRowFromBlockType(blockType) {
+            return {
+                block_key: blockType.block_key || '',
+                label: blockType.name || blockType.block_key || '',
+                help_text: blockType.description || '',
+                sort_order: this.rows.length + 1,
+                required: true,
+                locked: false,
+                defaults: [],
+            };
+        },
+
+        normalizeRowsFromTemplate(template) {
+            if (!template || typeof template !== 'object' || !Array.isArray(template.blocks)) {
+                return [];
+            }
+
+            return template.blocks
+                .filter((block) => block && typeof block === 'object' && typeof block.block_key === 'string' && block.block_key !== '')
+                .map((block, index) => {
+                    const defaults = [];
+                    const rawDefaults = block.block_config_defaults && typeof block.block_config_defaults === 'object'
+                        ? block.block_config_defaults
+                        : {};
+
+                    Object.entries(rawDefaults).forEach(([key, value]) => {
+                        defaults.push({
+                            key,
+                            type: typeof value === 'boolean' ? 'boolean' : (typeof value === 'number' ? 'number' : 'string'),
+                            value: typeof value === 'boolean' ? (value ? '1' : '0') : String(value ?? ''),
+                        });
+                    });
+
+                    const blockType = this.blockTypeByKey(block.block_key);
+                    return {
+                        block_key: block.block_key,
+                        label: typeof block.label === 'string' && block.label !== '' ? block.label : (blockType?.name || block.block_key),
+                        help_text: typeof block.help_text === 'string' ? block.help_text : (blockType?.description || ''),
+                        sort_order: Number.isInteger(block.sort_order) ? block.sort_order : this.toInteger(block.sort_order, index + 1),
+                        required: this.toBoolean(block.required, true),
+                        locked: this.toBoolean(block.locked, false),
+                        defaults,
+                    };
+                })
+                .sort((a, b) => a.sort_order - b.sort_order);
+        },
+
+        normalizeSortOrders() {
+            this.rows = this.rows.map((row, index) => ({
+                ...row,
+                sort_order: index + 1,
+                defaults: Array.isArray(row.defaults) ? row.defaults : [],
+            }));
+        },
+
+        addBlock(blockKey) {
+            const blockType = this.blockTypeByKey(blockKey);
+            if (!blockType) {
+                return;
+            }
+
+            this.rows.push(this.createRowFromBlockType(blockType));
+            this.sync();
+            this.scrollToTemplate();
+        },
+
+        removeBlock(index) {
+            this.rows.splice(index, 1);
+            this.sync();
+        },
+
+        moveBlock(index, delta) {
+            const targetIndex = index + delta;
+            if (targetIndex < 0 || targetIndex >= this.rows.length) {
+                return;
+            }
+
+            const rows = [...this.rows];
+            const [row] = rows.splice(index, 1);
+            rows.splice(targetIndex, 0, row);
+            this.rows = rows;
+            this.sync();
+        },
+
+        onBlockKeyChanged(index) {
+            const blockType = this.blockTypeByKey(this.rows[index]?.block_key || '');
+            if (!blockType) {
+                this.sync();
+                return;
+            }
+
+            const row = this.rows[index];
+            if (!row.label) {
+                row.label = blockType.name || row.block_key;
+            }
+            if (!row.help_text) {
+                row.help_text = blockType.description || '';
+            }
+            this.sync();
+        },
+
+        addDefault(blockIndex) {
+            if (!this.rows[blockIndex]) {
+                return;
+            }
+
+            this.rows[blockIndex].defaults.push({
+                key: '',
+                type: 'string',
+                value: '',
+            });
+            this.sync();
+        },
+
+        removeDefault(blockIndex, defaultIndex) {
+            if (!this.rows[blockIndex] || !Array.isArray(this.rows[blockIndex].defaults)) {
+                return;
+            }
+
+            this.rows[blockIndex].defaults.splice(defaultIndex, 1);
+            this.sync();
+        },
+
+        castDefaultValue(defaultRow) {
+            if (!defaultRow) {
+                return null;
+            }
+
+            if (defaultRow.type === 'boolean') {
+                return defaultRow.value === '1' || defaultRow.value === 1 || defaultRow.value === true || defaultRow.value === 'true';
+            }
+
+            if (defaultRow.type === 'number') {
+                const parsed = Number(defaultRow.value);
+                return Number.isFinite(parsed) ? parsed : null;
+            }
+
+            return String(defaultRow.value ?? '');
+        },
+
+        serializeDefaults(defaultRows) {
+            const defaults = {};
+            (Array.isArray(defaultRows) ? defaultRows : []).forEach((defaultRow) => {
+                const key = String(defaultRow?.key ?? '').trim();
+                if (!key) {
+                    return;
+                }
+
+                defaults[key] = this.castDefaultValue(defaultRow);
+            });
+            return defaults;
+        },
+
+        buildTemplate() {
+            const blocks = this.rows
+                .filter((row) => String(row.block_key || '').trim() !== '')
+                .map((row, index) => {
+                    const label = String(row.label || '').trim();
+                    const helpText = String(row.help_text || '').trim();
+                    return {
+                        block_key: String(row.block_key || '').trim(),
+                        label: label !== '' ? label : undefined,
+                        sort_order: index + 1,
+                        required: Boolean(row.required),
+                        locked: Boolean(row.locked),
+                        help_text: helpText !== '' ? helpText : undefined,
+                        block_config_defaults: this.serializeDefaults(row.defaults),
+                    };
+                });
+
+            return {
+                version: '1.0',
+                blocks,
+            };
+        },
+
+        sync() {
+            this.normalizeSortOrders();
+            const template = this.buildTemplate();
+            this.json = JSON.stringify(template, null, 2);
+            this.valid = template.blocks.length > 0;
+            this.error = '';
+
+            if (this.$refs.blockTemplateInput) {
+                this.$refs.blockTemplateInput.value = this.json;
             }
         },
 
-        validate() {
-            const input = this.raw.trim();
-            this.error  = '';
-            this.valid  = false;
-            this.blockCount = 0;
-
-            if (!input) {
-                return;
-            }
-
-            let data;
-            try {
-                data = JSON.parse(input);
-            } catch (e) {
-                this.error = e.message;
-                return;
-            }
-
-            if (!data || typeof data !== 'object') {
-                this.error = 'Must be a JSON object';
-                return;
-            }
-
-            if (data.version !== '1.0') {
-                this.error = 'version must be "1.0"';
-                return;
-            }
-
-            if (!Array.isArray(data.blocks)) {
-                this.error = 'blocks must be an array';
-                return;
-            }
-
-            if (data.blocks.length === 0) {
-                this.error = 'blocks must have at least one item';
-                return;
-            }
-
-            const sortOrders = [];
-            for (let i = 0; i < data.blocks.length; i++) {
-                const block = data.blocks[i];
-
-                if (!block.block_key || typeof block.block_key !== 'string') {
-                    this.error = `Block ${i}: block_key is required`;
-                    return;
+        scrollToTemplate() {
+            this.$nextTick(() => {
+                if (this.$refs.templateList && typeof this.$refs.templateList.scrollIntoView === 'function') {
+                    this.$refs.templateList.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-
-                if (!/^[a-z][a-z0-9_]*$/.test(block.block_key)) {
-                    this.error = `Block ${i}: block_key must match ^[a-z][a-z0-9_]*$`;
-                    return;
-                }
-
-                if (typeof block.sort_order !== 'number' || !Number.isInteger(block.sort_order) || block.sort_order < 1) {
-                    this.error = `Block ${i}: sort_order must be a positive integer`;
-                    return;
-                }
-
-                if (sortOrders.includes(block.sort_order)) {
-                    this.error = `Duplicate sort_order ${block.sort_order}`;
-                    return;
-                }
-
-                sortOrders.push(block.sort_order);
-            }
-
-            this.valid      = true;
-            this.blockCount = data.blocks.length;
+            });
         }
     };
 }

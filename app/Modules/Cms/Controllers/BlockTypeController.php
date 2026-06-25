@@ -89,6 +89,8 @@ class BlockTypeController extends BaseWebController
             return $this->failApi($response, lang('BlockTypes.block_types_create_failed'));
         }
 
+        $this->invalidateBlockCatalogCache();
+
         return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_create_success'));
     }
 
@@ -126,6 +128,8 @@ class BlockTypeController extends BaseWebController
             return $this->failApi($response, lang('BlockTypes.block_types_update_failed'));
         }
 
+        $this->invalidateBlockCatalogCache();
+
         return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_update_success'));
     }
 
@@ -137,7 +141,14 @@ class BlockTypeController extends BaseWebController
             return $this->failApi($response, lang('BlockTypes.block_types_delete_failed'), route_to('admin.cms.block_types'), false);
         }
 
+        $this->invalidateBlockCatalogCache();
+
         return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_delete_success'));
+    }
+
+    private function invalidateBlockCatalogCache(): void
+    {
+        cache()->delete('cms_block_types_active_catalog');
     }
 
 

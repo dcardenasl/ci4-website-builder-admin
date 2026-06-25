@@ -23,6 +23,14 @@ class CollectionStoreRequest extends BaseFormRequest
         ];
     }
 
+    public function data(): array
+    {
+        $data = parent::data();
+        $data['translations'] = $this->postArray('translations');
+
+        return $data;
+    }
+
     public function rules(): array
     {
         return [
@@ -46,9 +54,9 @@ class CollectionStoreRequest extends BaseFormRequest
     protected function normalizeTranslations(): array
     {
         $translations = [];
-        $rawTranslations = $this->request->getPost('translations');
+        $rawTranslations = $this->postArray('translations');
 
-        if (! is_array($rawTranslations)) {
+        if ($rawTranslations === []) {
             return [];
         }
 

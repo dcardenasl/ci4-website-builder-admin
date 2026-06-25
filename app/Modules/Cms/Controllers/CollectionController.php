@@ -7,6 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\CollectionStoreRequest;
 use App\Modules\Cms\Requests\CollectionUpdateRequest;
+use App\Modules\Cms\Services\BlockCatalogServiceInterface;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,11 +17,13 @@ use Psr\Log\LoggerInterface;
 class CollectionController extends BaseWebController
 {
     protected CollectionApiServiceInterface $collectionService;
+    protected BlockCatalogServiceInterface $blockCatalogService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->collectionService = service('collectionApiService');
+        $this->blockCatalogService = service('blockCatalogService');
     }
 
     public function index(): string
@@ -73,8 +76,9 @@ class CollectionController extends BaseWebController
     public function create(): string
     {
         return $this->render('cms/collections/create', [
-            'title'     => lang('Collections.collections_create'),
-            'languages' => $this->getLanguages(),
+            'title'      => lang('Collections.collections_create'),
+            'languages'  => $this->getLanguages(),
+            'blockTypes' => $this->blockCatalogService->all(),
         ]);
     }
 
@@ -104,9 +108,10 @@ class CollectionController extends BaseWebController
         }
 
         return $this->render('cms/collections/edit', [
-            'title'     => lang('Collections.collections_edit'),
-            'item'      => $this->extractData($response),
-            'languages' => $this->getLanguages(),
+            'title'      => lang('Collections.collections_edit'),
+            'item'       => $this->extractData($response),
+            'languages'   => $this->getLanguages(),
+            'blockTypes'  => $this->blockCatalogService->all(),
         ]);
     }
 
@@ -159,8 +164,5 @@ class CollectionController extends BaseWebController
 
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
     }
-
-
-
 
 }

@@ -13,6 +13,7 @@
 <?php ob_start(); ?>
 <form method="post" action="<?= route_to('admin.cms.collections.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <?= csrf_field() ?>
+        <input type="hidden" name="current_id" value="<?= esc((string) ($item['id'] ?? '')) ?>">
         <div class="lg:col-span-2 space-y-6">
         <?php $checkSlugBase = route_to('admin.cms.collections.check_slug'); ?>
         <?php $currentCollectionId = (string) ($item['id'] ?? ''); ?>
@@ -216,7 +217,7 @@
         <?php endif; ?>
 
         <!-- Block Template Section -->
-        <details class="group rounded-xl border border-gray-200 bg-white" <?= !empty($item['block_template']) ? 'open' : '' ?>>
+        <details class="group rounded-xl border border-gray-200 bg-white" open>
             <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
                 <span>
                     <?= esc(lang('Collections.section_block_template')) ?>
@@ -238,6 +239,7 @@ if ($templateValue === '' && !empty($item['block_template'])) {
 ?>
                 <?= view('cms/collections/partials/block_template_editor', [
     'value' => $templateValue,
+    'blockTypes' => $blockTypes ?? [],
     'errors' => $errors ?? []
 ]) ?>
             </div>
