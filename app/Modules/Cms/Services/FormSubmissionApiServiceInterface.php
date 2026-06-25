@@ -6,7 +6,10 @@ namespace App\Modules\Cms\Services;
 
 interface FormSubmissionApiServiceInterface
 {
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $filters
+     * @return array<string, mixed>
+     */
     public function list(array $filters = []): array;
 
     /** @return array<string, mixed> */

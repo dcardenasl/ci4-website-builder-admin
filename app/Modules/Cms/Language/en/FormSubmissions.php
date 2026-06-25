@@ -20,6 +20,8 @@ return [
     'submissions_empty'           => 'No submissions yet.',
     'submissions_empty_desc'      => 'Form submissions will appear here.',
 
+    'sidebar_label' => 'Submissions',
+
     'status_new'    => 'New',
     'status_read'   => 'Read',
     'status_replied' => 'Replied',

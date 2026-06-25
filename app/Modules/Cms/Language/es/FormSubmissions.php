@@ -20,6 +20,8 @@ return [
     'submissions_empty'           => 'Sin envíos aún.',
     'submissions_empty_desc'      => 'Los envíos de formulario aparecerán aquí.',
 
+    'sidebar_label' => 'Envíos',
+
     'status_new'    => 'Nuevo',
     'status_read'   => 'Leído',
     'status_replied' => 'Respondido',

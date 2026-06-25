@@ -112,6 +112,8 @@ return [
     'blocks_action_edit'          => 'Editar',
     'blocks_action_delete'        => 'Eliminar',
     'blocks_action_slides'        => 'Slides',
+    'blocks_action_collection_entries' => 'Entradas',
+    'blocks_action_new_entry'     => 'Nueva',
     'blocks_action_preview'       => 'Ver detalles del tipo de bloque',
     'blocks_action_collapse'      => 'Ocultar detalles',
     'blocks_view_page'            => 'Ver Página',
