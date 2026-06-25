@@ -116,4 +116,9 @@ return [
     'frequency_monthly' => 'Monthly',
     'frequency_yearly'  => 'Yearly',
     'frequency_never'   => 'Never',
+
+    // Block template banner (entry edit)
+    'block_template_notice_title' => 'This collection has a fixed block template',
+    'block_template_notice_body'  => 'The {0} block(s) below are pre-defined. Locked blocks (🔒) cannot be deleted. Edit their content via "Manage Blocks".',
+    'block_template_manage_link'  => 'Manage Blocks',
 ];

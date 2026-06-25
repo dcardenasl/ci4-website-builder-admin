@@ -123,10 +123,10 @@
 
                     <?php
                     $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
-                    ?>
+            ?>
                     <?php foreach ($languages as $index => $lang): ?>
                         <?php
-                        $transValue = [];
+                $transValue = [];
                         foreach ($translations as $translation) {
                             if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
                                 $transValue = $translation;

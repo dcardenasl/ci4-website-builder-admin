@@ -69,6 +69,28 @@
 
 
 
+        <!-- Block Template Banner -->
+        <?php if (!empty($blockTemplate['blocks'])): ?>
+            <div class="flex items-start gap-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3">
+                <svg class="h-4 w-4 text-brand-600 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-brand-900"><?= esc(lang('Entries.block_template_notice_title')) ?></p>
+                    <p class="mt-0.5 text-xs text-brand-700"><?= esc(lang('Entries.block_template_notice_body', [count($blockTemplate['blocks'])])) ?></p>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
+                        <?php foreach ($blockTemplate['blocks'] as $block): ?>
+                            <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium <?= !empty($block['locked']) ? 'bg-amber-100 text-amber-800' : 'bg-brand-100 text-brand-700' ?>">
+                                <?php if (!empty($block['locked'])): ?>
+                                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <?php endif; ?>
+                                <?= esc($block['label'] ?? $block['block_key'] ?? '') ?>
+                            </span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <a href="<?= route_to('admin.cms.entries.blocks', (string) ($item['id'] ?? '')) ?>" class="flex-shrink-0 text-xs font-medium text-brand-600 hover:text-brand-800 underline underline-offset-2 mt-0.5"><?= esc(lang('Entries.block_template_manage_link')) ?></a>
+            </div>
+        <?php endif; ?>
+
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php

@@ -59,6 +59,24 @@ return [
 
     'section_taxonomy'                => 'Taxonomy',
     'section_seo_defaults'            => 'SEO Defaults',
+    'section_block_template'          => 'Block Template (optional)',
+
+    // Block template editor
+    'block_template_help'              => 'Define a fixed block structure that all entries in this collection will inherit. If empty, editors can add blocks freely.',
+    'block_template_invalid_json'      => 'Invalid JSON:',
+    'block_template_valid'             => 'Valid template —',
+    'block_template_blocks'            => 'blocks',
+    'block_template_empty_hint'        => 'No template defined — entries will use free-form blocks.',
+    'block_template_see_example'       => 'Show example & field reference',
+    'block_template_example_hero'      => 'Cover image',
+    'block_template_example_hero_help' => 'Large image with title and CTA button',
+    'block_template_example_body'      => 'Main content',
+    'block_template_field_reference'   => 'Available fields per block item:',
+    'block_template_ref_block_key'     => 'Identifier matching an active block type (required)',
+    'block_template_ref_sort_order'    => 'Unique integer; controls display order (required)',
+    'block_template_ref_required'      => 'Boolean; marks the block as mandatory (default: true)',
+    'block_template_ref_locked'        => 'Boolean; prevents editors from deleting this block (default: false)',
+    'block_template_ref_defaults'      => 'Object; initial values written to block_config on creation',
 
     // Frequency options for changefreq
     'frequency_always'  => 'Always',

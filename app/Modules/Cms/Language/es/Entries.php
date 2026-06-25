@@ -116,4 +116,9 @@ return [
     'frequency_monthly' => 'Mensualmente',
     'frequency_yearly'  => 'Anualmente',
     'frequency_never'   => 'Nunca',
+
+    // Block template banner (entry edit)
+    'block_template_notice_title' => 'Esta colección tiene una plantilla de bloques fija',
+    'block_template_notice_body'  => 'Los {0} bloque(s) abajo están predefinidos. Los bloques con 🔒 no pueden eliminarse. Edita su contenido en "Gestionar Bloques".',
+    'block_template_manage_link'  => 'Gestionar Bloques',
 ];

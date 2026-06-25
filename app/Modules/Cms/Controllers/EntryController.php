@@ -7,6 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\EntryStoreRequest;
 use App\Modules\Cms\Requests\EntryUpdateRequest;
+use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use App\Modules\Cms\Services\EntryApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,11 +17,13 @@ use Psr\Log\LoggerInterface;
 class EntryController extends BaseWebController
 {
     protected EntryApiServiceInterface $entryService;
+    protected CollectionApiServiceInterface $collectionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
-        $this->entryService = service('entryApiService');
+        $this->entryService      = service('entryApiService');
+        $this->collectionService = service('collectionApiService');
     }
 
     public function index(): string
@@ -102,12 +105,44 @@ class EntryController extends BaseWebController
             return $this->withError(lang('Entries.entries_not_found'), route_to('admin.cms.entries'));
         }
 
+        $item           = $this->extractData($response);
+        $blockTemplate  = $this->resolveBlockTemplate($item);
+
         return $this->render('cms/entries/edit', [
-            'title'       => lang('Entries.entries_edit'),
-            'item'        => $this->extractData($response),
-            'collections' => $this->collectionsOptions(),
-            'languages'   => $this->getLanguages(),
+            'title'           => lang('Entries.entries_edit'),
+            'item'            => $item,
+            'collections'     => $this->collectionsOptions(),
+            'languages'       => $this->getLanguages(),
+            'blockTemplate'   => $blockTemplate,
         ]);
+    }
+
+    /**
+     * Fetches block_template from the entry's parent collection (null if none).
+     *
+     * @param array<string, mixed> $item
+     * @return array<string, mixed>|null
+     */
+    private function resolveBlockTemplate(array $item): ?array
+    {
+        $collectionId = $item['collection_id'] ?? null;
+        if (empty($collectionId)) {
+            return null;
+        }
+
+        $response = $this->safeApiCall(fn () => $this->collectionService->get((string) $collectionId));
+        if (! $response['ok']) {
+            return null;
+        }
+
+        $collection = $this->extractData($response);
+        $template   = $collection['block_template'] ?? null;
+
+        if (!is_array($template) || empty($template['blocks'])) {
+            return null;
+        }
+
+        return $template;
     }
 
     public function update(string $id): RedirectResponse

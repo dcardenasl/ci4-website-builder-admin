@@ -19,6 +19,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'requires_approval',
             'enables_categories',
             'enables_tags',
+            'block_template',
         ];
     }
 
@@ -33,6 +34,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'requires_approval' => 'permit_empty|in_list[0,1]',
             'enables_categories' => 'permit_empty|in_list[0,1]',
             'enables_tags' => 'permit_empty|in_list[0,1]',
+            'block_template' => 'permit_empty',
             'translations' => 'permit_empty',
             'translations.*.slug' => 'required_with[translations]|string|min_length[1]|max_length[150]',
         ];
@@ -76,7 +78,7 @@ class CollectionStoreRequest extends BaseFormRequest
 
     public function payload(): array
     {
-        return [
+        $payload = [
             'collection_key' => $this->postString('collection_key'),
             'default_sitemap_priority' => $this->postString('default_sitemap_priority') ?: '0.5',
             'default_changefreq' => $this->postString('default_changefreq') ?: 'weekly',
@@ -87,5 +89,12 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
             'translations' => $this->normalizeTranslations(),
         ];
+
+        $rawTemplate = $this->postString('block_template');
+        if ($rawTemplate !== '') {
+            $payload['block_template'] = $rawTemplate;
+        }
+
+        return $payload;
     }
 }

@@ -215,6 +215,34 @@
             </div>
         <?php endif; ?>
 
+        <!-- Block Template Section -->
+        <details class="group rounded-xl border border-gray-200 bg-white" <?= !empty($item['block_template']) ? 'open' : '' ?>>
+            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+                <span>
+                    <?= esc(lang('Collections.section_block_template')) ?>
+                    <?php if (!empty($item['block_template'])): ?>
+                        <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-brand-100 text-brand-800">
+                            <?= count($item['block_template']['blocks'] ?? []) ?> <?= esc(lang('Collections.block_template_blocks')) ?>
+                        </span>
+                    <?php endif; ?>
+                </span>
+                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+            </summary>
+            <div class="px-4 pb-4 pt-2 border-t border-gray-100">
+                <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_help')) ?></p>
+                <?php
+                    $templateValue = old('block_template', '');
+if ($templateValue === '' && !empty($item['block_template'])) {
+    $templateValue = json_encode($item['block_template'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+}
+?>
+                <?= view('cms/collections/partials/block_template_editor', [
+    'value' => $templateValue,
+    'errors' => $errors ?? []
+]) ?>
+            </div>
+        </details>
+
         </div>
         <aside class="space-y-6">
             <?php ob_start(); ?>

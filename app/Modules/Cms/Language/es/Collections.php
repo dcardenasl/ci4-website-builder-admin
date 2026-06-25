@@ -59,6 +59,24 @@ return [
 
     'section_taxonomy'                => 'Taxonomía',
     'section_seo_defaults'            => 'SEO por Defecto',
+    'section_block_template'          => 'Plantilla de Bloques (opcional)',
+
+    // Block template editor
+    'block_template_help'              => 'Define una estructura fija de bloques que todas las entradas de esta colección heredarán. Si está vacío, los editores pueden agregar bloques libremente.',
+    'block_template_invalid_json'      => 'JSON inválido:',
+    'block_template_valid'             => 'Plantilla válida —',
+    'block_template_blocks'            => 'bloques',
+    'block_template_empty_hint'        => 'Sin plantilla definida — las entradas usarán bloques libres.',
+    'block_template_see_example'       => 'Ver ejemplo y referencia de campos',
+    'block_template_example_hero'      => 'Imagen portada',
+    'block_template_example_hero_help' => 'Imagen grande con título y botón CTA',
+    'block_template_example_body'      => 'Contenido principal',
+    'block_template_field_reference'   => 'Campos disponibles por bloque:',
+    'block_template_ref_block_key'     => 'Identificador que corresponde a un tipo de bloque activo (requerido)',
+    'block_template_ref_sort_order'    => 'Entero único; controla el orden de visualización (requerido)',
+    'block_template_ref_required'      => 'Booleano; marca el bloque como obligatorio (predeterminado: true)',
+    'block_template_ref_locked'        => 'Booleano; impide que los editores eliminen este bloque (predeterminado: false)',
+    'block_template_ref_defaults'      => 'Objeto; valores iniciales escritos en block_config al crear',
 
     // Frequency options for changefreq
     'frequency_always'  => 'Siempre',
