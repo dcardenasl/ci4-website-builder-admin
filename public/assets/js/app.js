@@ -19,7 +19,7 @@ const isDev = String(document.documentElement.dataset.env || '').toLowerCase() =
 const devError = (...args) => { if (isDev) console.error(...args); };
 
 /**
- * Hydrates Lucide icon placeholders in the DOM.
+ * Hydrates Lucide icon placeholders in the DOM without blocking the UI.
  *
  * @returns {boolean} True if Lucide was available and icons were rendered, false otherwise
  */
@@ -28,10 +28,13 @@ const renderLucideIcons = () => {
         return false;
     }
 
-    window.lucide.createIcons({
-        attrs: {
-            'stroke-width': 1.8
-        }
+    // Render icons asynchronously to avoid blocking the main thread
+    window.requestAnimationFrame(() => {
+        window.lucide.createIcons({
+            attrs: {
+                'stroke-width': 1.8
+            }
+        });
     });
 
     return true;
@@ -39,7 +42,7 @@ const renderLucideIcons = () => {
 
 /**
  * Retries icon hydration until the Lucide CDN script is ready.
- * Polls up to 20 times at 150 ms intervals, then gives up gracefully.
+ * Polls up to 20 times at 500 ms intervals, then gives up gracefully.
  *
  * @returns {void}
  */
@@ -54,7 +57,7 @@ const bootLucideIcons = () => {
         if (renderLucideIcons() || attempts >= 20) {
             clearInterval(interval);
         }
-    }, 150);
+    }, 500);
 };
 
 window.formFieldBuilder = (config = {}) => {
@@ -2804,62 +2807,184 @@ document.addEventListener('alpine:init', () => {
 
     // ---------------------------------------------------------------------------
     // blockSorter — drag & drop ordering for block instance lists (SortableJS)
+    // Robust implementation with lifecycle management and error handling
     // ---------------------------------------------------------------------------
     Alpine.data('blockSorter', (reorderUrl = '') => ({
         saving: false,
         saved: false,
         dirty: false,
         _list: null,
+        _sortable: null,
+        _saveTimeoutId: null,
+        _abortController: null,
 
         init() {
-            const list = this.$el.querySelector('[data-sortable-list]');
-            if (!list || typeof Sortable === 'undefined') return;
-            this._list = list;
+            if (!reorderUrl || typeof Sortable === 'undefined') {
+                devError('[blockSorter] Missing reorderUrl or Sortable library');
+                return;
+            }
 
-            Sortable.create(list, {
-                handle: '[data-drag-handle]',
-                animation: 150,
-                ghostClass: 'opacity-40',
-                onEnd: () => {
-                    this.dirty = true;
-                    this.saved = false;
-                },
+            const list = this.$el.querySelector('[data-sortable-list]') || this.$el.querySelector('#block-sortable-list');
+            if (!list) {
+                devError('[blockSorter] Sortable list element not found');
+                return;
+            }
+
+            this._list = list;
+            // eslint-disable-next-line no-undef
+            this._abortController = new AbortController();
+
+            // Clean up any existing instance before creating new one
+            this._cleanupSortable();
+
+            try {
+                this._sortable = Sortable.create(list, {
+                    handle: '[data-drag-handle]',
+                    animation: 150,
+                    ghostClass: 'opacity-40',
+                    onEnd: () => {
+                        this.dirty = true;
+                        this.saved = false;
+                    },
+                });
+            } catch (err) {
+                devError('[blockSorter] Failed to create Sortable instance:', err);
+            }
+
+            // Register cleanup when element is removed from DOM
+            this._registerMutationObserver();
+        },
+
+        _registerMutationObserver() {
+             
+            if (typeof MutationObserver === 'undefined') return;
+
+            // eslint-disable-next-line no-undef
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    for (const node of mutation.removedNodes) {
+                        if (node === this.$el || this.$el.contains?.(node)) {
+                            this.destroy();
+                            observer.disconnect();
+                            return;
+                        }
+                    }
+                }
             });
+
+            observer.observe(this.$el.parentNode || document.body, { childList: true, subtree: true });
+        },
+
+        _cleanupSortable() {
+            if (this._sortable && typeof this._sortable.destroy === 'function') {
+                try {
+                    this._sortable.destroy();
+                } catch (err) {
+                    devError('[blockSorter] Error destroying Sortable:', err);
+                }
+            }
+            this._sortable = null;
+        },
+
+        destroy() {
+            // Clear any pending timeouts
+            if (this._saveTimeoutId) {
+                clearTimeout(this._saveTimeoutId);
+                this._saveTimeoutId = null;
+            }
+
+            // Cancel any in-flight requests
+            if (this._abortController) {
+                this._abortController.abort();
+                this._abortController = null;
+            }
+
+            // Clean up Sortable instance
+            this._cleanupSortable();
+
+            // Reset state
+            this._list = null;
+            this.saving = false;
+            this.saved = false;
+            this.dirty = false;
         },
 
         saveOrder() {
-            const list = this._list;
-            if (!list) return;
+            if (!this._list) {
+                devError('[blockSorter] List reference is null');
+                return;
+            }
 
-            const items = list.querySelectorAll('[data-block-id]');
+            if (!reorderUrl) {
+                devError('[blockSorter] Reorder URL is not configured');
+                return;
+            }
+
+            const items = this._list.querySelectorAll('[data-block-id], [data-id]');
+            if (items.length === 0) {
+                devError('[blockSorter] No items found to reorder');
+                return;
+            }
+
             const orders = {};
             items.forEach((el, index) => {
-                const id = el.getAttribute('data-block-id');
+                const id = el.getAttribute('data-block-id') || el.getAttribute('data-id');
                 if (id) orders[id] = index + 1;
             });
 
+            if (Object.keys(orders).length === 0) {
+                devError('[blockSorter] No valid item IDs found');
+                return;
+            }
+
             this.saving = true;
-            this.saved  = false;
+            this.saved = false;
+
+            // Clear previous timeout
+            if (this._saveTimeoutId) {
+                clearTimeout(this._saveTimeoutId);
+                this._saveTimeoutId = null;
+            }
 
             const csrfInput = document.querySelector('input[name^="ci4_"][name$="_csrf_token"]')
                           || document.querySelector('input[name="csrf_token"]');
-            const csrfName  = csrfInput?.name  || 'csrf_token';
+            const csrfName = csrfInput?.name || 'csrf_token';
             const csrfToken = csrfInput?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
             const body = new URLSearchParams({ [csrfName]: csrfToken });
             Object.entries(orders).forEach(([id, pos]) => body.append(`orders[${id}]`, String(pos)));
 
-            fetch(reorderUrl, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body })
-                .then(r => r.json())
-                .then(() => {
-                    this.saving = false;
-                    this.saved  = true;
-                    this.dirty  = false;
-                    setTimeout(() => { this.saved = false; }, 2500);
+            fetch(reorderUrl, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body,
+                signal: this._abortController?.signal,
+            })
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error(`HTTP ${r.status}`);
+                    }
+                    return r.json();
                 })
-                .catch(() => {
-                    this.saving = false;
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: 'Error al guardar el orden' } }));
+                .then(() => {
+                    if (this.saving) {
+                        this.saving = false;
+                        this.saved = true;
+                        this.dirty = false;
+                        this._saveTimeoutId = setTimeout(() => { this.saved = false; }, 2500);
+                    }
+                })
+                .catch((err) => {
+                    if (err.name === 'AbortError') {
+                        return;
+                    }
+                    devError('[blockSorter] Save order error:', err);
+                    if (this.saving) {
+                        this.saving = false;
+                        window.dispatchEvent(new CustomEvent('toast', {
+                            detail: { type: 'error', message: 'Error al guardar el orden' },
+                        }));
+                    }
                 });
         },
     }));
@@ -3006,14 +3131,22 @@ const bootSlugFields = () => {
     });
 };
 
+let lucideBootstrapped = false;
+
 document.addEventListener('DOMContentLoaded', () => {
-    bootLucideIcons();
+    if (!lucideBootstrapped) {
+        bootLucideIcons();
+        lucideBootstrapped = true;
+    }
     bootSlugFields();
     bootSessionExpiryWatcher();
 });
 
 window.addEventListener('load', () => {
-    bootLucideIcons();
+    if (!lucideBootstrapped) {
+        bootLucideIcons();
+        lucideBootstrapped = true;
+    }
 });
 
 /**
