@@ -292,4 +292,146 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
 
         $result->assertRedirectTo(site_url('admin/cms/pages/1/blocks'));
     }
+
+    public function testEditRendersWithCollectionOptions(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('get')
+            ->with('1', 'page', '10')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'id' => 10,
+                    'block_id' => 5,
+                    'parent_instance_id' => null,
+                    'block_config' => ['collection_key' => 'noticias_custom'],
+                    'translations' => [],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('get')
+            ->with(5)
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'id' => 5,
+                    'block_key' => 'news_grid',
+                    'schema_definition' => [
+                        'config_fields' => [
+                            'collection_key' => ['type' => 'string', 'label' => 'Clave de Colección (CMS)', 'required' => true, 'default' => 'noticias'],
+                        ],
+                    ],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => 1, 'is_active' => true],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $langMock);
+
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['collection_key' => 'noticias_active'],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
+        ])->get('/admin/cms/pages/1/blocks/10/edit');
+
+        $result->assertStatus(200);
+        $result->assertSee('noticias_active');
+        $result->assertSee('noticias_custom');
+    }
+
+    public function testIndexRendersCollectionActionButtons(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('list')
+            ->with('1', 'page')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    [
+                        'id' => 10,
+                        'block_id' => 5,
+                        'parent_instance_id' => null,
+                        'block_config' => ['collection_key' => 'noticias_active'],
+                        'is_active' => true,
+                        'translations' => [],
+                    ]
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    [
+                        'id' => 5,
+                        'block_key' => 'news_grid',
+                        'name' => 'Grilla de Noticias',
+                        'icon' => 'newspaper',
+                        'schema_definition' => [
+                            'config_fields' => [
+                                'collection_key' => ['type' => 'string', 'label' => 'Clave de Colección (CMS)', 'required' => true, 'default' => 'noticias'],
+                            ],
+                        ],
+                    ]
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 42, 'collection_key' => 'noticias_active'],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.read']],
+        ])->get('/admin/cms/pages/1/blocks');
+
+        $result->assertStatus(200);
+        $result->assertSee('/admin/cms/entries?collection_id=42');
+        $result->assertSee('/admin/cms/entries/create?collection_id=42');
+    }
 }

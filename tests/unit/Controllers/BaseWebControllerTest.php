@@ -98,7 +98,25 @@ final class BaseWebControllerTest extends CIUnitTestCase
         $this->assertSame([], $this->ctrl->callExtractItems(['data' => 'not-an-array']));
     }
 
+    public function testExtractItemsReturnsEmptyArrayWhenOkIsFalse(): void
+    {
+        $response = [
+            'ok' => false,
+            'data' => [['id' => 1]],
+        ];
+        $this->assertSame([], $this->ctrl->callExtractItems($response));
+    }
+
     // ─── extractData() ───────────────────────────────────────────────────────
+
+    public function testExtractDataReturnsEmptyArrayWhenOkIsFalse(): void
+    {
+        $response = [
+            'ok' => false,
+            'data' => ['id' => 1],
+        ];
+        $this->assertSame([], $this->ctrl->callExtractData($response));
+    }
 
     public function testExtractDataReturnsSingleObjectPayload(): void
     {
