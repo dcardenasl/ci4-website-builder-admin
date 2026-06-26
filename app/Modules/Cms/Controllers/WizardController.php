@@ -93,6 +93,31 @@ class WizardController extends BaseWebController
             ->setJSON($statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? []));
     }
 
+    /**
+     * @return array{ok:bool,status:int,data:mixed,raw:mixed,headers:mixed,messages:mixed,fieldErrors:mixed}
+     */
+    private function proxyBlockRequest(string $ownerType, int $ownerId, string $method, ?int $blockId = null, array $payload = [], array $filters = []): array
+    {
+        $domainClient = service('domainApiClient');
+        $path = $ownerType === 'entry'
+            ? "/cms/entries/{$ownerId}/blocks"
+            : "/cms/pages/{$ownerId}/blocks";
+
+        if ($blockId !== null) {
+            $path .= '/' . $blockId;
+        }
+
+        return $this->safeApiCall(static function () use ($domainClient, $method, $path, $payload, $filters) {
+            return match (strtoupper($method)) {
+                'GET'    => $domainClient->get($path, $filters),
+                'POST'   => $domainClient->post($path, $payload),
+                'PUT'    => $domainClient->put($path, $payload),
+                'DELETE' => $domainClient->delete($path),
+                default  => throw new \InvalidArgumentException('Unsupported block request method: ' . $method),
+            };
+        });
+    }
+
     public function uploadImage(): ResponseInterface
     {
         $file = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
@@ -147,10 +172,43 @@ class WizardController extends BaseWebController
         );
     }
 
+    public function createEntryBlock(int $entryId): ResponseInterface
+    {
+        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+            ? ($this->request->getJSON(true) ?? [])
+            : [];
+
+        if (empty($payload)) {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
+        }
+
+        $result = $this->proxyBlockRequest('entry', $entryId, 'POST', null, $payload);
+
+        $statusCode = (int) ($result['status'] ?? 502);
+        if ($statusCode < 100 || $statusCode > 599) {
+            $statusCode = 502;
+        }
+
+        return $this->response->setStatusCode($statusCode)->setJSON(
+            $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? [])
+        );
+    }
+
     public function deleteBlock(int $pageId, int $blockId): ResponseInterface
     {
-        $domainClient = service('domainApiClient');
-        $result       = $this->safeApiCall(static fn () => $domainClient->delete("/cms/pages/{$pageId}/blocks/{$blockId}"));
+        $result = $this->proxyBlockRequest('page', $pageId, 'DELETE', $blockId);
+
+        $statusCode = (int) ($result['status'] ?? 502);
+        if ($statusCode < 100 || $statusCode > 599) {
+            $statusCode = 502;
+        }
+
+        return $this->response->setStatusCode($statusCode)->setJSON(['ok' => $statusCode < 300]);
+    }
+
+    public function deleteEntryBlock(int $entryId, int $blockId): ResponseInterface
+    {
+        $result = $this->proxyBlockRequest('entry', $entryId, 'DELETE', $blockId);
 
         $statusCode = (int) ($result['status'] ?? 502);
         if ($statusCode < 100 || $statusCode > 599) {
@@ -162,8 +220,18 @@ class WizardController extends BaseWebController
 
     public function pageBlocks(int $pageId): ResponseInterface
     {
-        $domainClient = service('domainApiClient');
-        $result = $this->safeApiCall(static fn () => $domainClient->get("/cms/pages/{$pageId}/blocks", ['include_translations' => 1, 'limit' => 100]));
+        $result = $this->proxyBlockRequest('page', $pageId, 'GET', null, [], ['include_translations' => 1, 'limit' => 100]);
+
+        if (isset($result['ok']) && $result['ok'] === false) {
+            return $this->response->setStatusCode(502)->setJSON(['ok' => false, 'message' => 'Could not load blocks']);
+        }
+
+        return $this->response->setJSON($this->extractData($result));
+    }
+
+    public function entryBlocks(int $entryId): ResponseInterface
+    {
+        $result = $this->proxyBlockRequest('entry', $entryId, 'GET', null, [], ['include_translations' => 1, 'limit' => 100]);
 
         if (isset($result['ok']) && $result['ok'] === false) {
             return $this->response->setStatusCode(502)->setJSON(['ok' => false, 'message' => 'Could not load blocks']);
@@ -184,6 +252,28 @@ class WizardController extends BaseWebController
 
         $domainClient = service('domainApiClient');
         $result = $this->safeApiCall(static fn () => $domainClient->put("/cms/pages/{$pageId}/blocks/{$blockId}", $payload));
+
+        $statusCode = (int) ($result['status'] ?? 502);
+        if ($statusCode < 100 || $statusCode > 599) {
+            $statusCode = 502;
+        }
+
+        return $this->response->setStatusCode($statusCode)->setJSON(
+            $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? [])
+        );
+    }
+
+    public function updateEntryBlock(int $entryId, int $blockId): ResponseInterface
+    {
+        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+            ? ($this->request->getJSON(true) ?? [])
+            : [];
+
+        if (empty($payload)) {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
+        }
+
+        $result = $this->proxyBlockRequest('entry', $entryId, 'PUT', $blockId, $payload);
 
         $statusCode = (int) ($result['status'] ?? 502);
         if ($statusCode < 100 || $statusCode > 599) {

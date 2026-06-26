@@ -64,7 +64,11 @@ return [
 
     // Edit page — block list (árbol jerárquico)
     'blocks_loading'         => 'Cargando bloques...',
-    'no_blocks'              => 'Esta página no tiene bloques editables todavía.',
+    'blocks_description_page'=> 'Administra y ordena los bloques de esta página.',
+    'blocks_description_entry'=> 'Administra y ordena los bloques de esta entrada.',
+    'no_blocks_page'         => 'Esta página aún no tiene bloques de contenido.',
+    'no_blocks_entry'        => 'Esta entrada aún no tiene bloques de contenido.',
+    'no_blocks'              => 'Este contenido no tiene bloques editables todavía.',
     'btn_edit_block'         => 'Editar',
     'block_fallback'         => 'Bloque',
     'add_block'              => 'Agregar bloque',
@@ -136,4 +140,5 @@ return [
     'error_upload'           => 'No se pudo subir la imagen. Intenta de nuevo.',
     'error_publish'          => 'Hubo un error al publicar. Intenta de nuevo.',
     'error_generic'          => 'Algo salió mal. Intenta de nuevo.',
+    'content_fallback'       => 'Contenido',
 ];

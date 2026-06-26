@@ -19,6 +19,18 @@ if (! empty($page['translations']) && is_array($page['translations'])) {
 $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
     ? $publicSiteUrl . '/' . ltrim($previewSlug, '/')
     : '';
+
+$blocksSectionDesc = $ownerType === 'entry'
+    ? lang('Pages.blocks_section_desc_entry')
+    : lang('Pages.blocks_section_desc_page');
+
+$blocksEmptyTitle = $ownerType === 'entry'
+    ? lang('Pages.blocks_empty_title_entry')
+    : lang('Pages.blocks_empty_title_page');
+
+$blocksEmptyDesc = $ownerType === 'entry'
+    ? lang('Pages.blocks_empty_desc_entry')
+    : lang('Pages.blocks_empty_desc_page');
 ?>
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= route_to($ownerShowRoute, (string) $page['id']) ?>"
@@ -47,7 +59,7 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
     <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
         <div>
             <h3 class="text-xl font-bold text-gray-900"><?= esc(lang('Pages.blocks_section_title')) ?></h3>
-            <p class="text-sm text-gray-500 mt-1"><?= esc(lang('Pages.blocks_section_desc')) ?> <strong><?= esc($page['title'] ?? '') ?></strong></p>
+            <p class="text-sm text-gray-500 mt-1"><?= esc($blocksSectionDesc) ?> <strong><?= esc($page['title'] ?? '') ?></strong></p>
         </div>
         <div class="flex items-center gap-3">
             <span x-show="saving" class="flex items-center gap-1.5 text-xs text-gray-500">
@@ -80,8 +92,8 @@ $previewUrl = $publicSiteUrl !== '' && $previewSlug !== ''
     <?php if (empty($blocks)): ?>
         <div class="text-center py-12 border border-dashed border-gray-200 rounded-xl">
             <?= ui_icon('layout-template', 'h-10 w-10 text-gray-300 mx-auto mb-3') ?>
-            <p class="text-sm text-gray-500 font-medium"><?= esc(lang('Pages.blocks_empty_title')) ?></p>
-            <p class="text-xs text-gray-400 mt-1"><?= esc(lang('Pages.blocks_empty_desc')) ?></p>
+            <p class="text-sm text-gray-500 font-medium"><?= esc($blocksEmptyTitle) ?></p>
+            <p class="text-xs text-gray-400 mt-1"><?= esc($blocksEmptyDesc) ?></p>
         </div>
     <?php else: ?>
         <div data-sortable-list class="space-y-3">

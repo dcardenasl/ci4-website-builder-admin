@@ -64,7 +64,11 @@ return [
 
     // Edit page — block list (tree view)
     'blocks_loading'         => 'Loading blocks...',
-    'no_blocks'              => 'This page has no editable blocks yet.',
+    'blocks_description_page'=> 'Manage and order the blocks for this page.',
+    'blocks_description_entry'=> 'Manage and order the blocks for this entry.',
+    'no_blocks_page'         => 'This page has no content blocks yet.',
+    'no_blocks_entry'        => 'This entry has no content blocks yet.',
+    'no_blocks'              => 'This content item has no editable blocks yet.',
     'btn_edit_block'         => 'Edit',
     'block_fallback'         => 'Block',
     'add_block'              => 'Add block',
@@ -136,4 +140,5 @@ return [
     'error_upload'           => 'Could not upload the image. Please try again.',
     'error_publish'          => 'An error occurred while publishing. Please try again.',
     'error_generic'          => 'Something went wrong. Please try again.',
+    'content_fallback'       => 'Content item',
 ];

@@ -59,6 +59,8 @@ $csrfToken ??= csrf_hash();
     const CSRF_TOKEN = <?= json_encode($csrfToken) ?>;
     const NATIVE_KEYS = ['title', 'excerpt', 'featured_image', 'body', 'status'];
     const WIZARD_BASE = '<?= site_url('admin/cms/wizard') ?>';
+    const ADMIN_CMS_BASE = '<?= site_url('admin/cms') ?>';
+    const PUBLIC_SITE_URL = '<?= rtrim((string) env('PUBLIC_SITE_URL'), '/') ?>';
 
     const DEFAULT_STEPS = [
         {
@@ -98,6 +100,7 @@ $csrfToken ??= csrf_hash();
         add_child:             <?= json_encode(lang('Wizard.add_child')) ?>,
         add_block:             <?= json_encode(lang('Wizard.add_block')) ?>,
         block_fallback:        <?= json_encode(lang('Wizard.block_fallback')) ?>,
+        content_fallback:      <?= json_encode(lang('Wizard.content_fallback')) ?>,
     };
 
     // Block type → display emoji
@@ -153,7 +156,7 @@ $csrfToken ??= csrf_hash();
 
     function schemaTypeToUiType(schemaType, accept) {
         if (schemaType === 'file')    return accept === 'image' ? 'image' : 'text';
-        if (schemaType === 'richtext') return 'textarea';
+        if (schemaType === 'richtext' || schemaType === 'rich_text') return 'richtext';
         if (schemaType === 'string')  return 'text';
         if (schemaType === 'number')  return 'number';
         if (schemaType === 'boolean') return 'boolean';
@@ -196,9 +199,11 @@ $csrfToken ??= csrf_hash();
 
             // Edit page flow (B screens)
             selectedPage: null,
+            selectedOwnerType: 'page',
             pageBlocks: [],          // tree-structured (built from flat API response)
             pageBlocksLoading: false,
             pageBlocksError: '',
+            blocksBackScreen: 'page-select',
 
             // Block editing / creating
             selectedBlock: null,
@@ -319,9 +324,11 @@ $csrfToken ??= csrf_hash();
                         .map(([key, info]) => ({ key, ...info }));
                 }
 
-                // Top-level: show block types that support pages
+                // Top-level: show block types that support the current owner type
                 return allTypes
-                    .filter(([, info]) => info.supports_pages !== false && !info.is_child_only)
+                    .filter(([, info]) => this.selectedOwnerType === 'entry'
+                        ? info.supports_entries !== false && !info.is_child_only
+                        : info.supports_pages !== false && !info.is_child_only)
                     .map(([key, info]) => ({ key, ...info }));
             },
 
@@ -430,6 +437,68 @@ $csrfToken ??= csrf_hash();
                     uiType:   'textarea',
                     options:  [],
                 }));
+            },
+
+            syncRichTextFields() {
+                const fields = document.querySelectorAll('[data-wizard-richtext-field]');
+                fields.forEach((node) => {
+                    const key = node?.dataset?.fieldKey;
+                    if (!key) return;
+                    const input = node.querySelector('input[type="hidden"]');
+                    if (!input) return;
+                    this.blockEditData[key] = input.value ?? '';
+                });
+            },
+
+            ownerTypeLabel() {
+                return this.selectedOwnerType === 'entry'
+                    ? '<?= esc(lang('Pages.owner_label_entry'), 'js') ?>'
+                    : '<?= esc(lang('Pages.owner_label_page'), 'js') ?>';
+            },
+
+            blocksDescription() {
+                return this.selectedOwnerType === 'entry'
+                    ? '<?= esc(lang('Wizard.blocks_description_entry'), 'js') ?>'
+                    : '<?= esc(lang('Wizard.blocks_description_page'), 'js') ?>';
+            },
+
+            emptyBlocksText() {
+                return this.selectedOwnerType === 'entry'
+                    ? '<?= esc(lang('Wizard.no_blocks_entry'), 'js') ?>'
+                    : '<?= esc(lang('Wizard.no_blocks_page'), 'js') ?>';
+            },
+
+            ownerPreviewUrl() {
+                if (this.selectedOwnerType !== 'page' || !PUBLIC_SITE_URL || !this.selectedPage?.translations?.length) return '';
+                const slug = this.selectedPage.translations.find(t => t?.slug)?.slug || '';
+                return slug ? `${PUBLIC_SITE_URL}/${String(slug).replace(/^\//, '')}` : '';
+            },
+
+            ownerEditUrl() {
+                if (!this.selectedPage?.id) return '';
+                const segment = this.selectedOwnerType === 'entry' ? 'entries' : 'pages';
+                return `${ADMIN_CMS_BASE}/${segment}/${this.selectedPage.id}/edit`;
+            },
+
+            ownerBlocksUrl(suffix = '') {
+                if (!this.selectedPage?.id) return '';
+                const segment = this.selectedOwnerType === 'entry' ? 'entries' : 'pages';
+                return `${WIZARD_BASE}/${segment}/${this.selectedPage.id}/blocks${suffix}`;
+            },
+
+            setBlockOwner(owner, ownerType, backScreen = 'page-select') {
+                this.selectedPage = owner;
+                this.selectedOwnerType = ownerType;
+                this.blocksBackScreen = backScreen;
+                this.pageBlocks = [];
+                this.pageBlocksError = '';
+            },
+
+            async openOwnerBlocks(owner, ownerType = 'page', backScreen = 'page-select') {
+                this.setBlockOwner(owner, ownerType, backScreen);
+                this.pageBlocksLoading = true;
+                this.screen = 'page-blocks';
+                await this.refreshPageBlocks();
             },
 
             // ── Lifecycle ─────────────────────────────────────────────────────
@@ -561,7 +630,11 @@ $csrfToken ??= csrf_hash();
                     }
                     this.publishedEntry = data;
                     this.clearDraft();
-                    this.screen = 'success';
+                    if (data?.id) {
+                        await this.selectPublishedEntry(this.buildPublishedEntryPreview(payload, data));
+                    } else {
+                        this.screen = 'success';
+                    }
                 } catch (e) {
                     this.publishError = e.message ?? STRINGS.error_publish;
                 } finally {
@@ -614,6 +687,20 @@ $csrfToken ??= csrf_hash();
                 return payload;
             },
 
+            buildPublishedEntryPreview(payload, response) {
+                const translations = Array.isArray(payload?.translations) ? payload.translations : [];
+                const defaultTranslation = translations.find(t => t?.language_id === this.defaultLangId)
+                    ?? translations[0]
+                    ?? null;
+
+                return {
+                    ...(response ?? {}),
+                    title: response?.title ?? this.formData.title ?? this.selectedCollection?.name ?? STRINGS.content_fallback,
+                    slug: response?.slug ?? defaultTranslation?.slug ?? '',
+                    translations: response?.translations ?? translations,
+                };
+            },
+
             restart() {
                 this.clearDraft();
                 this.selectedCollection = null;
@@ -621,6 +708,12 @@ $csrfToken ??= csrf_hash();
                 this.currentStep = 0;
                 this.publishedEntry = null;
                 this.publishError = '';
+                this.selectedPage = null;
+                this.selectedOwnerType = 'page';
+                this.pageBlocks = [];
+                this.pageBlocksError = '';
+                this.pageBlocksLoading = false;
+                this.blocksBackScreen = 'page-select';
                 this.screen = 'home';
             },
 
@@ -636,12 +729,11 @@ $csrfToken ??= csrf_hash();
             },
 
             async selectPage(page) {
-                this.selectedPage = page;
-                this.pageBlocks = [];
-                this.pageBlocksError = '';
-                this.pageBlocksLoading = true;
-                this.screen = 'page-blocks';
-                await this.refreshPageBlocks();
+                await this.openOwnerBlocks(page, 'page', 'page-select');
+            },
+
+            async selectPublishedEntry(entry) {
+                await this.openOwnerBlocks(entry, 'entry', 'success');
             },
 
             async refreshPageBlocks() {
@@ -649,7 +741,7 @@ $csrfToken ??= csrf_hash();
                 this.pageBlocksLoading = true;
                 this.pageBlocksError = '';
                 try {
-                    const res  = await adminFetch(`${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks`);
+                    const res  = await adminFetch(this.ownerBlocksUrl());
                     const data = await res.json();
                     if (!res.ok) throw new Error(data?.message ?? STRINGS.error_blocks_load);
                     const items = data?.items ?? data?.data ?? (Array.isArray(data) ? data : []);
@@ -703,6 +795,7 @@ $csrfToken ??= csrf_hash();
 
             // ── Block CRUD ────────────────────────────────────────────────────
             async saveBlock() {
+                this.syncRichTextFields();
                 if (this.editMode === 'create') {
                     await this._createBlock();
                     return;
@@ -716,7 +809,10 @@ $csrfToken ??= csrf_hash();
                 this.blockSaveError = '';
                 try {
                     const t = (this.selectedBlock.translations ?? [])[0] ?? {};
+                    // is_active ensures data is never empty after the domain extracts translations,
+                    // which would otherwise trigger BaseCrudService's noFieldsToUpdate check.
                     const payload = {
+                        is_active: true,
                         translations: [{
                             language_id:  t.language_id ?? this.defaultLangId,
                             block_data:   this.blockEditData,
@@ -724,7 +820,7 @@ $csrfToken ??= csrf_hash();
                         }],
                     };
                     const res  = await adminFetch(
-                        `${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks/${this.selectedBlock.id}`,
+                        this.ownerBlocksUrl(`/${this.selectedBlock.id}`),
                         { method: 'POST', body: JSON.stringify(payload) }
                     );
                     const data = await res.json();
@@ -747,7 +843,7 @@ $csrfToken ??= csrf_hash();
 
                     const payload = {
                         block_id:           typeInfo.id,
-                        owner_type:         'page',
+                        owner_type:         this.selectedOwnerType,
                         owner_id:           this.selectedPage.id,
                         parent_instance_id: this.editParentBlock?.id ?? null,
                         sort_order:         this.nextSortOrder(this.editParentBlock),
@@ -761,7 +857,7 @@ $csrfToken ??= csrf_hash();
                     };
 
                     const res  = await adminFetch(
-                        `${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks`,
+                        this.ownerBlocksUrl(),
                         { method: 'POST', body: JSON.stringify(payload) }
                     );
                     const data = await res.json();
@@ -790,7 +886,7 @@ $csrfToken ??= csrf_hash();
                 this.deleteBlockTarget = null;
                 try {
                     const res = await adminFetch(
-                        `${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks/${block.id}/delete`,
+                        this.ownerBlocksUrl(`/${block.id}/delete`),
                         { method: 'POST' }
                     );
                     if (!res.ok) {
@@ -818,11 +914,11 @@ $csrfToken ??= csrf_hash();
                 try {
                     await Promise.all([
                         adminFetch(
-                            `${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks/${block.id}`,
+                            this.ownerBlocksUrl(`/${block.id}`),
                             { method: 'POST', body: JSON.stringify({ sort_order: orderA }) }
                         ),
                         adminFetch(
-                            `${WIZARD_BASE}/pages/${this.selectedPage.id}/blocks/${targetBlock.id}`,
+                            this.ownerBlocksUrl(`/${targetBlock.id}`),
                             { method: 'POST', body: JSON.stringify({ sort_order: orderB }) }
                         ),
                     ]);

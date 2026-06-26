@@ -5,9 +5,29 @@
 
     <!-- Breadcrumb header -->
     <div class="flex items-center gap-2 mb-5">
-        <button @click="screen = 'page-select'" class="text-sm text-gray-500 hover:text-gray-700"><?= lang('Wizard.btn_back') ?></button>
+        <button @click="screen = blocksBackScreen || 'page-select'" class="text-sm text-gray-500 hover:text-gray-700"><?= lang('Wizard.btn_back') ?></button>
         <span class="text-gray-300">/</span>
-        <h2 class="text-xl font-bold" x-text="selectedPage?.title || selectedPage?.slug || strings.page_fallback"></h2>
+        <div class="min-w-0">
+            <div class="flex items-center gap-2">
+                <h2 class="text-xl font-bold truncate" x-text="selectedPage?.title || selectedPage?.slug || strings.content_fallback"></h2>
+                <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-500" x-text="ownerTypeLabel()"></span>
+            </div>
+            <p class="text-xs text-gray-400 truncate" x-text="selectedPage?.slug ? '/' + selectedPage.slug : ''"></p>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+            <a x-show="ownerPreviewUrl() && selectedOwnerType === 'page'"
+               :href="ownerPreviewUrl()"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <?= esc(lang('Pages.blocks_view_page')) ?>
+            </a>
+            <a x-show="ownerEditUrl() && selectedOwnerType === 'entry'"
+               :href="ownerEditUrl()"
+               class="rounded-lg border border-brand-200 bg-white px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50 transition-colors">
+                <?= lang('Wizard.btn_edit_entry') ?>
+            </a>
+        </div>
     </div>
 
     <!-- Loading state -->
@@ -23,7 +43,8 @@
     <div x-show="!pageBlocksLoading && pageBlocks.length === 0 && !pageBlocksError"
          class="text-center py-12 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-xl">
         <div class="text-4xl mb-3">📭</div>
-        <p><?= lang('Wizard.no_blocks') ?></p>
+        <p x-text="emptyBlocksText()"></p>
+        <p class="mt-2 text-xs text-gray-400" x-text="blocksDescription()"></p>
     </div>
 
     <!-- Block tree -->
