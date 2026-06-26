@@ -62,15 +62,33 @@ return [
     'no_pages'               => 'No hay páginas disponibles.',
     'page_fallback'          => 'Página',
 
-    // Edit page — block list
+    // Edit page — block list (árbol jerárquico)
     'blocks_loading'         => 'Cargando bloques...',
     'no_blocks'              => 'Esta página no tiene bloques editables todavía.',
     'btn_edit_block'         => 'Editar',
+    'block_fallback'         => 'Bloque',
+    'add_block'              => 'Agregar bloque',
+    'add_child'              => 'Agregar elemento',
+
+    // Edit page — block delete
+    'delete_block_title'     => '¿Eliminar bloque?',
+    'delete_block_confirm'   => 'Esta acción no se puede deshacer.',
+
+    // Edit page — catálogo de bloques
+    'catalog_heading'        => 'Elige el tipo de bloque',
+    'catalog_adding_child_to'=> 'Agregando dentro de:',
+    'catalog_no_types'       => 'No hay tipos de bloque disponibles para este contexto.',
+    'catalog_container_badge'=> 'Contenedor',
 
     // Edit page — block edit
     'no_block_fields'        => 'Este bloque no tiene campos editables.',
     'btn_save_block'         => 'Guardar cambios',
+    'btn_create_block'       => 'Crear bloque',
     'btn_saving'             => 'Guardando...',
+    'block_edit_child_of'    => 'Dentro de:',
+    'block_edit_new_badge'   => 'Nuevo',
+    'bool_yes'               => 'Sí',
+    'bool_no'                => 'No',
 
     // Edit page — block saved
     'block_saved_title'      => '¡Guardado!',

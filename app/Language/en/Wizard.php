@@ -62,15 +62,33 @@ return [
     'no_pages'               => 'No pages available.',
     'page_fallback'          => 'Page',
 
-    // Edit page — block list
+    // Edit page — block list (tree view)
     'blocks_loading'         => 'Loading blocks...',
     'no_blocks'              => 'This page has no editable blocks yet.',
     'btn_edit_block'         => 'Edit',
+    'block_fallback'         => 'Block',
+    'add_block'              => 'Add block',
+    'add_child'              => 'Add element',
+
+    // Edit page — block delete
+    'delete_block_title'     => 'Delete block?',
+    'delete_block_confirm'   => 'This action cannot be undone.',
+
+    // Edit page — block catalog
+    'catalog_heading'        => 'Choose block type',
+    'catalog_adding_child_to'=> 'Adding inside:',
+    'catalog_no_types'       => 'No block types available for this context.',
+    'catalog_container_badge'=> 'Container',
 
     // Edit page — block edit
     'no_block_fields'        => 'This block has no editable fields.',
     'btn_save_block'         => 'Save changes',
+    'btn_create_block'       => 'Create block',
     'btn_saving'             => 'Saving...',
+    'block_edit_child_of'    => 'Inside:',
+    'block_edit_new_badge'   => 'New',
+    'bool_yes'               => 'Yes',
+    'bool_no'                => 'No',
 
     // Edit page — block saved
     'block_saved_title'      => 'Saved!',
