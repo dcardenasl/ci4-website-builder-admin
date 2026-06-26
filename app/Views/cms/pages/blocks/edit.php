@@ -45,14 +45,17 @@ $isActiveValue  = (bool) old('is_active', ! empty($block['is_active']));
 $blockIdValue   = old('block_id', (string) ($block['block_id'] ?? ''));
 
 $defaultLangId = 0;
+$defaultLangCode = 'EN';
 foreach ($languages as $l) {
     if (! empty($l['is_default'])) {
         $defaultLangId = (int) $l['id'];
+        $defaultLangCode = strtoupper((string) ($l['code'] ?? 'EN'));
         break;
     }
 }
 if ($defaultLangId === 0 && ! empty($languages)) {
     $defaultLangId = (int) $languages[0]['id'];
+    $defaultLangCode = strtoupper((string) ($languages[0]['code'] ?? 'EN'));
 }
 
 $blockKey    = $blockType['block_key'] ?? '';
@@ -84,7 +87,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
             <?php endif; ?>
         </div>
         <button type="button"
-                onclick="window.dispatchEvent(new CustomEvent('block-preview-open', { detail: { blockKey: <?= esc(json_encode($blockKey), 'attr') ?>, blockConfig: <?= esc($configJs, 'attr') ?>, blockData: {} } }))"
+                onclick="window.openBlockEditPreview && window.openBlockEditPreview(<?= esc(json_encode($blockKey), 'attr') ?>)"
                 class="shrink-0 flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 border border-brand-200 hover:border-brand-400 bg-white hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178Z"/>
@@ -96,6 +99,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
         <form method="post"
+              id="block-edit-form"
               action="<?= route_to($ownerUpdateRoute, (string) $page['id'], (string) $block['id']) ?>"
               class="space-y-6">
             <?= csrf_field() ?>
@@ -173,7 +177,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
             <?php if (! empty($fields)): ?>
             <div class="border-t border-gray-100 pt-5"
                  x-ref="langTabs"
-                 x-data="langTabs(<?= $defaultLangId ?>, '<?= esc(route_to('admin.cms.translate'), 'attr') ?>', 'ES')">
+                 x-data="langTabs(<?= $defaultLangId ?>, '<?= esc(route_to('admin.cms.translate'), 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                 <h4 class="text-sm font-semibold text-gray-800 mb-1"><?= esc(lang('Pages.block_content_section')) ?></h4>
                 <p class="text-xs text-gray-500 mb-4"><?= esc(lang('Pages.block_content_desc')) ?></p>
 
@@ -222,7 +226,9 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                     $transRow = $translationsByLanguage[$langId] ?? $currentRow;
                     $isDefault = ! empty($lang['is_default']);
                     ?>
-                <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
+                <div x-show="isActive(<?= (int) $lang['id'] ?>)"
+                     data-language-id="<?= (int) $lang['id'] ?>"
+                     class="space-y-4">
                     <input type="hidden" name="translations[<?= $idx ?>][language_id]" value="<?= esc((string) $lang['id']) ?>">
                     <input type="hidden" name="translations[<?= $idx ?>][is_published]" value="1">
 
@@ -468,6 +474,69 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
         </form>
     </section>
 </div>
+<script>
+window.openBlockEditPreview = window.openBlockEditPreview || function openBlockEditPreview(blockKey) {
+    const form = document.getElementById('block-edit-form');
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const blockConfig = {};
+    form.querySelectorAll('[name^="block_config["]').forEach((field) => {
+        if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+            return;
+        }
+
+        const match = field.name.match(/^block_config\[([^\]]+)\]$/);
+        if (!match) {
+            return;
+        }
+
+        const key = match[1];
+        if (field instanceof HTMLInputElement && field.type === 'checkbox') {
+            blockConfig[key] = field.checked;
+            return;
+        }
+
+        blockConfig[key] = field.value;
+    });
+
+    const langTabs = form.querySelector('[x-ref="langTabs"]')?._x_dataStack?.[0] || null;
+    const activeLanguageId = Number(langTabs?.active || 0);
+    const activePanel = activeLanguageId > 0
+        ? form.querySelector(`[data-language-id="${activeLanguageId}"]`)
+        : form.querySelector('[data-language-id]');
+
+    const blockData = {};
+    const sourceRoot = activePanel instanceof HTMLElement ? activePanel : form;
+    sourceRoot.querySelectorAll('[name*="[block_data]"]').forEach((field) => {
+        if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+            return;
+        }
+
+        const match = field.name.match(/^translations\[\d+\]\[block_data\]\[([^\]]+)\]$/);
+        if (!match) {
+            return;
+        }
+
+        const key = match[1];
+        if (field instanceof HTMLInputElement && field.type === 'checkbox') {
+            blockData[key] = field.checked;
+            return;
+        }
+
+        blockData[key] = field.value;
+    });
+
+    window.dispatchEvent(new CustomEvent('block-preview-open', {
+        detail: {
+            blockKey,
+            blockConfig,
+            blockData,
+        },
+    }));
+};
+</script>
 <?php $blockEditContent = ob_get_clean(); ?>
 
 <?= view('components/display/form_section', [

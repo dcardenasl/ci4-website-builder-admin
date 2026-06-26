@@ -3318,8 +3318,8 @@ window.handleGoogleCredentialResponse = (response) => {
  * Rich text editor component backed by Tiptap.
  *
  * Usage (PHP-rendered, static field name):
- *   <div x-data="richTextEditor(initialHtml)" x-init="init()">
- *     <input type="hidden" name="field_name" x-ref="hiddenInput" value="<?= $initial ?>">
+ *   <div x-data="richTextEditor(initialHtml, fieldName)" x-init="init()">
+ *     <button data-richtext-action="bold">B</button>
  *   </div>
  *
  * Usage (Alpine-rendered, dynamic field name):
@@ -3331,75 +3331,156 @@ window.handleGoogleCredentialResponse = (response) => {
  * @param {string} [fieldName]    - Exposed as this.inputName for dynamic :name bindings
  */
 window.richTextEditor = function richTextEditor(initialContent, fieldName) {
+    let editor = null;
+    let toolbar = null;
+    let onToolbarClick = null;
+
+    const syncHiddenInput = (component, value) => {
+        const input = component.$refs.hiddenInput;
+        if (input instanceof HTMLInputElement) {
+            input.value = value;
+        }
+    };
+
+    const teardown = (component) => {
+        if (toolbar && onToolbarClick) {
+            toolbar.removeEventListener('click', onToolbarClick);
+        }
+
+        toolbar = null;
+        onToolbarClick = null;
+
+        editor?.destroy();
+        editor = null;
+
+        if (component?.$refs?.editorEl instanceof HTMLElement) {
+            component.$refs.editorEl.innerHTML = '';
+        }
+    };
+
+    const runCommand = (action, value) => {
+        if (!editor) {
+            return;
+        }
+
+        const chain = editor.chain().focus();
+
+        switch (action) {
+            case 'bold':
+                chain.toggleBold();
+                break;
+            case 'italic':
+                chain.toggleItalic();
+                break;
+            case 'strike':
+                chain.toggleStrike();
+                break;
+            case 'code':
+                chain.toggleCode();
+                break;
+            case 'heading':
+                chain.toggleHeading({ level: Number.parseInt(value || '0', 10) });
+                break;
+            case 'bulletList':
+                chain.toggleBulletList();
+                break;
+            case 'orderedList':
+                chain.toggleOrderedList();
+                break;
+            case 'blockquote':
+                chain.toggleBlockquote();
+                break;
+            case 'hr':
+                chain.setHorizontalRule();
+                break;
+            case 'undo':
+                chain.undo();
+                break;
+            case 'redo':
+                chain.redo();
+                break;
+            case 'link': {
+                const currentHref = editor.getAttributes('link').href || '';
+                const url = window.prompt('URL del enlace:', currentHref);
+                if (url === null) {
+                    return;
+                }
+
+                if (url === '') {
+                    chain.extendMarkRange('link').unsetLink();
+                } else {
+                    chain.extendMarkRange('link').setLink({ href: url });
+                }
+                break;
+            }
+            default:
+                return;
+        }
+
+        chain.run();
+    };
+
     return {
-        editor: null,
         inputName: fieldName || '',
 
         init() {
             if (typeof window.tiptap === 'undefined') {
-                // Tiptap bundle not loaded — leave the fallback textarea visible
                 return;
             }
 
-            const { Editor, StarterKit, Link, Placeholder } = window.tiptap;
+            const editorHost = this.$refs.editorEl;
+            if (!(editorHost instanceof HTMLElement)) {
+                return;
+            }
 
-            this.editor = new Editor({
-                element: this.$refs.editorEl,
+            teardown(this);
+            editorHost.innerHTML = '';
+
+            const { Editor, StarterKit, Placeholder } = window.tiptap;
+
+            editor = new Editor({
+                element: editorHost,
                 extensions: [
-                    StarterKit,
-                    Link.configure({ openOnClick: false, autolink: true }),
+                    StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
                     Placeholder.configure({ placeholder: 'Escribe aquí…' }),
                 ],
                 content: initialContent || '',
-                onUpdate: ({ editor }) => {
-                    const input = this.$refs.hiddenInput;
-                    if (input instanceof HTMLInputElement) {
-                        input.value = editor.getHTML();
-                    }
+                onUpdate: ({ editor: currentEditor }) => {
+                    syncHiddenInput(this, currentEditor.getHTML());
                 },
             });
 
-            // Sync hidden input with initial content
-            const input = this.$refs.hiddenInput;
-            if (input instanceof HTMLInputElement) {
-                input.value = initialContent || '';
+            syncHiddenInput(this, editor.getHTML());
+
+            toolbar = this.$el.querySelector('[data-richtext-toolbar]');
+            if (toolbar instanceof HTMLElement) {
+                onToolbarClick = (event) => {
+                    const target = event.target;
+                    const button = target && typeof target.closest === 'function'
+                        ? target.closest('[data-richtext-action]')
+                        : null;
+
+                    if (!(button instanceof HTMLElement) || !toolbar.contains(button)) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    runCommand(
+                        button.dataset.richtextAction || '',
+                        button.dataset.richtextLevel || button.dataset.richtextValue || '',
+                    );
+                };
+
+                toolbar.addEventListener('click', onToolbarClick);
             }
         },
 
         destroy() {
-            this.editor?.destroy();
-            this.editor = null;
+            teardown(this);
         },
-
-        // ── Toolbar helpers ───────────────────────────────────────────────
 
         isActive(type, attrs) {
-            return this.editor?.isActive(type, attrs) ?? false;
-        },
-
-        bold()         { this.editor?.chain().focus().toggleBold().run(); },
-        italic()       { this.editor?.chain().focus().toggleItalic().run(); },
-        strike()       { this.editor?.chain().focus().toggleStrike().run(); },
-        code()         { this.editor?.chain().focus().toggleCode().run(); },
-        heading(level) { this.editor?.chain().focus().toggleHeading({ level }).run(); },
-        bulletList()   { this.editor?.chain().focus().toggleBulletList().run(); },
-        orderedList()  { this.editor?.chain().focus().toggleOrderedList().run(); },
-        blockquote()   { this.editor?.chain().focus().toggleBlockquote().run(); },
-        codeBlock()    { this.editor?.chain().focus().toggleCodeBlock().run(); },
-        hr()           { this.editor?.chain().focus().setHorizontalRule().run(); },
-        undo()         { this.editor?.chain().focus().undo().run(); },
-        redo()         { this.editor?.chain().focus().redo().run(); },
-        clearFormat()  { this.editor?.chain().focus().clearNodes().unsetAllMarks().run(); },
-
-        setLink() {
-            const prev = this.editor?.getAttributes('link').href || '';
-            const url  = window.prompt('URL del enlace:', prev);
-            if (url === null) return; // cancelled
-            if (url === '') {
-                this.editor?.chain().focus().extendMarkRange('link').unsetLink().run();
-                return;
-            }
-            this.editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+            return editor?.isActive(type, attrs) ?? false;
         },
     };
 };

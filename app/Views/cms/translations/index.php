@@ -57,6 +57,7 @@
             dict: <?= esc(json_encode([
                 'resources' => [
                     'page' => lang('Translations.resource_page'),
+                    'menu' => lang('Translations.resource_menu'),
                     'menu_item' => lang('Translations.resource_menu_item'),
                     'setting' => lang('Translations.resource_setting'),
                     'category' => lang('Translations.resource_category'),
@@ -64,15 +65,18 @@
                     'tag' => lang('Translations.resource_tag'),
                     'entry' => lang('Translations.resource_entry'),
                     'form' => lang('Translations.resource_form'),
+                    'form_field' => lang('Translations.resource_form_field'),
                     'block_instance' => lang('Translations.resource_block_instance'),
                 ],
                 'statuses' => [
                     'missing' => lang('Translations.status_missing'),
                     'incomplete' => lang('Translations.status_incomplete'),
+                    'mismatch' => lang('Translations.status_mismatch'),
                 ],
                 'details' => [
                     'missing_all' => lang('Translations.detail_missing_all'),
-                    'missing_fields' => lang('Translations.detail_missing_fields'),
+                    'missing_required_fields' => lang('Translations.detail_missing_required_fields'),
+                    'inconsistent_fields' => lang('Translations.detail_inconsistent_fields'),
                 ],
                 'fields' => [
                     'title' => lang('Translations.field_title'),
@@ -80,7 +84,22 @@
                     'label' => lang('Translations.field_label'),
                     'setting_value' => lang('Translations.field_setting_value'),
                     'name' => lang('Translations.field_name'),
+                    'submit_label' => lang('Translations.field_submit_label'),
                     'block_data' => lang('Translations.field_block_data'),
+                    'custom_url' => lang('Translations.field_custom_url'),
+                    'excerpt' => lang('Translations.field_excerpt'),
+                    'meta_title' => lang('Translations.field_meta_title'),
+                    'meta_description' => lang('Translations.field_meta_description'),
+                    'og_image_file_id' => lang('Translations.field_og_image_file_id'),
+                    'og_type' => lang('Translations.field_og_type'),
+                    'canonical_url' => lang('Translations.field_canonical_url'),
+                    'robots' => lang('Translations.field_robots'),
+                    'schema_data' => lang('Translations.field_schema_data'),
+                    'description' => lang('Translations.field_description'),
+                    'listing_title' => lang('Translations.field_listing_title'),
+                    'listing_intro' => lang('Translations.field_listing_intro'),
+                    'default_meta_title' => lang('Translations.field_default_meta_title'),
+                    'default_meta_description' => lang('Translations.field_default_meta_description'),
                 ]
             ])) ?>,
             translateResource(res) {
@@ -95,8 +114,11 @@
                 }
                 const parts = row.detail.split(': ');
                 if (parts.length > 1) {
-                    const fields = parts[1].split(', ').map(f => this.dict.fields[f.trim()] || f.trim()).join(', ');
-                    return this.dict.details.missing_fields.replace('{fields}', fields);
+                    const fields = parts.slice(1).join(': ').split(', ').map(f => this.dict.fields[f.trim()] || f.trim()).join(', ');
+                    if (row.status === 'mismatch') {
+                        return this.dict.details.inconsistent_fields.replace('{fields}', fields);
+                    }
+                    return this.dict.details.missing_required_fields.replace('{fields}', fields);
                 }
                 return row.detail;
             }
@@ -160,12 +182,17 @@
                                         <span class="font-bold text-xs uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200" x-text="row.language_code"></span>
                                     </td>
                                     <td class="<?= esc(table_td_class()) ?>">
-                                        <span :class="row.status === 'missing' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800'" x-text="translateStatus(row.status)"></span>
+                                        <span :class="row.status === 'missing' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800' : row.status === 'mismatch' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800'" x-text="translateStatus(row.status)"></span>
                                     </td>
                                     <td class="<?= esc(table_td_class('muted')) ?>" x-text="translateDetail(row)"></td>
                                     <td class="<?= esc(table_td_class()) ?>">
                                         <template x-if="row.resource === 'page'">
                                             <a :href="'<?= route_to('admin.cms.pages') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'menu'">
+                                            <a :href="'<?= route_to('admin.cms.menus') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
                                                 <?= esc(lang('Translations.action_translate')) ?>
                                             </a>
                                         </template>
@@ -201,6 +228,11 @@
                                         </template>
                                         <template x-if="row.resource === 'form'">
                                             <a :href="'<?= route_to('admin.cms.forms') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                                <?= esc(lang('Translations.action_translate')) ?>
+                                            </a>
+                                        </template>
+                                        <template x-if="row.resource === 'form_field'">
+                                            <a :href="'<?= route_to('admin.cms.forms') ?>/' + row.extra_data.form_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
                                                 <?= esc(lang('Translations.action_translate')) ?>
                                             </a>
                                         </template>
