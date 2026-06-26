@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Wizard UI refactor with modular partials and block CRUD** — decomposed wizard view into 8 reusable partial components (block_catalog, block_edit, page_layout, menu_edit, entry_wizard, etc.), added `createBlock()` and `deleteBlock()` controller methods, enhanced block type metadata enrichment from Domain API
+- **Entry block support** — extended wizard with `createEntryBlock()`, `entryBlocks()`, and `deleteEntryBlock()` endpoints; refactored block proxy logic via `proxyBlockRequest()` method to unify page and entry block handling with hierarchical tree rendering
 - **Automatic form field translation** — new `buildTranslateTargets()` helper and Alpine.js integration for automatic synchronization of field values between language tabs in CMS form editors
 - **Forms module** — new admin interface to manage CMS forms with field configuration, multilingual support, and form submission tracking (CMS-012)
 - **Analytics module** — new admin dashboard to view page view analytics with customizable period filters (1h, 24h, 7d, 30d), overview charts, and traffic insights; integrates with domain CMS analytics API
