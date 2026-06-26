@@ -101,10 +101,18 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
         || has_permission('cms.tags.read')
         || has_permission('cms.redirects.read')
         || has_permission('cms.submissions.read')
-        || has_permission('cms.forms.read');
+        || has_permission('cms.forms.read')
+        || has_permission('cms.entries.read');
 ?>
         <?php if ($hasCmsItem): ?>
             <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4">CMS</div>
+
+            <?php if (has_permission('cms.entries.read')): ?>
+                <a href="<?= site_url('admin/cms/wizard') ?>" class="<?= $navItemClass ?> <?= url_is('admin/cms/wizard*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
+                    <span aria-hidden="true">✨</span>
+                    <span><?= lang('Wizard.sidebar_label') ?></span>
+                </a>
+            <?php endif; ?>
 
             <?php
     // ── CMS group: Contenido ───────────────────────────────────────────

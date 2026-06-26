@@ -1,0 +1,121 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    // General
+    'title'                  => 'Content assistant',
+    'sidebar_label'          => 'Assistant',
+    'loading'                => 'Loading...',
+    'error_load'             => 'Could not load the assistant. Please try again.',
+    'status'                 => 'Status',
+    'btn_back'               => '← Back',
+    'btn_retry'              => 'Retry',
+
+    // Home
+    'home_heading'           => 'What do you want to do today?',
+    'add_content'            => 'Add content',
+    'add_content_desc'       => 'Choose the type of content you want to add',
+    'add_content_desc_empty' => 'No collections configured yet',
+    'edit_page'              => 'Edit a page',
+    'edit_page_desc'         => 'Modify the content of site pages',
+    'edit_menu'              => 'Change the menu',
+    'edit_menu_desc'         => 'Add, remove or reorder items',
+
+    // Draft banner
+    'draft_banner_title'     => '📝 You have a saved draft',
+    'draft_continue'         => 'Continue',
+    'draft_discard'          => 'Discard',
+
+    // Add content — collection select
+    'select_collection'      => 'What do you want to add?',
+    'no_collections'         => 'No collections available.',
+
+    // Add content — stepper
+    'step_of'                => 'Step %s of %s',
+    'btn_next'               => 'Next →',
+    'btn_review'             => 'Review and publish',
+    'upload_image'           => 'Click to upload an image',
+    'upload_click_hint'      => 'or drag here',
+    'upload_uploading'       => 'Uploading...',
+    'required_suffix'        => ' *',
+
+    // Confirm & publish
+    'confirm_title'          => 'Review before publishing',
+    'confirm_status_published'=> 'Published',
+    'confirm_status_draft'   => 'Draft',
+    'confirm_no_value'       => '(no value)',
+    'btn_publish'            => 'Publish now',
+    'btn_draft'              => 'Save as draft',
+    'btn_publishing'         => 'Publishing...',
+
+    // Success
+    'success_title'          => 'Published!',
+    'success_subtitle'       => 'is now live on the site.',
+    'btn_view_site'          => 'View on site',
+    'btn_edit_entry'         => 'Edit in panel',
+    'btn_add_more'           => 'Add more content',
+    'btn_back_panel'         => 'Back to panel',
+
+    // Edit page — page select
+    'page_select_heading'    => 'Which page do you want to edit?',
+    'no_pages'               => 'No pages available.',
+    'page_fallback'          => 'Page',
+
+    // Edit page — block list
+    'blocks_loading'         => 'Loading blocks...',
+    'no_blocks'              => 'This page has no editable blocks yet.',
+    'btn_edit_block'         => 'Edit',
+
+    // Edit page — block edit
+    'no_block_fields'        => 'This block has no editable fields.',
+    'btn_save_block'         => 'Save changes',
+    'btn_saving'             => 'Saving...',
+
+    // Edit page — block saved
+    'block_saved_title'      => 'Saved!',
+    'block_saved_subtitle'   => 'The block was updated successfully.',
+    'btn_view_blocks'        => 'View other blocks',
+
+    // Edit menu — menu select
+    'menu_select_heading'    => 'Which menu do you want to edit?',
+    'no_menus'               => 'No menus available.',
+    'menu_fallback'          => 'Menu',
+
+    // Edit menu — item list
+    'items_loading'          => 'Loading items...',
+    'menu_item_label_placeholder' => 'Label',
+    'menu_item_url_placeholder'   => 'URL (e.g. /contact)',
+    'add_item_heading'       => 'Add new item',
+    'btn_add_item'           => '+ Add',
+    'btn_save_order'         => 'Save order',
+
+    // Edit menu — delete modal
+    'delete_item_title'      => 'Delete item?',
+    'delete_item_confirm'    => 'The item "%s" will be deleted.',
+    'btn_cancel'             => 'Cancel',
+    'btn_delete'             => 'Delete',
+
+    // Default wizard steps (used when a collection has no wizard_config)
+    'default_step1_title'    => 'What is it called?',
+    'default_step1_hint'     => 'The name that will appear on the site.',
+    'default_field_title'    => 'Title',
+    'default_step2_title'    => 'Image',
+    'default_step2_hint'     => 'An image to accompany the content.',
+    'default_field_image'    => 'Main image',
+    'default_step3_title'    => 'Description',
+    'default_step3_hint'     => 'A brief summary.',
+    'default_field_excerpt'  => 'Description',
+
+    // Errors (JS-side — must be injected from PHP)
+    'error_no_pages'         => 'No pages available.',
+    'error_no_menus'         => 'No menus available.',
+    'error_blocks_load'      => 'Could not load the blocks.',
+    'error_items_load'       => 'Could not load the menu items.',
+    'error_block_save'       => 'Could not save. Please try again.',
+    'error_item_save'        => 'Could not save the item.',
+    'error_item_delete'      => 'Could not delete the item.',
+    'error_upload'           => 'Could not upload the image. Please try again.',
+    'error_publish'          => 'An error occurred while publishing. Please try again.',
+    'error_generic'          => 'Something went wrong. Please try again.',
+];
