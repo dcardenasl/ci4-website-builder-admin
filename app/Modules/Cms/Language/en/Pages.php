@@ -79,6 +79,9 @@ return [
 
     'translations_title'             => 'Translations / Content',
     'translation_label_default'      => 'Default',
+    'translation_complete'           => 'Translation complete',
+    'translation_incomplete'         => 'Translation incomplete',
+    'translation_missing'            => 'Translation missing',
     'translation_title_label'        => 'Title',
     'translation_title_placeholder'  => 'Enter page title',
     'translation_title_help'         => 'Visible title for this language.',
