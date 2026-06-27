@@ -180,47 +180,6 @@ export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN'
         }
     },
 
-    copyFileFieldToAll(sourceFileIdSelector, sourceFileUrlSelector, fieldKeyPattern) {
-        const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
-        const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
-        this.copyFileFieldToTargets(sourceFileIdSelector, sourceFileUrlSelector, allFileIdInputs, allFileUrlInputs);
-    },
-
-    copyFileFieldToTargets(sourceFileIdSelector, sourceFileUrlSelector, targetFileIdSelectors, targetFileUrlSelectors) {
-        const sourceFileId = document.querySelector(sourceFileIdSelector);
-        const sourceFileUrl = document.querySelector(sourceFileUrlSelector);
-        if (!sourceFileId || !sourceFileUrl) { console.warn('[langTabs] Could not find source file elements'); return; }
-
-        const sourceFileIdValue = String(sourceFileId.value || '');
-        const sourceFileUrlValue = String(sourceFileUrl.value || '');
-        const resolvedFileUrl = resolveTranslatableFilePreviewUrl(sourceFileIdValue, sourceFileUrlValue);
-
-        const allFileIdInputs = Array.from(targetFileIdSelectors, (selector) =>
-            typeof selector === 'string' ? document.querySelector(selector) : selector
-        ).filter((input) => input instanceof HTMLInputElement);
-        const allFileUrlInputs = Array.from(targetFileUrlSelectors, (selector) =>
-            typeof selector === 'string' ? document.querySelector(selector) : selector
-        ).filter((input) => input instanceof HTMLInputElement);
-        const updatedComponents = new Set();
-
-        allFileIdInputs.forEach((input) => {
-            if (input.value === sourceFileIdValue) return;
-            input.value = sourceFileIdValue;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            const fileFieldContainer = input.closest('[x-data*="translatableFileField"]');
-            const componentData = fileFieldContainer?._x_dataStack?.[0];
-            if (componentData && typeof componentData.applyFile === 'function') updatedComponents.add(componentData);
-        });
-
-        allFileUrlInputs.forEach((input) => {
-            if (input.value === resolvedFileUrl) return;
-            input.value = resolvedFileUrl;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            const fileFieldContainer = input.closest('[x-data*="translatableFileField"]');
-            const componentData = fileFieldContainer?._x_dataStack?.[0];
-            if (componentData && typeof componentData.applyFile === 'function') updatedComponents.add(componentData);
-        });
-
-        updatedComponents.forEach((componentData) => { componentData.applyFile(sourceFileIdValue, resolvedFileUrl); });
-    },
+    copyFileFieldToAll: copyLangTabsFileFieldToAll,
+    copyFileFieldToTargets: copyLangTabsFileFieldToTargets,
 });
