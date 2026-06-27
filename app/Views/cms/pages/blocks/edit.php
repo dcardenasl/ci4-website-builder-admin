@@ -352,7 +352,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                         <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
                                     </button>
                                     <button type="button"
-                                            @click="$refs.langTabs?._x_dataStack?.[0]?.copyFileFieldToAll('#file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '#file_url_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '<?= esc($fieldKey) ?>')"
+                                            @click="window.copyLangTabsFileFieldToAll($el, '#file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '#file_url_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '<?= esc($fieldKey) ?>')"
                                             x-show="fileId"
                                             class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-100 transition-colors">
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">

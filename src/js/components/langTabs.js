@@ -1,6 +1,80 @@
 /* global HTMLTextAreaElement, Event */
 import { resolveTranslatableFilePreviewUrl } from '../utils/fileUrl.js';
 
+const findLangTabsComponent = (startElement) => {
+    let current = startElement instanceof HTMLElement ? startElement : null;
+
+    while (current instanceof HTMLElement) {
+        const xData = String(current.getAttribute('x-data') || '');
+        if (xData.includes('langTabs(')) {
+            const component = current._x_dataStack?.[0];
+            if (component && typeof component.copyFileFieldToTargets === 'function') {
+                return component;
+            }
+        }
+
+        current = current.parentElement;
+    }
+
+    const fallbackRoots = [
+        document.querySelector('[x-ref="langTabs"]'),
+        document.querySelector('[x-data*="langTabs("]'),
+    ];
+
+    for (const root of fallbackRoots) {
+        const component = root?._x_dataStack?.[0];
+        if (component && typeof component.copyFileFieldToTargets === 'function') {
+            return component;
+        }
+    }
+
+    return null;
+};
+
+export const copyLangTabsFileFieldToTargets = (
+    triggerElement,
+    sourceFileIdSelector,
+    sourceFileUrlSelector,
+    targetFileIdSelectors,
+    targetFileUrlSelectors,
+) => {
+    const component = findLangTabsComponent(triggerElement);
+    if (!component) {
+        console.warn('[langTabs] Could not find a langTabs component to copy file fields');
+        return false;
+    }
+
+    component.copyFileFieldToTargets(
+        sourceFileIdSelector,
+        sourceFileUrlSelector,
+        targetFileIdSelectors,
+        targetFileUrlSelectors,
+    );
+
+    return true;
+};
+
+export const copyLangTabsFileFieldToAll = (
+    triggerElement,
+    sourceFileIdSelector,
+    sourceFileUrlSelector,
+    fieldKeyPattern,
+) => {
+    const component = findLangTabsComponent(triggerElement);
+    if (!component) {
+        console.warn('[langTabs] Could not find a langTabs component to copy file fields');
+        return false;
+    }
+
+    component.copyFileFieldToAll(
+        sourceFileIdSelector,
+        sourceFileUrlSelector,
+        fieldKeyPattern,
+    );
+
+    return true;
+};
+
 export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN') => ({
     active: defaultId,
     translating: false,

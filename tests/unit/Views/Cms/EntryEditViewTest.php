@@ -69,7 +69,7 @@ final class EntryEditViewTest extends CIUnitTestCase
 
         $this->assertStringContainsString('translatableFileField(', $html);
         $this->assertStringContainsString('Copiar a otros idiomas', $html);
-        $this->assertStringContainsString('copyFileFieldToTargets(', $html);
+        $this->assertStringContainsString('window.copyLangTabsFileFieldToTargets(', $html);
         $this->assertStringContainsString('featured_image_url', $html);
     }
 }

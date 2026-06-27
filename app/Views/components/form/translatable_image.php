@@ -63,7 +63,7 @@ if ($fileUrlValue === '' && $fileIdValue !== '') {
         </button>
         <?php if ($copyTargetFileIdSelectors !== []): ?>
             <button type="button"
-                    @click="$refs.langTabs?._x_dataStack?.[0]?.copyFileFieldToTargets('<?= esc($fileIdInputId, 'js') ?>', '<?= esc($fileUrlInputId, 'js') ?>', <?= esc(json_encode($copyTargetFileIdSelectors), 'attr') ?>, <?= esc(json_encode($copyTargetFileUrlSelectors), 'attr') ?>)"
+                    @click="window.copyLangTabsFileFieldToTargets($el, '<?= esc($fileIdInputId, 'js') ?>', '<?= esc($fileUrlInputId, 'js') ?>', <?= esc(json_encode($copyTargetFileIdSelectors), 'attr') ?>, <?= esc(json_encode($copyTargetFileUrlSelectors), 'attr') ?>)"
                     x-show="fileId"
                     class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-100 transition-colors">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">

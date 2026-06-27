@@ -24,6 +24,10 @@ import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
 import { handleGoogleCredentialResponse } from './components/googleAuth.js';
 import { richTextEditor } from './components/richTextEditor.js';
+import {
+    copyLangTabsFileFieldToAll,
+    copyLangTabsFileFieldToTargets,
+} from './components/langTabs.js';
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
@@ -55,6 +59,8 @@ document.addEventListener('alpine:init', () => {
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
     window.bestFilePreviewUrl = bestFilePreviewUrl;
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
+    window.copyLangTabsFileFieldToTargets = copyLangTabsFileFieldToTargets;
+    window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
 });
 
 // Must be on window before the Google GSI script fires
