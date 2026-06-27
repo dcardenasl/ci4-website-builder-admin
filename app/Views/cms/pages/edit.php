@@ -15,6 +15,22 @@ $resolveTranslation = static function (array $lang) use ($translations): array {
 
     return [];
 };
+
+// Calculate translation completion stats
+$translationStats = [];
+if (!empty($languages)) {
+    foreach ($languages as $lang) {
+        $langId = (int) ($lang['id'] ?? 0);
+        $transValue = $resolveTranslation($lang);
+        $translationStats[$langId] = [
+            'code' => $lang['code'] ?? '',
+            'status' => empty($transValue) ? 'missing' : ((!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete'),
+            'has_seo' => !empty($transValue['meta_title']) || !empty($transValue['meta_description'])
+        ];
+    }
+}
+$completedCount = array_sum(array_map(fn($s) => $s['status'] === 'complete' ? 1 : 0, $translationStats));
+$totalLanguages = count($translationStats);
 ?>
 <div class="mb-4 flex items-center justify-between">
     <a href="<?= $itemIdStr !== '' ? route_to('admin.cms.pages.show', $itemIdStr) : route_to('admin.cms.pages') ?>"
@@ -67,80 +83,91 @@ if (!empty($languages)) {
     <?php endif; ?>
 
     <?php ob_start(); ?>
-    <form method="post" action="<?= route_to('admin.cms.pages.update', $itemIdStr) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <form method="post" action="<?= route_to('admin.cms.pages.update', $itemIdStr) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3" x-data="{ expandedSections: { basic: true, translations: true, publishing: false, seo: false, advanced: false } }">
         <?= csrf_field() ?>
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-0">
 
-        <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
-            <div>
-                <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('App.form_core')) ?></h4>
-                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Pages.field_page_type_help')) ?></p>
-            </div>
+        <!-- SECTION: BASIC (Always expanded) -->
+        <div class="border-b border-gray-200 last:border-b-0">
+            <button type="button"
+                    @click="expandedSections.basic = !expandedSections.basic"
+                    class="w-full flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <span x-show="!expandedSections.basic" class="text-gray-400">▶</span>
+                    <span x-show="expandedSections.basic" class="text-gray-600">▼</span>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900"><?= esc(lang('App.form_core')) ?></h3>
+                        <p class="text-xs text-gray-500 mt-0.5"><?= esc(lang('Pages.field_page_type_help')) ?></p>
+                    </div>
+                </div>
+            </button>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <?= view('components/form/select', [
-                'name' => 'page_type',
-                'label' => 'Pages.field_page_type',
-                'required' => true,
-                'placeholder' => 'Pages.field_page_type_placeholder',
-                'help' => 'Pages.field_page_type_help',
-                'options' => [
-                    'home' => lang('Pages.page_type_home'),
-                    'generic' => lang('Pages.page_type_generic'),
-                    'contact' => lang('Pages.page_type_contact'),
-                    'privacy' => lang('Pages.page_type_privacy'),
-                    'terms' => lang('Pages.page_type_terms'),
-                    '404' => lang('Pages.page_type_404'),
-                    '500' => lang('Pages.page_type_500'),
-                    'maintenance' => lang('Pages.page_type_maintenance')
-                ],
-                'value' => $item['page_type'] ?? 'generic',
-                'errors' => $errors ?? []
-            ]) ?>
+            <div x-show="expandedSections.basic" class="px-4 pb-4 space-y-4 border-t border-gray-100">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <?= view('components/form/select', [
+                    'name' => 'page_type',
+                    'label' => 'Pages.field_page_type',
+                    'required' => true,
+                    'placeholder' => 'Pages.field_page_type_placeholder',
+                    'help' => 'Pages.field_page_type_help',
+                    'options' => [
+                        'home' => lang('Pages.page_type_home'),
+                        'generic' => lang('Pages.page_type_generic'),
+                        'contact' => lang('Pages.page_type_contact'),
+                        'privacy' => lang('Pages.page_type_privacy'),
+                        'terms' => lang('Pages.page_type_terms'),
+                        '404' => lang('Pages.page_type_404'),
+                        '500' => lang('Pages.page_type_500'),
+                        'maintenance' => lang('Pages.page_type_maintenance')
+                    ],
+                    'value' => $item['page_type'] ?? 'generic',
+                    'errors' => $errors ?? []
+                ]) ?>
 
-                <?= view('components/form/select', [
-                'name' => 'status',
-                'label' => 'Pages.field_status',
-                'required' => true,
-                'placeholder' => 'Pages.field_status_placeholder',
-                'help' => 'Pages.field_status_help',
-                'options' => [
-                    'draft' => lang('Pages.status_draft'),
-                    'published' => lang('Pages.status_published'),
-                    'archived' => lang('Pages.status_archived')
-                ],
-                'value' => $item['status'] ?? 'draft',
-                'errors' => $errors ?? []
-            ]) ?>
-            </div>
+                    <?= view('components/form/select', [
+                    'name' => 'status',
+                    'label' => 'Pages.field_status',
+                    'required' => true,
+                    'placeholder' => 'Pages.field_status_placeholder',
+                    'help' => 'Pages.field_status_help',
+                    'options' => [
+                        'draft' => lang('Pages.status_draft'),
+                        'published' => lang('Pages.status_published'),
+                        'archived' => lang('Pages.status_archived')
+                    ],
+                    'value' => $item['status'] ?? 'draft',
+                    'errors' => $errors ?? []
+                ]) ?>
+                </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <?= view('components/form/relation', [
-                'name' => 'parent_id',
-                'label' => 'Pages.field_parent_id',
-                'required' => false,
-                'options' => $pages ?? [],
-                'placeholder' => 'Pages.field_parent_id_placeholder',
-                'help' => 'Pages.field_parent_id_help',
-                'value' => $item['parent_id'] ?? '',
-                'errors' => $errors ?? []
-            ]) ?>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <?= view('components/form/relation', [
+                    'name' => 'parent_id',
+                    'label' => 'Pages.field_parent_id',
+                    'required' => false,
+                    'options' => $pages ?? [],
+                    'placeholder' => 'Pages.field_parent_id_placeholder',
+                    'help' => 'Pages.field_parent_id_help',
+                    'value' => $item['parent_id'] ?? '',
+                    'errors' => $errors ?? []
+                ]) ?>
 
-                <?= view('components/form/number', [
-                'name' => 'sort_order',
-                'label' => 'Pages.field_sort_order',
-                'required' => false,
-                'value' => $item['sort_order'] ?? 0,
-                'placeholder' => 'Pages.field_sort_order_placeholder',
-                'help' => 'Pages.field_sort_order_help',
-                'errors' => $errors ?? []
-            ]) ?>
+                    <?= view('components/form/number', [
+                    'name' => 'sort_order',
+                    'label' => 'Pages.field_sort_order',
+                    'required' => false,
+                    'value' => $item['sort_order'] ?? 0,
+                    'placeholder' => 'Pages.field_sort_order_placeholder',
+                    'help' => 'Pages.field_sort_order_help',
+                    'errors' => $errors ?? []
+                ]) ?>
+                </div>
             </div>
         </div>
 
 
 
-        <!-- Translations with language tabs -->
+        <!-- SECTION: TRANSLATIONS (with collapsible language tabs) -->
         <?php if (!empty($languages)): ?>
             <?php
             $defaultLangId = 0;
@@ -156,159 +183,175 @@ if (!empty($languages)) {
             }
             $translateUrl = route_to('admin.cms.translate');
             ?>
-            <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Pages.translations_title')) ?></h4>
-                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Pages.translations_help')) ?></p>
-                </div>
-
-                <?php $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId; ?>
-                <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
-                    <!-- Tab bar + translate-all button -->
-                    <div class="flex items-center justify-between border-b border-gray-200 mb-4">
-                        <div class="flex gap-0.5" role="tablist">
-                            <?php foreach ($languages as $lang): ?>
-                                <?php
-                                    $transValue = $resolveTranslation($lang);
-                                $t_status = 'missing';
-                                if (!empty($transValue)) {
-                                    $t_status = (!empty($transValue['title']) && !empty($transValue['slug'])) ? 'complete' : 'incomplete';
-                                }
-                                ?>
-                                <button type="button"
-                                    role="tab"
-                                    @click="setTab(<?= (int) $lang['id'] ?>)"
-                                    :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
-                                    :class="isActive(<?= (int) $lang['id'] ?>) ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors inline-flex items-center gap-1.5">
-                                    <span><?= esc(strtoupper($lang['code'])) ?></span>
-                                    <?php if ($t_status === 'missing'): ?>
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500" title="Missing translation"></span>
-                                    <?php elseif ($t_status === 'incomplete'): ?>
-                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500" title="Incomplete translation"></span>
-                                    <?php else: ?>
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500" title="Complete translation"></span>
-                                    <?php endif; ?>
-                                    <?php if (!empty($lang['is_default'])): ?>
-                                        <span class="ml-1 text-brand-400">★</span>
-                                    <?php endif; ?>
-                                </button>
-                            <?php endforeach; ?>
+            <div class="border-b border-gray-200 last:border-b-0">
+                <button type="button"
+                        @click="expandedSections.translations = !expandedSections.translations"
+                        class="w-full flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span x-show="!expandedSections.translations" class="text-gray-400">▶</span>
+                        <span x-show="expandedSections.translations" class="text-gray-600">▼</span>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-gray-900"><?= esc(lang('Pages.translations_title')) ?></h3>
+                            <p class="text-xs text-gray-500 mt-0.5"><?= esc(lang('Pages.translations_help')) ?></p>
                         </div>
-                        <?php if (!empty($translateTargets)): ?>
-                        <button type="button"
-                        @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
-                            :disabled="translating || translatingAll"
-                            class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
-                            <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
-                            <span x-show="translatingAll" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <span x-text="translateAllProgress"></span></span>
-                        </button>
-                        <?php endif; ?>
                     </div>
-
-                    <!-- Translate error message -->
-                    <p x-show="translateError !== ''" x-text="translateError" x-cloak class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
-
-                    <!-- Tab panels -->
-                    <?php foreach ($languages as $index => $lang): ?>
-                        <?php
-                            $transValue = $resolveTranslation($lang);
-                        $isDefault = !empty($lang['is_default']);
-                        $langCode  = strtoupper($lang['code'] ?? '');
-                        $fields = [
-                            ['from' => sprintf('[name="translations[%d][title]"]', $defaultLangIndex),            'to' => sprintf('[name="translations[%d][title]"]', $index)],
-                            ['from' => sprintf('[name="translations[%d][excerpt]"]', $defaultLangIndex),          'to' => sprintf('[name="translations[%d][excerpt]"]', $index)],
-                            ['from' => sprintf('[name="translations[%d][meta_title]"]', $defaultLangIndex),       'to' => sprintf('[name="translations[%d][meta_title]"]', $index)],
-                            ['from' => sprintf('[name="translations[%d][meta_description]"]', $defaultLangIndex), 'to' => sprintf('[name="translations[%d][meta_description]"]', $index)],
-                        ];
-                        ?>
-                        <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
-                            <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
-
-                            <?php if (!$isDefault): ?>
-                            <div class="flex justify-end">
-                                <button type="button"
-                                    @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
-                                    :disabled="translating"
-                                    class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
-                                    <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
-                                    <span x-show="translating" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <?= esc(lang('App.translating')) ?></span>
-                                </button>
-                            </div>
+                    <div class="flex items-center gap-1.5 ml-4">
+                        <span class="text-xs font-medium text-gray-600 whitespace-nowrap">
+                            <?php if ($totalLanguages > 0): ?>
+                                <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
+                                    <?= esc("$completedCount/$totalLanguages") ?>
+                                </span>
                             <?php endif; ?>
+                        </span>
+                    </div>
+                </button>
 
-                            <?= view('components/form/text', [
-                                'name' => "translations[{$index}][title]",
-                                'label' => 'Pages.translation_title_label',
-                                'required' => !empty($lang['is_default']),
-                                'placeholder' => 'Pages.translation_title_placeholder',
-                                'help' => 'Pages.translation_title_help',
-                                'value' => old("translations.{$index}.title", $transValue['title'] ?? ''),
-                                'maxlength' => 255,
-                                'errors' => $errors ?? []
-                            ]) ?>
+                <div x-show="expandedSections.translations" class="px-4 pb-4 space-y-4 border-t border-gray-100">
+                    <?php $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId; ?>
+                    <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
 
-                            <?= view('components/form/slug', [
-                                'name' => "translations[{$index}][slug]",
-                                'label' => 'Pages.translation_slug_label',
-                                'required' => !empty($lang['is_default']),
-                                'sourceId' => sprintf('[name="translations[%d][title]"]', $index),
-                                'checkUrl' => route_to('admin.cms.pages.check_slug') . '?language_id=' . (int)$lang['id'],
-                                'currentId' => $item['id'] ?? '',
-                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
-                                'help' => 'Pages.translation_slug_help',
-                                'errors' => $errors ?? []
-                            ]) ?>
-
-                            <?= view('components/form/textarea', [
-                                'name' => "translations[{$index}][excerpt]",
-                                'label' => 'Pages.translation_excerpt_label',
-                                'required' => false,
-                                'placeholder' => 'Pages.translation_excerpt_placeholder',
-                                'help' => 'Pages.translation_excerpt_help',
-                                'value' => old("translations.{$index}.excerpt", $transValue['excerpt'] ?? ''),
-                                'maxlength' => 500,
-                                'errors' => $errors ?? []
-                            ]) ?>
-
-                            <!-- SEO per language (collapsed, open if has values) -->
-                            <details class="group border border-gray-100 rounded-lg bg-gray-50/30" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description'])) ? 'open' : '' ?>>
-                                <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 rounded-lg select-none">
-                                    <span><?= esc(lang('Pages.section_seo_per_lang')) ?></span>
-                                    <svg class="h-3.5 w-3.5 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-                                </summary>
-                                <div class="px-3 pb-3 pt-2 space-y-4 border-t border-gray-100">
-                                    <?= view('components/form/text', [
-                                        'name' => "translations[{$index}][meta_title]",
-                                        'label' => 'Pages.translation_meta_title_label',
-                                        'required' => false,
-                                        'placeholder' => 'Pages.translation_meta_title_placeholder',
-                                        'help' => 'Pages.translation_meta_title_help',
-                                        'value' => old("translations.{$index}.meta_title", $transValue['meta_title'] ?? ''),
-                                        'maxlength' => 255,
-                                        'errors' => $errors ?? []
-                                    ]) ?>
-                                    <?= view('components/form/textarea', [
-                                        'name' => "translations[{$index}][meta_description]",
-                                        'label' => 'Pages.translation_meta_description_label',
-                                        'required' => false,
-                                        'placeholder' => 'Pages.translation_meta_description_placeholder',
-                                        'help' => 'Pages.translation_meta_description_help',
-                                        'value' => old("translations.{$index}.meta_description", $transValue['meta_description'] ?? ''),
-                                        'maxlength' => 500,
-                                        'rows' => 3,
-                                        'errors' => $errors ?? []
-                                    ]) ?>
-                                </div>
-                            </details>
+                        <!-- Language tabs with indicators -->
+                        <div class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-200">
+                            <div class="flex gap-1 flex-wrap" role="tablist">
+                                <?php foreach ($languages as $lang): ?>
+                                    <?php $langId = (int) $lang['id']; ?>
+                                    <button type="button"
+                                        role="tab"
+                                        @click="setTab(<?= $langId ?>)"
+                                        :aria-selected="isActive(<?= $langId ?>)"
+                                        :class="isActive(<?= $langId ?>) ? 'border-b-2 border-brand-600 text-brand-700 bg-brand-50' : 'border-b-2 border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+                                        class="px-3 py-2 text-sm font-medium transition-all rounded-t-lg inline-flex items-center gap-2">
+                                        <span><?= esc(strtoupper($lang['code'])) ?></span>
+                                        <?php if ($translationStats[$langId]['status'] === 'complete'): ?>
+                                            <span class="inline-block w-2 h-2 rounded-full bg-green-500" title="<?= lang('Pages.translation_complete') ?>"></span>
+                                        <?php elseif ($translationStats[$langId]['status'] === 'incomplete'): ?>
+                                            <span class="inline-block w-2 h-2 rounded-full bg-yellow-500" title="<?= lang('Pages.translation_incomplete') ?>"></span>
+                                        <?php else: ?>
+                                            <span class="inline-block w-2 h-2 rounded-full bg-red-500" title="<?= lang('Pages.translation_missing') ?>"></span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($lang['is_default'])): ?>
+                                            <span class="text-brand-500">★</span>
+                                        <?php endif; ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php if (!empty($translateTargets)): ?>
+                                <button type="button"
+                                    @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
+                                    :disabled="translating || translatingAll"
+                                    class="shrink-0 inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
+                                    <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
+                                    <span x-show="translatingAll" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <span x-text="translateAllProgress"></span></span>
+                                </button>
+                            <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
+
+                        <!-- Translation error message -->
+                        <p x-show="translateError !== ''" x-text="translateError" x-cloak class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
+
+                        <!-- Tab content panels -->
+                        <?php foreach ($languages as $index => $lang): ?>
+                            <?php
+                                $langId = (int) $lang['id'];
+                                $transValue = $resolveTranslation($lang);
+                                $isDefault = !empty($lang['is_default']);
+                                $langCode  = strtoupper($lang['code'] ?? '');
+                                $fields = [
+                                    ['from' => sprintf('[name="translations[%d][title]"]', $defaultLangIndex),            'to' => sprintf('[name="translations[%d][title]"]', $index)],
+                                    ['from' => sprintf('[name="translations[%d][excerpt]"]', $defaultLangIndex),          'to' => sprintf('[name="translations[%d][excerpt]"]', $index)],
+                                    ['from' => sprintf('[name="translations[%d][meta_title]"]', $defaultLangIndex),       'to' => sprintf('[name="translations[%d][meta_title]"]', $index)],
+                                    ['from' => sprintf('[name="translations[%d][meta_description]"]', $defaultLangIndex), 'to' => sprintf('[name="translations[%d][meta_description]"]', $index)],
+                                ];
+                            ?>
+                            <div x-show="isActive(<?= $langId ?>)" class="space-y-4">
+                                <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
+
+                                <?php if (!$isDefault): ?>
+                                    <div class="flex justify-end">
+                                        <button type="button"
+                                            @click="autoTranslate('<?= esc($langCode, 'attr') ?>', <?= esc(json_encode($fields, JSON_THROW_ON_ERROR), 'attr') ?>)"
+                                            :disabled="translating"
+                                            class="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
+                                            <span x-show="!translating"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_from_default')) ?></span>
+                                            <span x-show="translating" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <?= esc(lang('App.translating')) ?></span>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?= view('components/form/text', [
+                                    'name' => "translations[{$index}][title]",
+                                    'label' => 'Pages.translation_title_label',
+                                    'required' => !empty($lang['is_default']),
+                                    'placeholder' => 'Pages.translation_title_placeholder',
+                                    'help' => 'Pages.translation_title_help',
+                                    'value' => old("translations.{$index}.title", $transValue['title'] ?? ''),
+                                    'maxlength' => 255,
+                                    'errors' => $errors ?? []
+                                ]) ?>
+
+                                <?= view('components/form/slug', [
+                                    'name' => "translations[{$index}][slug]",
+                                    'label' => 'Pages.translation_slug_label',
+                                    'required' => !empty($lang['is_default']),
+                                    'sourceId' => sprintf('[name="translations[%d][title]"]', $index),
+                                    'checkUrl' => route_to('admin.cms.pages.check_slug') . '?language_id=' . (int)$lang['id'],
+                                    'currentId' => $item['id'] ?? '',
+                                    'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
+                                    'help' => 'Pages.translation_slug_help',
+                                    'errors' => $errors ?? []
+                                ]) ?>
+
+                                <?= view('components/form/textarea', [
+                                    'name' => "translations[{$index}][excerpt]",
+                                    'label' => 'Pages.translation_excerpt_label',
+                                    'required' => false,
+                                    'placeholder' => 'Pages.translation_excerpt_placeholder',
+                                    'help' => 'Pages.translation_excerpt_help',
+                                    'value' => old("translations.{$index}.excerpt", $transValue['excerpt'] ?? ''),
+                                    'maxlength' => 500,
+                                    'errors' => $errors ?? []
+                                ]) ?>
+
+                                <!-- SEO per language (collapsible, open if has values) -->
+                                <details class="group border border-gray-200 rounded-lg bg-gray-50" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description'])) ? 'open' : '' ?>>
+                                    <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg select-none transition-colors">
+                                        <span><?= esc(lang('Pages.section_seo_per_lang')) ?></span>
+                                        <svg class="h-3.5 w-3.5 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+                                    </summary>
+                                    <div class="px-3 pb-3 pt-2 space-y-4 border-t border-gray-200">
+                                        <?= view('components/form/text', [
+                                            'name' => "translations[{$index}][meta_title]",
+                                            'label' => 'Pages.translation_meta_title_label',
+                                            'required' => false,
+                                            'placeholder' => 'Pages.translation_meta_title_placeholder',
+                                            'help' => 'Pages.translation_meta_title_help',
+                                            'value' => old("translations.{$index}.meta_title", $transValue['meta_title'] ?? ''),
+                                            'maxlength' => 255,
+                                            'errors' => $errors ?? []
+                                        ]) ?>
+                                        <?= view('components/form/textarea', [
+                                            'name' => "translations[{$index}][meta_description]",
+                                            'label' => 'Pages.translation_meta_description_label',
+                                            'required' => false,
+                                            'placeholder' => 'Pages.translation_meta_description_placeholder',
+                                            'help' => 'Pages.translation_meta_description_help',
+                                            'value' => old("translations.{$index}.meta_description", $transValue['meta_description'] ?? ''),
+                                            'maxlength' => 500,
+                                            'rows' => 3,
+                                            'errors' => $errors ?? []
+                                        ]) ?>
+                                    </div>
+                                </details>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
 
         </div>
-        <aside class="space-y-6">
+        <aside class="space-y-4">
+            <!-- Action buttons panel -->
             <?php ob_start(); ?>
             <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.update')) ?></button>
             <a href="<?= $itemIdStr !== '' ? route_to('admin.cms.pages.show', $itemIdStr) : route_to('admin.cms.pages') ?>"
@@ -316,13 +359,25 @@ if (!empty($languages)) {
             <?php $actionsContent = ob_get_clean(); ?>
             <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
 
-            <!-- Publishing & Scheduling -->
-            <details class="group rounded-xl border border-gray-200 bg-white" <?= (!empty($item['published_at']) || !empty($item['scheduled_at'])) ? 'open' : '' ?>>
-                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+            <!-- Publishing & Scheduling (collapsible) -->
+            <div class="border-b border-gray-200 last:border-b-0 bg-white rounded-lg overflow-hidden" x-show="expandedSections.publishing" @click="expandedSections.publishing = !expandedSections.publishing">
+                <button type="button"
+                        @click.stop="expandedSections.publishing = !expandedSections.publishing"
+                        class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <span x-show="!expandedSections.publishing" class="text-gray-400">▶</span>
+                        <span x-show="expandedSections.publishing" class="text-gray-600">▼</span>
+                        <span class="text-sm font-medium text-gray-700"><?= esc(lang('Pages.section_publishing')) ?></span>
+                    </div>
+                </button>
+            </div>
+
+            <details class="group border border-gray-200 rounded-lg bg-white" x-show="!expandedSections.publishing" <?= (!empty($item['published_at']) || !empty($item['scheduled_at'])) ? 'open' : '' ?>>
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                     <span><?= esc(lang('Pages.section_publishing')) ?></span>
                     <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
                 </summary>
-                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-200">
                     <?= view('components/form/datetime', [
                     'name' => 'published_at',
                     'label' => 'Pages.field_published_at',
@@ -344,13 +399,13 @@ if (!empty($languages)) {
                 </div>
             </details>
 
-            <!-- SEO & Sitemap -->
-            <details class="group rounded-xl border border-gray-200 bg-white">
-                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
+            <!-- SEO & Sitemap (collapsible) -->
+            <details class="group border border-gray-200 rounded-lg bg-white" x-show="!expandedSections.seo">
+                <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                     <span><?= esc(lang('Pages.section_seo_sitemap')) ?></span>
                     <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
                 </summary>
-                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-100">
+                <div class="px-4 pb-4 pt-2 space-y-4 border-t border-gray-200">
                     <?= view('components/form/boolean', [
                     'name' => 'is_in_sitemap',
                     'label' => 'Pages.field_is_in_sitemap',

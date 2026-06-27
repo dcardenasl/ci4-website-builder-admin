@@ -674,6 +674,7 @@ $csrfToken ??= csrf_hash();
                     title:            this.formData.title ?? '',
                     excerpt:          this.formData.excerpt ?? '',
                     featured_file_id: this.formData.featured_image_id ?? null,
+                    featured_image_url: this.formData.featured_image_url ?? null,
                 };
 
                 payload.translations = languages.length > 0
