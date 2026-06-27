@@ -165,6 +165,32 @@
                                 'errors' => $errors ?? []
                             ]) ?>
 
+                            <?php
+                                $otherFileIdSelectors = [];
+                                $otherFileUrlSelectors = [];
+                                foreach ($languages as $targetIndex => $targetLanguage) {
+                                    if ((int) ($targetLanguage['id'] ?? 0) === (int) ($lang['id'] ?? 0)) {
+                                        continue;
+                                    }
+                                    $otherFileIdSelectors[] = '#entry_featured_file_id_' . $targetIndex;
+                                    $otherFileUrlSelectors[] = '#entry_featured_image_url_' . $targetIndex;
+                                }
+                            ?>
+                            <?= view('components/form/translatable_image', [
+                                'label' => 'Entries.translation_featured_image_label',
+                                'help' => 'Entries.translation_featured_image_help',
+                                'fileIdName' => "translations[{$index}][featured_file_id]",
+                                'fileUrlName' => "translations[{$index}][featured_image_url]",
+                                'fileIdInputId' => 'entry_featured_file_id_' . $index,
+                                'fileUrlInputId' => 'entry_featured_image_url_' . $index,
+                                'fileIdValue' => old("translations.{$index}.featured_file_id", ''),
+                                'fileUrlValue' => old("translations.{$index}.featured_image_url", ''),
+                                'copyTargetFileIdSelectors' => $otherFileIdSelectors,
+                                'copyTargetFileUrlSelectors' => $otherFileUrlSelectors,
+                                'copyLabel' => 'Entries.translation_copy_to_other_languages',
+                                'accept' => 'image',
+                            ]) ?>
+
                             <details class="group border border-gray-100 rounded-lg bg-gray-50/30">
                                 <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 rounded-lg select-none">
                                     <span><?= esc(lang('Entries.section_seo_per_lang')) ?></span>

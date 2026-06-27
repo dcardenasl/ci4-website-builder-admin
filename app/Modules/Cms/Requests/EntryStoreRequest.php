@@ -40,6 +40,8 @@ class EntryStoreRequest extends BaseFormRequest
             'published_at' => 'permit_empty|valid_date',
             'scheduled_at' => 'permit_empty|valid_date',
             'translations' => 'permit_empty',
+            'translations.*.featured_file_id' => 'permit_empty|integer',
+            'translations.*.featured_image_url' => 'permit_empty|string|max_length[2048]',
         ];
     }
 
@@ -63,10 +65,12 @@ class EntryStoreRequest extends BaseFormRequest
             $title = isset($trans['title']) ? trim((string) $trans['title']) : '';
             $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
             $excerpt = isset($trans['excerpt']) ? trim((string) $trans['excerpt']) : '';
+            $featuredFileId = isset($trans['featured_file_id']) && $trans['featured_file_id'] !== '' ? (int) $trans['featured_file_id'] : null;
+            $featuredImageUrl = isset($trans['featured_image_url']) ? trim((string) $trans['featured_image_url']) : '';
             $metaTitle = isset($trans['meta_title']) ? trim((string) $trans['meta_title']) : '';
             $metaDescription = isset($trans['meta_description']) ? trim((string) $trans['meta_description']) : '';
 
-            if ($title === '' && $slug === '' && $excerpt === '' && $metaTitle === '' && $metaDescription === '') {
+            if ($title === '' && $slug === '' && $excerpt === '' && $featuredFileId === null && $featuredImageUrl === '' && $metaTitle === '' && $metaDescription === '') {
                 continue;
             }
 
@@ -75,6 +79,8 @@ class EntryStoreRequest extends BaseFormRequest
                 'slug' => $slug,
                 'title' => $title,
                 'excerpt' => $excerpt !== '' ? $excerpt : null,
+                'featured_file_id' => $featuredFileId,
+                'featured_image_url' => $featuredImageUrl !== '' ? $featuredImageUrl : null,
                 'meta_title' => $metaTitle !== '' ? $metaTitle : null,
                 'meta_description' => $metaDescription !== '' ? $metaDescription : null,
             ];
