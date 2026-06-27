@@ -322,6 +322,40 @@ The API supports an optional `X-App-Key` header that identifies the admin app as
 
 When present, `ApiClient` injects `X-App-Key` on every request (public and authenticated). When absent, the header is not sent. Configuring an invalid key causes every request to return `401` from the API — a misconfiguration that is caught immediately.
 
+## CMS — Two-Audience Model
+
+The CMS module serves two distinct user audiences with separate UI flows. **Never mix permissions or routes between them.**
+
+### Audience 1: Non-technical editors (`cms-editor` role)
+- Use the **Wizard** (`/admin/cms/wizard`) — guided step-by-step flow for creating/editing entries and managing menus.
+- See the **Contenido** sidebar group: Entradas, Colecciones, Categorías, Tags, Formularios, Envíos.
+- Gate: `cms.entries.read` permission (also grants wizard access).
+
+### Audience 2: Technical administrators (`cms-admin` role)
+- Use both the Wizard AND the **canonical CMS modules** for full control.
+- See the **Estructura** sidebar group: Páginas, Menús, Tipos de bloque, Redirecciones.
+- Gate: `cms.pages.read`, `cms.menus.read`, `cms.blocks.read` permissions.
+
+### Sidebar permission structure
+
+```
+[CMS]
+  ├── Wizard link            → cms.entries.read
+  ├── [Contenido group]      → cms.entries.read OR cms.collections.read OR cms.categories.read
+  │     Entradas, Colecciones, Categorías, Tags, Formularios, Envíos
+  └── [Estructura group]     → cms.pages.read OR cms.menus.read OR cms.blocks.read OR cms.redirects.read
+        Páginas, Menús, Tipos de bloque, Redirecciones
+```
+
+### Rules
+- Structural routes (pages, menus, block types, redirects) must NEVER appear under `cms.entries.*` permission gates.
+- Content routes (entries, collections, taxonomy, forms) must NEVER appear under `cms.pages.*`/`cms.blocks.*` gates.
+- The Wizard and canonical modules are **parallel flows** — do not remove one to replace the other.
+- Permission codes are authoritative in `ci4-website-builder-domain/app/Config/DomainPermissions.php`.
+- Hub roles `cms-editor` and `cms-admin` are seeded by `CmsRolesSeeder` in the API project. Run it after `domain:sync-permissions`.
+
+---
+
 ## Implemented Modules
 
 All modules are fully implemented:
