@@ -1,78 +1,111 @@
 /* global HTMLTextAreaElement, Event */
 import { resolveTranslatableFilePreviewUrl } from '../utils/fileUrl.js';
 
-const findLangTabsComponent = (startElement) => {
-    let current = startElement instanceof HTMLElement ? startElement : null;
-
-    while (current instanceof HTMLElement) {
-        const xData = String(current.getAttribute('x-data') || '');
-        if (xData.includes('langTabs(')) {
-            const component = current._x_dataStack?.[0];
-            if (component && typeof component.copyFileFieldToTargets === 'function') {
-                return component;
-            }
+const toElement = (candidate) => {
+    if (candidate instanceof HTMLElement) {
+        return candidate;
+    }
+    if (typeof candidate === 'string') {
+        const trimmed = candidate.trim();
+        if (trimmed === '') {
+            return null;
         }
 
-        current = current.parentElement;
+        const normalizedId = trimmed.replace(/^#/, '');
+        return document.querySelector(trimmed)
+            || document.getElementById(normalizedId)
+            || document.querySelector(`[id="${normalizedId.replace(/"/g, '\\"')}"]`);
     }
-
-    const fallbackRoots = [
-        document.querySelector('[x-ref="langTabs"]'),
-        document.querySelector('[x-data*="langTabs("]'),
-    ];
-
-    for (const root of fallbackRoots) {
-        const component = root?._x_dataStack?.[0];
-        if (component && typeof component.copyFileFieldToTargets === 'function') {
-            return component;
-        }
-    }
-
     return null;
 };
 
-export const copyLangTabsFileFieldToTargets = (
-    triggerElement,
+const findTranslatableFileFieldComponent = (input) => {
+    const container = input instanceof HTMLElement ? input.closest('[x-data*="translatableFileField"]') : null;
+    const component = container?._x_dataStack?.[0];
+    return component && typeof component.applyFile === 'function' ? component : null;
+};
+
+const applyTargetValue = (targetInput, fileIdValue, fileUrlValue) => {
+    if (!(targetInput instanceof HTMLInputElement)) {
+        return;
+    }
+
+    targetInput.value = fileIdValue;
+    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const componentData = findTranslatableFileFieldComponent(targetInput);
+    if (componentData) {
+        componentData.applyFile(fileIdValue, fileUrlValue);
+    }
+};
+
+const copyFileFieldValues = (
     sourceFileIdSelector,
     sourceFileUrlSelector,
     targetFileIdSelectors,
     targetFileUrlSelectors,
 ) => {
-    const component = findLangTabsComponent(triggerElement);
-    if (!component) {
-        console.warn('[langTabs] Could not find a langTabs component to copy file fields');
+    const sourceFileId = toElement(sourceFileIdSelector);
+    const sourceFileUrl = toElement(sourceFileUrlSelector);
+    if (!(sourceFileId instanceof HTMLInputElement) || !(sourceFileUrl instanceof HTMLInputElement)) {
+        console.warn('[langTabs] Could not find source file elements');
         return false;
     }
 
-    component.copyFileFieldToTargets(
+    const sourceFileIdValue = String(sourceFileId.value || '');
+    const sourceFileUrlValue = String(sourceFileUrl.value || '');
+    const resolvedFileUrl = resolveTranslatableFilePreviewUrl(sourceFileIdValue, sourceFileUrlValue);
+
+    const fileIdInputs = Array.from(targetFileIdSelectors, toElement).filter((input) => input instanceof HTMLInputElement);
+    const fileUrlInputs = Array.from(targetFileUrlSelectors, toElement).filter((input) => input instanceof HTMLInputElement);
+
+    fileIdInputs.forEach((input) => {
+        applyTargetValue(input, sourceFileIdValue, resolvedFileUrl);
+    });
+
+    fileUrlInputs.forEach((input) => {
+        if (input.value === resolvedFileUrl) {
+            return;
+        }
+        input.value = resolvedFileUrl;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+
+        const componentData = findTranslatableFileFieldComponent(input);
+        if (componentData) {
+            componentData.applyFile(sourceFileIdValue, resolvedFileUrl);
+        }
+    });
+
+    return true;
+};
+
+export const copyLangTabsFileFieldToTargets = (
+    sourceFileIdSelector,
+    sourceFileUrlSelector,
+    targetFileIdSelectors,
+    targetFileUrlSelectors,
+) => {
+    return copyFileFieldValues(
         sourceFileIdSelector,
         sourceFileUrlSelector,
         targetFileIdSelectors,
         targetFileUrlSelectors,
     );
-
-    return true;
 };
 
 export const copyLangTabsFileFieldToAll = (
-    triggerElement,
     sourceFileIdSelector,
     sourceFileUrlSelector,
     fieldKeyPattern,
 ) => {
-    const component = findLangTabsComponent(triggerElement);
-    if (!component) {
-        console.warn('[langTabs] Could not find a langTabs component to copy file fields');
-        return false;
-    }
-
-    component.copyFileFieldToAll(
+    const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
+    const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
+    return copyFileFieldValues(
         sourceFileIdSelector,
         sourceFileUrlSelector,
-        fieldKeyPattern,
+        allFileIdInputs,
+        allFileUrlInputs,
     );
-
-    return true;
 };
 
 export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN') => ({
