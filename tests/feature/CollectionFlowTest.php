@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\BlockCatalogServiceInterface;
+use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;

@@ -168,4 +168,310 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertArrayHasKey('items', $body);
         $this->assertSame(99, $body['items'][0]['id']);
     }
+
+    // ── publish() validation ──────────────────────────────────────────────────
+
+    public function testPublishRejectsEmptyPayload(): void
+    {
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->publish();
+
+        $this->assertSame(400, $result->getStatusCode());
+    }
+
+    public function testPublishRejectsMissingCollectionId(): void
+    {
+        $this->injectJsonBody(['title' => 'Test', 'status' => 'draft']);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->publish();
+
+        $this->assertSame(422, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('collection_id', $body['errors']);
+    }
+
+    public function testPublishRejectsMissingTitle(): void
+    {
+        $this->injectJsonBody(['collection_id' => 1, 'title' => '  ', 'status' => 'draft']);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->publish();
+
+        $this->assertSame(422, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('title', $body['errors']);
+    }
+
+    public function testPublishRejectsInvalidStatus(): void
+    {
+        $this->injectJsonBody(['collection_id' => 1, 'title' => 'Test', 'status' => 'scheduled']);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->publish();
+
+        $this->assertSame(422, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('status', $body['errors']);
+    }
+
+    public function testPublishForwardsValidPayloadToDomain(): void
+    {
+        $payload = ['collection_id' => 1, 'title' => 'My Entry', 'status' => 'published'];
+        $this->injectJsonBody($payload);
+
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/entries', $payload)
+            ->willReturn([
+                'ok' => true, 'status' => 201,
+                'data' => ['id' => 42, 'title' => 'My Entry'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->publish();
+
+        $this->assertSame(201, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertSame(42, $body['id']);
+    }
+
+    // ── uploadImage() validation ──────────────────────────────────────────────
+
+    public function testValidateImageFileRejectsNonImageMime(): void
+    {
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+
+        $fakeFile = new class () {
+            public function getMimeType(): string
+            {
+                return 'application/pdf';
+            }
+            public function getSize(): int
+            {
+                return 1024;
+            }
+        };
+
+        $ref = new \ReflectionMethod($controller, 'validateImageFile');
+        $ref->setAccessible(true);
+        $error = $ref->invoke($controller, $fakeFile);
+
+        $this->assertIsString($error);
+        $this->assertStringContainsString('application/pdf', $error);
+    }
+
+    public function testValidateImageFileRejectsOversizedFile(): void
+    {
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+
+        $fakeFile = new class () {
+            public function getMimeType(): string
+            {
+                return 'image/jpeg';
+            }
+            public function getSize(): int
+            {
+                return 20 * 1024 * 1024;
+            } // 20 MB
+        };
+
+        $ref = new \ReflectionMethod($controller, 'validateImageFile');
+        $ref->setAccessible(true);
+        $error = $ref->invoke($controller, $fakeFile);
+
+        $this->assertIsString($error);
+        $this->assertStringContainsString('MB', $error);
+    }
+
+    public function testValidateImageFileAcceptsValidImage(): void
+    {
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+
+        $fakeFile = new class () {
+            public function getMimeType(): string
+            {
+                return 'image/jpeg';
+            }
+            public function getSize(): int
+            {
+                return 500 * 1024;
+            } // 500 KB
+        };
+
+        $ref = new \ReflectionMethod($controller, 'validateImageFile');
+        $ref->setAccessible(true);
+        $error = $ref->invoke($controller, $fakeFile);
+
+        $this->assertNull($error);
+    }
+
+    // ── createBlock() / createEntryBlock() validation ────────────────────────
+
+    public function testCreateBlockRejectsMissingBlockTypeKey(): void
+    {
+        $this->injectJsonBody(['block_data' => ['text' => 'hello']]);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createBlock(1);
+
+        $this->assertSame(400, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertStringContainsString('block_type_key', $body['message']);
+    }
+
+    public function testCreateBlockForwardsValidPayloadToDomain(): void
+    {
+        $payload = ['block_type_key' => 'rich_text', 'block_data' => ['text' => 'hello']];
+        $this->injectJsonBody($payload);
+
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/pages/5/blocks', $payload)
+            ->willReturn([
+                'ok' => true, 'status' => 201,
+                'data' => ['id' => 10],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createBlock(5);
+
+        $this->assertSame(201, $result->getStatusCode());
+    }
+
+    public function testCreateEntryBlockRejectsMissingBlockTypeKey(): void
+    {
+        $this->injectJsonBody(['block_data' => []]);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createEntryBlock(3);
+
+        $this->assertSame(400, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertStringContainsString('block_type_key', $body['message']);
+    }
+
+    public function testCreateEntryBlockForwardsValidPayloadToDomain(): void
+    {
+        $payload = ['block_type_key' => 'hero', 'block_data' => ['title' => 'Hi']];
+        $this->injectJsonBody($payload);
+
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/entries/3/blocks', $payload)
+            ->willReturn([
+                'ok' => true, 'status' => 201,
+                'data' => ['id' => 20],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createEntryBlock(3);
+
+        $this->assertSame(201, $result->getStatusCode());
+    }
+
+    // ── menu item mutations ───────────────────────────────────────────────────
+
+    public function testAddMenuItemForwardsPayloadToDomain(): void
+    {
+        $payload = ['label' => 'Inicio', 'url' => '/'];
+        $this->injectJsonBody($payload);
+
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/menu-items', array_merge($payload, ['menu_id' => 2]))
+            ->willReturn([
+                'ok' => true, 'status' => 201,
+                'data' => ['id' => 7],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->addMenuItem(2);
+
+        $this->assertSame(201, $result->getStatusCode());
+    }
+
+    public function testUpdateMenuItemForwardsPayloadToDomain(): void
+    {
+        $payload = ['label' => 'Contacto', 'url' => '/contacto'];
+        $this->injectJsonBody($payload);
+
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('put')
+            ->with('/cms/menu-items/9', $payload)
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => ['id' => 9],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->updateMenuItem(9);
+
+        $this->assertSame(200, $result->getStatusCode());
+    }
+
+    public function testDeleteMenuItemForwardsToDomain(): void
+    {
+        $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->expects($this->once())
+            ->method('delete')
+            ->with('/cms/menu-items/9')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('domainApiClient', $mock);
+
+        $controller = new WizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->deleteMenuItem(9);
+
+        $this->assertSame(200, $result->getStatusCode());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Replaces the CI4 request body with a JSON payload so controller methods
+     * that call $this->request->getJSON(true) receive the expected data.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function injectJsonBody(array $data): void
+    {
+        $request = Services::request();
+        $request->setBody((string) json_encode($data));
+        $request->setHeader('Content-Type', 'application/json');
+        Services::injectMock('request', $request);
+    }
 }
