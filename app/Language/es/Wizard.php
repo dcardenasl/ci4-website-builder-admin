@@ -42,7 +42,7 @@ return [
 
     // Confirm & publish
     'confirm_title'          => 'Revisa antes de publicar',
-    'confirm_status_published'=> 'Publicado',
+    'confirm_status_published' => 'Publicado',
     'confirm_status_draft'   => 'Borrador',
     'confirm_no_value'       => '(sin valor)',
     'btn_publish'            => 'Publicar ahora',
@@ -64,8 +64,8 @@ return [
 
     // Edit page — block list (árbol jerárquico)
     'blocks_loading'         => 'Cargando bloques...',
-    'blocks_description_page'=> 'Administra y ordena los bloques de esta página.',
-    'blocks_description_entry'=> 'Administra y ordena los bloques de esta entrada.',
+    'blocks_description_page' => 'Administra y ordena los bloques de esta página.',
+    'blocks_description_entry' => 'Administra y ordena los bloques de esta entrada.',
     'no_blocks_page'         => 'Esta página aún no tiene bloques de contenido.',
     'no_blocks_entry'        => 'Esta entrada aún no tiene bloques de contenido.',
     'no_blocks'              => 'Este contenido no tiene bloques editables todavía.',
@@ -80,9 +80,9 @@ return [
 
     // Edit page — catálogo de bloques
     'catalog_heading'        => 'Elige el tipo de bloque',
-    'catalog_adding_child_to'=> 'Agregando dentro de:',
+    'catalog_adding_child_to' => 'Agregando dentro de:',
     'catalog_no_types'       => 'No hay tipos de bloque disponibles para este contexto.',
-    'catalog_container_badge'=> 'Contenedor',
+    'catalog_container_badge' => 'Contenedor',
 
     // Edit page — block edit
     'no_block_fields'        => 'Este bloque no tiene campos editables.',

@@ -42,7 +42,7 @@ return [
 
     // Confirm & publish
     'confirm_title'          => 'Review before publishing',
-    'confirm_status_published'=> 'Published',
+    'confirm_status_published' => 'Published',
     'confirm_status_draft'   => 'Draft',
     'confirm_no_value'       => '(no value)',
     'btn_publish'            => 'Publish now',
@@ -64,8 +64,8 @@ return [
 
     // Edit page — block list (tree view)
     'blocks_loading'         => 'Loading blocks...',
-    'blocks_description_page'=> 'Manage and order the blocks for this page.',
-    'blocks_description_entry'=> 'Manage and order the blocks for this entry.',
+    'blocks_description_page' => 'Manage and order the blocks for this page.',
+    'blocks_description_entry' => 'Manage and order the blocks for this entry.',
     'no_blocks_page'         => 'This page has no content blocks yet.',
     'no_blocks_entry'        => 'This entry has no content blocks yet.',
     'no_blocks'              => 'This content item has no editable blocks yet.',
@@ -80,9 +80,9 @@ return [
 
     // Edit page — block catalog
     'catalog_heading'        => 'Choose block type',
-    'catalog_adding_child_to'=> 'Adding inside:',
+    'catalog_adding_child_to' => 'Adding inside:',
     'catalog_no_types'       => 'No block types available for this context.',
-    'catalog_container_badge'=> 'Container',
+    'catalog_container_badge' => 'Container',
 
     // Edit page — block edit
     'no_block_fields'        => 'This block has no editable fields.',
