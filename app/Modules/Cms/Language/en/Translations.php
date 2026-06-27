@@ -46,7 +46,7 @@ return [
     'field_custom_url'      => 'custom URL',
     'field_excerpt'         => 'excerpt',
     'field_meta_title'      => 'meta title',
-    'field_meta_description'=> 'meta description',
+    'field_meta_description' => 'meta description',
     'field_og_image_file_id' => 'OG image',
     'field_og_type'         => 'OG type',
     'field_canonical_url'   => 'canonical URL',

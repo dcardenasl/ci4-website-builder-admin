@@ -19,18 +19,18 @@ $itemId = (string) ($item['id'] ?? '');
         <?php if (!empty($languages)): ?>
             <?php
                 $defaultLangId = 0;
-                $defaultLangCode = '';
-                $defaultLangIndex = 0;
-                foreach ($languages as $i => $l) {
-                    if (!empty($l['is_default'])) {
-                        $defaultLangId = (int) $l['id'];
-                        $defaultLangCode = $l['code'] ?? '';
-                        $defaultLangIndex = $i;
-                        break;
-                    }
+            $defaultLangCode = '';
+            $defaultLangIndex = 0;
+            foreach ($languages as $i => $l) {
+                if (!empty($l['is_default'])) {
+                    $defaultLangId = (int) $l['id'];
+                    $defaultLangCode = $l['code'] ?? '';
+                    $defaultLangIndex = $i;
+                    break;
                 }
-                $translateUrl = route_to('admin.cms.translate');
-                $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
+            }
+            $translateUrl = route_to('admin.cms.translate');
+            $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
             ?>
             <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/60">
                 <div class="mb-4">
@@ -72,12 +72,12 @@ $itemId = (string) ($item['id'] ?? '');
                     <?php foreach ($languages as $index => $lang): ?>
                         <?php
                             $transValue = [];
-                            foreach ($translations as $translation) {
-                                if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
-                                    $transValue = $translation;
-                                    break;
-                                }
+                        foreach ($translations as $translation) {
+                            if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
+                                $transValue = $translation;
+                                break;
                             }
+                        }
                         ?>
                         <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
                             <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">

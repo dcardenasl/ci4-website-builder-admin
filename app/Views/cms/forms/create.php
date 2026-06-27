@@ -65,17 +65,17 @@
     <?php if (!empty($languages)): ?>
         <?php
             $defaultLangId = 0;
-            $defaultLangCode = '';
-            $defaultLangIndex = 0;
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId = (int) $l['id'];
-                    $defaultLangCode = $l['code'] ?? '';
-                    $defaultLangIndex = $i;
-                    break;
-                }
+        $defaultLangCode = '';
+        $defaultLangIndex = 0;
+        foreach ($languages as $i => $l) {
+            if (!empty($l['is_default'])) {
+                $defaultLangId = (int) $l['id'];
+                $defaultLangCode = $l['code'] ?? '';
+                $defaultLangIndex = $i;
+                break;
             }
-            $translateUrl = route_to('admin.cms.translate');
+        }
+        $translateUrl = route_to('admin.cms.translate');
         ?>
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-base font-semibold text-gray-800"><?= lang('Forms.section_translations') ?></h2>

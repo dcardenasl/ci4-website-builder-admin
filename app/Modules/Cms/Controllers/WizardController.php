@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Support\FileSizeLimits;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -72,12 +73,18 @@ class WizardController extends BaseWebController
 
     public function publish(): ResponseInterface
     {
-        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+        $raw     = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
             ? ($this->request->getJSON(true) ?? [])
             : [];
+        $payload = is_array($raw) ? $raw : [];
 
         if (empty($payload)) {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
+        }
+
+        $errors = $this->validatePublishPayload($payload);
+        if ($errors !== []) {
+            return $this->response->setStatusCode(422)->setJSON(['ok' => false, 'errors' => $errors]);
         }
 
         $domainClient = service('domainApiClient');
@@ -94,7 +101,9 @@ class WizardController extends BaseWebController
     }
 
     /**
-     * @return array{ok:bool,status:int,data:mixed,raw:mixed,headers:mixed,messages:mixed,fieldErrors:mixed}
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $filters
+     * @return array<string, mixed>
      */
     private function proxyBlockRequest(string $ownerType, int $ownerId, string $method, ?int $blockId = null, array $payload = [], array $filters = []): array
     {
@@ -128,6 +137,11 @@ class WizardController extends BaseWebController
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'No valid file provided']);
         }
 
+        $mimeError = $this->validateImageFile($file);
+        if ($mimeError !== null) {
+            return $this->response->setStatusCode(422)->setJSON(['ok' => false, 'message' => $mimeError]);
+        }
+
         $apiClient = service('apiClient');
         $result = $this->safeApiCall(static fn () => $apiClient->upload('/files/upload', [
             'file' => [
@@ -151,12 +165,17 @@ class WizardController extends BaseWebController
 
     public function createBlock(int $pageId): ResponseInterface
     {
-        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+        $raw     = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
             ? ($this->request->getJSON(true) ?? [])
             : [];
+        $payload = is_array($raw) ? $raw : [];
 
         if (empty($payload)) {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
+        }
+
+        if (empty($payload['block_type_key']) || !is_string($payload['block_type_key'])) {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'block_type_key is required']);
         }
 
         $domainClient = service('domainApiClient');
@@ -174,12 +193,17 @@ class WizardController extends BaseWebController
 
     public function createEntryBlock(int $entryId): ResponseInterface
     {
-        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+        $raw     = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
             ? ($this->request->getJSON(true) ?? [])
             : [];
+        $payload = is_array($raw) ? $raw : [];
 
         if (empty($payload)) {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
+        }
+
+        if (empty($payload['block_type_key']) || !is_string($payload['block_type_key'])) {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'block_type_key is required']);
         }
 
         $result = $this->proxyBlockRequest('entry', $entryId, 'POST', null, $payload);
@@ -265,9 +289,10 @@ class WizardController extends BaseWebController
 
     public function updateEntryBlock(int $entryId, int $blockId): ResponseInterface
     {
-        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+        $raw     = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
             ? ($this->request->getJSON(true) ?? [])
             : [];
+        $payload = is_array($raw) ? $raw : [];
 
         if (empty($payload)) {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
@@ -361,5 +386,61 @@ class WizardController extends BaseWebController
         return $this->response->setStatusCode($statusCode)->setJSON(
             $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? [])
         );
+    }
+
+    // ── Validation helpers ────────────────────────────────────────────────────
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, string>  field → error message
+     */
+    private function validatePublishPayload(array $payload): array
+    {
+        $errors = [];
+
+        $collectionId = $payload['collection_id'] ?? null;
+        if ($collectionId === null || (int) $collectionId <= 0) {
+            $errors['collection_id'] = 'collection_id is required and must be a positive integer';
+        }
+
+        $title = $payload['title'] ?? '';
+        if (!is_string($title) || trim($title) === '') {
+            $errors['title'] = 'title is required';
+        }
+
+        $status = $payload['status'] ?? '';
+        if (!in_array($status, ['published', 'draft'], true)) {
+            $errors['status'] = 'status must be "published" or "draft"';
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Validates that the uploaded file is an image within the allowed size limit.
+     * Uses fileinfo (getMimeType) to verify the real MIME type, not just the
+     * client-reported Content-Type.
+     *
+     * @param object $file UploadedFile
+     */
+    private function validateImageFile(object $file): ?string
+    {
+        if (!method_exists($file, 'getMimeType') || !method_exists($file, 'getSize')) {
+            return null;
+        }
+
+        $realMime = strtolower((string) ($file->getMimeType() ?: ''));
+        if (!str_starts_with($realMime, 'image/')) {
+            return 'Only image files are allowed (received: ' . ($realMime ?: 'unknown') . ')';
+        }
+
+        $size = (int) $file->getSize();
+        $maxBytes = FileSizeLimits::effectiveMaxBytes();
+        if ($size > $maxBytes) {
+            $maxMb = FileSizeLimits::bytesToMb($maxBytes);
+            return "File size exceeds the {$maxMb} MB limit";
+        }
+
+        return null;
     }
 }

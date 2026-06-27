@@ -398,6 +398,11 @@ abstract class BaseWebController extends BaseController
      *       $defaultLangId
      *   );
      */
+    /**
+     * @param array<array-key, mixed>  $languages
+     * @param array<array-key, string> $fieldMap
+     * @return list<array{langCode: string, fieldPairs: list<array{from: string, to: string}>}>
+     */
     protected function buildTranslateTargets(
         array $languages,
         array $fieldMap,
@@ -436,12 +441,10 @@ abstract class BaseWebController extends BaseController
                 ];
             }
 
-            if (!empty($fieldPairs)) {
-                $targets[] = [
-                    'langCode'   => $langCode,
-                    'fieldPairs' => $fieldPairs,
-                ];
-            }
+            $targets[] = [
+                'langCode'   => $langCode,
+                'fieldPairs' => $fieldPairs,
+            ];
         }
 
         return $targets;

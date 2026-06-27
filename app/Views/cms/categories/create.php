@@ -53,17 +53,17 @@
         <?php if (!empty($languages)): ?>
             <?php
                 $defaultLangId = 0;
-                $defaultLangCode = '';
-                $defaultLangIndex = 0;
-                foreach ($languages as $i => $l) {
-                    if (!empty($l['is_default'])) {
-                        $defaultLangId = (int) $l['id'];
-                        $defaultLangCode = $l['code'] ?? '';
-                        $defaultLangIndex = $i;
-                        break;
-                    }
+            $defaultLangCode = '';
+            $defaultLangIndex = 0;
+            foreach ($languages as $i => $l) {
+                if (!empty($l['is_default'])) {
+                    $defaultLangId = (int) $l['id'];
+                    $defaultLangCode = $l['code'] ?? '';
+                    $defaultLangIndex = $i;
+                    break;
                 }
-                $translateUrl = route_to('admin.cms.translate');
+            }
+            $translateUrl = route_to('admin.cms.translate');
             ?>
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="text-sm font-semibold text-gray-800 mb-3"><?= esc(lang('Categories.translations_title')) ?></h4>

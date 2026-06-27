@@ -79,18 +79,18 @@
         <?php if (!empty($languages)): ?>
             <?php
                 $defaultLangId    = 0;
-                $defaultLangIndex = 0;
-                $defaultLangCode  = 'EN';
-                foreach ($languages as $i => $l) {
-                    if (!empty($l['is_default'])) {
-                        $defaultLangId    = (int) $l['id'];
-                        $defaultLangIndex = $i;
-                        $defaultLangCode  = strtoupper($l['code'] ?? 'EN');
-                        break;
-                    }
+            $defaultLangIndex = 0;
+            $defaultLangCode  = 'EN';
+            foreach ($languages as $i => $l) {
+                if (!empty($l['is_default'])) {
+                    $defaultLangId    = (int) $l['id'];
+                    $defaultLangIndex = $i;
+                    $defaultLangCode  = strtoupper($l['code'] ?? 'EN');
+                    break;
                 }
-                $translateUrl = route_to('admin.cms.translate');
-                $checkSlugBase = route_to('admin.cms.pages.check_slug');
+            }
+            $translateUrl = route_to('admin.cms.translate');
+            $checkSlugBase = route_to('admin.cms.pages.check_slug');
             ?>
             <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
                 <div class="mb-4">

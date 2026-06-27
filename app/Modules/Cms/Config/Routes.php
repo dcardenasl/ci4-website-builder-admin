@@ -10,25 +10,25 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (RouteCollection $routes): void {
     // Wizard — content creation assistant (must be before any (:segment) routes)
-    $routes->get('wizard',         '\App\Modules\Cms\Controllers\WizardController::index',       ['as' => 'admin.cms.wizard',        'filter' => 'permission:cms.entries.read']);
-    $routes->get('wizard/config',  '\App\Modules\Cms\Controllers\WizardController::config',      ['as' => 'admin.cms.wizard.config',  'filter' => 'permission:cms.entries.read']);
-    $routes->post('wizard/publish','\App\Modules\Cms\Controllers\WizardController::publish',     ['as' => 'admin.cms.wizard.publish', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('wizard', '\App\Modules\Cms\Controllers\WizardController::index', ['as' => 'admin.cms.wizard',        'filter' => 'permission:cms.entries.read']);
+    $routes->get('wizard/config', '\App\Modules\Cms\Controllers\WizardController::config', ['as' => 'admin.cms.wizard.config',  'filter' => 'permission:cms.entries.read']);
+    $routes->post('wizard/publish', '\App\Modules\Cms\Controllers\WizardController::publish', ['as' => 'admin.cms.wizard.publish', 'filter' => 'permission:cms.entries.write']);
     $routes->post('wizard/upload', '\App\Modules\Cms\Controllers\WizardController::uploadImage', ['as' => 'admin.cms.wizard.upload',  'filter' => 'permission:cms.entries.write']);
     // Wizard — Edit page (WIZ-007)
-    $routes->get('wizard/pages/(:num)/blocks',                   '\App\Modules\Cms\Controllers\WizardController::pageBlocks/$1',    ['as' => 'admin.cms.wizard.page-blocks',       'filter' => 'permission:cms.pages.read']);
-    $routes->post('wizard/pages/(:num)/blocks',                  '\App\Modules\Cms\Controllers\WizardController::createBlock/$1',   ['as' => 'admin.cms.wizard.create-block',      'filter' => 'permission:cms.pages.write']);
-    $routes->post('wizard/pages/(:num)/blocks/(:num)',           '\App\Modules\Cms\Controllers\WizardController::updateBlock/$1/$2', ['as' => 'admin.cms.wizard.update-block',       'filter' => 'permission:cms.pages.write']);
-    $routes->post('wizard/pages/(:num)/blocks/(:num)/delete',    '\App\Modules\Cms\Controllers\WizardController::deleteBlock/$1/$2', ['as' => 'admin.cms.wizard.delete-block',      'filter' => 'permission:cms.pages.write']);
+    $routes->get('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::pageBlocks/$1', ['as' => 'admin.cms.wizard.page-blocks',       'filter' => 'permission:cms.pages.read']);
+    $routes->post('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::createBlock/$1', ['as' => 'admin.cms.wizard.create-block',      'filter' => 'permission:cms.pages.write']);
+    $routes->post('wizard/pages/(:num)/blocks/(:num)', '\App\Modules\Cms\Controllers\WizardController::updateBlock/$1/$2', ['as' => 'admin.cms.wizard.update-block',       'filter' => 'permission:cms.pages.write']);
+    $routes->post('wizard/pages/(:num)/blocks/(:num)/delete', '\App\Modules\Cms\Controllers\WizardController::deleteBlock/$1/$2', ['as' => 'admin.cms.wizard.delete-block',      'filter' => 'permission:cms.pages.write']);
     // Wizard — Entry blocks review/edit
-    $routes->get('wizard/entries/(:num)/blocks',                 '\App\Modules\Cms\Controllers\WizardController::entryBlocks/$1',    ['as' => 'admin.cms.wizard.entry-blocks',      'filter' => 'permission:cms.entries.read']);
-    $routes->post('wizard/entries/(:num)/blocks',                '\App\Modules\Cms\Controllers\WizardController::createEntryBlock/$1', ['as' => 'admin.cms.wizard.create-entry-block', 'filter' => 'permission:cms.entries.write']);
-    $routes->post('wizard/entries/(:num)/blocks/(:num)',         '\App\Modules\Cms\Controllers\WizardController::updateEntryBlock/$1/$2', ['as' => 'admin.cms.wizard.update-entry-block', 'filter' => 'permission:cms.entries.write']);
-    $routes->post('wizard/entries/(:num)/blocks/(:num)/delete',  '\App\Modules\Cms\Controllers\WizardController::deleteEntryBlock/$1/$2', ['as' => 'admin.cms.wizard.delete-entry-block', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('wizard/entries/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::entryBlocks/$1', ['as' => 'admin.cms.wizard.entry-blocks',      'filter' => 'permission:cms.entries.read']);
+    $routes->post('wizard/entries/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::createEntryBlock/$1', ['as' => 'admin.cms.wizard.create-entry-block', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('wizard/entries/(:num)/blocks/(:num)', '\App\Modules\Cms\Controllers\WizardController::updateEntryBlock/$1/$2', ['as' => 'admin.cms.wizard.update-entry-block', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('wizard/entries/(:num)/blocks/(:num)/delete', '\App\Modules\Cms\Controllers\WizardController::deleteEntryBlock/$1/$2', ['as' => 'admin.cms.wizard.delete-entry-block', 'filter' => 'permission:cms.entries.write']);
     // Wizard — Edit menu (WIZ-008)
-    $routes->get('wizard/menus/(:num)/items',         '\App\Modules\Cms\Controllers\WizardController::menuItems/$1',     ['as' => 'admin.cms.wizard.menu-items',         'filter' => 'permission:cms.menus.read']);
-    $routes->post('wizard/menus/(:num)/items',        '\App\Modules\Cms\Controllers\WizardController::addMenuItem/$1',   ['as' => 'admin.cms.wizard.add-menu-item',      'filter' => 'permission:cms.menus.write']);
+    $routes->get('wizard/menus/(:num)/items', '\App\Modules\Cms\Controllers\WizardController::menuItems/$1', ['as' => 'admin.cms.wizard.menu-items',         'filter' => 'permission:cms.menus.read']);
+    $routes->post('wizard/menus/(:num)/items', '\App\Modules\Cms\Controllers\WizardController::addMenuItem/$1', ['as' => 'admin.cms.wizard.add-menu-item',      'filter' => 'permission:cms.menus.write']);
     $routes->post('wizard/menus/items/(:num)/delete', '\App\Modules\Cms\Controllers\WizardController::deleteMenuItem/$1', ['as' => 'admin.cms.wizard.delete-menu-item',   'filter' => 'permission:cms.menus.write']);
-    $routes->post('wizard/menus/items/(:num)',        '\App\Modules\Cms\Controllers\WizardController::updateMenuItem/$1', ['as' => 'admin.cms.wizard.update-menu-item',   'filter' => 'permission:cms.menus.write']);
+    $routes->post('wizard/menus/items/(:num)', '\App\Modules\Cms\Controllers\WizardController::updateMenuItem/$1', ['as' => 'admin.cms.wizard.update-menu-item',   'filter' => 'permission:cms.menus.write']);
 
     // File Translations
     $routes->get('files/(:num)/translations', '\\App\\Modules\\Cms\\Controllers\\FileTranslationController::edit/$1', ['as' => 'admin.cms.file_translations.edit',   'filter' => 'permission:cms.pages.write']);
