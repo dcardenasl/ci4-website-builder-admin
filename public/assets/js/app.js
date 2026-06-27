@@ -1748,6 +1748,17 @@ document.addEventListener('alpine:init', () => {
                 || ''
         );
     };
+    window.resolveTranslatableFilePreviewUrl = (fileId, fileUrl = '') => {
+        const normalizedUrl = String(fileUrl || '');
+        if (normalizedUrl !== '') {
+            return normalizedUrl;
+        }
+
+        const normalizedId = String(fileId || '');
+        return normalizedId !== ''
+            ? `${window.location.origin}/files/${encodeURIComponent(normalizedId)}/view`
+            : '';
+    };
 
     /**
      * Global file picker store.
@@ -2125,17 +2136,17 @@ document.addEventListener('alpine:init', () => {
     }));
 
     /**
-     * File field component for block editors.
+     * Shared file field component for translated media fields.
      * Stores fileId + fileUrl (both submitted as hidden inputs) and a previewUrl for display.
      * Uses the global $store.filePicker — no separate modal needed.
      *
-     * Usage: x-data="blockFileField(initialId, initialUrl, accept)"
+     * Usage: x-data="translatableFileField(initialId, initialUrl, accept)"
      *   accept: 'image' | 'video' | 'document' | 'audio' | 'any' | 'image/*' | …
      */
-    Alpine.data('blockFileField', (initialId = '', initialUrl = '', accept = 'image') => ({
+    const translatableFileField = (initialId = '', initialUrl = '', accept = 'image') => ({
         fileId:     String(initialId),
-        fileUrl:    String(initialUrl),
-        previewUrl: String(initialUrl),
+        fileUrl:    window.resolveTranslatableFilePreviewUrl(initialId, initialUrl),
+        previewUrl: window.resolveTranslatableFilePreviewUrl(initialId, initialUrl),
         accept:     String(accept),
         pickerLabels: {
             image:    { select: 'Seleccionar imagen',    change: 'Cambiar imagen' },
@@ -2157,21 +2168,25 @@ document.addEventListener('alpine:init', () => {
                 multi:  false,
                 onSelect: (file) => {
                     const fileId = String(file.id ?? '');
-                    // Use the /files/{id}/view endpoint which generates proper preview URLs
-                    const previewUrl = fileId ? String(window.location.origin) + '/files/' + fileId + '/view' : '';
-                    this.fileId     = fileId;
-                    this.fileUrl    = previewUrl;
-                    this.previewUrl = previewUrl;
+                    const previewUrl = String(window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : (file.url || ''));
+                    this.applyFile(fileId, previewUrl);
                 },
             });
         },
 
-        clearFile() {
-            this.fileId     = '';
-            this.fileUrl    = '';
-            this.previewUrl = '';
+        applyFile(fileId = '', fileUrl = '') {
+            const normalizedId = String(fileId || '');
+            const normalizedUrl = window.resolveTranslatableFilePreviewUrl(normalizedId, fileUrl);
+            this.fileId = normalizedId;
+            this.fileUrl = normalizedUrl;
+            this.previewUrl = normalizedUrl;
         },
-    }));
+
+        clearFile() {
+            this.applyFile('', '');
+        },
+    });
+    Alpine.data('translatableFileField', translatableFileField);
 
     /**
      * Repeater field component for block editors.
@@ -2560,6 +2575,20 @@ document.addEventListener('alpine:init', () => {
          * @param {string} fieldKeyPattern - Pattern to match other language tabs (e.g., "fieldKey")
          */
         copyFileFieldToAll(sourceFileIdSelector, sourceFileUrlSelector, fieldKeyPattern) {
+            const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
+            const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
+            this.copyFileFieldToTargets(sourceFileIdSelector, sourceFileUrlSelector, allFileIdInputs, allFileUrlInputs);
+        },
+
+        /**
+         * Copy file field (both ID and URL) from one language to explicitly selected targets.
+         * Used by translated fields that do not follow the block_data naming convention.
+         * @param {string} sourceFileIdSelector
+         * @param {string} sourceFileUrlSelector
+         * @param {Array<string>|NodeListOf<HTMLInputElement>} targetFileIdSelectors
+         * @param {Array<string>|NodeListOf<HTMLInputElement>} targetFileUrlSelectors
+         */
+        copyFileFieldToTargets(sourceFileIdSelector, sourceFileUrlSelector, targetFileIdSelectors, targetFileUrlSelectors) {
             const sourceFileId = document.querySelector(sourceFileIdSelector);
             const sourceFileUrl = document.querySelector(sourceFileUrlSelector);
 
@@ -2568,45 +2597,50 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            const fileId = sourceFileId.value;
-            const fileUrl = sourceFileUrl.value;
+            const sourceFileIdValue = String(sourceFileId.value || '');
+            const sourceFileUrlValue = String(sourceFileUrl.value || '');
+            const resolvedFileUrl = window.resolveTranslatableFilePreviewUrl(sourceFileIdValue, sourceFileUrlValue);
 
-            if (!fileId || !fileUrl) {
-                console.warn('[langTabs] Source file ID or URL is empty');
-                return;
-            }
+            const allFileIdInputs = Array.from(targetFileIdSelectors, (selector) =>
+                typeof selector === 'string' ? document.querySelector(selector) : selector
+            ).filter((input) => input instanceof HTMLInputElement);
+            const allFileUrlInputs = Array.from(targetFileUrlSelectors, (selector) =>
+                typeof selector === 'string' ? document.querySelector(selector) : selector
+            ).filter((input) => input instanceof HTMLInputElement);
+            const updatedComponents = new Set();
 
-            // Find all other language tabs and copy the file
-            const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
-            const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
+            allFileIdInputs.forEach((input) => {
+                if (input.value === sourceFileIdValue) {
+                    return;
+                }
 
-            allFileIdInputs.forEach(input => {
-                if (input !== sourceFileId) {
-                    input.value = fileId;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.value = sourceFileIdValue;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
 
-                    // Also update the Alpine component if it exists
-                    const blockFileFieldContainer = input.closest('[x-data*="blockFileField"]');
-                    const componentData = blockFileFieldContainer?._x_dataStack?.[0];
-                    if (componentData) {
-                        componentData.fileId = fileId;
-                    }
+                const fileFieldContainer = input.closest('[x-data*="translatableFileField"]');
+                const componentData = fileFieldContainer?._x_dataStack?.[0];
+                if (componentData && typeof componentData.applyFile === 'function') {
+                    updatedComponents.add(componentData);
                 }
             });
 
-            allFileUrlInputs.forEach(input => {
-                if (input !== sourceFileUrl) {
-                    input.value = fileUrl;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-
-                    // Also update the Alpine component if it exists
-                    const blockFileFieldContainer = input.closest('[x-data*="blockFileField"]');
-                    const componentData = blockFileFieldContainer?._x_dataStack?.[0];
-                    if (componentData) {
-                        componentData.fileUrl = fileUrl;
-                        componentData.previewUrl = fileUrl;
-                    }
+            allFileUrlInputs.forEach((input) => {
+                if (input.value === resolvedFileUrl) {
+                    return;
                 }
+
+                input.value = resolvedFileUrl;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+
+                const fileFieldContainer = input.closest('[x-data*="translatableFileField"]');
+                const componentData = fileFieldContainer?._x_dataStack?.[0];
+                if (componentData && typeof componentData.applyFile === 'function') {
+                    updatedComponents.add(componentData);
+                }
+            });
+
+            updatedComponents.forEach((componentData) => {
+                componentData.applyFile(sourceFileIdValue, resolvedFileUrl);
             });
         },
     }));

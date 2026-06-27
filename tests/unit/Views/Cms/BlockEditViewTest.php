@@ -36,6 +36,8 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'is_published' => '1',
                         'block_data' => [
                             'title' => 'Submitted Title',
+                            'cover_file_id' => '42',
+                            'cover_url' => '/files/42/view',
                         ],
                     ],
                 ],
@@ -59,6 +61,8 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'language_id' => 1,
                         'block_data' => [
                             'title' => 'Existing Title',
+                            'cover_file_id' => '42',
+                            'cover_url' => '/files/42/view',
                         ],
                     ],
                 ],
@@ -70,6 +74,12 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'type' => 'text',
                         'label' => 'Title',
                         'required' => true,
+                    ],
+                    'cover' => [
+                        'type' => 'file',
+                        'label' => 'Cover',
+                        'accept' => 'image',
+                        'required' => false,
                     ],
                 ],
                 'config_fields' => [
@@ -96,6 +106,7 @@ final class BlockEditViewTest extends CIUnitTestCase
         $this->assertStringContainsString('Title is required', $html);
         $this->assertStringContainsString('id="block-edit-form"', $html);
         $this->assertStringContainsString('data-language-id="1"', $html);
+        $this->assertStringContainsString('translatableFileField(', $html);
         $this->assertStringContainsString('window.openBlockEditPreview', $html);
     }
 

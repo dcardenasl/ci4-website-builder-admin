@@ -325,7 +325,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                 <?= esc($flabel) ?>
                                 <?php if ($freq): ?><span class="text-red-500 ml-0.5">*</span><?php endif; ?>
                             </label>
-                            <div x-data="blockFileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
+                            <div x-data="translatableFileField(<?= $existingFileIdJs ?>, <?= $existingFileUrlJs ?>, <?= $facceptJs ?>)" class="space-y-2">
                                 <input type="hidden"
                                        id="file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>"
                                        name="<?= $fieldFileIdName ?>"
