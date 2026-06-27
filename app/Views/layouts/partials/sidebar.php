@@ -101,8 +101,7 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
         || has_permission('cms.tags.read')
         || has_permission('cms.redirects.read')
         || has_permission('cms.submissions.read')
-        || has_permission('cms.forms.read')
-        || has_permission('cms.entries.read');
+        || has_permission('cms.forms.read');
 ?>
         <?php if ($hasCmsItem): ?>
             <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4">CMS</div>
@@ -115,15 +114,18 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
             <?php endif; ?>
 
             <?php
-    // ── CMS group: Contenido ───────────────────────────────────────────
-    $hasContentGroup = has_permission('cms.pages.read')
-        || has_permission('cms.entries.read')
-        || has_permission('cms.collections.read')
-        || has_permission('cms.submissions.read')
-        || has_permission('cms.forms.read');
-            $contentActive = url_is('admin/cms/pages*')
-                || url_is('admin/cms/entries*')
+            // ── CMS group: Contenido ───────────────────────────────────────────
+            // Visible to editors (non-technical): entries, collections, taxonomy, forms
+            $hasContentGroup = has_permission('cms.entries.read')
+                || has_permission('cms.collections.read')
+                || has_permission('cms.categories.read')
+                || has_permission('cms.tags.read')
+                || has_permission('cms.submissions.read')
+                || has_permission('cms.forms.read');
+            $contentActive = url_is('admin/cms/entries*')
                 || url_is('admin/cms/collections*')
+                || url_is('admin/cms/categories*')
+                || url_is('admin/cms/tags*')
                 || url_is('admin/cms/form-submissions*')
                 || url_is('admin/cms/forms*');
             ?>
@@ -139,12 +141,6 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                     </span>
                 </button>
                 <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
-                    <?php if (has_permission('cms.pages.read')): ?>
-                        <a href="<?= site_url('admin/cms/pages') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/pages*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/pages*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
-                            <?= ui_icon('cms-page') ?>
-                            <span><?= lang('Pages.pages_title') ?></span>
-                        </a>
-                    <?php endif; ?>
                     <?php if (has_permission('cms.entries.read')): ?>
                         <a href="<?= site_url('admin/cms/entries') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/entries*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/entries*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-entry') ?>
@@ -155,6 +151,18 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                         <a href="<?= site_url('admin/cms/collections') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/collections*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/collections*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-collection') ?>
                             <span><?= lang('Collections.collections_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.categories.read')): ?>
+                        <a href="<?= site_url('admin/cms/categories') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/categories*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/categories*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
+                            <?= ui_icon('folder-open') ?>
+                            <span><?= lang('Categories.categories_title') ?></span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (has_permission('cms.tags.read')): ?>
+                        <a href="<?= site_url('admin/cms/tags') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/tags*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/tags*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
+                            <?= ui_icon('tag') ?>
+                            <span><?= lang('Tags.tags_title') ?></span>
                         </a>
                     <?php endif; ?>
                     <?php if (has_permission('cms.forms.read')): ?>
@@ -175,10 +183,13 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
 
             <?php
             // ── CMS group: Estructura ─────────────────────────────────────────
-            $hasStructureGroup = has_permission('cms.menus.read')
+            // Visible to technical users: pages, menus, block types, redirects
+            $hasStructureGroup = has_permission('cms.pages.read')
+                || has_permission('cms.menus.read')
                 || has_permission('cms.blocks.read')
                 || has_permission('cms.redirects.read');
-            $structureActive = url_is('admin/cms/menus*')
+            $structureActive = url_is('admin/cms/pages*')
+                || url_is('admin/cms/menus*')
                 || url_is('admin/cms/block-types*')
                 || url_is('admin/cms/redirects*');
             ?>
@@ -194,6 +205,12 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                     </span>
                 </button>
                 <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
+                    <?php if (has_permission('cms.pages.read')): ?>
+                        <a href="<?= site_url('admin/cms/pages') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/pages*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/pages*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
+                            <?= ui_icon('cms-page') ?>
+                            <span><?= lang('Pages.pages_title') ?></span>
+                        </a>
+                    <?php endif; ?>
                     <?php if (has_permission('cms.menus.read')): ?>
                         <a href="<?= site_url('admin/cms/menus') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/menus*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/menus*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-menu') ?>
@@ -210,41 +227,6 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                         <a href="<?= site_url('admin/cms/redirects') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/redirects*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/redirects*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
                             <?= ui_icon('cms-redirect') ?>
                             <span><?= lang('Redirects.redirects_title') ?></span>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <?php
-            // ── CMS group: Taxonomía ──────────────────────────────────────────
-            $hasTaxonomyGroup = has_permission('cms.categories.read')
-                || has_permission('cms.tags.read');
-            $taxonomyActive = url_is('admin/cms/categories*')
-                || url_is('admin/cms/tags*');
-            ?>
-            <?php if ($hasTaxonomyGroup): ?>
-            <div x-data="{ open: <?= $taxonomyActive ? 'true' : "localStorage.getItem('cms-g-taxonomy') !== 'false'" ?> }" class="space-y-1">
-                <button type="button"
-                        @click="open = !open; localStorage.setItem('cms-g-taxonomy', open)"
-                        class="<?= $navGroupButtonClass ?>"
-                        :aria-expanded="open">
-                    <span class="text-xs font-medium uppercase tracking-wide text-gray-500"><?= lang('App.cms_taxonomy') ?></span>
-                    <span class="inline-flex items-center justify-center transition-transform duration-200" :class="{ 'rotate-180': open }">
-                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>
-                    </span>
-                </button>
-                <div x-show="open" x-cloak class="<?= $navGroupBodyClass ?>">
-                    <?php if (has_permission('cms.categories.read')): ?>
-                        <a href="<?= site_url('admin/cms/categories') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/categories*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/categories*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
-                            <?= ui_icon('folder-open') ?>
-                            <span><?= lang('Categories.categories_title') ?></span>
-                        </a>
-                    <?php endif; ?>
-                    <?php if (has_permission('cms.tags.read')): ?>
-                        <a href="<?= site_url('admin/cms/tags') ?>" class="<?= $navSubItemClass ?> <?= active_nav('admin/cms/tags*', $navSubItemActiveClass) ?> <?= url_is('admin/cms/tags*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>">
-                            <?= ui_icon('tag') ?>
-                            <span><?= lang('Tags.tags_title') ?></span>
                         </a>
                     <?php endif; ?>
                 </div>
