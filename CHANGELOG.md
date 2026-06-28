@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **File usage tracking with multi-source API integration** — enhanced FileApiService to aggregate file usages from both Hub and Domain APIs, added `resolveEditUrl()` in FileController to generate contextual edit links for each usage (pages, entries, blocks, users, settings), improving file lifecycle visibility in the admin UI
 - **Wizard UI refactor with modular partials and block CRUD** — decomposed wizard view into 8 reusable partial components (block_catalog, block_edit, page_layout, menu_edit, entry_wizard, etc.), added `createBlock()` and `deleteBlock()` controller methods, enhanced block type metadata enrichment from Domain API
 - **Entry block support** — extended wizard with `createEntryBlock()`, `entryBlocks()`, and `deleteEntryBlock()` endpoints; refactored block proxy logic via `proxyBlockRequest()` method to unify page and entry block handling with hierarchical tree rendering
 - **Automatic form field translation** — new `buildTranslateTargets()` helper and Alpine.js integration for automatic synchronization of field values between language tabs in CMS form editors
