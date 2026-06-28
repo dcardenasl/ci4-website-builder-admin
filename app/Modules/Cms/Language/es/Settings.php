@@ -42,4 +42,39 @@ return [
     'field_is_translatable_on'    => 'Traducible',
     'field_is_translatable_off'   => 'No traducible',
     'field_language'              => 'Idioma',
+
+    // Tipo de control UI
+    'field_input_type'            => 'Tipo de control UI',
+    'field_input_type_help'       => 'Determina qué componente de formulario renderiza este setting en el admin.',
+    'input_type_text'             => 'Texto',
+    'input_type_textarea'         => 'Área de texto',
+    'input_type_richtext'         => 'Texto enriquecido',
+    'input_type_url'              => 'URL',
+    'input_type_email'            => 'Email',
+    'input_type_phone'            => 'Teléfono',
+    'input_type_color'            => 'Selector de color',
+    'input_type_number'           => 'Número',
+    'input_type_boolean'          => 'Toggle (sí/no)',
+    'input_type_image'            => 'Selector de imagen',
+    'input_type_file'             => 'Selector de archivo',
+    'input_type_select'           => 'Lista desplegable',
+    'input_type_code'             => 'Código / JSON',
+    'input_type_slug'             => 'Slug',
+
+    // Opciones JSON para select
+    'field_options_json'          => 'Opciones del selector (JSON)',
+    'field_options_json_placeholder' => '[{"value":"opc1","label":"Opción 1"},{"value":"opc2","label":"Opción 2"}]',
+    'field_options_json_help'     => 'Array de objetos {value, label}. Solo aplica cuando el tipo de control es "Lista desplegable".',
+
+    // Requerido / solo lectura
+    'field_is_required'           => 'Requerido',
+    'field_is_readonly'           => 'Solo lectura',
+
+    // Etiquetas UI por idioma (dentro de la sección de traducciones)
+    'ui_labels_section'           => 'Etiquetas UI (label / placeholder / texto de ayuda)',
+    'field_label_placeholder'     => 'Etiqueta del campo',
+    'field_placeholder_placeholder' => 'Texto de placeholder',
+    'field_help_text_placeholder' => 'Texto de ayuda que aparece debajo del campo',
+
+    'key_must_be_unique'          => 'Esta clave de configuración ya está en uso.',
 ];

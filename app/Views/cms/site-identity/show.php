@@ -1,58 +1,102 @@
 <?php
-/** @var array<string, array<string, mixed>> $settingsMap */
-$settingsMap = $settingsMap ?? [];
-
-$siteName    = (string) ($settingsMap['site_name']['setting_value']    ?? '');
-$siteTagline = (string) ($settingsMap['site_tagline']['setting_value'] ?? '');
+/**
+ * Site Identity — Metadata-driven view.
+ *
+ * Renders every setting in the 'identity' group using its input_type.
+ * To add a new identity field, create a cms_setting with group='identity'
+ * and the correct input_type — no code change required here.
+ *
+ * Layout:
+ *   - Left (2/3): all text/bool/select/etc. settings stacked in one card
+ *   - Right (1/3): image/file pickers (brand assets)
+ *
+ * @var array<string, array<string, mixed>> $settingsMap   keyed by setting_key
+ * @var array<int, array<string, mixed>>    $languages
+ * @var int|null                            $baseLanguageId
+ */
+$settingsMap    = $settingsMap ?? [];
+$languages      = $languages ?? [];
 $baseLanguageId = isset($baseLanguageId) && is_numeric($baseLanguageId) ? (int) $baseLanguageId : null;
 
-$siteNameIsTrans    = !empty($settingsMap['site_name']['is_translatable']);
-$siteTaglineIsTrans = !empty($settingsMap['site_tagline']['is_translatable']);
-
-$initialLanguageId = 0;
 $translationLanguages = [];
+$initialLangId        = 0;
 foreach ($languages as $language) {
-    $languageId = (int) ($language['id'] ?? 0);
-    if ($languageId <= 0) {
+    $langId = (int) ($language['id'] ?? 0);
+    if ($langId <= 0 || $langId === $baseLanguageId) {
         continue;
     }
-    if ($baseLanguageId !== null && $languageId === $baseLanguageId) {
-        continue;
+    if ($initialLangId === 0) {
+        $initialLangId = $langId;
     }
     $translationLanguages[] = $language;
-    $initialLanguageId = $languageId;
-    break;
-}
-foreach ($languages as $language) {
-    $languageId = (int) ($language['id'] ?? 0);
-    if ($languageId <= 0 || ($baseLanguageId !== null && $languageId === $baseLanguageId)) {
-        continue;
-    }
-    if (! in_array($language, $translationLanguages, true)) {
-        $translationLanguages[] = $language;
-    }
 }
 
-$logoMeta    = $settingsMap['site_logo']['setting_meta'] ?? [];
-$logoFileId  = (int) ($settingsMap['site_logo']['setting_value'] ?? 0);
-$logoUrl     = is_array($logoMeta) ? (string) ($logoMeta['url'] ?? '') : '';
-$logoMime    = is_array($logoMeta) ? (string) ($logoMeta['mime_type'] ?? '') : '';
+$sortedSettings = array_values($settingsMap);
+usort($sortedSettings, fn ($a, $b) => ($a['sort_order'] ?? 0) <=> ($b['sort_order'] ?? 0));
 
-$faviconMeta   = $settingsMap['favicon']['setting_meta'] ?? [];
-$faviconFileId = (int) ($settingsMap['favicon']['setting_value'] ?? 0);
-$faviconUrl    = is_array($faviconMeta) ? (string) ($faviconMeta['url'] ?? '') : '';
-$faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ?? '') : '';
+$assetSettings   = array_values(array_filter($sortedSettings, fn ($s) => in_array($s['input_type'] ?? 'text', ['image', 'file'], true)));
+$contentSettings = array_values(array_filter($sortedSettings, fn ($s) => !in_array($s['input_type'] ?? 'text', ['image', 'file'], true)));
+
+/** @param array<string, mixed> $setting */
+function identity_resolve_label(array $setting): string
+{
+    foreach ($setting['translations'] ?? [] as $t) {
+        if (!empty($t['label'])) {
+            return (string) $t['label'];
+        }
+    }
+    return (string) ($setting['description'] ?? $setting['setting_key'] ?? '');
+}
+
+/** @param array<string, mixed> $setting */
+function identity_resolve_placeholder(array $setting): string
+{
+    foreach ($setting['translations'] ?? [] as $t) {
+        if (!empty($t['placeholder'])) {
+            return (string) $t['placeholder'];
+        }
+    }
+    return '';
+}
+
+/** @param array<string, mixed> $setting */
+function identity_resolve_help(array $setting): string
+{
+    foreach ($setting['translations'] ?? [] as $t) {
+        if (!empty($t['help_text'])) {
+            return (string) $t['help_text'];
+        }
+    }
+    return '';
+}
+
+/** @param array<string, mixed> $setting */
+function identity_get_translation(array $setting, int $langId, string $field = 'setting_value'): string
+{
+    foreach ($setting['translations'] ?? [] as $t) {
+        if ((int) ($t['language_id'] ?? 0) === $langId && isset($t[$field])) {
+            return (string) $t[$field];
+        }
+    }
+    return '';
+}
 ?>
 
-<div class="space-y-6">
+<div class="space-y-5">
 
-    <!-- Page header -->
     <div>
         <h1 class="text-xl font-semibold text-gray-900"><?= lang('SiteIdentity.page_title') ?></h1>
         <p class="mt-1 text-sm text-gray-500"><?= lang('SiteIdentity.section_intro') ?></p>
     </div>
 
-    <!-- Cache note -->
+    <?php if (empty($sortedSettings)): ?>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+            <?= lang('SiteIdentity.no_settings') ?>
+        </div>
+
+    <?php else: ?>
+
     <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
         <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
@@ -60,225 +104,249 @@ $faviconMime   = is_array($faviconMeta) ? (string) ($faviconMeta['mime_type'] ??
         <span><?= lang('SiteIdentity.cache_note') ?></span>
     </div>
 
-    <form method="post" action="<?= route_to('admin.cms.site_identity.update') ?>" class="space-y-6"
-          x-data="{ activeLangId: <?= $initialLanguageId ?> }">
+    <form method="post" action="<?= route_to('admin.cms.site_identity.update') ?>"
+          x-data="{ activeLangId: <?= $initialLangId ?> }" class="space-y-6">
         <?= csrf_field() ?>
 
-        <?php ob_start(); ?>
-        <div class="space-y-6">
-            <?php
-                $siteNameIsTrans = !empty($settingsMap['site_name']['is_translatable']);
-$siteNameTrans = $settingsMap['site_name']['translations'] ?? [];
-$siteTaglineIsTrans = !empty($settingsMap['site_tagline']['is_translatable']);
-$siteTaglineTrans = $settingsMap['site_tagline']['translations'] ?? [];
-$showTranslations = !empty($languages) && ($siteNameIsTrans || $siteTaglineIsTrans);
-?>
+        <?php
+        $hasContent = !empty($contentSettings);
+        $hasAssets  = !empty($assetSettings);
+        $colClass   = ($hasContent && $hasAssets) ? 'grid grid-cols-1 gap-6 lg:grid-cols-3' : '';
+        ?>
+        <div class="<?= esc($colClass) ?>">
 
-            <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 space-y-4">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
+            <?php if ($hasContent): ?>
+            <div class="<?= $hasAssets ? 'lg:col-span-2' : '' ?> space-y-6">
+
+                <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <div class="border-b border-gray-100 px-5 py-4">
                         <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700"><?= lang('SiteIdentity.core_section') ?></h3>
-                        <p class="mt-1 text-sm text-gray-500"><?= lang('SiteIdentity.base_section_intro') ?></p>
                     </div>
-                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
-                        <?= lang('SiteIdentity.base_badge') ?>
-                    </span>
-                </div>
+                    <div class="divide-y divide-gray-100">
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><?= lang('SiteIdentity.field_site_name') ?></label>
-                        <input type="text" id="site_name" name="site_name" value="<?= esc($siteName) ?>" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_name')) ?>" class="<?= input_class('site_name') ?>">
-                    </div>
+                    <?php foreach ($contentSettings as $idx => $setting):
+                        $key         = (string) ($setting['setting_key'] ?? '');
+                        $inputType   = (string) ($setting['input_type'] ?? 'text');
+                        $currentVal  = (string) ($setting['setting_value'] ?? '');
+                        $isTrans     = !empty($setting['is_translatable']);
+                        $isReadonly  = !empty($setting['is_readonly']);
+                        $label       = identity_resolve_label($setting);
+                        $placeholder = identity_resolve_placeholder($setting);
+                        $helpText    = identity_resolve_help($setting);
+                        ?>
+                    <div class="px-5 py-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            <?= esc($label) ?>
+                            <?php if (!empty($setting['is_required'])): ?>
+                                <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
+                            <?php endif; ?>
+                        </label>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2"><?= lang('SiteIdentity.field_site_tagline') ?></label>
-                        <input type="text" id="site_tagline" name="site_tagline" value="<?= esc($siteTagline) ?>" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_tagline')) ?>" class="<?= input_class('site_tagline') ?>">
+                        <?php if ($inputType === 'boolean'): ?>
+                            <?= view('components/form/boolean', [
+                                    'name'      => "{$key}_value",
+                                    'label'     => '',
+                                    'value'     => filter_var($currentVal, FILTER_VALIDATE_BOOLEAN),
+                                    'on_label'  => 'App.yes',
+                                    'off_label' => 'App.no',
+                                    'readonly'  => $isReadonly,
+                                    'errors'    => $errors ?? [],
+                                ]) ?>
+
+                        <?php elseif ($inputType === 'textarea' || $inputType === 'richtext'): ?>
+                            <textarea name="<?= esc($key) ?>_value"
+                                      rows="4"
+                                      placeholder="<?= esc($placeholder) ?>"
+                                      class="form-input text-sm"
+                                      <?= $isReadonly ? 'readonly' : '' ?>><?= esc($currentVal) ?></textarea>
+
+                        <?php elseif ($inputType === 'code'): ?>
+                            <textarea name="<?= esc($key) ?>_value"
+                                      rows="5"
+                                      placeholder="<?= esc($placeholder) ?>"
+                                      class="form-input font-mono text-sm bg-gray-950 text-green-400 border-gray-700"
+                                      <?= $isReadonly ? 'readonly' : '' ?>><?= esc($currentVal) ?></textarea>
+
+                        <?php elseif ($inputType === 'select'):
+                            $rawOptions = $setting['options_json'] ?? null;
+                            $options    = [];
+                            if (is_array($rawOptions)) {
+                                foreach ($rawOptions as $opt) {
+                                    $options[(string) ($opt['value'] ?? '')] = (string) ($opt['label'] ?? '');
+                                }
+                            }
+                            ?>
+                            <select name="<?= esc($key) ?>_value" class="form-input text-sm" <?= $isReadonly ? 'disabled' : '' ?>>
+                                <?php foreach ($options as $optVal => $optLabel): ?>
+                                    <option value="<?= esc($optVal) ?>" <?= ($currentVal === $optVal) ? 'selected' : '' ?>>
+                                        <?= esc($optLabel) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+
+                        <?php else:
+                            $htmlType = match ($inputType) {
+                                'url'    => 'url',
+                                'email'  => 'email',
+                                'phone'  => 'tel',
+                                'color'  => 'color',
+                                'number' => 'number',
+                                'slug'   => 'text',
+                                default  => 'text',
+                            };
+                            ?>
+                            <input type="<?= esc($htmlType) ?>"
+                                   name="<?= esc($key) ?>_value"
+                                   value="<?= esc($currentVal) ?>"
+                                   placeholder="<?= esc($placeholder) ?>"
+                                   class="form-input text-sm"
+                                   <?= $isReadonly ? 'readonly' : '' ?>>
+                        <?php endif; ?>
+
+                        <?php if ($helpText !== ''): ?>
+                            <p class="mt-1 text-xs text-gray-400"><?= esc($helpText) ?></p>
+                        <?php endif; ?>
+
+                        <?php if ($isTrans && !empty($translationLanguages)): ?>
+                            <div class="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 pt-2 pb-3">
+                                <div class="mb-2 flex gap-3 border-b border-gray-200">
+                                    <?php foreach ($translationLanguages as $tLang): ?>
+                                        <?php $tId = (int) $tLang['id']; ?>
+                                        <button type="button"
+                                                @click="activeLangId = <?= $tId ?>"
+                                                :class="activeLangId === <?= $tId ?> ? 'border-brand-500 text-brand-600 font-semibold' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                                                class="whitespace-nowrap border-b-2 pb-1.5 px-0.5 text-xs transition-colors">
+                                            <?= esc(strtoupper((string) ($tLang['code'] ?? ''))) ?>
+                                        </button>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php foreach ($translationLanguages as $tLang):
+                                    $tId  = (int) $tLang['id'];
+                                    $tVal = identity_get_translation($setting, $tId, 'setting_value');
+                                    ?>
+                                    <div x-show="activeLangId === <?= $tId ?>" x-cloak>
+                                        <input type="text"
+                                               name="<?= esc($key) ?>_translations[<?= $tId ?>]"
+                                               value="<?= esc($tVal) ?>"
+                                               class="form-input text-sm"
+                                               placeholder="<?= esc($label) ?> (<?= esc(strtolower((string) ($tLang['native_name'] ?? $tLang['name'] ?? ''))) ?>)"
+                                               <?= $isReadonly ? 'readonly' : '' ?>>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                </div>
+                    <?php endforeach; ?>
+
+                    </div>
+                </section>
+
             </div>
-
-            <?php if ($showTranslations): ?>
-                <div class="border-b border-gray-200 pb-2">
-                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                        <?php foreach ($translationLanguages as $lang): ?>
-                            <?php $langId = (int) $lang['id']; ?>
-                            <button type="button"
-                                    @click="activeLangId = <?= $langId ?>"
-                                    :class="activeLangId === <?= $langId ?> ? 'border-brand-500 text-brand-600 font-semibold' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'"
-                                    class="whitespace-nowrap border-b-2 pb-2 px-1 text-sm transition-colors duration-150">
-                                <?= esc($lang['native_name'] ?? $lang['name']) ?> (<?= esc(strtoupper($lang['code'])) ?>)
-                            </button>
-                        <?php endforeach; ?>
-                    </nav>
-                </div>
-
-                <div class="space-y-6">
-                    <?php if ($siteNameIsTrans): ?>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2"><?= lang('SiteIdentity.field_site_name_translations') ?></label>
-                            <div class="mt-1">
-                                <?php foreach ($translationLanguages as $lang): ?>
-                                    <?php
-                            $langId = (int) $lang['id'];
-                                    $langName = esc($lang['native_name'] ?? $lang['name']);
-                                    $val = '';
-                                    foreach ($siteNameTrans as $t) {
-                                        if ((int) ($t['language_id'] ?? 0) === $langId) {
-                                            $val = (string) ($t['setting_value'] ?? '');
-                                            break;
-                                        }
-                                    }
-                                    ?>
-                                    <div x-show="activeLangId === <?= $langId ?>" x-cloak>
-                                        <input type="text" name="site_name_translations[<?= $langId ?>]" value="<?= esc($val) ?>" class="<?= input_class("site_name_translations[$langId]") ?> text-sm" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_name')) ?> (<?= strtolower($langName) ?>)">
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($siteTaglineIsTrans): ?>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2"><?= lang('SiteIdentity.field_site_tagline_translations') ?></label>
-                            <div class="mt-1">
-                                <?php foreach ($translationLanguages as $lang): ?>
-                                    <?php
-                                        $langId = (int) $lang['id'];
-                                    $langName = esc($lang['native_name'] ?? $lang['name']);
-                                    $val = '';
-                                    foreach ($siteTaglineTrans as $t) {
-                                        if ((int) ($t['language_id'] ?? 0) === $langId) {
-                                            $val = (string) ($t['setting_value'] ?? '');
-                                            break;
-                                        }
-                                    }
-                                    ?>
-                                    <div x-show="activeLangId === <?= $langId ?>" x-cloak>
-                                        <input type="text" name="site_tagline_translations[<?= $langId ?>]" value="<?= esc($val) ?>" class="<?= input_class("site_tagline_translations[$langId]") ?> text-sm" placeholder="<?= esc(lang('SiteIdentity.placeholder_site_tagline')) ?> (<?= strtolower($langName) ?>)">
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
             <?php endif; ?>
+
+            <?php if ($hasAssets): ?>
+            <aside class="space-y-4">
+                <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <div class="border-b border-gray-100 px-5 py-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700"><?= lang('SiteIdentity.assets_section') ?></h3>
+                    </div>
+                    <div class="divide-y divide-gray-100 px-5">
+
+                    <?php foreach ($assetSettings as $setting):
+                        $key        = (string) ($setting['setting_key'] ?? '');
+                        $inputType  = (string) ($setting['input_type'] ?? 'image');
+                        $isReadonly = !empty($setting['is_readonly']);
+                        $label      = identity_resolve_label($setting);
+                        $helpText   = identity_resolve_help($setting);
+                        $fileId     = (string) ($setting['setting_value'] ?? '');
+                        $fpAccept   = ($inputType === 'image') ? 'image/*' : '';
+                        $fpFilter   = ($inputType === 'image') ? 'image' : '';
+                        ?>
+                    <div class="py-4">
+                        <p class="mb-2 text-sm font-medium text-gray-700"><?= esc($label) ?></p>
+
+                        <div x-data="filePickerField({
+                                name: '<?= esc("{$key}_file_id", 'js') ?>',
+                                value: '<?= esc($fileId, 'js') ?>',
+                                accept: '<?= esc($fpAccept, 'js') ?>',
+                                filterType: '<?= esc($fpFilter, 'js') ?>'
+                            })"
+                             x-init="init()"
+                             <?= $isReadonly ? 'data-readonly="true"' : '' ?>>
+
+                            <input type="hidden" :name="fieldName" :value="fileId">
+                            <input type="hidden" name="<?= esc($key) ?>_url" :value="fileInfo.url">
+                            <input type="hidden" name="<?= esc($key) ?>_mime_type" :value="fileInfo.mime_type">
+
+                            <!-- File selected -->
+                            <div x-show="fileId !== ''" x-cloak
+                                 class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-100 bg-white">
+                                    <template x-if="fileInfo.is_image && fileInfo.url !== ''">
+                                        <img :src="fileInfo.url" :alt="fileInfo.original_name" class="h-full w-full object-cover">
+                                    </template>
+                                    <template x-if="!fileInfo.is_image || fileInfo.url === ''">
+                                        <?= ui_icon('file', 'h-7 w-7 text-gray-400') ?>
+                                    </template>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900" x-text="fileInfo.original_name || '—'"></p>
+                                    <p class="text-xs text-gray-400" x-text="fileInfo.human_size"></p>
+                                </div>
+                                <?php if (!$isReadonly): ?>
+                                <div class="flex flex-shrink-0 flex-col gap-1">
+                                    <button type="button" @click="openPicker()" class="<?= action_button_class() ?> text-xs">
+                                        <?= esc(lang('Files.picker_change')) ?>
+                                    </button>
+                                    <button type="button" @click="clearFile()" class="<?= action_button_class('danger') ?> text-xs">
+                                        <?= esc(lang('App.remove')) ?>
+                                    </button>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- No file selected -->
+                            <button type="button"
+                                    x-show="fileId === ''"
+                                    @click="<?= $isReadonly ? '' : 'openPicker()' ?>"
+                                    <?= $isReadonly ? 'disabled' : '' ?>
+                                    class="flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-5 text-center transition-colors <?= $isReadonly ? 'opacity-60 cursor-not-allowed' : 'hover:border-brand-400 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500' ?>">
+                                <div class="flex flex-col items-center gap-2">
+                                    <?= ui_icon('upload', 'h-7 w-7 text-gray-400') ?>
+                                    <p class="text-sm text-gray-400"><?= esc(lang('SiteIdentity.select_file')) ?></p>
+                                </div>
+                            </button>
+
+                            <!-- Loading -->
+                            <div x-show="loading" x-cloak class="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                                <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <?= esc(lang('App.loading')) ?>
+                            </div>
+                        </div>
+
+                        <?php if ($helpText !== ''): ?>
+                            <p class="mt-1.5 text-xs text-gray-400"><?= esc($helpText) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+
+                    </div>
+                </section>
+            </aside>
+            <?php endif; ?>
+
         </div>
-        <?php $coreIdentityContent = ob_get_clean(); ?>
 
-        <?= view('components/display/form_section', [
-            'title' => 'SiteIdentity.core_section',
-            'description' => 'SiteIdentity.section_intro',
-            'content' => $coreIdentityContent,
-            'bodyClass' => 'space-y-6'
-        ]) ?>
-
-        <?php ob_start(); ?>
-        <div class="space-y-4" x-data="{
-            fileId: <?= esc((string) $logoFileId, 'attr') ?>,
-            fileUrl: <?= esc(json_encode($logoUrl), 'attr') ?>,
-            fileMime: <?= esc(json_encode($logoMime), 'attr') ?>,
-            open() {
-                Alpine.store('filePicker').show({
-                    filterType: 'image',
-                    accept: 'image/*',
-                    multi: false,
-                    onSelect: (file) => {
-                        this.fileId   = file.id;
-                        this.fileUrl  = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : (file.url || '');
-                        this.fileMime = file.mime_type || '';
-                    },
-                });
-            },
-            remove() { this.fileId = 0; this.fileUrl = ''; this.fileMime = ''; }
-        }">
-            <input type="hidden" name="site_logo_file_id" :value="fileId">
-            <input type="hidden" name="site_logo_url" :value="fileUrl">
-            <input type="hidden" name="site_logo_mime_type" :value="fileMime">
-            <div class="flex items-center gap-4">
-                <div x-show="fileUrl" class="shrink-0">
-                    <img :src="fileUrl" alt="" class="h-16 w-auto rounded border border-gray-200 object-contain bg-gray-50">
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" @click="open()" class="<?= action_button_class() ?> text-sm">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
-                        </svg>
-                        <span x-text="fileId ? '<?= esc(lang('SiteIdentity.change_logo')) ?>' : '<?= esc(lang('SiteIdentity.select_logo')) ?>'"></span>
-                    </button>
-                    <button type="button" x-show="fileId" @click="remove()" class="<?= action_button_class('danger') ?>">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18m-2 0-.75 12.75A2.25 2.25 0 0 1 15 21.75H9a2.25 2.25 0 0 1-2.25-2.25L6 6m3 0V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6m-6 0h6"/>
-                        </svg>
-                        <?= lang('SiteIdentity.remove_logo') ?>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <?php $logoContent = ob_get_clean(); ?>
-
-        <?= view('components/display/form_section', [
-            'title' => 'SiteIdentity.field_site_logo',
-            'description' => 'SiteIdentity.assets_section',
-            'content' => $logoContent,
-            'bodyClass' => 'space-y-4'
-        ]) ?>
-
-        <?php ob_start(); ?>
-        <div class="space-y-4" x-data="{
-            fileId: <?= esc((string) $faviconFileId, 'attr') ?>,
-            fileUrl: <?= esc(json_encode($faviconUrl), 'attr') ?>,
-            fileMime: <?= esc(json_encode($faviconMime), 'attr') ?>,
-            open() {
-                Alpine.store('filePicker').show({
-                    filterType: 'image',
-                    accept: 'image/*',
-                    multi: false,
-                    onSelect: (file) => {
-                        this.fileId   = file.id;
-                        this.fileUrl  = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : (file.url || '');
-                        this.fileMime = file.mime_type || '';
-                    },
-                });
-            },
-            remove() { this.fileId = 0; this.fileUrl = ''; this.fileMime = ''; }
-        }">
-            <input type="hidden" name="favicon_file_id" :value="fileId">
-            <input type="hidden" name="favicon_url" :value="fileUrl">
-            <input type="hidden" name="favicon_mime_type" :value="fileMime">
-            <div class="flex items-center gap-4">
-                <div x-show="fileUrl" class="shrink-0">
-                    <img :src="fileUrl" alt="" class="h-10 w-10 rounded border border-gray-200 object-contain bg-gray-50">
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" @click="open()" class="<?= action_button_class() ?> text-sm">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
-                        </svg>
-                        <span x-text="fileId ? '<?= esc(lang('SiteIdentity.change_favicon')) ?>' : '<?= esc(lang('SiteIdentity.select_favicon')) ?>'"></span>
-                    </button>
-                    <button type="button" x-show="fileId" @click="remove()" class="<?= action_button_class('danger') ?>">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18m-2 0-.75 12.75A2.25 2.25 0 0 1 15 21.75H9a2.25 2.25 0 0 1-2.25-2.25L6 6m3 0V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6m-6 0h6"/>
-                        </svg>
-                        <?= lang('SiteIdentity.remove_favicon') ?>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <?php $faviconContent = ob_get_clean(); ?>
-
-        <?= view('components/display/form_section', [
-            'title' => 'SiteIdentity.field_favicon',
-            'description' => 'SiteIdentity.assets_section',
-            'content' => $faviconContent,
-            'bodyClass' => 'space-y-4'
-        ]) ?>
-
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="<?= action_button_class('primary') ?>">
                 <?= lang('App.save') ?>
             </button>
         </div>
+
     </form>
+    <?php endif; ?>
+
 </div>

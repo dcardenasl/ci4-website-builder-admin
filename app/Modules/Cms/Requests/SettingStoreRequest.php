@@ -29,6 +29,8 @@ class SettingStoreRequest extends BaseFormRequest
         return [
             'setting_key',
             'setting_type',
+            'input_type',
+            'options_json',
             'setting_value',
             'setting_value_string',
             'setting_value_int',
@@ -36,6 +38,8 @@ class SettingStoreRequest extends BaseFormRequest
             'setting_value_json',
             'setting_group',
             'is_translatable',
+            'is_required',
+            'is_readonly',
             'sort_order',
             'description',
         ];
@@ -44,23 +48,28 @@ class SettingStoreRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'setting_key' => 'required|min_length[2]|max_length[255]',
-            'setting_value' => 'permit_empty|string',
+            'setting_key'          => 'required|min_length[2]|max_length[255]',
+            'setting_value'        => 'permit_empty|string',
             'setting_value_string' => 'permit_empty|string',
-            'setting_value_int' => 'permit_empty|integer',
-            'setting_value_bool' => 'permit_empty|in_list[0,1]',
-            'setting_value_json' => 'permit_empty|string',
-            'setting_type' => 'permit_empty|in_list[string,int,bool,json,file_id]',
-            'setting_group' => 'permit_empty|string|max_length[255]',
-            'is_translatable' => 'permit_empty|in_list[0,1]',
-            'sort_order' => 'permit_empty|integer',
-            'description' => 'permit_empty|string',
+            'setting_value_int'    => 'permit_empty|integer',
+            'setting_value_bool'   => 'permit_empty|in_list[0,1]',
+            'setting_value_json'   => 'permit_empty|string',
+            'setting_type'         => 'permit_empty|in_list[string,int,bool,json,file_id]',
+            'input_type'           => 'permit_empty|in_list[text,textarea,richtext,url,email,phone,color,number,boolean,image,file,select,code,slug]',
+            'options_json'         => 'permit_empty|string',
+            'setting_group'        => 'permit_empty|string|max_length[255]',
+            'is_translatable'      => 'permit_empty|in_list[0,1]',
+            'is_required'          => 'permit_empty|in_list[0,1]',
+            'is_readonly'          => 'permit_empty|in_list[0,1]',
+            'sort_order'           => 'permit_empty|integer',
+            'description'          => 'permit_empty|string',
         ];
     }
 
     public function payload(): array
     {
         $type           = $this->postString('setting_type') ?: 'string';
+        $inputType      = $this->postString('input_type') ?: 'text';
         $isTranslatable = $this->postBool('is_translatable');
         $settingValue   = $this->settingValueForType($type);
 
@@ -68,8 +77,12 @@ class SettingStoreRequest extends BaseFormRequest
             'setting_key'     => $this->postString('setting_key'),
             'setting_value'   => $settingValue,
             'setting_type'    => $type,
+            'input_type'      => $inputType,
+            'options_json'    => $this->postString('options_json') ?: null,
             'setting_group'   => $this->postString('setting_group'),
             'is_translatable' => $isTranslatable ? '1' : '0',
+            'is_required'     => $this->postBool('is_required') ? '1' : '0',
+            'is_readonly'     => $this->postBool('is_readonly') ? '1' : '0',
             'sort_order'      => $this->postInt('sort_order', 0),
             'description'     => $this->postString('description'),
         ];
@@ -83,8 +96,9 @@ class SettingStoreRequest extends BaseFormRequest
             return $payload;
         }
 
-        $postTranslations = $this->request->getPost('translations');
-        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        $postTranslations    = $this->request->getPost('translations');
+        $postUiTranslations  = $this->request->getPost('ui_translations');
+        $baseLanguageId      = $this->resolveBaseLanguageId($languages);
         if ($this->baseLanguageId !== null) {
             $baseLanguageId = $this->baseLanguageId;
         }
@@ -100,19 +114,36 @@ class SettingStoreRequest extends BaseFormRequest
                 continue;
             }
 
-            if (! is_array($postTranslations) || ! array_key_exists($langId, $postTranslations)) {
-                continue;
+            $entry = ['language_id' => $langId];
+            $hasContent = false;
+
+            if (is_array($postTranslations) && array_key_exists($langId, $postTranslations)) {
+                $val = (string) $postTranslations[$langId];
+                if ($val !== '') {
+                    $entry['setting_value'] = $val;
+                    $hasContent = true;
+                }
             }
 
-            $translationValue = (string) $postTranslations[$langId];
-            if ($translationValue === '') {
-                continue;
+            if (is_array($postUiTranslations) && isset($postUiTranslations[$langId]) && is_array($postUiTranslations[$langId])) {
+                $ui = $postUiTranslations[$langId];
+                if (isset($ui['label']) && (string) $ui['label'] !== '') {
+                    $entry['label'] = (string) $ui['label'];
+                    $hasContent = true;
+                }
+                if (isset($ui['placeholder']) && (string) $ui['placeholder'] !== '') {
+                    $entry['placeholder'] = (string) $ui['placeholder'];
+                    $hasContent = true;
+                }
+                if (isset($ui['help_text']) && (string) $ui['help_text'] !== '') {
+                    $entry['help_text'] = (string) $ui['help_text'];
+                    $hasContent = true;
+                }
             }
 
-            $translations[] = [
-                'language_id'   => $langId,
-                'setting_value' => $translationValue,
-            ];
+            if ($hasContent) {
+                $translations[] = $entry;
+            }
         }
 
         if (!empty($translations)) {

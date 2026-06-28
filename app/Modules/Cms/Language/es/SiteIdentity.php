@@ -27,4 +27,12 @@ return [
     'change_favicon' => 'Cambiar favicon',
     'remove_logo'    => 'Quitar logo',
     'remove_favicon' => 'Quitar favicon',
+
+    // Etiquetas genéricas para campos de archivo metadata-driven
+    'select_file'  => 'Seleccionar archivo',
+    'change_file'  => 'Cambiar archivo',
+    'remove_file'  => 'Quitar',
+
+    // Estado vacío cuando no hay settings de identidad
+    'no_settings'  => 'No se han configurado settings de identidad. Crea settings con el grupo "identity" para poblar esta página.',
 ];

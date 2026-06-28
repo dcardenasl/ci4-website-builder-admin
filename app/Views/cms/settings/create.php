@@ -1,17 +1,24 @@
 <?php
 $item = $item ?? [];
 $selectedSettingType = old('setting_type', $item['setting_type'] ?? 'string');
-$baseLanguageId = isset($baseLanguageId) && is_numeric($baseLanguageId) ? (int) $baseLanguageId : null;
-$isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? false);
+$selectedInputType   = old('input_type', $item['input_type'] ?? 'text');
+$baseLanguageId      = isset($baseLanguageId) && is_numeric($baseLanguageId) ? (int) $baseLanguageId : null;
+$isTranslatable      = (bool) old('is_translatable', $item['is_translatable'] ?? false);
+$optionsJson         = old('options_json', $item['options_json'] ?? null);
+if (is_array($optionsJson)) {
+    $optionsJson = json_encode($optionsJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+}
 ?>
 <div class="mb-4">
     <a href="<?= route_to('admin.cms.settings') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
 </div>
 
 <div class="space-y-6"
-    x-data="{ 
+    x-data="{
         settingType: '<?= esc($selectedSettingType, 'js') ?>',
-        isTranslatable: <?= (old('is_translatable', $item['is_translatable'] ?? false)) ? 'true' : 'false' ?>
+        inputType: '<?= esc($selectedInputType, 'js') ?>',
+        isTranslatable: <?= (old('is_translatable', $item['is_translatable'] ?? false)) ? 'true' : 'false' ?>,
+        showOptions: <?= ($selectedInputType === 'select') ? 'true' : 'false' ?>
     }">
     
     <div class="flex items-center justify-between">
@@ -125,6 +132,17 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                                 <div x-show="settingType === 'json'" x-cloak>
                                     <textarea name="translations[<?= $langId ?>]" rows="5" class="<?= input_class("translations[$langId]") ?> !mt-0 text-sm font-mono bg-white" :disabled="!isTranslatable || settingType !== 'json'" placeholder="{}"><?= esc($transValue) ?></textarea>
                                 </div>
+
+                                <details class="pt-1">
+                                    <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none">
+                                        <?= lang('Settings.ui_labels_section') ?>
+                                    </summary>
+                                    <div class="mt-2 space-y-2">
+                                        <input type="text" name="ui_translations[<?= $langId ?>][label]" value="" class="form-input text-sm" placeholder="<?= esc(lang('Settings.field_label_placeholder')) ?>" :disabled="!isTranslatable">
+                                        <input type="text" name="ui_translations[<?= $langId ?>][placeholder]" value="" class="form-input text-sm" placeholder="<?= esc(lang('Settings.field_placeholder_placeholder')) ?>" :disabled="!isTranslatable">
+                                        <input type="text" name="ui_translations[<?= $langId ?>][help_text]" value="" class="form-input text-sm" placeholder="<?= esc(lang('Settings.field_help_text_placeholder')) ?>" :disabled="!isTranslatable">
+                                    </div>
+                                </details>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -160,47 +178,105 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                 'placeholder' => 'Settings.field_setting_type_placeholder',
                 'help' => 'Settings.field_setting_type_help',
                 'options' => [
-                    'string' => lang('BlockTypes.type_string'),
-                    'int' => lang('BlockTypes.type_int'),
-                    'bool' => lang('BlockTypes.type_bool'),
-                    'json' => lang('BlockTypes.type_json'),
-                    'file_id' => lang('BlockTypes.type_file_id')
+                    'string'  => lang('BlockTypes.type_string'),
+                    'int'     => lang('BlockTypes.type_int'),
+                    'bool'    => lang('BlockTypes.type_bool'),
+                    'json'    => lang('BlockTypes.type_json'),
+                    'file_id' => lang('BlockTypes.type_file_id'),
                 ],
                 'value' => $item['setting_type'] ?? 'string',
                 'errors' => $errors ?? [],
-                'attributes' => ['x-model' => 'settingType']
+                'attributes' => ['x-model' => 'settingType'],
             ]) ?>
 
-            <div @change="isTranslatable = $event.target.checked">
-                <?= view('components/form/boolean', [
-                    'name' => 'is_translatable',
-                    'label' => 'Settings.field_is_translatable',
-                    'value' => $item['is_translatable'] ?? false,
-                    'on_label' => 'Settings.field_is_translatable_on',
-                    'off_label' => 'Settings.field_is_translatable_off',
-                    'help' => 'Settings.field_is_translatable_help',
-                    'errors' => $errors ?? []
+            <?= view('components/form/select', [
+                'name' => 'input_type',
+                'label' => 'Settings.field_input_type',
+                'required' => true,
+                'help' => 'Settings.field_input_type_help',
+                'options' => [
+                    'text'     => lang('Settings.input_type_text'),
+                    'textarea' => lang('Settings.input_type_textarea'),
+                    'richtext' => lang('Settings.input_type_richtext'),
+                    'url'      => lang('Settings.input_type_url'),
+                    'email'    => lang('Settings.input_type_email'),
+                    'phone'    => lang('Settings.input_type_phone'),
+                    'color'    => lang('Settings.input_type_color'),
+                    'number'   => lang('Settings.input_type_number'),
+                    'boolean'  => lang('Settings.input_type_boolean'),
+                    'image'    => lang('Settings.input_type_image'),
+                    'file'     => lang('Settings.input_type_file'),
+                    'select'   => lang('Settings.input_type_select'),
+                    'code'     => lang('Settings.input_type_code'),
+                    'slug'     => lang('Settings.input_type_slug'),
+                ],
+                'value' => $selectedInputType,
+                'errors' => $errors ?? [],
+                'attributes' => ['x-model' => 'inputType', '@change' => "showOptions = inputType === 'select'"],
+            ]) ?>
+
+            <div x-show="showOptions" x-cloak>
+                <?= view('components/form/textarea', [
+                    'name'        => 'options_json',
+                    'label'       => 'Settings.field_options_json',
+                    'required'    => false,
+                    'value'       => $optionsJson ?? '[{"value":"option_1","label":"Option 1"}]',
+                    'placeholder' => 'Settings.field_options_json_placeholder',
+                    'help'        => 'Settings.field_options_json_help',
+                    'rows'        => 6,
+                    'errors'      => $errors ?? [],
+                    'class'       => 'font-mono text-sm bg-gray-50',
                 ]) ?>
             </div>
 
+            <div @change="isTranslatable = $event.target.checked">
+                <?= view('components/form/boolean', [
+                    'name'      => 'is_translatable',
+                    'label'     => 'Settings.field_is_translatable',
+                    'value'     => $item['is_translatable'] ?? false,
+                    'on_label'  => 'Settings.field_is_translatable_on',
+                    'off_label' => 'Settings.field_is_translatable_off',
+                    'help'      => 'Settings.field_is_translatable_help',
+                    'errors'    => $errors ?? [],
+                ]) ?>
+            </div>
+
+            <?= view('components/form/boolean', [
+                'name'      => 'is_required',
+                'label'     => 'Settings.field_is_required',
+                'value'     => $item['is_required'] ?? false,
+                'on_label'  => 'App.yes',
+                'off_label' => 'App.no',
+                'errors'    => $errors ?? [],
+            ]) ?>
+
+            <?= view('components/form/boolean', [
+                'name'      => 'is_readonly',
+                'label'     => 'Settings.field_is_readonly',
+                'value'     => $item['is_readonly'] ?? false,
+                'on_label'  => 'App.yes',
+                'off_label' => 'App.no',
+                'errors'    => $errors ?? [],
+            ]) ?>
+
             <?= view('components/form/text', [
-                'name' => 'setting_group',
-                'label' => 'Settings.field_setting_group',
-                'required' => false,
-                'value' => $item['setting_group'] ?? '',
+                'name'        => 'setting_group',
+                'label'       => 'Settings.field_setting_group',
+                'required'    => false,
+                'value'       => $item['setting_group'] ?? '',
                 'placeholder' => 'Settings.field_setting_group_placeholder',
-                'help' => 'Settings.field_setting_group_help',
-                'errors' => $errors ?? []
+                'help'        => 'Settings.field_setting_group_help',
+                'errors'      => $errors ?? [],
             ]) ?>
 
             <?= view('components/form/textarea', [
-                'name' => 'description',
-                'label' => 'Settings.field_description',
-                'required' => false,
-                'value' => $item['description'] ?? '',
+                'name'        => 'description',
+                'label'       => 'Settings.field_description',
+                'required'    => false,
+                'value'       => $item['description'] ?? '',
                 'placeholder' => 'Settings.field_description_placeholder',
-                'help' => 'Settings.field_description_help',
-                'errors' => $errors ?? []
+                'help'        => 'Settings.field_description_help',
+                'errors'      => $errors ?? [],
             ]) ?>
             <?php $propertiesContent = ob_get_clean(); ?>
 

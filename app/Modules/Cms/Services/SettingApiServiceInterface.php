@@ -35,4 +35,16 @@ interface SettingApiServiceInterface
 
     /** @return ApiResponse */
     public function getByGroup(string $group): array;
+
+    /** @return ApiResponse */
+    public function getConnections(int $settingId): array;
+
+    /**
+     * @param array<string, mixed> $data
+     * @return ApiResponse
+     */
+    public function createConnection(int $settingId, array $data): array;
+
+    /** @return ApiResponse */
+    public function deleteConnection(int $settingId, int $connectionId): array;
 }

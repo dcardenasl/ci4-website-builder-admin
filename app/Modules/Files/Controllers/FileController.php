@@ -491,6 +491,10 @@ class FileController extends BaseWebController
         return isset($map[$resource]) ? $map[$resource]($resourceId) : null;
     }
 
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     private function kbToBytes(array $params): array
     {
         foreach (['size_min', 'size_max'] as $key) {

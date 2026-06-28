@@ -27,4 +27,12 @@ return [
     'change_favicon' => 'Change favicon',
     'remove_logo'    => 'Remove logo',
     'remove_favicon' => 'Remove favicon',
+
+    // Generic file labels (used for new metadata-driven fields)
+    'select_file'  => 'Select file',
+    'change_file'  => 'Change file',
+    'remove_file'  => 'Remove',
+
+    // Metadata-driven fallback when no settings exist
+    'no_settings'  => 'No identity settings have been configured. Create settings with group "identity" to populate this page.',
 ];

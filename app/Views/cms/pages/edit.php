@@ -29,7 +29,7 @@ if (!empty($languages)) {
         ];
     }
 }
-$completedCount = array_sum(array_map(fn($s) => $s['status'] === 'complete' ? 1 : 0, $translationStats));
+$completedCount = array_sum(array_map(fn ($s) => $s['status'] === 'complete' ? 1 : 0, $translationStats));
 $totalLanguages = count($translationStats);
 ?>
 <div class="mb-4 flex items-center justify-between">
@@ -253,15 +253,15 @@ if (!empty($languages)) {
                         <?php foreach ($languages as $index => $lang): ?>
                             <?php
                                 $langId = (int) $lang['id'];
-                                $transValue = $resolveTranslation($lang);
-                                $isDefault = !empty($lang['is_default']);
-                                $langCode  = strtoupper($lang['code'] ?? '');
-                                $fields = [
-                                    ['from' => sprintf('[name="translations[%d][title]"]', $defaultLangIndex),            'to' => sprintf('[name="translations[%d][title]"]', $index)],
-                                    ['from' => sprintf('[name="translations[%d][excerpt]"]', $defaultLangIndex),          'to' => sprintf('[name="translations[%d][excerpt]"]', $index)],
-                                    ['from' => sprintf('[name="translations[%d][meta_title]"]', $defaultLangIndex),       'to' => sprintf('[name="translations[%d][meta_title]"]', $index)],
-                                    ['from' => sprintf('[name="translations[%d][meta_description]"]', $defaultLangIndex), 'to' => sprintf('[name="translations[%d][meta_description]"]', $index)],
-                                ];
+                            $transValue = $resolveTranslation($lang);
+                            $isDefault = !empty($lang['is_default']);
+                            $langCode  = strtoupper($lang['code'] ?? '');
+                            $fields = [
+                                ['from' => sprintf('[name="translations[%d][title]"]', $defaultLangIndex),            'to' => sprintf('[name="translations[%d][title]"]', $index)],
+                                ['from' => sprintf('[name="translations[%d][excerpt]"]', $defaultLangIndex),          'to' => sprintf('[name="translations[%d][excerpt]"]', $index)],
+                                ['from' => sprintf('[name="translations[%d][meta_title]"]', $defaultLangIndex),       'to' => sprintf('[name="translations[%d][meta_title]"]', $index)],
+                                ['from' => sprintf('[name="translations[%d][meta_description]"]', $defaultLangIndex), 'to' => sprintf('[name="translations[%d][meta_description]"]', $index)],
+                            ];
                             ?>
                             <div x-show="isActive(<?= $langId ?>)" class="space-y-4">
                                 <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">

@@ -167,29 +167,29 @@
 
                             <?php
                                 $otherFileIdSelectors = [];
-                                $otherFileUrlSelectors = [];
-                                foreach ($languages as $targetIndex => $targetLanguage) {
-                                    if ((int) ($targetLanguage['id'] ?? 0) === (int) ($lang['id'] ?? 0)) {
-                                        continue;
-                                    }
-                                    $otherFileIdSelectors[] = '#entry_featured_file_id_' . $targetIndex;
-                                    $otherFileUrlSelectors[] = '#entry_featured_image_url_' . $targetIndex;
-                                }
-                            ?>
+                        $otherFileUrlSelectors = [];
+                        foreach ($languages as $targetIndex => $targetLanguage) {
+                            if ((int) ($targetLanguage['id'] ?? 0) === (int) ($lang['id'] ?? 0)) {
+                                continue;
+                            }
+                            $otherFileIdSelectors[] = '#entry_featured_file_id_' . $targetIndex;
+                            $otherFileUrlSelectors[] = '#entry_featured_image_url_' . $targetIndex;
+                        }
+                        ?>
                             <?= view('components/form/translatable_image', [
-                                'label' => 'Entries.translation_featured_image_label',
-                                'help' => 'Entries.translation_featured_image_help',
-                                'fileIdName' => "translations[{$index}][featured_file_id]",
-                                'fileUrlName' => "translations[{$index}][featured_image_url]",
-                                'fileIdInputId' => 'entry_featured_file_id_' . $index,
-                                'fileUrlInputId' => 'entry_featured_image_url_' . $index,
-                                'fileIdValue' => old("translations.{$index}.featured_file_id", ''),
-                                'fileUrlValue' => old("translations.{$index}.featured_image_url", ''),
-                                'copyTargetFileIdSelectors' => $otherFileIdSelectors,
-                                'copyTargetFileUrlSelectors' => $otherFileUrlSelectors,
-                                'copyLabel' => 'Entries.translation_copy_to_other_languages',
-                                'accept' => 'image',
-                            ]) ?>
+                            'label' => 'Entries.translation_featured_image_label',
+                            'help' => 'Entries.translation_featured_image_help',
+                            'fileIdName' => "translations[{$index}][featured_file_id]",
+                            'fileUrlName' => "translations[{$index}][featured_image_url]",
+                            'fileIdInputId' => 'entry_featured_file_id_' . $index,
+                            'fileUrlInputId' => 'entry_featured_image_url_' . $index,
+                            'fileIdValue' => old("translations.{$index}.featured_file_id", ''),
+                            'fileUrlValue' => old("translations.{$index}.featured_image_url", ''),
+                            'copyTargetFileIdSelectors' => $otherFileIdSelectors,
+                            'copyTargetFileUrlSelectors' => $otherFileUrlSelectors,
+                            'copyLabel' => 'Entries.translation_copy_to_other_languages',
+                            'accept' => 'image',
+                        ]) ?>
 
                             <details class="group border border-gray-100 rounded-lg bg-gray-50/30">
                                 <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 rounded-lg select-none">
@@ -198,26 +198,26 @@
                                 </summary>
                                 <div class="px-3 pb-3 pt-2 space-y-4 border-t border-gray-100">
                                     <?= view('components/form/text', [
-                                        'name' => "translations[{$index}][meta_title]",
-                                        'label' => 'Entries.translation_meta_title_label',
-                                        'required' => false,
-                                        'placeholder' => 'Entries.translation_meta_title_placeholder',
-                                        'help' => 'Entries.translation_meta_title_help',
-                                        'value' => old("translations.{$index}.meta_title", ''),
-                                        'maxlength' => 255,
-                                        'errors' => $errors ?? []
-                                    ]) ?>
+                                    'name' => "translations[{$index}][meta_title]",
+                                    'label' => 'Entries.translation_meta_title_label',
+                                    'required' => false,
+                                    'placeholder' => 'Entries.translation_meta_title_placeholder',
+                                    'help' => 'Entries.translation_meta_title_help',
+                                    'value' => old("translations.{$index}.meta_title", ''),
+                                    'maxlength' => 255,
+                                    'errors' => $errors ?? []
+                                ]) ?>
                                     <?= view('components/form/textarea', [
-                                        'name' => "translations[{$index}][meta_description]",
-                                        'label' => 'Entries.translation_meta_description_label',
-                                        'required' => false,
-                                        'placeholder' => 'Entries.translation_meta_description_placeholder',
-                                        'help' => 'Entries.translation_meta_description_help',
-                                        'value' => old("translations.{$index}.meta_description", ''),
-                                        'maxlength' => 500,
-                                        'rows' => 3,
-                                        'errors' => $errors ?? []
-                                    ]) ?>
+                                    'name' => "translations[{$index}][meta_description]",
+                                    'label' => 'Entries.translation_meta_description_label',
+                                    'required' => false,
+                                    'placeholder' => 'Entries.translation_meta_description_placeholder',
+                                    'help' => 'Entries.translation_meta_description_help',
+                                    'value' => old("translations.{$index}.meta_description", ''),
+                                    'maxlength' => 500,
+                                    'rows' => 3,
+                                    'errors' => $errors ?? []
+                                ]) ?>
                                 </div>
                             </details>
                         </div>
@@ -303,13 +303,13 @@
                         'placeholder' => 'Entries.field_sitemap_changefreq_placeholder',
                         'help' => 'Entries.field_sitemap_changefreq_help',
                         'options' => [
-                            'always' => lang('Entries.frequency_always'),
-                            'hourly' => lang('Entries.frequency_hourly'),
-                            'daily' => lang('Entries.frequency_daily'),
-                            'weekly' => lang('Entries.frequency_weekly'),
-                            'monthly' => lang('Entries.frequency_monthly'),
-                            'yearly' => lang('Entries.frequency_yearly'),
-                            'never' => lang('Entries.frequency_never'),
+                        'always' => lang('Entries.frequency_always'),
+                        'hourly' => lang('Entries.frequency_hourly'),
+                        'daily' => lang('Entries.frequency_daily'),
+                        'weekly' => lang('Entries.frequency_weekly'),
+                        'monthly' => lang('Entries.frequency_monthly'),
+                        'yearly' => lang('Entries.frequency_yearly'),
+                        'never' => lang('Entries.frequency_never'),
                         ],
                         'value' => $item['sitemap_changefreq'] ?? 'weekly',
                         'errors' => $errors ?? []
