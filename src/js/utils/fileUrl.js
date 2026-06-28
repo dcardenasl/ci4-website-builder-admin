@@ -15,9 +15,5 @@ export const bestFilePreviewUrl = (file) => {
  */
 export const resolveTranslatableFilePreviewUrl = (fileId, fileUrl = '') => {
     const normalizedUrl = String(fileUrl || '');
-    if (normalizedUrl !== '') return normalizedUrl;
-    const normalizedId = String(fileId || '');
-    return normalizedId !== ''
-        ? `${window.location.origin}/files/${encodeURIComponent(normalizedId)}/view`
-        : '';
+    return normalizedUrl !== '' ? normalizedUrl : '';
 };

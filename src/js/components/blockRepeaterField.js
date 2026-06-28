@@ -1,3 +1,5 @@
+import { bestFilePreviewUrl } from '../utils/fileUrl.js';
+
 export const blockRepeaterField = (existingItems = [], itemFields = {}, fieldKey = '', langIdx = 0) => {
     const initItems = (existingItems || []).map((item) => {
         const out = {};
@@ -45,10 +47,10 @@ export const blockRepeaterField = (existingItems = [], itemFields = {}, fieldKey
                 filterType, accept: mimeAccept, multi: false,
                 onSelect: (file) => {
                     const fileId = String(file.id ?? '');
-                    const previewUrl = fileId ? `${window.location.origin}/files/${fileId}/view` : '';
+                    const canonicalUrl = String(bestFilePreviewUrl(file) || file.url || '');
                     this.items[itemIdx][subKey + '_file_id']     = fileId;
-                    this.items[itemIdx][subKey + '_url']         = previewUrl;
-                    this.items[itemIdx][subKey + '_preview_url'] = previewUrl;
+                    this.items[itemIdx][subKey + '_url']         = canonicalUrl;
+                    this.items[itemIdx][subKey + '_preview_url'] = canonicalUrl;
                 },
             });
         },
