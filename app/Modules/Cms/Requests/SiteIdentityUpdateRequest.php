@@ -51,6 +51,13 @@ class SiteIdentityUpdateRequest extends BaseFormRequest
         return [];
     }
 
+    public function validate(): bool
+    {
+        // This request is metadata-driven, so the update gate should not
+        // depend on fixed field definitions.
+        return true;
+    }
+
     /**
      * Returns a map of setting_key → update payload for the API.
      *

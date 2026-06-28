@@ -282,8 +282,8 @@ function identity_get_translation(array $setting, int $langId, string $field = '
                             <div x-show="fileId !== ''" x-cloak
                                  class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
                                 <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-100 bg-white">
-                                    <template x-if="fileInfo.is_image && fileInfo.url !== ''">
-                                        <img :src="fileInfo.url" :alt="fileInfo.original_name" class="h-full w-full object-cover">
+                                    <template x-if="fileInfo.is_image && (fileInfo.previewUrl || fileInfo.url)">
+                                        <img :src="fileInfo.previewUrl || fileInfo.url" :alt="fileInfo.original_name" class="h-full w-full object-cover">
                                     </template>
                                     <template x-if="!fileInfo.is_image || fileInfo.url === ''">
                                         <?= ui_icon('file', 'h-7 w-7 text-gray-400') ?>

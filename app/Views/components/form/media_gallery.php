@@ -66,8 +66,8 @@ if ($mediaRows === []) {
                     <!-- File Preview & Selector -->
                     <div class="space-y-3">
                         <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white">
-                            <template x-if="row.file && row.file.is_image && row.file.url">
-                                <img :src="row.file.url" :alt="fileName(row)" class="h-full w-full object-cover">
+                            <template x-if="row.file && row.file.is_image && (row.file.previewUrl || row.file.url)">
+                                <img :src="row.file.previewUrl || row.file.url" :alt="fileName(row)" class="h-full w-full object-cover">
                             </template>
                             <template x-if="!(row.file && row.file.is_image && row.file.url)">
                                 <div class="text-gray-400">

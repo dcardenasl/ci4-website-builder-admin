@@ -1,11 +1,11 @@
 import { devError } from '../utils/dev.js';
 import { isObject } from '../utils/url.js';
-import { bestFilePreviewUrl } from '../utils/fileUrl.js';
+import { bestFileOriginalUrl, bestFilePreviewUrl } from '../utils/fileUrl.js';
 
 export const filePickerField = (config = {}) => ({
     fieldName: String(config.name || 'file_id'),
     fileId: String(config.value || ''),
-    fileInfo: { original_name: '', mime_type: '', category: '', is_image: false, url: '', human_size: '' },
+    fileInfo: { original_name: '', mime_type: '', category: '', is_image: false, url: '', previewUrl: '', human_size: '' },
     loading: false,
     _accept: String(config.accept || ''),
     _filterType: String(config.filterType || ''),
@@ -35,7 +35,8 @@ export const filePickerField = (config = {}) => ({
                     mime_type: String(d.mime_type || ''),
                     category: String(d.category || ''),
                     is_image: Boolean(d.is_image),
-                    url: String(d.url || ''),
+                    url: String(bestFileOriginalUrl(d) || d.url || ''),
+                    previewUrl: String(bestFilePreviewUrl(d) || d.url || ''),
                     human_size: String(d.human_size || ''),
                 };
             }
@@ -58,7 +59,8 @@ export const filePickerField = (config = {}) => ({
                     mime_type: String(file.mime_type || ''),
                     category: String(file.category || ''),
                     is_image: Boolean(file.is_image),
-                    url: String(bestFilePreviewUrl(file)),
+                    url: String(bestFileOriginalUrl(file) || file.url || ''),
+                    previewUrl: String(bestFilePreviewUrl(file) || file.url || ''),
                     human_size: String(file.human_size || ''),
                 };
             },
@@ -67,6 +69,6 @@ export const filePickerField = (config = {}) => ({
 
     clearFile() {
         this.fileId = '';
-        this.fileInfo = { original_name: '', mime_type: '', category: '', is_image: false, url: '', human_size: '' };
+        this.fileInfo = { original_name: '', mime_type: '', category: '', is_image: false, url: '', previewUrl: '', human_size: '' };
     },
 });

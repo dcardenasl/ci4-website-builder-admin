@@ -1,4 +1,4 @@
-import { resolveTranslatableFilePreviewUrl, bestFilePreviewUrl } from '../utils/fileUrl.js';
+import { resolveTranslatableFilePreviewUrl, bestFileOriginalUrl, bestFilePreviewUrl } from '../utils/fileUrl.js';
 
 export const translatableFileField = (initialId = '', initialUrl = '', accept = 'image') => ({
     fileId: String(initialId),
@@ -23,8 +23,8 @@ export const translatableFileField = (initialId = '', initialUrl = '', accept = 
             filterType, accept: mimeAccept, multi: false,
             onSelect: (file) => {
                 const fileId = String(file.id ?? '');
-                const previewUrl = String(bestFilePreviewUrl(file) || file.url || '');
-                this.applyFile(fileId, previewUrl);
+                this.applyFile(fileId, bestFileOriginalUrl(file) || file.url || '');
+                this.previewUrl = String(bestFilePreviewUrl(file) || file.url || '');
             },
         });
     },
@@ -34,7 +34,6 @@ export const translatableFileField = (initialId = '', initialUrl = '', accept = 
         const normalizedUrl = resolveTranslatableFilePreviewUrl(normalizedId, fileUrl);
         this.fileId = normalizedId;
         this.fileUrl = normalizedUrl;
-        this.previewUrl = normalizedUrl;
     },
 
     clearFile() { this.applyFile('', ''); },

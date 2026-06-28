@@ -4,11 +4,11 @@ export const blockRepeaterField = (existingItems = [], itemFields = {}, fieldKey
     const initItems = (existingItems || []).map((item) => {
         const out = {};
         Object.keys(itemFields || {}).forEach((subKey) => {
-            if ((itemFields[subKey] || {}).type === 'file') {
-                out[subKey + '_file_id']     = String(item[subKey + '_file_id'] || '');
-                out[subKey + '_preview_url'] = '';
-                out[subKey + '_url']         = String(item[subKey + '_url'] || '');
-            } else {
+                if ((itemFields[subKey] || {}).type === 'file') {
+                    out[subKey + '_file_id']     = String(item[subKey + '_file_id'] || '');
+                    out[subKey + '_preview_url'] = '';
+                    out[subKey + '_url']         = String(item[subKey + '_url'] || '');
+                } else {
                 out[subKey] = item[subKey] ?? '';
             }
         });
@@ -47,10 +47,11 @@ export const blockRepeaterField = (existingItems = [], itemFields = {}, fieldKey
                 filterType, accept: mimeAccept, multi: false,
                 onSelect: (file) => {
                     const fileId = String(file.id ?? '');
-                    const canonicalUrl = String(bestFilePreviewUrl(file) || file.url || '');
+                    const canonicalUrl = String(file.url || '');
+                    const previewUrl = String(bestFilePreviewUrl(file) || file.url || '');
                     this.items[itemIdx][subKey + '_file_id']     = fileId;
                     this.items[itemIdx][subKey + '_url']         = canonicalUrl;
-                    this.items[itemIdx][subKey + '_preview_url'] = canonicalUrl;
+                    this.items[itemIdx][subKey + '_preview_url'] = previewUrl;
                 },
             });
         },

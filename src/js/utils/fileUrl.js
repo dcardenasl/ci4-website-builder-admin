@@ -1,8 +1,16 @@
 import { isObject } from './url.js';
 
 /** @param {object|null} file @returns {string} */
+export const bestFileOriginalUrl = (file) => {
+    return String(file?.url || '');
+};
+
+/** @param {object|null} file @returns {string} */
 export const bestFilePreviewUrl = (file) => {
     const variants = isObject(file?.variants) ? file.variants : {};
+    if (String(file?.mime_type || '').toLowerCase() === 'image/gif') {
+        return String(file?.url || '');
+    }
     return String(
         variants.md?.url || variants.sm?.url || variants.thumb?.url || file?.url || ''
     );

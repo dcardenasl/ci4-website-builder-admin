@@ -1,5 +1,6 @@
 import { devError } from '../utils/dev.js';
 import { isObject } from '../utils/url.js';
+import { bestFileOriginalUrl, bestFilePreviewUrl } from '../utils/fileUrl.js';
 
 const normalizePickerFile = (file) => {
     if (!file) return {};
@@ -10,6 +11,7 @@ const normalizePickerFile = (file) => {
         category: file.category ?? '',
         is_image: file.is_image ?? (file.category === 'image'),
         url: file.url ?? '',
+        previewUrl: file.previewUrl ?? '',
         human_size: file.human_size ?? '',
         variants: file.variants ?? {}
     };
@@ -44,7 +46,8 @@ export const adminMediaGallery = (config = {}) => ({
                     mime_type: String(selected.mime_type || ''),
                     category: String(selected.category || ''),
                     is_image: Boolean(selected.is_image),
-                    url: String(selected.url || ''),
+                    url: String(bestFileOriginalUrl(selected) || selected.url || ''),
+                    previewUrl: String(bestFilePreviewUrl(selected) || selected.url || ''),
                     human_size: String(selected.human_size || ''),
                     variants: selected.variants || {},
                 };
@@ -77,7 +80,8 @@ export const adminMediaGallery = (config = {}) => ({
                     mime_type: String(d.mime_type || ''),
                     category: String(d.category || ''),
                     is_image: Boolean(d.is_image),
-                    url: String(d.url || ''),
+                    url: String(bestFileOriginalUrl(d) || d.url || ''),
+                    previewUrl: String(bestFilePreviewUrl(d) || d.url || ''),
                     human_size: String(d.human_size || ''),
                     variants: d.variants || {},
                 };

@@ -456,7 +456,7 @@ function blockInstanceBuilder(blockTypes, languages) {
         // For repeater sub-fields: all four are set
         pickFile(langId, fieldKey, itemIdx, subKey, file) {
             if (itemIdx === null) {
-                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : file.url };
+                this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: file.id, url: file.url, preview_url: window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : file.url };
             } else {
                 const k = `${langId}_${fieldKey}`;
                 if (this.repeaterItems[k] && this.repeaterItems[k][itemIdx]) {
