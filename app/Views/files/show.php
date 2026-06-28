@@ -180,12 +180,17 @@ $smUrl    = is_array($variants['sm'] ?? null) ? (string) ($variants['sm']['url']
             <?php else: ?>
                 <ul class="mt-3 divide-y divide-gray-100">
                     <?php foreach ($usages as $usage): ?>
+                        <?php $editUrl = (string) ($usage['edit_url'] ?? ''); ?>
                         <li class="py-2 flex items-center justify-between gap-3 text-sm">
-                            <div>
-                                <p class="font-medium text-gray-900"><?= esc((string) ($usage['label'] ?? '')) ?></p>
+                            <div class="min-w-0">
+                                <?php if ($editUrl !== ''): ?>
+                                    <a href="<?= esc($editUrl) ?>" class="font-medium text-brand-600 hover:underline truncate block"><?= esc((string) ($usage['label'] ?? '')) ?></a>
+                                <?php else: ?>
+                                    <p class="font-medium text-gray-900 truncate"><?= esc((string) ($usage['label'] ?? '')) ?></p>
+                                <?php endif; ?>
                                 <p class="text-xs text-gray-500"><?= esc((string) ($usage['resource'] ?? '')) ?> #<?= esc((string) ($usage['resource_id'] ?? '')) ?></p>
                             </div>
-                            <span class="text-xs text-gray-400 uppercase"><?= esc((string) ($usage['role'] ?? '')) ?></span>
+                            <span class="text-xs text-gray-400 uppercase shrink-0"><?= esc((string) ($usage['role'] ?? '')) ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>

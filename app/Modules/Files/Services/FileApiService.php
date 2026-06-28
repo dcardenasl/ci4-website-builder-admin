@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Files\Services;
 
+use App\Libraries\ApiClientInterface;
+use App\Libraries\DomainApiClientInterface;
 use App\Services\ResourceApiService;
 use RuntimeException;
 
 class FileApiService extends ResourceApiService implements FileApiServiceInterface
 {
+    public function __construct(
+        ApiClientInterface $apiClient,
+        protected DomainApiClientInterface $domainApiClient,
+    ) {
+        parent::__construct($apiClient);
+    }
+
     protected function resourcePath(): string
     {
         return '/files';
@@ -59,7 +68,16 @@ class FileApiService extends ResourceApiService implements FileApiServiceInterfa
 
     public function usages(int|string $id): array
     {
-        return $this->apiClient->get('/files/' . $id . '/usages');
+        $hubResponse    = $this->apiClient->get('/files/' . $id . '/usages');
+        $domainResponse = $this->domainApiClient->get('/cms/files/' . $id . '/usages');
+
+        $hubItems    = is_array($hubResponse['data'] ?? null) ? (array) $hubResponse['data'] : [];
+        $domainItems = is_array($domainResponse['data'] ?? null) ? (array) $domainResponse['data'] : [];
+
+        /** @var array<string, mixed> $merged */
+        $merged = array_merge($hubItems, $domainItems);
+
+        return array_merge($hubResponse, ['data' => $merged]);
     }
 
 

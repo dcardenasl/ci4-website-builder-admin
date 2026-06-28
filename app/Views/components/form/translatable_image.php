@@ -33,10 +33,8 @@ $previewClass = (string) ($previewClass ?? 'h-32 w-full rounded-lg border border
 $copyTargetFileIdSelectors = is_array($copyTargetFileIdSelectors ?? null) ? $copyTargetFileIdSelectors : [];
 $copyTargetFileUrlSelectors = is_array($copyTargetFileUrlSelectors ?? null) ? $copyTargetFileUrlSelectors : [];
 
-if ($fileUrlValue === '' && $fileIdValue !== '') {
-    $fileUrlValue = site_url('files/' . (int) $fileIdValue . '/view');
-}
 ?>
+
 <div class="space-y-2 rounded-lg border border-gray-200 bg-white p-4"
      x-data="translatableFileField(<?= esc(json_encode($fileIdValue), 'attr') ?>, <?= esc(json_encode($fileUrlValue), 'attr') ?>, <?= esc(json_encode($accept), 'attr') ?>)">
     <input type="hidden"

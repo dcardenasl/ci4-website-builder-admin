@@ -162,10 +162,18 @@ class FileController extends BaseWebController
             $usageData = $usageData['data'];
         }
 
+        $usageData = array_map(fn (array $u) => array_merge($u, [
+            'edit_url' => $this->resolveEditUrl(
+                (string) ($u['resource'] ?? ''),
+                (int) ($u['resource_id'] ?? 0),
+                is_array($u['context'] ?? null) ? (array) $u['context'] : [],
+            ),
+        ]), array_values($usageData));
+
         return $this->render('files/show', [
             'title'  => lang('Files.detail_title'),
             'file'   => $this->extractData($info),
-            'usages' => array_values($usageData),
+            'usages' => $usageData,
         ]);
     }
 
@@ -456,6 +464,33 @@ class FileController extends BaseWebController
      * @param array<string, mixed> $params
      * @return array<string, mixed>
      */
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function resolveEditUrl(string $resource, int $resourceId, array $context = []): ?string
+    {
+        if ($resource === 'block_instances') {
+            $ownerType = (string) ($context['owner_type'] ?? '');
+            $ownerId   = (int) ($context['owner_id'] ?? 0);
+            if ($ownerType === 'page' && $ownerId > 0) {
+                return site_url('admin/cms/pages/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+            }
+            if ($ownerType === 'entry' && $ownerId > 0) {
+                return site_url('admin/cms/entries/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+            }
+            return null;
+        }
+
+        $map = [
+            'entries'  => fn (int $id): string => site_url('admin/cms/entries/' . $id . '/edit'),
+            'pages'    => fn (int $id): string => site_url('admin/cms/pages/' . $id . '/edit'),
+            'users'    => fn (int $id): string => site_url('admin/users/' . $id . '/edit'),
+            'settings' => fn (int $id): string => site_url('admin/cms/settings/' . $id . '/edit'),
+        ];
+
+        return isset($map[$resource]) ? $map[$resource]($resourceId) : null;
+    }
+
     private function kbToBytes(array $params): array
     {
         foreach (['size_min', 'size_max'] as $key) {
