@@ -28,6 +28,7 @@ return [
     'register_title'    => 'Registro',
     'register_subtitle' => 'Crea tu cuenta de administrador',
     'register_button'   => 'Registrarse',
+    'register_processing' => 'Creando tu cuenta...',
     'register_success'  => 'Cuenta creada. Por favor espera la aprobación del administrador.',
     'register_failed'   => 'No se pudo completar el registro.',
     'forgot_title'      => 'Recuperar contraseña',

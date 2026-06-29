@@ -28,6 +28,7 @@ return [
     'register_title'    => 'Register',
     'register_subtitle' => 'Create your administrator account',
     'register_button'   => 'Sign up',
+    'register_processing' => 'Creating your account...',
     'register_success'  => 'Account created. Please wait for administrator approval.',
     'register_failed'   => 'Could not complete registration.',
     'forgot_title'      => 'Forgot password',
