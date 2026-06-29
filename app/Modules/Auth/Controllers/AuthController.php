@@ -123,6 +123,7 @@ class AuthController extends BaseWebController
 
         $payload = $request->payload();
         $payload['client_base_url'] = $this->clientBaseUrl();
+        $payload['locale'] = $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es';
 
         $response = $this->safeApiCall(fn () => $this->authService->register($payload));
 
