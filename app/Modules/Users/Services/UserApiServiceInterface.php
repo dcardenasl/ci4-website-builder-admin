@@ -34,7 +34,7 @@ interface UserApiServiceInterface
     public function delete(int|string $id): array;
 
     /** @return ApiResponse */
-    public function approve(int|string $id): array;
+    public function approve(int|string $id, ?string $locale = null): array;
 
     /** @return ApiResponse */
     public function assignableRoles(): array;

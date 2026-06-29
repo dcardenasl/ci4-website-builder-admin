@@ -146,7 +146,8 @@ class UserController extends BaseWebController
 
     public function approve(string $id): RedirectResponse
     {
-        $response = $this->safeApiCall(fn () => $this->userService->approve($id));
+        $locale = $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es';
+        $response = $this->safeApiCall(fn () => $this->userService->approve($id, is_string($locale) ? $locale : 'es'));
 
         if (! $response['ok']) {
             return $this->failApi($response, lang('Users.approve_failed'), route_to('admin.users.show', $id), false);

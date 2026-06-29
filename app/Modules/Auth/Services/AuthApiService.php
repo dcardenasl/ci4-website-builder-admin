@@ -23,11 +23,14 @@ class AuthApiService extends BaseApiService implements AuthApiServiceInterface
         return $this->apiClient->publicPost('/auth/register', $payload);
     }
 
-    public function forgotPassword(string $email, ?string $clientBaseUrl = null): array
+    public function forgotPassword(string $email, ?string $clientBaseUrl = null, ?string $locale = null): array
     {
         $payload = ['email' => $email];
         if ($clientBaseUrl !== null && $clientBaseUrl !== '') {
             $payload['client_base_url'] = $clientBaseUrl;
+        }
+        if ($locale !== null && $locale !== '') {
+            $payload['locale'] = $locale;
         }
 
         return $this->apiClient->publicPost('/auth/forgot-password', $payload);

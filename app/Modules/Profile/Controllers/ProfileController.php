@@ -75,6 +75,7 @@ class ProfileController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->profileService->forgotPassword(
             $email,
             $this->clientBaseUrl(),
+            $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es'
         ));
 
         if (! $response['ok']) {
@@ -88,6 +89,7 @@ class ProfileController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->profileService->resendVerification([
             'client_base_url' => $this->clientBaseUrl(),
+            'locale' => $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es',
         ]));
 
         if (! $response['ok']) {

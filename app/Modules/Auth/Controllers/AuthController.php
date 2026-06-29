@@ -159,8 +159,13 @@ class AuthController extends BaseWebController
 
         $payload = $request->payload();
         $payload['client_base_url'] = $this->clientBaseUrl();
+        $payload['locale'] = $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es';
 
-        $response = $this->safeApiCall(fn () => $this->authService->forgotPassword($payload['email'], $payload['client_base_url']));
+        $response = $this->safeApiCall(fn () => $this->authService->forgotPassword(
+            $payload['email'],
+            $payload['client_base_url'],
+            $payload['locale']
+        ));
 
         if (! $response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Auth.forgot_failed')));

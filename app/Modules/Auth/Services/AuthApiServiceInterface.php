@@ -28,7 +28,7 @@ interface AuthApiServiceInterface
     public function register(array $payload): array;
 
     /** @return ApiResponse */
-    public function forgotPassword(string $email, ?string $clientBaseUrl = null): array;
+    public function forgotPassword(string $email, ?string $clientBaseUrl = null, ?string $locale = null): array;
 
     /**
      * @param array<string, mixed> $payload

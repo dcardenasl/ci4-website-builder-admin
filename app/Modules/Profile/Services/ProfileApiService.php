@@ -39,11 +39,12 @@ class ProfileApiService extends BaseApiService implements ProfileApiServiceInter
     /**
      * Request password reset email
      */
-    public function forgotPassword(string $email, string $clientBaseUrl): array
+    public function forgotPassword(string $email, string $clientBaseUrl, ?string $locale = null): array
     {
         return $this->apiClient->publicPost('/auth/forgot-password', [
             'email'            => $email,
             'client_base_url'  => $clientBaseUrl,
+            'locale'           => $locale ?? '',
         ]);
     }
 

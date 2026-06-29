@@ -1,5 +1,10 @@
-<form method="post" action="<?= site_url('register') ?>" class="space-y-4" x-data="{ password: '' }">
+<form method="post" action="<?= site_url('register') ?>"
+      class="relative space-y-4"
+      x-data="{ password: '', submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }"
+      @submit.prevent="startSubmit()"
+      :aria-busy="submitting.toString()">
     <?= csrf_field() ?>
+    <?= view('components/form/submitting_overlay', ['message' => lang('Auth.register_processing')]) ?>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
             <label class="block text-sm font-medium text-gray-700" for="first_name"><?= lang('Auth.first_name_label') ?></label>
@@ -39,7 +44,12 @@
         <?= render_field_error('password_confirmation') ?>
     </div>
 
-    <button type="submit" class="w-full rounded-lg bg-brand-600 text-white px-4 py-2 font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"><?= lang('Auth.register_button') ?></button>
+    <button type="submit"
+            :disabled="submitting"
+            class="w-full rounded-lg bg-brand-600 text-white px-4 py-2 font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60">
+        <span x-show="!submitting"><?= lang('Auth.register_button') ?></span>
+        <span x-show="submitting" style="display:none"><?= lang('Auth.register_processing') ?></span>
+    </button>
 </form>
 
 <div class="mt-4 text-sm text-gray-600 text-center">

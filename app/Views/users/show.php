@@ -78,9 +78,13 @@ $canModifyTarget = ! empty($user) ? can_act_on_user($user) : false;
 
     <?php ob_start(); ?>
     <?php if (($user['status'] ?? '') === 'pending_approval'): ?>
-        <form method="post" action="<?= route_to('admin.users.approve', $uid) ?>">
+        <form method="post" action="<?= route_to('admin.users.approve', $uid) ?>" x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }" @submit.prevent="startSubmit()">
             <?= csrf_field() ?>
-            <button type="submit" class="w-full rounded-lg bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"><?= lang('Users.approve') ?></button>
+            <button type="submit" :disabled="submitting" class="w-full rounded-lg bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
+                <span x-show="!submitting"><?= lang('Users.approve') ?></span>
+                <span x-show="submitting" style="display:none"><?= lang('Users.approving') ?></span>
+            </button>
+            <?= view('components/form/submitting_overlay', ['message' => lang('Users.approving')]) ?>
         </form>
     <?php endif; ?>
     <?php if ($canModifyTarget): ?>

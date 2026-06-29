@@ -38,9 +38,14 @@ class UserApiService extends ResourceApiService implements UserApiServiceInterfa
         return $response;
     }
 
-    public function approve(int|string $id): array
+    public function approve(int|string $id, ?string $locale = null): array
     {
-        $response = $this->apiClient->post('/users/' . $id . '/approve');
+        $payload = [];
+        if ($locale !== null && $locale !== '') {
+            $payload['locale'] = $locale;
+        }
+
+        $response = $this->apiClient->post('/users/' . $id . '/approve', $payload);
         $this->invalidateLookupsOnSuccess($response);
 
         return $response;

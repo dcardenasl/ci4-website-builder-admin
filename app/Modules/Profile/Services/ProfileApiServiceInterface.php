@@ -19,7 +19,7 @@ interface ProfileApiServiceInterface
     public function update(string $userId, array $payload): array;
 
     /** @return ApiResponse */
-    public function forgotPassword(string $email, string $clientBaseUrl): array;
+    public function forgotPassword(string $email, string $clientBaseUrl, ?string $locale = null): array;
 
     /**
      * @param array<string, mixed> $payload
