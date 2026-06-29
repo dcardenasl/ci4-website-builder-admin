@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Locale in user registration** — automatically include the current application locale in the registration payload to ensure new users inherit the language preference from their signup context
 - **Setting connections management UI** — enhanced settings forms with support for `input_type` (e.g. text, textarea, select, json), `options_json` for custom field options, `is_required` and `is_readonly` flags, and `ui_meta` for rich field metadata; added SettingConnectionController integration for managing setting relationships
 - **File usage tracking with multi-source API integration** — enhanced FileApiService to aggregate file usages from both Hub and Domain APIs, added `resolveEditUrl()` in FileController to generate contextual edit links for each usage (pages, entries, blocks, users, settings), improving file lifecycle visibility in the admin UI
 - **Wizard UI refactor with modular partials and block CRUD** — decomposed wizard view into 8 reusable partial components (block_catalog, block_edit, page_layout, menu_edit, entry_wizard, etc.), added `createBlock()` and `deleteBlock()` controller methods, enhanced block type metadata enrichment from Domain API
