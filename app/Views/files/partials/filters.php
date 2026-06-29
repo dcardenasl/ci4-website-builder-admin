@@ -1,5 +1,6 @@
 <?php
 /** @var array<int, array{value:string, label:string}> $categoryOptions */
+/** @var bool|null $showCategoryFilter */
 $categoryOptions  = $categoryOptions ?? [];
 $currentCategory  = (string) request()->getGet('category');
 $currentFrom      = (string) request()->getGet('date_from');
@@ -13,17 +14,19 @@ $currentSizeMax   = (string) request()->getGet('size_max');
         <input type="text" name="search" value="<?= esc((string) request()->getGet('search')) ?>" placeholder="<?= lang('Files.search_placeholder') ?>"
             class="<?= esc(filter_input_class()) ?>" data-table-debounce="350">
     </div>
-    <div>
-        <label class="<?= esc(filter_label_class()) ?>"><?= lang('Files.category') ?></label>
-        <select name="category" class="<?= esc(filter_input_class()) ?>">
-            <?php foreach ($categoryOptions as $opt): ?>
-                <?php $value = (string) ($opt['value'] ?? ''); ?>
-                <option value="<?= esc($value) ?>" <?= $value === $currentCategory ? 'selected' : '' ?>>
-                    <?= esc((string) ($opt['label'] ?? $value)) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
+    <?php if (($showCategoryFilter ?? false) === true): ?>
+        <div>
+            <label class="<?= esc(filter_label_class()) ?>"><?= lang('Files.category') ?></label>
+            <select name="category" class="<?= esc(filter_input_class()) ?>">
+                <?php foreach ($categoryOptions as $opt): ?>
+                    <?php $value = (string) ($opt['value'] ?? ''); ?>
+                    <option value="<?= esc($value) ?>" <?= $value === $currentCategory ? 'selected' : '' ?>>
+                        <?= esc((string) ($opt['label'] ?? $value)) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    <?php endif; ?>
     <?= view('layouts/partials/filter_limit', ['limitOptions' => $limitOptions ?? [10, 25, 50, 100]]) ?>
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('Files.filter_date_from') ?></label>

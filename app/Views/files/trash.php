@@ -44,8 +44,9 @@ $csrfHash = csrf_hash();
         'filterDefaults'     => ['limit' => '25'],
         'fieldsView'         => 'files/partials/filters',
         'fieldsData'         => [
-            'limitOptions'    => $limitOptions ?? [10, 25, 50, 100],
-            'categoryOptions' => $categoryOptions ?? [],
+            'limitOptions'       => $limitOptions ?? [10, 25, 50, 100],
+            'categoryOptions'    => $categoryOptions ?? [],
+            'showCategoryFilter' => true,
         ],
         'submitLabel' => lang('App.search'),
     ]) ?>

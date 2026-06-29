@@ -10,7 +10,7 @@
 
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('Menus.menus_filter_is_active') ?></label>
-        <select name="is_active" class="<?= esc(filter_input_class()) ?>" data-table-filter>
+        <select name="is_active" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= esc(lang('Menus.menus_filter_all_statuses')) ?></option>
             <option value="1" <?= request()->getGet('is_active') === '1' ? 'selected' : '' ?>><?= esc(lang('Menus.field_is_active_on')) ?></option>
             <option value="0" <?= request()->getGet('is_active') === '0' ? 'selected' : '' ?>><?= esc(lang('Menus.field_is_active_off')) ?></option>

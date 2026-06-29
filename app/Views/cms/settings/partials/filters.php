@@ -10,7 +10,7 @@
 
     <div>
         <label class="<?= esc(filter_label_class()) ?>"><?= lang('Settings.field_setting_group') ?></label>
-        <select name="setting_group" class="<?= esc(filter_input_class()) ?>" data-table-filter>
+        <select name="setting_group" class="<?= esc(filter_input_class()) ?>">
             <option value=""><?= lang('BlockTypes.filter_all_groups') ?></option>
             <option value="general" <?= request()->getGet('setting_group') === 'general' ? 'selected' : '' ?>><?= lang('BlockTypes.group_general') ?></option>
             <option value="seo" <?= request()->getGet('setting_group') === 'seo' ? 'selected' : '' ?>><?= lang('BlockTypes.group_seo') ?></option>
