@@ -4,7 +4,7 @@
 > Historial de completadas: ver `TASKS_ARCHIVE.md`.
 > Cross-repo: ver `../TASKS.md`.
 > Plan detallado CMS admin: ver [`../docs/cms_integration_plan.md`](../docs/cms_integration_plan.md).
-> Última actualización: 2026-06-12 (CMS Integration admin modules planificados — Fases A/B/C post-domain)
+> Última actualización: 2026-06-29 (auditoría exhaustiva de filtros y buscador documentada)
 
 ---
 
@@ -16,7 +16,15 @@
 
 ## 🟡 Próximo (ordenado por prioridad)
 
-*(vacío)*
+- **[AUD-001] Revisar y cerrar los hallazgos de la auditoría de filtros/buscador del admin**
+  - Referencia: [`../docs/audits/2026-06-29-admin-filters-search-audit.md`](../docs/audits/2026-06-29-admin-filters-search-audit.md)
+  - Alcance:
+    - decidir si `data-table-filter` se elimina o se implementa como auto-submit real;
+    - unificar o justificar la duplicidad de categoría en `files` / `files/trash`;
+    - normalizar o documentar las excepciones (`analytics`, `metrics`, `form-submissions`, `translations/audit`, `admin/universal`).
+  - Criterio de cierre:
+    - cada excepción queda corregida o documentada;
+    - la próxima sesión arranca desde este ítem y no desde la nota de auditoría.
 
 ---
 
