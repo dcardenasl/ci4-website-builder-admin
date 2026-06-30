@@ -137,7 +137,7 @@ Key rules:
 
 Key normalization:
 
-- `payload()` returns `visibility` with default `private`.
+- `payload()` is empty for file upload; visibility is resolved centrally by the API policy layer.
 - Dynamic error messages that include the maximum allowed file size in MB.
 
 ## How to Add a New FormRequest

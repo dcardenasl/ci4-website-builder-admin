@@ -110,12 +110,15 @@ final class FileUploadFlowTest extends CIUnitTestCase
                 $this->callback(function ($files) use ($tmpFile) {
                     return isset($files['file']) && $files['file']['path'] === $tmpFile && $files['file']['filename'] === 'test.txt';
                 }),
-                ['visibility' => 'private']
+                []
             )
             ->willReturn($this->apiOkResponse(['id' => 1], 201));
 
-        $service = new FileApiService($mockClient);
-        $result = $service->upload('file', $tmpFile, 'test.txt', 'text/plain', ['visibility' => 'private']);
+        $mockDomainClient = $this->createMock(\App\Libraries\DomainApiClientInterface::class);
+        $mockDomainClient->method('get')->willReturn($this->apiOkResponse([]));
+
+        $service = new FileApiService($mockClient, $mockDomainClient);
+        $result = $service->upload('file', $tmpFile, 'test.txt', 'text/plain', []);
 
         $this->assertTrue($result['ok']);
         @unlink($tmpFile);

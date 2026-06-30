@@ -27,13 +27,9 @@ class FileController extends BaseWebController
     public function index(): string
     {
         return $this->render('files/index', [
-            'title'             => lang('Files.title'),
-            'visibilityOptions' => CatalogOptions::options([], 'files.visibility', [
-                ['value' => 'private', 'label' => lang('Files.private')],
-                ['value' => 'public',  'label' => lang('Files.public')],
-            ]),
-            'limitOptions'      => CatalogOptions::limitOptions([]),
-            'categoryOptions'   => $this->categoryOptions(),
+            'title'          => lang('Files.title'),
+            'limitOptions'   => CatalogOptions::limitOptions([]),
+            'categoryOptions'=> $this->categoryOptions(),
         ]);
     }
 

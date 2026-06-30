@@ -33,7 +33,7 @@ final class FileUploadRequestTest extends CIUnitTestCase
         $this->assertSame('test.png', $data['file']);
     }
 
-    public function testPayloadDefaultsVisibilityToPrivateWhenEmpty(): void
+    public function testPayloadIsEmptyWhenNoOptionalFieldsAreProvided(): void
     {
         $request = service('request');
         $request->setGlobal('post', []);
@@ -41,7 +41,7 @@ final class FileUploadRequestTest extends CIUnitTestCase
         $formRequest = new FileUploadRequest($request, $this->createValidationMock());
         $payload = $formRequest->payload();
 
-        $this->assertSame('private', $payload['visibility']);
+        $this->assertSame([], $payload);
     }
 
     public function testValidateFailsWhenExtensionIsNotAllowed(): void

@@ -103,9 +103,7 @@ class FileUploadRequest extends BaseFormRequest
 
     public function payload(): array
     {
-        return [
-            'visibility' => 'private',
-        ];
+        return [];
     }
 
     /**
