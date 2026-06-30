@@ -4,6 +4,7 @@
     x-data="remoteTable({
         apiUrl: '<?= route_to('admin.cms.languages.data') ?>',
         pageUrl: '<?= route_to('admin.cms.languages') ?>',
+        defaultSort: '-created_at',
         routes: {
             showBase: '<?= route_to('admin.cms.languages') ?>',
             editBase: '<?= route_to('admin.cms.languages') ?>'

@@ -35,6 +35,7 @@ $currentCategory = (string) request()->getGet('category');
     }, remoteTable({
         apiUrl: '<?= site_url('files/data') ?>',
         pageUrl: '<?= route_to('files') ?>',
+        defaultSort: '-uploaded_at',
         routes: {
             downloadBase: '<?= route_to('files') ?>',
             deleteBase: '<?= route_to('files') ?>'

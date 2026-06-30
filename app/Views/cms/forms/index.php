@@ -5,6 +5,7 @@
         ...remoteTable({
             apiUrl: '<?= route_to('admin.cms.forms.data') ?>',
             pageUrl: '<?= route_to('admin.cms.forms') ?>',
+            defaultSort: '-created_at',
             routes: {
                 showBase: '<?= route_to('admin.cms.forms') ?>',
                 editBase: '<?= route_to('admin.cms.forms') ?>'

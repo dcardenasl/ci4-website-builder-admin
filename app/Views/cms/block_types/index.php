@@ -4,6 +4,7 @@
     x-data="remoteTable({
         apiUrl: '<?= route_to('admin.cms.block_types.data') ?>',
         pageUrl: '<?= route_to('admin.cms.block_types') ?>',
+        defaultSort: '-created_at',
         routes: {
             showBase: '<?= route_to('admin.cms.block_types') ?>',
             editBase: '<?= route_to('admin.cms.block_types') ?>'

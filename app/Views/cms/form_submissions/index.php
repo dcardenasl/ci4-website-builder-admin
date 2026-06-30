@@ -52,6 +52,7 @@ $dataUrl = route_to('admin.cms.form_submissions.data') . ($activeStatus !== '' ?
     x-data="remoteTable({
         apiUrl: '<?= esc($dataUrl) ?>',
         pageUrl: '<?= route_to('admin.cms.form_submissions') ?>',
+        defaultSort: '-created_at',
         routes: { showBase: '<?= route_to('admin.cms.form_submissions') ?>' },
         limitOptions: <?= esc(json_encode(array_map('strval', $limitOptions ?? [10, 25, 50]))) ?>
     })" x-init="init()">

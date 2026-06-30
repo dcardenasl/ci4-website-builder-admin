@@ -31,6 +31,7 @@ $csrfHash = csrf_hash();
     }, remoteTable({
         apiUrl: '<?= site_url('files/trash/data') ?>',
         pageUrl: '<?= route_to('files.trash') ?>',
+        defaultSort: '-uploaded_at',
         routes: {},
         csrf: { name: '<?= esc($csrfName) ?>', hash: '<?= esc($csrfHash) ?>' },
         limitOptions: <?= esc(json_encode(array_map('strval', $limitOptions ?? [10, 25, 50, 100]))) ?>

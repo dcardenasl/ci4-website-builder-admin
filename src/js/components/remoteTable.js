@@ -15,6 +15,7 @@ export const remoteTableFactory = (config = {}) => {
         mode: config.mode || 'generic',
         routes: config.routes || {},
         csrf: config.csrf || { name: '', hash: '' },
+        defaultSort: typeof config.defaultSort === 'string' ? config.defaultSort : '',
         limitOptions: Array.isArray(config.limitOptions) && config.limitOptions.length > 0 ? config.limitOptions : ['10', '25', '50', '100'],
         confirmDelete: config.confirmDelete || text.confirm,
         loading: false,
@@ -37,6 +38,12 @@ export const remoteTableFactory = (config = {}) => {
             this.loadFilterConfig();
             const fromUrl = queryToObject(window.location.search);
             this.query = { ...this.defaultFilterQuery(), ...fromUrl };
+            if (typeof this.query.sort !== 'string' || this.query.sort.trim() === '') {
+                const defaultSort = String(this.defaultSort || '').trim();
+                if (defaultSort !== '') {
+                    this.query.sort = defaultSort;
+                }
+            }
             this.applyQueryToForm();
             this.bindFormEvents();
             this.fetchData(false);

@@ -4,6 +4,7 @@
     x-data="remoteTable({
         apiUrl: '<?= route_to('admin.cms.redirects.data') ?>',
         pageUrl: '<?= route_to('admin.cms.redirects') ?>',
+        defaultSort: '-created_at',
         routes: {
             showBase: '<?= route_to('admin.cms.redirects') ?>',
             editBase: '<?= route_to('admin.cms.redirects') ?>'

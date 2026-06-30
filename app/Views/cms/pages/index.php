@@ -24,6 +24,7 @@ foreach ($languages ?? [] as $key => $language) {
     x-data="remoteTable({
         apiUrl: '<?= route_to('admin.cms.pages.data') ?>',
         pageUrl: '<?= route_to('admin.cms.pages') ?>',
+        defaultSort: '-created_at',
         routes: {
             showBase: '<?= route_to('admin.cms.pages') ?>',
             editBase: '<?= route_to('admin.cms.pages') ?>'
