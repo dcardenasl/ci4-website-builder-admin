@@ -14,6 +14,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('wizard/config', '\App\Modules\Cms\Controllers\WizardController::config', ['as' => 'admin.cms.wizard.config',  'filter' => 'permission:cms.entries.read']);
     $routes->post('wizard/publish', '\App\Modules\Cms\Controllers\WizardController::publish', ['as' => 'admin.cms.wizard.publish', 'filter' => 'permission:cms.entries.write']);
     $routes->post('wizard/upload', '\App\Modules\Cms\Controllers\WizardController::uploadImage', ['as' => 'admin.cms.wizard.upload',  'filter' => 'permission:cms.entries.write']);
+    $routes->get('wizard/structure', '\App\Modules\Cms\Controllers\StructureWizardController::index', ['as' => 'admin.cms.wizard.structure']);
     // Wizard — Edit page (WIZ-007)
     $routes->get('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::pageBlocks/$1', ['as' => 'admin.cms.wizard.page-blocks',       'filter' => 'permission:cms.pages.read']);
     $routes->post('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::createBlock/$1', ['as' => 'admin.cms.wizard.create-block',      'filter' => 'permission:cms.pages.write']);

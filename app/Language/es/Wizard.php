@@ -5,7 +5,9 @@ declare(strict_types=1);
 return [
     // General
     'title'                  => 'Asistente de contenido',
-    'sidebar_label'          => 'Asistente',
+    'structure_title'        => 'Asistente de estructura',
+    'sidebar_label'          => 'Asistente de contenido',
+    'structure_sidebar_label'=> 'Asistente de estructura',
     'loading'                => 'Cargando...',
     'error_load'             => 'No se pudo cargar el asistente. Intenta de nuevo.',
     'status'                 => 'Estado',
@@ -21,6 +23,18 @@ return [
     'edit_page_desc'         => 'Modifica el contenido de las páginas del sitio',
     'edit_menu'              => 'Cambiar el menú',
     'edit_menu_desc'         => 'Agregar, quitar o reordenar ítems',
+    'structure_heading'      => '¿Qué quieres construir hoy?',
+    'structure_intro'        => 'Crea la base del sitio con flujos guiados y sin tocar el CRUD experto.',
+    'create_page'            => 'Crear página',
+    'create_page_desc'       => 'Inicio, Nosotros, Contacto y páginas anidadas',
+    'create_collection'      => 'Crear colección',
+    'create_collection_desc' => 'Blog, portafolio, noticias, servicios y más',
+    'create_menu'            => 'Crear menú',
+    'create_menu_desc'       => 'Navegación principal, footer o menús secundarios',
+    'create_redirect'        => 'Crear redirección',
+    'create_redirect_desc'   => 'Reglas 301/302 y cambios de URL',
+    'go_structure_panel'     => 'Abrir módulo de estructura',
+    'wizard_structure_hint'  => 'Usa el asistente para crear una base mínima y luego continúa en el CRUD completo si necesitas ajustes avanzados.',
 
     // Draft banner
     'draft_banner_title'     => '📝 Tienes un borrador guardado',
@@ -128,6 +142,8 @@ return [
     'default_step3_title'    => 'Descripción',
     'default_step3_hint'     => 'Un resumen breve.',
     'default_field_excerpt'  => 'Descripción',
+    'collection_wizard_intro' => 'Crea una colección mínima y lista para usarse en el wizard de contenido.',
+    'collection_wizard_minimum' => 'Este flujo guarda una colección válida con traducciones base, prefijo URL y flags coherentes.',
 
     // Errors (JS-side — must be injected from PHP)
     'error_no_pages'         => 'No hay páginas disponibles.',

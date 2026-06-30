@@ -5,7 +5,9 @@ declare(strict_types=1);
 return [
     // General
     'title'                  => 'Content assistant',
-    'sidebar_label'          => 'Assistant',
+    'structure_title'        => 'Structure assistant',
+    'sidebar_label'          => 'Content assistant',
+    'structure_sidebar_label'=> 'Structure assistant',
     'loading'                => 'Loading...',
     'error_load'             => 'Could not load the assistant. Please try again.',
     'status'                 => 'Status',
@@ -21,6 +23,18 @@ return [
     'edit_page_desc'         => 'Modify the content of site pages',
     'edit_menu'              => 'Change the menu',
     'edit_menu_desc'         => 'Add, remove or reorder items',
+    'structure_heading'      => 'What do you want to build today?',
+    'structure_intro'        => 'Create the site foundation with guided flows and without touching the expert CRUDs.',
+    'create_page'            => 'Create page',
+    'create_page_desc'       => 'Home, About, Contact and nested pages',
+    'create_collection'      => 'Create collection',
+    'create_collection_desc' => 'Blog, portfolio, news, services and more',
+    'create_menu'            => 'Create menu',
+    'create_menu_desc'       => 'Main nav, footer or secondary menus',
+    'create_redirect'        => 'Create redirect',
+    'create_redirect_desc'   => '301/302 rules and URL changes',
+    'go_structure_panel'     => 'Open structure module',
+    'wizard_structure_hint'  => 'Use the assistant to create a minimum viable foundation, then continue in the full CRUD if you need advanced settings.',
 
     // Draft banner
     'draft_banner_title'     => '📝 You have a saved draft',
@@ -128,6 +142,8 @@ return [
     'default_step3_title'    => 'Description',
     'default_step3_hint'     => 'A brief summary.',
     'default_field_excerpt'  => 'Description',
+    'collection_wizard_intro' => 'Create a minimal collection ready to be used in the content wizard.',
+    'collection_wizard_minimum' => 'This flow saves a valid collection with base translations, URL prefix and coherent flags.',
 
     // Errors (JS-side — must be injected from PHP)
     'error_no_pages'         => 'No pages available.',

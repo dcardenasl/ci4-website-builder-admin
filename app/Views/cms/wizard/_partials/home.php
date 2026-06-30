@@ -36,5 +36,11 @@
             <span class="font-semibold text-gray-800"><?= lang('Wizard.edit_menu') ?></span>
             <span class="text-xs text-gray-500"><?= lang('Wizard.edit_menu_desc') ?></span>
         </button>
+        <a href="<?= route_to('admin.cms.wizard.structure') ?>"
+           class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white p-6 text-center hover:border-brand-400 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <span class="text-4xl">🏗️</span>
+            <span class="font-semibold text-gray-800"><?= lang('Wizard.structure_sidebar_label') ?></span>
+            <span class="text-xs text-gray-500"><?= lang('Wizard.wizard_structure_hint') ?></span>
+        </a>
     </div>
 </div>
