@@ -173,13 +173,13 @@ if ($blockTypesJson === false) {
     <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_catalog_title') ?? 'Block catalog') ?></h5>
+                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_catalog_title')) ?></h5>
                 <p class="mt-1 text-xs text-gray-500">
-                    <?= esc(lang('Collections.block_template_builder_catalog_help') ?? 'Pick blocks from the catalog and build the collection template.') ?>
+                    <?= esc(lang('Collections.block_template_builder_catalog_help')) ?>
                 </p>
             </div>
             <div class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700">
-                <span><?= esc(lang('Collections.block_template_builder_count') ?? 'Template blocks') ?>:</span>
+                <span><?= esc(lang('Collections.block_template_builder_count')) ?>:</span>
                 <span x-text="rows.length"></span>
             </div>
         </div>
@@ -195,29 +195,29 @@ if ($blockTypesJson === false) {
                     <span class="text-xs font-semibold text-gray-800" x-text="bt.name"></span>
                     <code class="text-[10px] font-mono text-gray-400" x-text="bt.block_key"></code>
                     <span class="text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100">
-                        <?= esc(lang('Collections.block_template_builder_add_block') ?? 'Add to template') ?>
+                        <?= esc(lang('Collections.block_template_builder_add_block')) ?>
                     </span>
                 </button>
             </template>
         </div>
 
         <div x-show="blockTypes.length === 0" x-cloak class="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
-            <?= esc(lang('Collections.block_template_builder_no_blocks') ?? 'No active block types are available.') ?>
+            <?= esc(lang('Collections.block_template_builder_no_blocks')) ?>
         </div>
     </section>
 
     <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" x-ref="templateList">
         <div class="flex items-start justify-between gap-3">
             <div>
-                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title') ?? 'Template structure') ?></h5>
+                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title')) ?></h5>
                 <p class="mt-1 text-xs text-gray-500">
-                    <?= esc(lang('Collections.block_template_builder_template_help') ?? 'Use the template rows to define order, labels, defaults, and lock state.') ?>
+                    <?= esc(lang('Collections.block_template_builder_template_help')) ?>
                 </p>
             </div>
             <button type="button"
                 @click="sync()"
                 class="<?= esc(action_button_class()) ?> px-3 py-1.5 text-xs font-medium">
-                <?= esc(lang('App.save') ?? 'Save') ?>
+                <?= esc(lang('App.save')) ?>
             </button>
         </div>
 
@@ -237,14 +237,14 @@ if ($blockTypesJson === false) {
                                 @click="moveBlock(index, -1)"
                                 :disabled="index === 0"
                                 class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_up') ?? 'Move up', 'js') ?>' : ''">
+                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_up'), 'js') ?>' : ''">
                                 ↑
                             </button>
                             <button type="button"
                                 @click="moveBlock(index, 1)"
                                 :disabled="index === rows.length - 1"
                                 class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_down') ?? 'Move down', 'js') ?>' : ''">
+                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_down'), 'js') ?>' : ''">
                                 ↓
                             </button>
                             <button type="button"
@@ -257,25 +257,25 @@ if ($blockTypesJson === false) {
 
                     <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                         <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_label') ?? 'Label') ?></label>
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_label')) ?></label>
                             <input type="text"
                                 x-model="row.label"
                                 @input="sync()"
                                 class="<?= esc(input_class('block_template')) ?>"
-                                placeholder="<?= esc(lang('Collections.block_template_builder_block_label_placeholder') ?? 'Public label shown in admin') ?>">
+                                placeholder="<?= esc(lang('Collections.block_template_builder_block_label_placeholder')) ?>">
                         </div>
 
                         <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_help') ?? 'Help text') ?></label>
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_help')) ?></label>
                             <input type="text"
                                 x-model="row.help_text"
                                 @input="sync()"
                                 class="<?= esc(input_class('block_template')) ?>"
-                                placeholder="<?= esc(lang('Collections.block_template_builder_block_help_placeholder') ?? 'Optional guidance for editors') ?>">
+                                placeholder="<?= esc(lang('Collections.block_template_builder_block_help_placeholder')) ?>">
                         </div>
 
                         <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_key') ?? 'Block type') ?></label>
+                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_key')) ?></label>
                             <select x-model="row.block_key" @change="onBlockKeyChanged(index)" class="<?= esc(input_class('block_template')) ?>">
                                 <option value=""><?= esc(lang('App.select')) ?></option>
                                 <template x-for="bt in blockTypes" :key="bt.block_key">
@@ -287,11 +287,11 @@ if ($blockTypesJson === false) {
                         <div class="grid grid-cols-2 gap-3">
                             <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
                                 <input type="checkbox" x-model="row.required" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                                <?= esc(lang('Collections.block_template_builder_required') ?? 'Required') ?>
+                                <?= esc(lang('Collections.block_template_builder_required')) ?>
                             </label>
                             <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
                                 <input type="checkbox" x-model="row.locked" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                                <?= esc(lang('Collections.block_template_builder_locked') ?? 'Locked') ?>
+                                <?= esc(lang('Collections.block_template_builder_locked')) ?>
                             </label>
                         </div>
                     </div>
@@ -299,11 +299,11 @@ if ($blockTypesJson === false) {
                     <div class="mt-4 rounded-lg border border-gray-200 bg-white p-3">
                         <div class="flex items-center justify-between gap-2">
                             <div>
-                                <h6 class="text-xs font-semibold text-gray-700"><?= esc(lang('Collections.block_template_builder_defaults_title') ?? 'Default values') ?></h6>
-                                <p class="mt-0.5 text-[11px] text-gray-500"><?= esc(lang('Collections.block_template_builder_defaults_help') ?? 'Key/value pairs used to seed block_config.') ?></p>
+                                <h6 class="text-xs font-semibold text-gray-700"><?= esc(lang('Collections.block_template_builder_defaults_title')) ?></h6>
+                                <p class="mt-0.5 text-[11px] text-gray-500"><?= esc(lang('Collections.block_template_builder_defaults_help')) ?></p>
                             </div>
                             <button type="button" @click="addDefault(index)" class="rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-700 transition-colors hover:bg-brand-100">
-                                <?= esc(lang('Collections.block_template_builder_add_default') ?? 'Add value') ?>
+                                <?= esc(lang('Collections.block_template_builder_add_default')) ?>
                             </button>
                         </div>
 
@@ -314,12 +314,12 @@ if ($blockTypesJson === false) {
                                         x-model="defaultRow.key"
                                         @input="sync()"
                                         class="<?= esc(input_class('block_template')) ?>"
-                                        placeholder="<?= esc(lang('Collections.block_template_builder_default_key_placeholder') ?? 'config_key') ?>">
+                                        placeholder="<?= esc(lang('Collections.block_template_builder_default_key_placeholder')) ?>">
 
                                     <select x-model="defaultRow.type" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
-                                        <option value="string">string</option>
-                                        <option value="number">number</option>
-                                        <option value="boolean">boolean</option>
+                                        <option value="string"><?= esc(lang('Collections.block_template_builder_type_string')) ?></option>
+                                        <option value="number"><?= esc(lang('Collections.block_template_builder_type_number')) ?></option>
+                                        <option value="boolean"><?= esc(lang('Collections.block_template_builder_type_boolean')) ?></option>
                                     </select>
 
                                     <template x-if="defaultRow.type === 'boolean'">
@@ -342,7 +342,7 @@ if ($blockTypesJson === false) {
                                             x-model="defaultRow.value"
                                             @input="sync()"
                                             class="<?= esc(input_class('block_template')) ?>"
-                                            placeholder="<?= esc(lang('Collections.block_template_builder_default_value_placeholder') ?? 'Default value') ?>">
+                                            placeholder="<?= esc(lang('Collections.block_template_builder_default_value_placeholder')) ?>">
                                     </template>
 
                                     <button type="button"
@@ -354,7 +354,7 @@ if ($blockTypesJson === false) {
                             </template>
 
                             <p x-show="row.defaults.length === 0" x-cloak class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-400">
-                                <?= esc(lang('Collections.block_template_builder_defaults_empty') ?? 'No default values yet.') ?>
+                                <?= esc(lang('Collections.block_template_builder_defaults_empty')) ?>
                             </p>
                         </div>
                     </div>
@@ -362,14 +362,14 @@ if ($blockTypesJson === false) {
             </template>
 
             <p x-show="rows.length === 0" x-cloak class="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-sm text-gray-500">
-                <?= esc(lang('Collections.block_template_builder_empty') ?? 'Pick blocks from the catalog to start building the template.') ?>
+                <?= esc(lang('Collections.block_template_builder_empty')) ?>
             </p>
         </div>
     </section>
 
     <details class="rounded-xl border border-gray-200 bg-white p-4">
         <summary class="cursor-pointer select-none text-sm font-medium text-gray-700">
-            <?= esc(lang('Collections.block_template_builder_preview_json') ?? 'Preview JSON') ?>
+            <?= esc(lang('Collections.block_template_builder_preview_json')) ?>
         </summary>
         <pre class="mt-3 max-h-80 overflow-auto rounded-lg bg-gray-950 p-4 text-xs leading-relaxed text-gray-100" x-text="json"></pre>
     </details>
@@ -426,7 +426,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate) {
 
         blockTypeLabel(blockKey) {
             const item = this.blockTypes.find((bt) => bt.block_key === blockKey);
-            return item ? item.name : (blockKey || 'Block');
+            return item ? item.name : (blockKey || <?= json_encode(lang('Collections.block_template_builder_block_fallback')) ?>);
         },
 
         blockTypeByKey(blockKey) {

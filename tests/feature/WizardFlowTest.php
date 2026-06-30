@@ -43,6 +43,28 @@ final class WizardFlowTest extends CIUnitTestCase
         $result->assertSee('Reintentar');
     }
 
+    public function testStructureWizardIndexRendersForAdmin(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user' => ['permissions' => [
+                'cms.entries.read',
+                'cms.collections.read',
+                'cms.collections.write',
+                'cms.pages.read',
+                'cms.pages.write',
+                'cms.menus.read',
+                'cms.menus.write',
+            ]],
+        ])->get('/admin/cms/wizard/structure');
+
+        $result->assertStatus(200);
+        $result->assertSee('¿Qué quieres construir hoy?');
+        $result->assertSee('Crear colección');
+        $result->assertSee('Crear menú');
+    }
+
     public function testConfigUnwrapsDomainPayload(): void
     {
         $mock = $this->createMock(DomainApiClientInterface::class);

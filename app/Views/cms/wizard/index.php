@@ -97,6 +97,9 @@ $csrfToken ??= csrf_hash();
         error_upload:          <?= json_encode(lang('Wizard.error_upload')) ?>,
         error_publish:         <?= json_encode(lang('Wizard.error_publish')) ?>,
         error_load:            <?= json_encode(lang('Wizard.error_load')) ?>,
+        error_block_type_missing: <?= json_encode(lang('Wizard.error_block_type_missing')) ?>,
+        error_block_delete:    <?= json_encode(lang('Wizard.error_block_delete')) ?>,
+        error_upload_failed:   <?= json_encode(lang('Wizard.error_upload_failed')) ?>,
         add_child:             <?= json_encode(lang('Wizard.add_child')) ?>,
         add_block:             <?= json_encode(lang('Wizard.add_block')) ?>,
         block_fallback:        <?= json_encode(lang('Wizard.block_fallback')) ?>,
@@ -584,7 +587,7 @@ $csrfToken ??= csrf_hash();
                     fd.append('file', file);
                     const res  = await adminFetch(WIZARD_BASE + '/upload', { method: 'POST', body: fd });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data?.message ?? 'Upload failed');
+                    if (!res.ok) throw new Error(data?.message ?? STRINGS.error_upload_failed);
                     const fileData = data?.file ?? data;
                     this.formData[field.key + '_id']  = fileData?.id ?? null;
                     this.formData[field.key + '_url'] = fileData?.url ?? fileData?.variants?.md?.url ?? null;
@@ -605,7 +608,7 @@ $csrfToken ??= csrf_hash();
                     fd.append('file', file);
                     const res  = await adminFetch(WIZARD_BASE + '/upload', { method: 'POST', body: fd });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data?.message ?? 'Upload failed');
+                    if (!res.ok) throw new Error(data?.message ?? STRINGS.error_upload_failed);
                     const fileData = data?.file ?? data;
                     this.blockEditData[field.key + '_file_id'] = fileData?.id ?? null;
                     this.blockEditData[field.key + '_url']     = fileData?.url ?? fileData?.variants?.md?.url ?? null;
@@ -840,7 +843,7 @@ $csrfToken ??= csrf_hash();
                 this.blockSaveError = '';
                 try {
                     const typeInfo = this.blockTypeInfo(this.editBlockTypeKey);
-                    if (!typeInfo?.id) throw new Error('Block type ID not found');
+                    if (!typeInfo?.id) throw new Error(STRINGS.error_block_type_missing);
 
                     const payload = {
                         block_id:           typeInfo.id,
@@ -892,12 +895,12 @@ $csrfToken ??= csrf_hash();
                     );
                     if (!res.ok) {
                         const data = await res.json().catch(() => ({}));
-                        this.pageBlocksError = data?.message ?? 'Error al eliminar el bloque';
+                        this.pageBlocksError = data?.message ?? STRINGS.error_block_delete;
                         return;
                     }
                     await this.refreshPageBlocks();
                 } catch (_) {
-                    this.pageBlocksError = 'Error al eliminar el bloque';
+                    this.pageBlocksError = STRINGS.error_block_delete;
                 }
             },
 

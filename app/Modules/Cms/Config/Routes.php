@@ -15,6 +15,10 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('wizard/publish', '\App\Modules\Cms\Controllers\WizardController::publish', ['as' => 'admin.cms.wizard.publish', 'filter' => 'permission:cms.entries.write']);
     $routes->post('wizard/upload', '\App\Modules\Cms\Controllers\WizardController::uploadImage', ['as' => 'admin.cms.wizard.upload',  'filter' => 'permission:cms.entries.write']);
     $routes->get('wizard/structure', '\App\Modules\Cms\Controllers\StructureWizardController::index', ['as' => 'admin.cms.wizard.structure']);
+    $routes->get('wizard/structure/config', '\App\Modules\Cms\Controllers\StructureWizardController::config', ['as' => 'admin.cms.wizard.structure.config']);
+    $routes->post('wizard/structure/create-collection', '\App\Modules\Cms\Controllers\StructureWizardController::createCollection', ['as' => 'admin.cms.wizard.structure.create_collection']);
+    $routes->post('wizard/structure/create-page', '\App\Modules\Cms\Controllers\StructureWizardController::createPage', ['as' => 'admin.cms.wizard.structure.create_page']);
+    $routes->post('wizard/structure/create-menu', '\App\Modules\Cms\Controllers\StructureWizardController::createMenu', ['as' => 'admin.cms.wizard.structure.create_menu']);
     // Wizard — Edit page (WIZ-007)
     $routes->get('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::pageBlocks/$1', ['as' => 'admin.cms.wizard.page-blocks',       'filter' => 'permission:cms.pages.read']);
     $routes->post('wizard/pages/(:num)/blocks', '\App\Modules\Cms\Controllers\WizardController::createBlock/$1', ['as' => 'admin.cms.wizard.create-block',      'filter' => 'permission:cms.pages.write']);
