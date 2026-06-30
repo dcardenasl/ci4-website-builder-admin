@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Interactive multi-step structure wizard** — enhanced wizard with Alpine.js-driven step-by-step flow, intent presets (blog, news, portfolio, services, custom), dynamic form validation, and multi-language support for guided collection creation
 - **Structure wizard** — new guided interface to create and manage pages, collections, menus, and redirects with modal dialogs and hierarchical organization
 - **Default sort on remote tables** — added `defaultSort` configuration to remoteTable component; all data tables now sort by newest records first by default (created_at descending), improving UX by showing the most recently created/updated items at the top
 - **Locale in user registration** — automatically include the current application locale in the registration payload to ensure new users inherit the language preference from their signup context
