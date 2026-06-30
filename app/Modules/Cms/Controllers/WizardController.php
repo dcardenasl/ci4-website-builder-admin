@@ -95,9 +95,22 @@ class WizardController extends BaseWebController
             $statusCode = 502;
         }
 
+        $body = $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? []);
+
+        if ($statusCode >= 200 && $statusCode < 300 && ! isset($body['ok'])) {
+            $body = ['ok' => true] + $body;
+        } elseif ($statusCode >= 400) {
+            $body = [
+                'ok' => false,
+                'message' => $result['messages'][0] ?? $result['message'] ?? lang('Wizard.error_publish'),
+                'errors' => $result['fieldErrors'] ?? [],
+                'data' => $body,
+            ];
+        }
+
         return $this->response
             ->setStatusCode($statusCode)
-            ->setJSON($statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? []));
+            ->setJSON($body);
     }
 
     /**

@@ -64,6 +64,9 @@ $csrfToken ??= csrf_hash();
             <button type="button" @click="screen = 'home'" class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-700"><?= esc(lang('App.back')) ?></button>
             <span x-text="stepLabel()"></span>
         </div>
+        <div class="h-2 overflow-hidden rounded-full bg-gray-200">
+            <div class="h-2 rounded-full bg-brand-600 transition-all" :style="`width: ${Math.round((collectionStep / 4) * 100)}%`"></div>
+        </div>
         <div class="grid gap-6 lg:grid-cols-12">
             <aside class="lg:col-span-3">
                 <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -80,7 +83,7 @@ $csrfToken ??= csrf_hash();
             <main class="lg:col-span-9">
                 <form @submit.prevent="submitCollection()" class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step2')) ?></p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step1')) ?></p>
                         <h2 class="mt-1 text-2xl font-bold text-gray-900"><?= esc(lang('Wizard.create_collection')) ?></h2>
                         <p class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_collection_review_intro')) ?></p>
                     </div>
@@ -97,7 +100,7 @@ $csrfToken ??= csrf_hash();
                     </template>
                     <template x-if="collectionStep === 2">
                         <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step3')) ?></p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step2')) ?></p>
                             <div class="mt-3 grid gap-4 md:grid-cols-2">
                                 <label class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"><input type="checkbox" x-model="form.requires_approval" class="rounded border-gray-300"><span><span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_flag_requires_approval')) ?></span><span class="block text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_flag_requires_approval_help')) ?></span></span></label>
                                 <label class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"><input type="checkbox" x-model="form.enables_categories" class="rounded border-gray-300"><span><span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_flag_categories')) ?></span><span class="block text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_flag_categories_help')) ?></span></span></label>
@@ -116,7 +119,7 @@ $csrfToken ??= csrf_hash();
                         <div class="space-y-4">
                             <div x-show="collectionErrors.step3" x-cloak class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" x-text="collectionErrors.step3"></div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step4')) ?></p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step3')) ?></p>
                             <div class="mt-3 grid gap-4 md:grid-cols-2">
                                 <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_field_language_name')) ?></span><input type="text" x-model="translation.name" class="w-full rounded-lg border-gray-300"></label>
                                 <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_field_language_slug')) ?></span><input type="text" x-model="translation.slug" class="w-full rounded-lg border-gray-300"></label>
@@ -126,22 +129,20 @@ $csrfToken ??= csrf_hash();
                         </div>
                     </template>
                     <template x-if="collectionStep === 4">
-                        <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step5')) ?></p>
-                            <div class="mt-3 flex items-center justify-between gap-3">
-                                <div><p class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_optional_config')) ?></p><p class="text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_optional_config_hint')) ?></p></div>
-                                <select x-model="form.wizard_config_mode" class="rounded-lg border-gray-300"><option value="empty"><?= esc(lang('Wizard.wizard_structure_empty_mode')) ?></option><option value="base"><?= esc(lang('Wizard.wizard_structure_base_mode')) ?></option></select>
-                            </div>
-                            <template x-if="form.wizard_config_mode === 'base'">
-                                <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-                                    <p class="font-semibold text-gray-900 mb-2"><?= esc(lang('Wizard.wizard_structure_preview_title')) ?></p>
-                                    <pre class="overflow-auto rounded-lg bg-white p-3 text-xs border border-gray-200" x-text="wizardConfigPreview()"></pre>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-                    <template x-if="collectionStep === 5">
                         <div class="space-y-4">
+                            <div class="rounded-2xl border border-gray-200 bg-white p-4">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step4')) ?></p>
+                                <div class="mt-3 flex items-center justify-between gap-3">
+                                    <div><p class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_optional_config')) ?></p><p class="text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_optional_config_hint')) ?></p></div>
+                                    <select x-model="form.wizard_config_mode" class="rounded-lg border-gray-300"><option value="empty"><?= esc(lang('Wizard.wizard_structure_empty_mode')) ?></option><option value="base"><?= esc(lang('Wizard.wizard_structure_base_mode')) ?></option></select>
+                                </div>
+                                <template x-if="form.wizard_config_mode === 'base'">
+                                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 mt-3">
+                                        <p class="font-semibold text-gray-900 mb-2"><?= esc(lang('Wizard.wizard_structure_preview_title')) ?></p>
+                                        <pre class="overflow-auto rounded-lg bg-white p-3 text-xs border border-gray-200" x-text="wizardConfigPreview()"></pre>
+                                    </div>
+                                </template>
+                            </div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
                                 <p class="font-semibold text-gray-900 mb-3"><?= esc(lang('Wizard.wizard_structure_final_summary')) ?></p>
                                 <p><strong><?= esc(lang('Wizard.wizard_structure_summary_name')) ?>:</strong> <span x-text="form.name || '—'"></span></p>
@@ -156,9 +157,9 @@ $csrfToken ??= csrf_hash();
                     </template>
                     <div class="flex flex-wrap gap-3">
                         <button type="button" @click="prevCollectionStep()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700" :disabled="collectionStep === 1"><?= esc(lang('Wizard.wizard_structure_prev')) ?></button>
-                        <button type="button" @click="nextCollectionStep()" x-show="collectionStep < 5" class="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700" :disabled="!canAdvanceCollectionStep()"><?= esc(lang('Wizard.wizard_structure_next')) ?></button>
-                        <button type="submit" x-show="collectionStep === 5" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60" :disabled="saving || !canSubmitCollection()"><span x-show="!saving"><?= esc(lang('Wizard.wizard_structure_create')) ?></span><span x-show="saving"><?= esc(lang('Wizard.wizard_structure_creating')) ?></span></button>
-                        <button type="button" @click="screen = 'home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('App.cancel')) ?></button>
+                        <button type="button" @click="nextCollectionStep()" x-show="collectionStep < 4" class="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700" :disabled="!canAdvanceCollectionStep()"><?= esc(lang('Wizard.wizard_structure_next')) ?></button>
+                        <button type="submit" x-show="collectionStep === 4" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60" :disabled="saving || !canSubmitCollection()"><span x-show="!saving"><?= esc(lang('Wizard.wizard_structure_create')) ?></span><span x-show="saving"><?= esc(lang('Wizard.wizard_structure_creating')) ?></span></button>
+                        <button type="button" @click="screen = 'home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></button>
                     </div>
                 </form>
             </main>
@@ -192,7 +193,7 @@ $csrfToken ??= csrf_hash();
                 <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-4"><input type="checkbox" x-model="page.is_in_sitemap" class="rounded border-gray-300"><span class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_page_sitemap')) ?></span></label>
                 <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_field_order')) ?></span><input type="number" x-model.number="page.sort_order" class="w-full rounded-lg border-gray-300"></label>
             </div>
-            <div class="flex flex-wrap gap-3"><button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"><?= esc(lang('Wizard.create_page')) ?></button><button type="button" @click="screen='home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('App.cancel')) ?></button></div>
+            <div class="flex flex-wrap gap-3"><button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"><?= esc(lang('Wizard.create_page')) ?></button><button type="button" @click="screen='home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></button></div>
         </form>
         <div x-show="message" x-cloak class="rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-text="message"></div>
         <div x-show="errorMsg" x-cloak class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" x-text="errorMsg"></div>
@@ -208,7 +209,7 @@ $csrfToken ??= csrf_hash();
                 <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-4"><input type="checkbox" x-model="menu.is_active" class="rounded border-gray-300"><span class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_menu_active')) ?></span></label>
                 <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_menu_name')) ?></span><input type="text" x-model="menu.name" class="w-full rounded-lg border-gray-300"></label>
             </div>
-            <div class="flex flex-wrap gap-3"><button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"><?= esc(lang('Wizard.create_menu')) ?></button><button type="button" @click="screen='home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('App.cancel')) ?></button></div>
+            <div class="flex flex-wrap gap-3"><button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"><?= esc(lang('Wizard.create_menu')) ?></button><button type="button" @click="screen='home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></button></div>
         </form>
         <div x-show="message" x-cloak class="rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-text="message"></div>
         <div x-show="errorMsg" x-cloak class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" x-text="errorMsg"></div>
@@ -261,7 +262,7 @@ $csrfToken ??= csrf_hash();
                 this.collectionErrors = { step1: '', step3: '' };
                 if (this.collectionStep === 1) { this.syncCollection(); }
                 if (this.collectionStep === 2) { this.form.requires_approval = !!this.form.requires_approval; }
-                if (this.collectionStep < 5) { this.collectionStep += 1; }
+                if (this.collectionStep < 4) { this.collectionStep += 1; }
             },
             prevCollectionStep() { if (this.collectionStep > 1) this.collectionStep -= 1; },
             canSubmitCollection() {
@@ -271,7 +272,7 @@ $csrfToken ??= csrf_hash();
             wizardConfigPreview() {
                 return JSON.stringify({ icon: '🗂️', label: this.form.name || <?= json_encode(lang('Wizard.create_collection')) ?>, description: this.translation.description || '', steps: [{ step_title: <?= json_encode(lang('Wizard.default_step1_title')) ?>, fields: [{ key: 'title', label: <?= json_encode(lang('Wizard.default_field_title')) ?>, type: 'text', required: true }] }, { step_title: <?= json_encode(lang('Wizard.default_step3_title')) ?>, fields: [{ key: 'excerpt', label: <?= json_encode(lang('Wizard.default_field_excerpt')) ?>, type: 'textarea', required: false }] }] }, null, 2);
             },
-            stepLabel() { return <?= json_encode(sprintf(lang('Wizard.step_of'), '%s', '5')) ?>.replace('%s', this.collectionStep); },
+            stepLabel() { return <?= json_encode(sprintf(lang('Wizard.step_of'), '%s', '4')) ?>.replace('%s', this.collectionStep); },
             async submitCollection() {
                 if (!this.canSubmitCollection()) { this.errorMsg = <?= json_encode(lang('Wizard.wizard_structure_collection_payload_error')) ?>; return; }
                 this.saving = true; this.message=''; this.errorMsg='';
@@ -283,7 +284,9 @@ $csrfToken ??= csrf_hash();
                     const id = json.data?.id || '';
                     this.message = <?= json_encode(lang('Wizard.wizard_structure_collection_ready')) ?>;
                     this.createdCollectionId = id ? String(id) : '';
-                } catch (e) { this.errorMsg = e.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>; } finally { this.saving = false; }
+                } catch (e) {
+                    this.errorMsg = e.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>;
+                } finally { this.saving = false; }
             },
             async submitPage() {
                 this.message=''; this.errorMsg='';

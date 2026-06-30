@@ -626,18 +626,22 @@ $csrfToken ??= csrf_hash();
                 try {
                     const payload = this.buildEntryPayload();
                     const res  = await adminFetch(WIZARD_BASE + '/publish', { method: 'POST', body: JSON.stringify(payload) });
-                    const data = await res.json();
+                    const raw = await res.text();
+                    let data = {};
+                    try {
+                        data = raw ? JSON.parse(raw) : {};
+                    } catch (_) {
+                        data = { message: raw || STRINGS.error_publish };
+                    }
                     if (!res.ok) {
-                        const msg = data?.messages?.[0] ?? data?.message ?? STRINGS.error_publish;
+                        const msg = data?.message
+                            ?? data?.messages?.[0]
+                            ?? (raw ? raw : `${STRINGS.error_publish} (HTTP ${res.status})`);
                         throw new Error(msg);
                     }
                     this.publishedEntry = data;
                     this.clearDraft();
-                    if (data?.id) {
-                        await this.selectPublishedEntry(this.buildPublishedEntryPreview(payload, data));
-                    } else {
-                        this.screen = 'success';
-                    }
+                    this.screen = 'success';
                 } catch (e) {
                     this.publishError = e.message ?? STRINGS.error_publish;
                 } finally {
@@ -664,7 +668,9 @@ $csrfToken ??= csrf_hash();
 
                 const payload = {
                     collection_id:   this.selectedCollection.id,
-                    workflow_status: this.formData.status ?? 'published',
+                    title:           this.formData.title ?? this.selectedCollection?.name ?? STRINGS.content_fallback,
+                    status:          this.formData.status ?? 'published',
+                    workflow_status:  this.formData.status ?? 'published',
                     sort_order: 0, view_count: 0, is_featured: false, is_in_sitemap: true,
                     translations: [],
                 };

@@ -186,8 +186,5 @@
             <?= lang('Wizard.btn_edit_entry') ?>
         </a>
         <button @click="restart()" class="text-sm text-brand-600 hover:text-brand-800"><?= lang('Wizard.btn_add_more') ?></button>
-        <a href="<?= route_to('admin.cms.entries') ?>" class="text-sm text-gray-500 hover:text-gray-700">
-            <?= lang('Wizard.btn_back_panel') ?>
-        </a>
     </div>
 </div>
