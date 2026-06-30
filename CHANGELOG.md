@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Default sort on remote tables** — added `defaultSort` configuration to remoteTable component; all data tables now sort by newest records first by default (created_at descending), improving UX by showing the most recently created/updated items at the top
 - **Locale in user registration** — automatically include the current application locale in the registration payload to ensure new users inherit the language preference from their signup context
 - **Setting connections management UI** — enhanced settings forms with support for `input_type` (e.g. text, textarea, select, json), `options_json` for custom field options, `is_required` and `is_readonly` flags, and `ui_meta` for rich field metadata; added SettingConnectionController integration for managing setting relationships
 - **File usage tracking with multi-source API integration** — enhanced FileApiService to aggregate file usages from both Hub and Domain APIs, added `resolveEditUrl()` in FileController to generate contextual edit links for each usage (pages, entries, blocks, users, settings), improving file lifecycle visibility in the admin UI
