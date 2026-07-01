@@ -132,6 +132,55 @@ class BlockInstanceController extends BaseWebController
             : lang('Pages.pages_not_found');
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function activeLanguages(): array
+    {
+        $languages = cache()->get('cms_active_languages');
+        if (is_array($languages)) {
+            return array_values($languages);
+        }
+
+        $languagesResponse = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $languages = $languagesResponse['ok'] ? $this->extractItems($languagesResponse) : [];
+        if (! empty($languages)) {
+            cache()->save('cms_active_languages', $languages, 3600);
+        }
+
+        return array_values($languages);
+    }
+
+    /**
+     * @param array<string, mixed> $blockType
+     * @return array<string, mixed>
+     */
+    private function blockSchemaFields(array $blockType): array
+    {
+        $schemaDefinition = $blockType['schema_definition'] ?? [];
+        if (is_string($schemaDefinition) && trim($schemaDefinition) !== '') {
+            $decoded = json_decode($schemaDefinition, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $schemaDefinition = $decoded;
+            }
+        }
+
+        if (! is_array($schemaDefinition)) {
+            return [];
+        }
+
+        $fields = $schemaDefinition['fields'] ?? [];
+        return is_array($fields) ? $fields : [];
+    }
+
+    /**
+     * @param array<string, mixed> $blockType
+     */
+    private function shouldSeedBlankTranslations(array $blockType): bool
+    {
+        return $this->blockSchemaFields($blockType) === [];
+    }
+
     public function index(string $ownerId): string|RedirectResponse
     {
         $ownerType = $this->ownerTypeFromRequest();
@@ -190,15 +239,7 @@ class BlockInstanceController extends BaseWebController
         $typesIndexed = $this->fetchBlockTypes();
         $types = array_values($typesIndexed);
 
-        // Fetch languages (cached)
-        $languages = cache()->get('cms_active_languages');
-        if ($languages === null) {
-            $languagesResponse = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
-            $languages = $languagesResponse['ok'] ? $this->extractItems($languagesResponse) : [];
-            if (! empty($languages)) {
-                cache()->save('cms_active_languages', $languages, 3600);
-            }
-        }
+        $languages = $this->activeLanguages();
 
         $parentIdRaw      = $this->request->getGet('parent_instance_id');
         $parentInstanceId = ($parentIdRaw !== null && is_scalar($parentIdRaw) && (int) $parentIdRaw > 0)
@@ -293,6 +334,28 @@ class BlockInstanceController extends BaseWebController
                     'block_data'   => $blockData,
                     'is_published' => (bool) ($t['is_published'] ?? true)
                 ];
+            }
+        }
+
+        if ($translations === []) {
+            $typeResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->get($blockId));
+            if ($typeResponse['ok']) {
+                $blockType = $this->extractData($typeResponse);
+                if ($this->shouldSeedBlankTranslations($blockType)) {
+                    $translations = array_map(
+                        static fn (array $language): array => [
+                            'language_id'  => (int) ($language['id'] ?? 0),
+                            'block_data'   => [],
+                            'is_published' => true,
+                        ],
+                        $this->activeLanguages()
+                    );
+
+                    $translations = array_values(array_filter(
+                        $translations,
+                        static fn (array $translation): bool => $translation['language_id'] > 0
+                    ));
+                }
             }
         }
 
