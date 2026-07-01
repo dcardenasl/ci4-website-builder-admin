@@ -4,12 +4,12 @@
 <div x-show="screen === 'page-blocks'" x-cloak>
 
     <!-- Breadcrumb header -->
-    <div class="flex items-center gap-2 mb-5">
+    <div class="flex flex-wrap items-center gap-2 mb-5">
         <button @click="screen = blocksBackScreen || 'page-select'" class="text-sm text-gray-500 hover:text-gray-700"><?= lang('Wizard.btn_back') ?></button>
         <span class="text-gray-300">/</span>
         <div class="min-w-0">
             <div class="flex items-center gap-2">
-                <h2 class="text-xl font-bold truncate" x-text="selectedPage?.title || selectedPage?.slug || strings.content_fallback"></h2>
+        <h2 class="text-lg font-semibold text-gray-900 truncate" x-text="selectedPage?.title || selectedPage?.slug || strings.content_fallback"></h2>
                 <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-semibold text-gray-500" x-text="ownerTypeLabel()"></span>
             </div>
             <p class="text-xs text-gray-400 truncate" x-text="selectedPage?.slug ? '/' + selectedPage.slug : ''"></p>
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Loading state -->
-    <div x-show="pageBlocksLoading" class="text-center py-8 text-gray-400">
+    <div x-show="pageBlocksLoading" class="rounded-xl border border-gray-200 bg-white py-10 text-center text-gray-400 shadow-sm">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto mb-2"></div>
         <p class="text-sm"><?= lang('Wizard.blocks_loading') ?></p>
     </div>
@@ -41,7 +41,7 @@
 
     <!-- Empty state -->
     <div x-show="!pageBlocksLoading && pageBlocks.length === 0 && !pageBlocksError"
-         class="text-center py-12 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+         class="rounded-xl border border-dashed border-gray-200 bg-white py-12 text-center text-gray-400 text-sm shadow-sm">
         <div class="text-4xl mb-3">📭</div>
         <p x-text="emptyBlocksText()"></p>
         <p class="mt-2 text-xs text-gray-400" x-text="blocksDescription()"></p>
@@ -158,7 +158,7 @@
     <!-- ── Delete block confirmation modal ── -->
     <div x-show="deleteBlockTarget" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div class="bg-white rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-xl max-w-sm w-full mx-4">
             <h3 class="font-bold mb-2"><?= lang('Wizard.delete_block_title') ?></h3>
             <p class="text-sm text-gray-500 mb-1">
                 <span x-text="blockLabel(deleteBlockTarget, 0)"></span>

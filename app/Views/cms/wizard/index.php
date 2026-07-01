@@ -7,18 +7,29 @@
 $csrfName  ??= csrf_token();
 $csrfToken ??= csrf_hash();
 ?>
-<div class="max-w-2xl mx-auto" x-data="wizard()" x-init="init()">
+<div class="max-w-6xl mx-auto space-y-6" x-data="wizard()" x-init="init()">
+
+    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= lang('Wizard.home_heading') ?></p>
+                <h1 class="text-2xl font-semibold text-gray-900"><?= lang('Wizard.home_heading') ?></h1>
+                <p class="text-sm text-gray-600"><?= lang('Wizard.structure_intro') ?></p>
+            </div>
+            <a href="<?= site_url('dashboard') ?>" class="btn-secondary"><?= lang('Wizard.btn_back_panel') ?></a>
+        </div>
+    </div>
 
     <!-- Loading screen -->
-    <div x-show="screen === 'loading'" x-cloak class="text-center py-16 text-gray-400">
+    <div x-show="screen === 'loading'" x-cloak class="rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-600 mx-auto mb-4"></div>
-        <p><?= lang('Wizard.loading') ?></p>
+        <p class="text-sm text-gray-500"><?= lang('Wizard.loading') ?></p>
     </div>
 
     <!-- Error screen -->
-    <div x-show="screen === 'error'" x-cloak class="text-center py-16">
-        <p class="text-red-600 text-sm mb-4" x-text="errorMsg"></p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+    <div x-show="screen === 'error'" x-cloak class="rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm">
+        <p class="text-sm font-medium text-red-700" x-text="errorMsg"></p>
+        <div class="mt-4 flex flex-wrap gap-3">
             <button @click="init()" class="btn-secondary"><?= lang('Wizard.btn_retry') ?></button>
             <button @click="goHome()" class="btn-primary"><?= lang('Wizard.btn_back_panel') ?></button>
         </div>
@@ -258,8 +269,23 @@ $csrfToken ??= csrf_hash();
             addContentDesc() {
                 const cols = this.config?.collections ?? [];
                 if (cols.length === 0) return STRINGS.add_content_desc_empty;
-                const names = cols.slice(0, 4).map(c => c.name);
+                const names = cols.slice(0, 4).map(c => this.collectionDisplayLabel(c));
                 return names.join(', ') + (cols.length > 4 ? '…' : '');
+            },
+
+            collectionDisplayLabel(collection) {
+                if (!collection) return STRINGS.content_fallback;
+
+                const name = String(collection.name ?? '').trim() || STRINGS.content_fallback;
+                const key = String(collection.collection_key ?? '').trim();
+                const prefix = String(collection.url_prefix ?? '').trim();
+                const descriptor = key || prefix;
+
+                if (!descriptor || descriptor === name.toLowerCase()) {
+                    return name;
+                }
+
+                return `${name} · ${descriptor}`;
             },
 
             // ── Block type helpers ────────────────────────────────────────────
@@ -530,6 +556,25 @@ $csrfToken ??= csrf_hash();
             // ── Navigation ────────────────────────────────────────────────────
             goAddContent() {
                 this.screen = 'collection-select';
+            },
+
+            applyIntentDefaults(option) {
+                this.selectedIntent = option;
+                const suggestions = option?.suggestions ?? {};
+                const name = option?.label?.trim() || 'Colección';
+                const key = option?.key?.trim() || slugify(name);
+
+                this.form.name = name;
+                this.form.collection_key = key;
+                this.form.url_prefix = key;
+                this.form.requires_approval = !!suggestions.requires_approval;
+                this.form.enables_categories = suggestions.enables_categories !== undefined ? !!suggestions.enables_categories : true;
+                this.form.enables_tags = suggestions.enables_tags !== undefined ? !!suggestions.enables_tags : true;
+                this.form.default_sitemap_priority = suggestions.default_sitemap_priority ?? 0.5;
+                this.form.default_changefreq = suggestions.default_changefreq ?? 'weekly';
+
+                this.translation.name = name;
+                this.translation.slug = slugify(name);
             },
 
             selectCollection(col) {

@@ -2,18 +2,20 @@
 
 <!-- ── SCREEN: COLLECTION SELECT ── -->
 <div x-show="screen === 'collection-select'" x-cloak>
-    <h2 class="text-xl font-bold mb-4"><?= lang('Wizard.select_collection') ?></h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Wizard.select_collection') ?></h2>
     <div x-show="(config?.collections ?? []).length === 0"
-         class="text-gray-400 text-sm py-8 text-center">
+         class="rounded-xl border border-dashed border-gray-200 bg-white py-10 text-center text-sm text-gray-400 shadow-sm">
         <?= lang('Wizard.no_collections') ?>
     </div>
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         <template x-for="col in (config?.collections ?? [])" :key="col.id">
             <button @click="selectCollection(col)"
-                    class="flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-gray-200 bg-white p-5 text-center hover:border-brand-400 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500">
-                <span class="text-3xl" x-text="col.icon || '📄'"></span>
-                <span class="font-semibold text-sm text-gray-800" x-text="col.name"></span>
-                <span class="text-xs text-gray-400 line-clamp-2" x-text="col.description"></span>
+                    class="flex min-h-[120px] flex-col items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <span class="text-2xl" x-text="col.icon || '📄'"></span>
+                <span class="space-y-1">
+                    <span class="block text-sm font-semibold text-gray-900" x-text="collectionDisplayLabel(col)"></span>
+                    <span class="block text-xs text-gray-500 line-clamp-2" x-text="col.description"></span>
+                </span>
             </button>
         </template>
     </div>
@@ -27,7 +29,7 @@
         <div class="mb-4">
             <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
                 <span x-text="stepLabel()"></span>
-                <span x-text="selectedCollection?.name ?? ''"></span>
+                <span x-text="collectionDisplayLabel(selectedCollection)"></span>
             </div>
             <div class="h-2 w-full rounded-full bg-gray-200">
                 <div class="h-2 rounded-full bg-brand-600 transition-all"
@@ -36,7 +38,7 @@
         </div>
 
         <!-- Step header -->
-        <h2 class="text-xl font-bold mb-1" x-text="currentStepSchema.step_title"></h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-1" x-text="currentStepSchema.step_title"></h2>
         <p class="text-sm text-gray-500 mb-5" x-text="currentStepSchema.step_hint"></p>
 
         <!-- Dynamic fields -->
@@ -47,22 +49,22 @@
 
                 <template x-if="field.type === 'text'">
                     <input type="text" :placeholder="field.placeholder || ''" x-model="formData[field.key]"
-                           class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
                 </template>
 
                 <template x-if="field.type === 'textarea'">
                     <textarea :placeholder="field.placeholder || ''" x-model="formData[field.key]" rows="4"
-                              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
+                              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                 </template>
 
                 <template x-if="field.type === 'date'">
                     <input type="date" x-model="formData[field.key]"
-                           class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
                 </template>
 
                 <template x-if="field.type === 'select'">
                     <select x-model="formData[field.key]"
-                            class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                         <template x-for="opt in (field.options || [])" :key="opt.value">
                             <option :value="opt.value" x-text="opt.label"></option>
                         </template>
@@ -82,7 +84,7 @@
                         </template>
                         <template x-if="!formData[field.key + '_url']">
                             <label :class="{'opacity-60': uploading}"
-                                   class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                                   class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
                                 <span class="text-4xl">📷</span>
                                 <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
                                 <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
@@ -97,7 +99,7 @@
 
                 <template x-if="field.type === 'rich_text'">
                     <textarea :placeholder="field.placeholder || ''" x-model="formData[field.key]" rows="8"
-                              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
+                              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                 </template>
             </div>
         </template>
@@ -117,12 +119,12 @@
 
 <!-- ── SCREEN: CONFIRM ── -->
 <div x-show="screen === 'confirm'" x-cloak>
-    <h2 class="text-xl font-bold mb-4"><?= lang('Wizard.confirm_title') ?></h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Wizard.confirm_title') ?></h2>
 
     <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-3">
         <div class="flex items-center gap-3 pb-3 border-b border-gray-200">
             <span x-text="selectedCollection?.icon ?? '📄'" class="text-3xl"></span>
-            <span class="font-bold text-lg text-gray-800" x-text="selectedCollection?.name ?? ''"></span>
+            <span class="font-bold text-lg text-gray-800" x-text="collectionDisplayLabel(selectedCollection)"></span>
         </div>
 
         <template x-for="step in steps" :key="step.step_title">
@@ -169,11 +171,13 @@
 </div>
 
 <!-- ── SCREEN: SUCCESS ── -->
-<div x-show="screen === 'success'" x-cloak class="text-center py-8">
-    <div class="text-6xl mb-4">✅</div>
-    <h2 class="text-2xl font-bold mb-2"><?= lang('Wizard.success_title') ?></h2>
+<div x-show="screen === 'success'" x-cloak class="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+    <div class="text-4xl mb-4">✅</div>
+    <h2 class="text-lg font-semibold mb-2 text-gray-900"
+        x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_title_draft') ?>' : '<?= lang('Wizard.success_title') ?>'"></h2>
     <p class="text-gray-500 mb-6">
-        "<span x-text="formData.title"></span>" <?= lang('Wizard.success_subtitle') ?>
+        "<span x-text="formData.title"></span>"
+        <span x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_subtitle_draft') ?>' : '<?= lang('Wizard.success_subtitle') ?>'"></span>
     </p>
     <div class="flex flex-col gap-3 items-center">
         <a x-show="publishedEntry?.public_url"

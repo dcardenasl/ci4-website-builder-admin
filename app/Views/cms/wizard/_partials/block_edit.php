@@ -4,12 +4,12 @@
 <div x-show="screen === 'block-edit'" x-cloak>
 
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 mb-5">
+    <div class="flex flex-wrap items-center gap-2 mb-5">
         <button @click="editMode === 'create' ? screen = 'block-catalog' : screen = 'page-blocks'"
                 class="text-sm text-gray-500 hover:text-gray-700"><?= lang('Wizard.btn_back') ?></button>
         <span class="text-gray-300">/</span>
         <div>
-            <h2 class="text-xl font-bold" x-text="blockEditTitle()"></h2>
+            <h2 class="text-lg font-semibold text-gray-900" x-text="blockEditTitle()"></h2>
             <p class="text-xs text-gray-500 mt-0.5" x-show="editParentBlock">
                 <?= lang('Wizard.block_edit_child_of') ?>
                 <span x-text="blockLabel(editParentBlock, 0)" class="font-medium"></span>
@@ -36,27 +36,27 @@
             <template x-if="field.uiType === 'text'">
                 <input type="text"
                        x-model="blockEditData[field.key]"
-                       class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
             </template>
 
             <!-- date -->
             <template x-if="field.uiType === 'date'">
                 <input type="date"
                        x-model="blockEditData[field.key]"
-                       class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
             </template>
 
             <!-- number -->
             <template x-if="field.uiType === 'number'">
                 <input type="number"
                        x-model="blockEditData[field.key]"
-                       class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
             </template>
 
             <!-- boolean (select) -->
             <template x-if="field.uiType === 'boolean'">
                 <select x-model="blockEditData[field.key]"
-                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <option value="1"><?= lang('Wizard.bool_yes') ?></option>
                     <option value="0"><?= lang('Wizard.bool_no') ?></option>
                 </select>
@@ -65,7 +65,7 @@
             <!-- select -->
             <template x-if="field.uiType === 'select'">
                 <select x-model="blockEditData[field.key]"
-                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <template x-for="opt in (field.options || [])" :key="opt">
                         <option :value="opt" x-text="opt"></option>
                     </template>
@@ -86,7 +86,7 @@
                     </template>
                     <template x-if="!blockEditData[field.key + '_url']">
                         <label :class="{'opacity-60': uploading}"
-                               class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                               class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
                             <span class="text-4xl">📷</span>
                             <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
                             <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
@@ -105,7 +105,7 @@
                      :data-field-key="field.key"
                      x-data="richTextEditor(blockEditData[field.key] || '', '')"
                      x-init="init()"
-                     class="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
+                    class="border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
                     <?= view('partials/richtext_toolbar') ?>
                     <div x-ref="editorEl" class="richtext-content px-3 py-2.5 min-h-[130px] text-sm text-gray-800 cursor-text"></div>
                     <input type="hidden" x-ref="hiddenInput">
@@ -115,7 +115,7 @@
             <template x-if="field.uiType === 'textarea'">
                 <textarea x-model="blockEditData[field.key]"
                           rows="3"
-                          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
+                          class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
             </template>
 
             <!-- url -->
@@ -123,7 +123,7 @@
                 <input type="url"
                        x-model="blockEditData[field.key]"
                        placeholder="https://"
-                       class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                       class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
             </template>
         </div>
     </template>

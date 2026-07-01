@@ -1,21 +1,28 @@
 <?php /* Wizard — B1: Page selection */ ?>
 
 <!-- ── SCREEN: PAGE SELECT (B1) ── -->
-<div x-show="screen === 'page-select'" x-cloak>
-    <h2 class="text-xl font-bold mb-4"><?= lang('Wizard.page_select_heading') ?></h2>
+<div x-show="screen === 'page-select'" x-cloak class="space-y-4">
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900"><?= lang('Wizard.page_select_heading') ?></h2>
+            <p class="text-sm text-gray-500"><?= lang('Wizard.no_pages') ?></p>
+        </div>
+    </div>
     <div x-show="(config?.pages ?? []).length === 0"
-         class="text-gray-400 text-sm py-8 text-center">
+         class="rounded-xl border border-dashed border-gray-200 bg-white py-10 text-center text-sm text-gray-400 shadow-sm">
         <?= lang('Wizard.no_pages') ?>
     </div>
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         <template x-for="page in (config?.pages ?? [])" :key="page.id">
             <button @click="selectPage(page)"
-                    class="flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-gray-200 bg-white p-5 text-center hover:border-brand-400 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-500">
-                <span class="text-3xl">📄</span>
-                <span class="font-semibold text-sm text-gray-800" x-text="page.title || page.slug || strings.page_fallback"></span>
-                <span class="text-xs text-gray-400" x-text="page.slug ? '/' + page.slug : ''"></span>
+                    class="flex min-h-[120px] flex-col items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <span class="text-2xl">📄</span>
+                <span class="space-y-1">
+                    <span class="block text-sm font-semibold text-gray-900" x-text="page.title || page.slug || strings.page_fallback"></span>
+                    <span class="block text-xs text-gray-500" x-text="page.slug ? '/' + page.slug : ''"></span>
+                </span>
             </button>
         </template>
     </div>
-    <button @click="screen = 'home'" class="mt-4 text-sm text-gray-500 hover:text-gray-700"><?= lang('Wizard.btn_back') ?></button>
+    <button @click="screen = 'home'" class="btn-secondary text-sm"><?= lang('Wizard.btn_back') ?></button>
 </div>
