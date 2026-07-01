@@ -7,6 +7,87 @@ $roleId = (string) ($role['id'] ?? '');
 
 <?php
 $initialSelected = count($assignedIds);
+
+/**
+ * @param array<int, array<string, mixed>> $permissions
+ * @return array<string, array{label: string, permissions: array<int, array<string, mixed>>}>
+ */
+$groupPermissionsByResource = static function (array $permissions): array {
+    $groups = [];
+
+    foreach ($permissions as $permission) {
+        $code = (string) ($permission['code'] ?? '');
+        $resource = (string) ($permission['resource'] ?? '');
+
+        if ($resource === '' && $code !== '') {
+            $parts = explode('.', $code);
+            $resource = $parts[1] ?? 'misc';
+        }
+
+        if ($resource === '') {
+            $resource = 'misc';
+        }
+
+        if (! isset($groups[$resource])) {
+            $groups[$resource] = [
+                'label' => str_replace(['_', '-'], ' ', $resource),
+                'resource' => $resource,
+                'permissions' => [],
+            ];
+        }
+
+        $groups[$resource]['permissions'][] = $permission;
+    }
+
+    ksort($groups);
+
+    foreach ($groups as &$group) {
+        usort($group['permissions'], static function (array $left, array $right): int {
+            $leftAction = (string) ($left['action'] ?? '');
+            $rightAction = (string) ($right['action'] ?? '');
+
+            return [$leftAction, (string) ($left['code'] ?? '')] <=> [$rightAction, (string) ($right['code'] ?? '')];
+        });
+    }
+    unset($group);
+
+    return $groups;
+};
+
+$groupOrder = static function (string $resource): int {
+    return match ($resource) {
+        'pages' => 10,
+        'entries' => 20,
+        'collections' => 30,
+        'menus' => 40,
+        'blocks' => 50,
+        'categories' => 60,
+        'tags' => 70,
+        'settings' => 80,
+        'languages' => 90,
+        'redirects' => 100,
+        'forms' => 110,
+        'submissions' => 120,
+        'analytics' => 130,
+        'users' => 200,
+        'files' => 210,
+        'api_keys' => 220,
+        'iam' => 230,
+        default => 999,
+    };
+};
+
+/**
+ * @return array<string, string>
+ */
+$actionBadgeClass = static function (string $action): string {
+    return match ($action) {
+        'read' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
+        'write' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
+        'admin' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
+        default => 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
+    };
+};
 ?>
 <form method="post" action="<?= route_to('admin.iam.role_permissions.save', $roleId) ?>" class="space-y-4"
       x-data="{
@@ -48,28 +129,72 @@ $initialSelected = count($assignedIds);
 
     <?php foreach ($applications as $application): ?>
         <?php $permissions = $application['permissions'] ?? []; ?>
+        <?php $permissionGroups = $groupPermissionsByResource($permissions); ?>
         <div class="border-b border-gray-200 pb-4">
             <div class="mb-2 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-900"><?= esc((string) ($application['name'] ?? $application['code'] ?? '')) ?></h3>
                 <span class="text-xs text-gray-500"><?= count($permissions) ?> <?= esc(lang('Iam.permissions_title')) ?></span>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                <?php foreach ($permissions as $permission): ?>
-                    <?php $permissionId = (string) ($permission['id'] ?? ''); ?>
-                    <label class="inline-flex items-start gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
-                        x-show="search === '' || '<?= esc(strtolower((string) $permission['code'])) ?>'.includes(search.toLowerCase()) || '<?= esc(strtolower((string) $permission['description'])) ?>'.includes(search.toLowerCase())"
-                        x-cloak>
-                        <input type="checkbox" name="permission_ids[]" value="<?= esc($permissionId) ?>"
-                            <?= in_array($permissionId, $assignedIds, true) ? 'checked' : '' ?>
-                            class="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                        <span>
-                            <code class="font-medium text-gray-900"><?= esc((string) ($permission['code'] ?? '-')) ?></code>
-                            <span class="block text-xs text-gray-500"><?= esc((string) ($permission['description'] ?? '')) ?></span>
-                        </span>
-                    </label>
+            <div class="space-y-4">
+                <?php uasort($permissionGroups, static fn (array $left, array $right) => $groupOrder((string) ($left['resource'] ?? '')) <=> $groupOrder((string) ($right['resource'] ?? ''))); ?>
+                <?php foreach ($permissionGroups as $group): ?>
+                    <?php
+                        $groupPermissions = $group['permissions'];
+                        $resourceKey = (string) ($group['resource'] ?? $group['label'] ?? '');
+                    ?>
+                    <section class="rounded-xl border border-gray-200 bg-gray-50/60 p-3">
+                        <div class="mb-3 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <h4 class="text-sm font-semibold text-gray-800">
+                                    <?= esc(ucfirst((string) $group['label'])) ?>
+                                </h4>
+                                <span class="text-xs text-gray-500"><?= count($groupPermissions) ?> permisos</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                    class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+                                    onclick="window.togglePermissionGroup('<?= esc($resourceKey) ?>', true, this.closest('form'))">
+                                    Seleccionar todo
+                                </button>
+                                <button type="button"
+                                    class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+                                    onclick="window.togglePermissionGroup('<?= esc($resourceKey) ?>', false, this.closest('form'))">
+                                    Ninguno
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                            <?php foreach ($groupPermissions as $permission): ?>
+                                <?php
+                                    $permissionId = (string) ($permission['id'] ?? '');
+                                    $permissionCode = strtolower((string) ($permission['code'] ?? ''));
+                                    $permissionDescription = strtolower((string) ($permission['description'] ?? ''));
+                                    $permissionAction = strtolower((string) ($permission['action'] ?? ''));
+                                ?>
+                                <label class="inline-flex items-start gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+                                    x-show="search === '' || '<?= esc($permissionCode) ?>'.includes(search.toLowerCase()) || '<?= esc($permissionDescription) ?>'.includes(search.toLowerCase())"
+                                    x-cloak>
+                                    <input type="checkbox" name="permission_ids[]" value="<?= esc($permissionId) ?>"
+                                        data-resource="<?= esc($resourceKey) ?>"
+                                        <?= in_array($permissionId, $assignedIds, true) ? 'checked' : '' ?>
+                                        class="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                    <span class="min-w-0">
+                                        <span class="mb-1 flex items-center gap-2">
+                                            <code class="font-medium text-gray-900"><?= esc((string) ($permission['code'] ?? '-')) ?></code>
+                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide <?= esc($actionBadgeClass($permissionAction)) ?>">
+                                                <?= esc($permissionAction ?: 'other') ?>
+                                            </span>
+                                        </span>
+                                        <span class="block text-xs text-gray-500"><?= esc((string) ($permission['description'] ?? '')) ?></span>
+                                    </span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </section>
                 <?php endforeach; ?>
             </div>
-        </div>
+    </div>
     <?php endforeach; ?>
 
     <div class="flex items-center gap-3">
@@ -80,3 +205,27 @@ $initialSelected = count($assignedIds);
         </p>
     </div>
 </form>
+
+<script>
+window.togglePermissionGroup = window.togglePermissionGroup || function (resource, state, form) {
+    if (!form) {
+        return;
+    }
+
+    const selector = 'input[type="checkbox"][data-resource="' + resource + '"]';
+    const checkboxes = Array.from(form.querySelectorAll(selector));
+
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = state;
+    });
+
+    const checked = form.querySelectorAll('input[name="permission_ids[]"]:checked').length;
+    const counter = form.querySelector('[x-text="selectedCount"]');
+    if (counter && counter.__x && counter.__x.$data) {
+        counter.__x.$data.selectedCount = checked;
+        counter.__x.$data.isDirty = true;
+    }
+
+    form.dispatchEvent(new Event('change', { bubbles: true }));
+};
+</script>

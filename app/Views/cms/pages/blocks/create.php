@@ -125,9 +125,9 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <span x-text="field.label || key"></span>
                             </label>
 
-                            <template x-if="field.type === 'select'">
+                                <template x-if="field.type === 'select'">
                                 <select :name="`block_config[${key}]`"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                     <template x-for="opt in (field.options || [])" :key="opt">
                                         <option :value="opt" :selected="opt === (field.default || '')" x-text="opt"></option>
                                     </template>
@@ -144,7 +144,7 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <input type="text" :name="`block_config[${key}]`"
                                        :value="field.default || ''"
                                        :placeholder="field.default || ''"
-                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                       class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                             </template>
 
                             <p x-show="field.description" class="text-[11px] text-gray-400 mt-0.5" x-text="field.description"></p>
@@ -185,7 +185,7 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <template x-if="field.type === 'richtext'">
                                     <div x-data="richTextEditor('', `translations[${langIndex}][block_data][${fieldKey}]`)"
                                          x-init="init()"
-                                         class="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
+                                         class="border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
                                         <?= view('partials/richtext_toolbar') ?>
                                         <!-- Editor area -->
                                         <div x-ref="editorEl" class="richtext-content px-3 py-2.5 min-h-[120px] text-sm text-gray-800 cursor-text"></div>
@@ -198,7 +198,7 @@ $parentIdJs    = json_encode($parentInstanceId);
                                     <textarea :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                               rows="4"
                                               :required="field.required && lang.is_default == 1"
-                                              class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"></textarea>
+                                              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                                 </template>
                                 <template x-if="field.type === 'url'">
                                     <input type="text" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
@@ -206,17 +206,17 @@ $parentIdJs    = json_encode($parentInstanceId);
                                            placeholder="https:// o /ruta"
                                            inputmode="url"
                                            spellcheck="false"
-                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                 </template>
                                 <template x-if="field.type === 'integer' || field.type === 'int'">
                                     <input type="number" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
-                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                 </template>
                                 <template x-if="field.type === 'select'">
                                     <select :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                             :required="field.required && lang.is_default == 1"
-                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                         <template x-for="opt in (field.options || [])" :key="opt">
                                             <option :value="opt" :selected="opt === (field.default || '')" x-text="opt"></option>
                                         </template>
@@ -248,6 +248,15 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                             </svg>
                                             <span x-text="getPickedFileId(lang.id, fieldKey) ? (pickerChangeLabels[field.accept || 'image'] || 'Cambiar archivo') : (pickerSelectLabels[field.accept || 'image'] || 'Seleccionar archivo')"></span>
+                                        </button>
+                                        <button type="button"
+                                                x-show="getPickedFileUrl(lang.id, fieldKey)"
+                                                @click="clearPickedFile(lang.id, fieldKey)"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                            </svg>
+                                            <span>Quitar archivo</span>
                                         </button>
                                     </div>
                                 </template>
@@ -301,19 +310,19 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                    placeholder="https:// o /ruta"
                                                                    inputmode="url"
                                                                    spellcheck="false"
-                                                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                                         </template>
                                                         <template x-if="subField.type === 'text' || subField.type === 'textarea'">
                                                             <textarea :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                                       x-model="item[subKey]"
                                                                       rows="3"
-                                                                      class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"></textarea>
+                                                              class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                                                         </template>
                                                         <template x-if="!['file','url','text','textarea'].includes(subField.type)">
                                                             <input type="text"
                                                                    :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                                    x-model="item[subKey]"
-                                                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                                         </template>
                                                     </div>
                                                 </template>
@@ -332,7 +341,7 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <template x-if="!['richtext','text','textarea','url','integer','int','select','file','repeater'].includes(field.type)">
                                     <input type="text" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
-                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                           class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                 </template>
 
                                 <p x-show="field.type === 'richtext'" class="text-[10px] text-gray-400">Ctrl+B negrita · Ctrl+I cursiva · Ctrl+K enlace</p>
@@ -465,6 +474,10 @@ function blockInstanceBuilder(blockTypes, languages) {
                     this.repeaterItems[k][itemIdx][subKey + '_preview_url'] = window.bestFilePreviewUrl ? window.bestFilePreviewUrl(file) : file.url;
                 }
             }
+        },
+
+        clearPickedFile(langId, fieldKey) {
+            this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: '', url: '', preview_url: '' };
         },
 
         openPreview() {

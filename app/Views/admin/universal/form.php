@@ -40,15 +40,15 @@
                 <?php elseif ($type === 'text'): ?>
                     <label class="block text-sm font-medium text-gray-700" for="<?= esc($name) ?>"><?= esc($titleAttr) ?></label>
                     <textarea id="<?= esc($name) ?>" name="<?= esc($name) ?>" <?= $required ?> rows="4"
-                              class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"><?= esc($val) ?></textarea>
+                              class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"><?= esc($val) ?></textarea>
                 <?php elseif ($type === 'integer' || $type === 'number'): ?>
                     <label class="block text-sm font-medium text-gray-700" for="<?= esc($name) ?>"><?= esc($titleAttr) ?></label>
                     <input id="<?= esc($name) ?>" name="<?= esc($name) ?>" type="number" value="<?= esc($val) ?>" <?= $required ?>
-                           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                 <?php else: ?>
                     <label class="block text-sm font-medium text-gray-700" for="<?= esc($name) ?>"><?= esc($titleAttr) ?></label>
                     <input id="<?= esc($name) ?>" name="<?= esc($name) ?>" type="text" value="<?= esc($val) ?>" <?= $required ?>
-                           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                 <?php endif; ?>
                 <?= render_field_error($name) ?>
             </div>

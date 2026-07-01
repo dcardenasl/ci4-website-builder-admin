@@ -109,7 +109,7 @@ $previewUrl   = route_to('admin.cms.blocks.preview');
                 <input type="text"
                        x-model="customBlockKey"
                        placeholder="<?= esc(lang('BlockTypes.field_block_key_placeholder')) ?>"
-                       class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm font-mono">
+                       class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                 <p class="text-xs text-gray-500"><?= esc(lang('BlockTypes.field_block_key_help')) ?></p>
             </div>
 

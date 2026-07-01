@@ -132,7 +132,7 @@
             
             <!-- Filters -->
             <div class="flex items-center gap-2">
-                <select name="language_id" class="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500" 
+                <select name="language_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" 
                     @change="filter('language_id', $event.target.value)">
                     <option value=""><?= esc(lang('Translations.all_active_languages')) ?></option>
                     <?php foreach ($languages as $lang): ?>

@@ -27,7 +27,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
                    x-model="field.key"
                    @input="rebuildJson()"
                    placeholder="ej: heading"
-                   class="w-full text-xs border border-gray-300 rounded px-2 py-1.5 font-mono focus:ring-brand-500 focus:border-brand-500">
+                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs font-mono text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
         </div>
 
         <!-- Tipo -->
@@ -35,7 +35,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
             <label class="block text-[10px] font-medium text-gray-500 mb-1">Tipo</label>
             <select x-model="field.type"
                     @change="rebuildJson()"
-                    class="w-full text-xs border border-gray-300 rounded px-2 py-1.5 focus:ring-brand-500 focus:border-brand-500">
+                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                 <option value="string">string</option>
                 <option value="text">text</option>
                 <option value="richtext">richtext</option>
@@ -57,7 +57,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
                    x-model="field.label"
                    @input="rebuildJson()"
                    placeholder="ej: Título"
-                   class="w-full text-xs border border-gray-300 rounded px-2 py-1.5 focus:ring-brand-500 focus:border-brand-500">
+                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
         </div>
 
         <!-- Opciones (solo select) -->
@@ -67,7 +67,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
                    x-model="field.options"
                    @input="rebuildJson()"
                    placeholder="opción1, opción2"
-                   class="w-full text-xs border border-gray-300 rounded px-2 py-1.5 focus:ring-brand-500 focus:border-brand-500">
+                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
         </div>
 
         <!-- Requerido -->
@@ -102,12 +102,12 @@ $sectionKey = $isConfig ? 'config' : 'content';
                     <!-- Key -->
                     <div class="flex-1 min-w-0">
                         <label class="block text-[9px] font-medium text-gray-400 mb-0.5">Clave</label>
-                        <input type="text" x-model="subField.key" @input="rebuildJson()" placeholder="ej: sub_title" class="w-full text-[11px] border border-gray-300 rounded px-1.5 py-1 font-mono">
+                        <input type="text" x-model="subField.key" @input="rebuildJson()" placeholder="ej: sub_title" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-[11px] font-mono text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     </div>
                     <!-- Tipo -->
                     <div class="w-24 shrink-0">
                         <label class="block text-[9px] font-medium text-gray-400 mb-0.5">Tipo</label>
-                        <select x-model="subField.type" @change="rebuildJson()" class="w-full text-[11px] border border-gray-300 rounded px-1 py-1">
+                        <select x-model="subField.type" @change="rebuildJson()" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-[11px] text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                             <option value="string">string</option>
                             <option value="text">text</option>
                             <option value="url">url</option>
@@ -117,7 +117,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
                     <!-- Label -->
                     <div class="flex-1 min-w-0">
                         <label class="block text-[9px] font-medium text-gray-400 mb-0.5">Etiqueta</label>
-                        <input type="text" x-model="subField.label" @input="rebuildJson()" placeholder="ej: Subtítulo" class="w-full text-[11px] border border-gray-300 rounded px-1.5 py-1">
+                        <input type="text" x-model="subField.label" @input="rebuildJson()" placeholder="ej: Subtítulo" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-[11px] text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     </div>
                     <!-- Requerido -->
                     <div class="pt-3 shrink-0">
@@ -140,4 +140,3 @@ $sectionKey = $isConfig ? 'config' : 'content';
         </div>
     </div>
 </div>
-

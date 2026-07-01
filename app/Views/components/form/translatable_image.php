@@ -59,6 +59,15 @@ $copyTargetFileUrlSelectors = is_array($copyTargetFileUrlSelectors ?? null) ? $c
             </svg>
             <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
         </button>
+        <button type="button"
+                @click="clearFile()"
+                x-show="fileId"
+                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+            </svg>
+            <span><?= esc(lang('App.remove')) ?></span>
+        </button>
         <?php if ($copyTargetFileIdSelectors !== []): ?>
             <button type="button"
                     @click="window.copyLangTabsFileFieldToTargets('<?= esc($fileIdInputId, 'js') ?>', '<?= esc($fileUrlInputId, 'js') ?>', <?= esc(json_encode($copyTargetFileIdSelectors), 'attr') ?>, <?= esc(json_encode($copyTargetFileUrlSelectors), 'attr') ?>)"

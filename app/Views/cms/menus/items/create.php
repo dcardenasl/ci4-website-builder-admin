@@ -100,7 +100,7 @@ $suggestedSortOrder = count($items);
                                     <?= esc(lang('Menus.items_label_label')) ?> <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="translations[<?= esc($langId) ?>][label]" value="<?= esc(old("translations.{$langId}.label", $translation['label'] ?? '')) ?>" required
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                     placeholder="<?= esc(lang('Menus.items_label_placeholder')) ?>">
                             </div>
 
@@ -110,7 +110,7 @@ $suggestedSortOrder = count($items);
                                 </label>
                                 <input type="text" name="translations[<?= esc($langId) ?>][custom_url]" value="<?= esc(old("translations.{$langId}.custom_url", $translation['custom_url'] ?? '')) ?>"
                                     x-bind:disabled="linkType !== 'custom_url'"
-                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                     placeholder="<?= esc(lang('Menus.items_custom_url_placeholder')) ?>">
                             </div>
                         </div>
@@ -123,7 +123,7 @@ $suggestedSortOrder = count($items);
             <!-- Link Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_type_label')) ?></label>
-                <select name="link_type" x-model="linkType" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                <select name="link_type" x-model="linkType" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <option value="page"><?= esc(lang('Menus.items_link_type_page')) ?></option>
                     <option value="entry"><?= esc(lang('Menus.items_link_type_entry')) ?></option>
                     <option value="collection_listing"><?= esc(lang('Menus.items_link_type_collection_listing')) ?></option>
@@ -135,7 +135,7 @@ $suggestedSortOrder = count($items);
             <!-- Target selectors (conditional) -->
             <div x-show="linkType === 'page'" x-cloak>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_page_label')) ?> <span class="text-red-500">*</span></label>
-                <select name="page_id" x-bind:disabled="linkType !== 'page'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                <select name="page_id" x-bind:disabled="linkType !== 'page'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <option value=""><?= esc(lang('Menus.items_target_page_placeholder')) ?></option>
                     <?php foreach ($pages as $id => $title): ?>
                         <option value="<?= esc($id) ?>" <?= (string) $selectedPageId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
@@ -145,7 +145,7 @@ $suggestedSortOrder = count($items);
 
             <div x-show="linkType === 'entry'" x-cloak>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_entry_label')) ?> <span class="text-red-500">*</span></label>
-                <select name="entry_id" x-bind:disabled="linkType !== 'entry'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                <select name="entry_id" x-bind:disabled="linkType !== 'entry'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <option value=""><?= esc(lang('Menus.items_target_entry_placeholder')) ?></option>
                     <?php foreach ($entries as $id => $title): ?>
                         <option value="<?= esc($id) ?>" <?= (string) $selectedEntryId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
@@ -155,7 +155,7 @@ $suggestedSortOrder = count($items);
 
             <div x-show="linkType === 'collection_listing'" x-cloak>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_target_collection_label')) ?> <span class="text-red-500">*</span></label>
-                <select name="collection_id" x-bind:disabled="linkType !== 'collection_listing'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                <select name="collection_id" x-bind:disabled="linkType !== 'collection_listing'" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <option value=""><?= esc(lang('Menus.items_target_collection_placeholder')) ?></option>
                     <?php foreach ($collections as $id => $title): ?>
                         <option value="<?= esc($id) ?>" <?= (string) $selectedCollectionId === (string) $id ? 'selected' : '' ?>><?= esc($title) ?></option>
@@ -167,7 +167,7 @@ $suggestedSortOrder = count($items);
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_parent_label')) ?></label>
-                    <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                    <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                         <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
                         <?php foreach ($parentOptions as $opt): ?>
                             <option value="<?= esc($opt['id']) ?>"><?= esc($opt['label']) ?></option>
@@ -178,7 +178,7 @@ $suggestedSortOrder = count($items);
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
                     <input type="number" name="sort_order" value="<?= esc(old('sort_order', (string) $suggestedSortOrder)) ?>" min="0" required
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                     <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_sort_order_help')) ?></p>
                 </div>
             </div>
@@ -189,7 +189,7 @@ $suggestedSortOrder = count($items);
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_link_target_label')) ?></label>
-                        <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200">
+                        <select name="link_target" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                             <option value="_self" <?= old('link_target', '_self') === '_self' ? 'selected' : '' ?>><?= esc(lang('Menus.items_link_target_same')) ?></option>
                             <option value="_blank" <?= old('link_target', '_self') === '_blank' ? 'selected' : '' ?>><?= esc(lang('Menus.items_link_target_new')) ?></option>
                         </select>
@@ -197,7 +197,7 @@ $suggestedSortOrder = count($items);
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_icon_label')) ?></label>
                         <input type="text" name="icon" value="<?= esc(old('icon', '')) ?>"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                             placeholder="<?= esc(lang('Menus.items_icon_placeholder')) ?>">
                         <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_icon_help')) ?></p>
                     </div>
@@ -205,7 +205,7 @@ $suggestedSortOrder = count($items);
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_css_class_label')) ?></label>
                     <input type="text" name="css_class" value="<?= esc(old('css_class', '')) ?>"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="<?= esc(lang('Menus.items_css_class_placeholder')) ?>">
                 </div>
             </div>

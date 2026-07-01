@@ -150,7 +150,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             }
                             ?>
                             <select name="<?= esc($cfFieldName, 'attr') ?>"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                     <?= $cfReq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
                                 <?php foreach ($cfOptions as $opt): ?>
@@ -163,7 +163,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <input type="<?= $cfType === 'url' ? 'url' : ($cfType === 'integer' ? 'number' : 'text') ?>"
                                    name="<?= esc($cfFieldName, 'attr') ?>"
                                    value="<?= esc((string) $cfVal) ?>"
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                   class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                    <?= $cfReq ? 'required' : '' ?>>
                         <?php endif; ?>
                         <?= render_field_error($cfFieldName) ?>
@@ -261,7 +261,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                         <?php elseif (in_array($ft, ['text', 'textarea'])): ?>
                             <textarea name="<?= esc($fieldName, 'attr') ?>"
                                       rows="4"
-                                      class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                      class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                       <?= $freq ? 'required' : '' ?>><?= esc((string) old($fieldName, $fval)) ?></textarea>
                             <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'url'): ?>
@@ -277,7 +277,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                        placeholder="https:// o /ruta"
                                        inputmode="url"
                                        spellcheck="false"
-                                       class="block w-full pl-9 rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                       class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 pl-9 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                        <?= $freq ? 'required' : '' ?>>
                             </div>
                             <?= render_field_error($fieldName) ?>
@@ -285,7 +285,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <input type="number"
                                    name="<?= esc($fieldName, 'attr') ?>"
                                    value="<?= esc((string) old($fieldName, $fval)) ?>"
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                   class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                    <?= $freq ? 'required' : '' ?>>
                             <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'boolean'): ?>
@@ -300,7 +300,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'select' && ! empty($foptions)): ?>
                             <select name="<?= esc($fieldName, 'attr') ?>"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                     <?= $freq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
                                 <?php foreach ($foptions as $opt): ?>
@@ -350,6 +350,15 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                         </svg>
                                         <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                    </button>
+                                    <button type="button"
+                                            @click="clearFile()"
+                                            x-show="fileId"
+                                            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                        </svg>
+                                        <span>Quitar</span>
                                     </button>
                                     <button type="button"
                                             @click="window.copyLangTabsFileFieldToAll('#file_id_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '#file_url_lang_<?= $idx ?>_<?= esc($fieldKey) ?>', '<?= esc($fieldKey) ?>')"
@@ -425,19 +434,19 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                                            placeholder="https:// o /ruta"
                                                            inputmode="url"
                                                            spellcheck="false"
-                                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                                           class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                                 </template>
                                                 <template x-if="subField.type === 'text' || subField.type === 'textarea'">
                                                     <textarea :name="`translations[${langIdx}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                               x-model="item[subKey]"
                                                               rows="3"
-                                                              class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"></textarea>
+                                                              class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                                                 </template>
                                                 <template x-if="!['file','url','text','textarea'].includes(subField.type)">
                                                     <input type="text"
                                                            :name="`translations[${langIdx}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
                                                            x-model="item[subKey]"
-                                                           class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm">
+                                                           class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                                 </template>
                                             </div>
                                         </template>
@@ -456,7 +465,7 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             <input type="text"
                                    name="<?= esc($fieldName, 'attr') ?>"
                                    value="<?= esc((string) old($fieldName, $fval)) ?>"
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-500 focus:border-brand-500 text-sm"
+                                   class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                    <?= $freq ? 'required' : '' ?>>
                             <?= render_field_error($fieldName) ?>
                         <?php endif; ?>
