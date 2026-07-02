@@ -47,6 +47,22 @@ final class WizardFlowTest extends CIUnitTestCase
 
     public function testStructureWizardIndexRendersForAdmin(): void
     {
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'label' => 'English', 'is_default' => false],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
         $result = $this->withSession([
             'access_token' => 'token',
             'permissions_refreshed_at' => time(),
@@ -67,14 +83,17 @@ final class WizardFlowTest extends CIUnitTestCase
         $result->assertSee('Crear menú');
         $body = (string) $result->getBody();
         $this->assertStringContainsString('Resumen del preset', $body);
+        $this->assertStringContainsString('Idiomas habilitados', $body);
+        $this->assertStringContainsString('collection_translation_name_0', $body);
+        $this->assertStringContainsString('collection_translation_slug_0', $body);
         $this->assertStringContainsString('collectionErrors.slug_base', $body);
         $this->assertStringContainsString('data-slug-invalid-message', $body);
         $this->assertStringNotContainsString('name="collection_type"', $body);
         $this->assertStringNotContainsString('name="url_prefix"', $body);
-        $this->assertStringNotContainsString('Idioma base', $body);
+        $this->assertStringContainsString('Idioma base', $body);
     }
 
-    public function testStructureWizardConfigPassesThroughDefaultLanguageIdFromLanguageService(): void
+    public function testStructureWizardConfigExposesActiveLanguagesWithoutDefaultLanguageId(): void
     {
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->expects($this->once())
@@ -91,9 +110,6 @@ final class WizardFlowTest extends CIUnitTestCase
                 'messages' => [],
                 'fieldErrors' => [],
             ]);
-        $languageMock->expects($this->once())
-            ->method('defaultId')
-            ->willReturn(1);
         Services::injectMock('languageApiService', $languageMock);
 
         $controller = new StructureWizardController();
@@ -106,8 +122,8 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertArrayHasKey('data', $body);
         $this->assertArrayHasKey('languages', $body['data']);
         $this->assertArrayHasKey('collection_presets', $body['data']);
-        $this->assertArrayHasKey('default_language_id', $body['data']);
-        $this->assertSame(1, $body['data']['default_language_id']);
+        $this->assertArrayNotHasKey('default_language_id', $body['data']);
+        $this->assertTrue($body['data']['languages'][0]['is_default']);
         $this->assertNotEmpty($body['data']['collection_presets']['blog']['block_template']['blocks']);
     }
 

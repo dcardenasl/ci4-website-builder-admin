@@ -6,6 +6,32 @@
  */
 $csrfName  ??= csrf_token();
 $csrfToken ??= csrf_hash();
+
+$wizardLanguages = array_values(array_filter($languages ?? [], static fn ($language): bool => is_array($language)));
+$wizardDefaultLanguage = null;
+$wizardTranslationLanguages = [];
+
+foreach ($wizardLanguages as $language) {
+    if (! is_array($language)) {
+        continue;
+    }
+
+    if ($wizardDefaultLanguage === null && ! empty($language['is_default'])) {
+        $wizardDefaultLanguage = $language;
+        continue;
+    }
+
+    $wizardTranslationLanguages[] = $language;
+}
+
+if ($wizardDefaultLanguage === null && $wizardLanguages !== []) {
+    $wizardDefaultLanguage = $wizardLanguages[0];
+    $wizardTranslationLanguages = array_slice($wizardLanguages, 1);
+}
+
+$wizardDefaultLanguageId = (int) ($wizardDefaultLanguage['id'] ?? 0);
+$wizardDefaultLanguageCode = strtoupper((string) ($wizardDefaultLanguage['code'] ?? ''));
+$wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wizardDefaultLanguage['name'] ?? $wizardDefaultLanguageCode);
 ?>
 <div class="max-w-6xl mx-auto space-y-6" x-data="structureWizard()" x-init="init()" @slug-availability-changed.window="onSlugAvailabilityChanged($event)">
     <div x-show="screen === 'loading'" x-cloak class="text-center py-16 text-gray-400">
@@ -157,6 +183,92 @@ $csrfToken ??= csrf_hash();
                         <div class="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
                             <p><strong>Estado:</strong> <span x-text="usePreset ? 'Se aplicará el preset recomendado' : 'Se creará sin preset'"></span></p>
                         </div>
+                        <?php if ($wizardLanguages !== []): ?>
+                            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_languages_section_title')) ?></p>
+                                        <h3 class="mt-1 text-base font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_languages_proposals_title')) ?></h3>
+                                        <p class="mt-2 text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_languages_section_help')) ?></p>
+                                    </div>
+                                    <div class="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
+                                        <?= esc(lang('Wizard.wizard_structure_languages_base_label')) ?>: <span x-text="defaultCollectionLanguageLabel()"><?= esc($wizardDefaultLanguageLabel ?: '—') ?></span>
+                                    </div>
+                                </div>
+
+                                <?php if ($wizardTranslationLanguages !== []): ?>
+                                    <div class="mt-4 space-y-4">
+                                        <?php foreach ($wizardTranslationLanguages as $translationIndex => $language): ?>
+                                            <?php
+                                                $languageId = (int) ($language['id'] ?? 0);
+                                                $languageCode = strtoupper((string) ($language['code'] ?? ''));
+                                                $languageLabel = (string) ($language['label'] ?? $language['name'] ?? $languageCode ?: ('#' . $languageId));
+                                                $translationFieldPrefix = "collectionTranslationRows[{$translationIndex}]";
+                                            ?>
+                                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 transition" :class="collectionTranslations[<?= $translationIndex ?>]?.included ? 'opacity-100' : 'opacity-60'">
+                                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-gray-900"><?= esc($languageLabel) ?></p>
+                                                        <p class="text-xs text-gray-500"><?= esc($languageCode ?: ('#' . $languageId)) ?></p>
+                                                    </div>
+                                                    <div class="flex flex-wrap items-center gap-2">
+                                                        <label class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700">
+                                                            <input type="checkbox" x-model="collectionTranslations[<?= $translationIndex ?>].included" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                                            <span><?= esc(lang('Wizard.wizard_structure_language_include')) ?></span>
+                                                        </label>
+                                                        <button type="button" @click="translateCollectionLanguage(<?= $translationIndex ?>)" :disabled="collectionTranslating || !collectionTranslations[<?= $translationIndex ?>].included" class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                            <span x-show="!collectionTranslations[<?= $translationIndex ?>].translating"><?= esc(lang('Wizard.wizard_structure_language_translate')) ?></span>
+                                                            <span x-show="collectionTranslations[<?= $translationIndex ?>].translating" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating')) ?></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                                    <input type="hidden" id="collection_translation_language_<?= $translationIndex ?>" name="<?= esc($translationFieldPrefix) ?>[language_id]" value="<?= esc($languageId) ?>">
+
+                                                    <?= view('components/forms/text_input', [
+                                                        'name' => "collection_translation_name_{$translationIndex}",
+                                                        'label' => lang('Wizard.wizard_structure_translation_name_label'),
+                                                        'type' => 'text',
+                                                        'class' => 'block',
+                                                        'attrs' => ':disabled="!collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].name" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
+                                                    ]) ?>
+
+                                                    <?= view('components/form/slug', [
+                                                        'name' => "collection_translation_slug_{$translationIndex}",
+                                                        'label' => 'Wizard.wizard_structure_translation_slug_label',
+                                                        'sourceId' => '#collection_translation_name_' . $translationIndex,
+                                                        'checkUrl' => route_to('admin.cms.collections.check_slug'),
+                                                        'required' => false,
+                                                        'languageSelector' => '#collection_translation_language_' . $translationIndex,
+                                                        'help' => 'Wizard.wizard_structure_translation_slug_help',
+                                                        'attrs' => ':disabled="!collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].slug" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
+                                                    ]) ?>
+                                                </div>
+
+                                                <p class="mt-3 text-xs text-gray-500" x-show="collectionTranslations[<?= $translationIndex ?>].included" x-cloak><?= esc(lang('Wizard.wizard_structure_translation_hint')) ?></p>
+                                                <p class="mt-3 text-xs text-red-600" x-show="collectionTranslations[<?= $translationIndex ?>].error" x-cloak x-text="collectionTranslations[<?= $translationIndex ?>].error"></p>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
+                                        <?= esc(lang('Wizard.wizard_structure_languages_no_extra')) ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($wizardTranslationLanguages !== []): ?>
+                                    <p x-show="collectionTranslationError" x-cloak class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-text="collectionTranslationError"></p>
+                                    <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                        <p class="text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_languages_section_footer')) ?></p>
+                                        <button type="button" @click="translateAllCollectionLanguages()" :disabled="collectionTranslating" class="rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                            <span x-show="!collectionTranslating"><?= esc(lang('Wizard.wizard_structure_language_translate_all')) ?></span>
+                                            <span x-show="collectionTranslating" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating_all')) ?></span>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <button type="button" @click="prevCollectionStep()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700" :disabled="collectionStep === 1"><?= esc(lang('Wizard.wizard_structure_prev')) ?></button>
@@ -170,12 +282,46 @@ $csrfToken ??= csrf_hash();
                 </form>
             </main>
         </div>
-        <div x-show="message" x-cloak class="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 shadow-sm" x-text="message"></div>
-        <div x-show="errorMsg" x-cloak class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm" x-text="errorMsg"></div>
-        <div x-show="createdCollectionId" x-cloak class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_collection_ready')) ?></p>
-            <p class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_post_create_help')) ?></p>
-            <div class="mt-4 flex flex-wrap gap-3">
+    </div>
+
+    <div x-show="screen === 'collection-success'" x-cloak class="space-y-6">
+        <div class="rounded-xl border border-green-200 bg-green-50 p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl shadow-sm">✅</div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-green-700"><?= esc(lang('Wizard.wizard_structure_completion_kicker')) ?></p>
+                    <h2 class="mt-2 text-3xl font-bold text-green-950"><?= esc(lang('Wizard.wizard_structure_completion_title')) ?></h2>
+                    <p class="mt-3 max-w-3xl text-sm text-green-900/80"><?= esc(lang('Wizard.wizard_structure_completion_body')) ?></p>
+                </div>
+            </div>
+
+            <div class="mt-6 rounded-2xl border border-green-200 bg-white p-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-green-700"><?= esc(lang('Wizard.wizard_structure_completion_created_title')) ?></p>
+                        <div class="mt-2 space-y-1 text-sm text-gray-700">
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_name')) ?>:</strong> <span x-text="collectionCompleted?.name || '—'"></span></p>
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_internal_slug')) ?>:</strong> <span x-text="collectionCompleted?.slug || '—'"></span></p>
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_type')) ?>:</strong> <span x-text="collectionTypeLabel(collectionCompleted?.type)"></span></p>
+                        </div>
+                    </div>
+                    <div class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-green-800">
+                        <?= esc(lang('Wizard.wizard_structure_completion_next_steps_title')) ?>
+                    </div>
+                </div>
+
+                <ol class="mt-5 space-y-3 text-sm text-gray-700 list-decimal pl-4">
+                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_detail')) ?></li>
+                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_entry')) ?></li>
+                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_advanced')) ?></li>
+                </ol>
+
+                <p class="mt-5 rounded-xl border border-dashed border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
+                    <?= esc(lang('Wizard.wizard_structure_completion_hint_body')) ?>
+                </p>
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-3">
                 <a :href="collectionDetailUrl()" class="btn-primary text-sm"><?= esc(lang('Wizard.wizard_structure_go_detail')) ?></a>
                 <button type="button" @click="resetCollectionFlow()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.wizard_structure_create_another')) ?></button>
                 <a href="<?= route_to('admin.cms.wizard') ?>" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></a>
@@ -239,12 +385,15 @@ $csrfToken ??= csrf_hash();
     'use strict';
     const CSRF_NAME = <?= json_encode($csrfName) ?>;
     const CSRF_TOKEN = <?= json_encode($csrfToken) ?>;
+    const TRANSLATE_URL = <?= json_encode(route_to('admin.cms.translate')) ?>;
+    const COLLECTION_TRANSLATION_LANGUAGES = <?= json_encode($wizardTranslationLanguages, JSON_THROW_ON_ERROR) ?>;
+    const COLLECTION_DEFAULT_LANGUAGE = <?= json_encode($wizardDefaultLanguage, JSON_THROW_ON_ERROR) ?>;
     function headers() { return { 'X-CSRF-TOKEN': CSRF_TOKEN, [CSRF_NAME]: CSRF_TOKEN, 'Content-Type': 'application/json' }; }
     async function req(url, body) { return fetch(url, { method: 'POST', credentials: 'same-origin', headers: headers(), body: JSON.stringify(body) }); }
     function slugify(v) { return (v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 50); }
     window.structureWizard = function () {
         return {
-            screen: 'loading', config: null, errorMsg: '', message: '', saving: false, createdCollectionId: '',
+            screen: 'loading', config: null, errorMsg: '', message: '', saving: false, createdCollectionId: '', collectionCompleted: null,
             collectionErrors: { step1: '', slug_base: '' },
             collectionSlugAvailability: '',
             form: { name: '', slug_base: '', collection_key: '', sort_order: 0, collection_type: 'blog' },
@@ -252,6 +401,11 @@ $csrfToken ??= csrf_hash();
             translation: { language_id: 0, description: '' },
             usePreset: true,
             collectionPreset: null,
+            collectionTranslations: [],
+            collectionTranslationError: '',
+            collectionTranslating: false,
+            collectionTranslationLanguages: COLLECTION_TRANSLATION_LANGUAGES,
+            collectionDefaultLanguage: COLLECTION_DEFAULT_LANGUAGE,
             page: { page_type: 'generic', parent_id: null, translations: [], title: '', slug: ''},
             menu: { menu_key: '', location: 'main', is_active: true, name: '' },
             async init() {
@@ -259,30 +413,42 @@ $csrfToken ??= csrf_hash();
                     const res = await fetch('<?= route_to('admin.cms.wizard.structure.config') ?>', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                     const json = await res.json();
                     this.config = json.data || {};
-                    this.translation.language_id = this.resolveDefaultLanguageId();
-                    this.page.translations = [{ language_id: this.translation.language_id, slug: '', title: '', excerpt: '', meta_title: '', meta_description: '' }];
+                    const defaultLanguageId = this.resolveDefaultLanguageId();
+                    this.translation.language_id = defaultLanguageId;
+                    this.page.translations = [{ language_id: defaultLanguageId, slug: '', title: '', excerpt: '', meta_title: '', meta_description: '' }];
                     this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
                     this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
                     this.collectionSlugAvailability = '';
+                    this.collectionTranslations = this.buildCollectionTranslations();
                     this.syncCollectionSlugLanguage();
                     this.screen = 'home';
                 } catch (e) { this.errorMsg = <?= json_encode(lang('Wizard.wizard_structure_error_load')) ?>; this.screen = 'error'; }
             },
             resolveDefaultLanguageId() {
-                const configDefault = Number(this.config?.default_language_id || 0);
-                if (configDefault > 0) {
-                    return configDefault;
-                }
                 const languages = this.config?.languages || [];
                 const defaultLanguage = languages.find((language) => language?.is_default);
                 return Number(defaultLanguage?.id || languages[0]?.id || 0);
+            },
+            resolveDefaultLanguage() {
+                const languages = this.config?.languages || [];
+                return languages.find((language) => language?.is_default) || languages[0] || COLLECTION_DEFAULT_LANGUAGE || null;
+            },
+            resolveDefaultLanguageCode() {
+                const language = this.resolveDefaultLanguage();
+                return String(language?.code || '').trim().toUpperCase();
+            },
+            languageLabel(language) {
+                return String(language?.label || language?.name || language?.code || '').trim() || '—';
+            },
+            defaultCollectionLanguageLabel() {
+                return this.languageLabel(this.resolveDefaultLanguage());
             },
             syncCollectionSlugLanguage() {
                 const slugInput = this.collectionSlugInput();
                 if (!(slugInput && slugInput.tagName === 'INPUT')) {
                     return;
                 }
-                const languageId = Number(this.config?.default_language_id || this.translation.language_id || 0);
+                const languageId = Number(this.resolveDefaultLanguageId() || this.translation.language_id || 0);
                 slugInput.dataset.slugLanguageId = String(languageId > 0 ? languageId : '');
                 slugInput.dispatchEvent(new Event('input', { bubbles: true }));
             },
@@ -293,9 +459,199 @@ $csrfToken ??= csrf_hash();
             collectionPresetBlocks() {
                 return Array.isArray(this.collectionPreset?.block_template?.blocks) ? this.collectionPreset.block_template.blocks : [];
             },
-            start(kind) { this.message=''; this.errorMsg=''; this.createdCollectionId=''; this.collectionErrors = { step1: '', slug_base: '' }; this.collectionSlugAvailability = ''; this.screen = kind; if (kind === 'collection') { this.collectionStep = 1; this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other'; this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type); this.usePreset = true; this.form.slug_base = ''; this.form.collection_key = ''; this.form.name = ''; } if (kind === 'page') { this.page.title=''; this.page.slug=''; } if (kind==='menu') { this.menu.menu_key=''; this.menu.name=''; } },
-            resetCollectionFlow() { this.createdCollectionId=''; this.message=''; this.errorMsg=''; this.collectionErrors = { step1: '', slug_base: '' }; this.collectionSlugAvailability = ''; this.collectionStep = 1; this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other'; this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type); this.usePreset = true; this.form.slug_base=''; this.form.collection_key=''; this.form.name=''; this.screen = 'collection'; },
-            collectionDetailUrl() { return this.createdCollectionId ? '<?= route_to('admin.cms.collections') ?>/' + this.createdCollectionId : '<?= route_to('admin.cms.collections') ?>'; },
+            buildCollectionTranslations() {
+                const defaultLanguageId = Number(this.resolveDefaultLanguageId() || 0);
+                return (this.collectionTranslationLanguages || [])
+                    .filter((language) => Number(language?.id || 0) > 0 && Number(language.id) !== defaultLanguageId)
+                    .map((language) => ({
+                        language_id: Number(language.id || 0),
+                        code: String(language.code || '').toUpperCase(),
+                        label: this.languageLabel(language),
+                        included: true,
+                        name: '',
+                        slug: '',
+                        translating: false,
+                        error: '',
+                    }));
+            },
+            resetCollectionTranslations() {
+                this.collectionTranslations = this.buildCollectionTranslations();
+                this.collectionTranslationError = '';
+            },
+            collectionTranslationNameInput(index) {
+                return this.$el.querySelector(`#collection_translation_name_${index}`);
+            },
+            collectionTranslationSlugInput(index) {
+                return this.$el.querySelector(`#collection_translation_slug_${index}`);
+            },
+            clearCollectionTranslationError(index) {
+                if (this.collectionTranslations[index]) {
+                    this.collectionTranslations[index].error = '';
+                }
+                this.collectionTranslationError = '';
+            },
+            async translateText(text, sourceLang, targetLang) {
+                const value = String(text || '').trim();
+                const source = String(sourceLang || '').trim().toUpperCase();
+                const target = String(targetLang || '').trim().toUpperCase();
+                if (value === '' || source === '' || target === '') {
+                    return '';
+                }
+
+                const url = new URL(TRANSLATE_URL, window.location.origin);
+                url.searchParams.set('text', value);
+                url.searchParams.set('source_lang', source);
+                url.searchParams.set('target_lang', target);
+
+                const response = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+                const json = await response.json();
+                if (response.ok && json && typeof json.translated === 'string' && json.translated.trim() !== '') {
+                    return json.translated.trim();
+                }
+
+                throw new Error(json?.error || json?.message || <?= json_encode(lang('Wizard.wizard_structure_languages_translate_error')) ?>);
+            },
+            async _translateCollectionLanguage(index) {
+                const row = this.collectionTranslations[index];
+                if (!row || !row.included) {
+                    return;
+                }
+
+                const sourceLang = this.resolveDefaultLanguageCode();
+                const sourceText = String(this.form.name || '').trim();
+                if (sourceText === '') {
+                    row.error = <?= json_encode(lang('Wizard.wizard_structure_translation_source_missing')) ?>;
+                    return;
+                }
+
+                row.translating = true;
+                row.error = '';
+                this.collectionTranslationError = '';
+                try {
+                    const translatedName = await this.translateText(sourceText, sourceLang, row.code);
+                    const nameInput = this.collectionTranslationNameInput(index);
+                    if (nameInput instanceof HTMLInputElement) {
+                        nameInput.value = translatedName;
+                        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    } else {
+                        row.name = translatedName;
+                    }
+
+                    const slugInput = this.collectionTranslationSlugInput(index);
+                    if (slugInput instanceof HTMLInputElement) {
+                        slugInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    } else if (row.slug.trim() === '') {
+                        row.slug = slugify(translatedName);
+                    }
+                } catch (error) {
+                    row.error = error instanceof Error ? error.message : String(error);
+                } finally {
+                    row.translating = false;
+                }
+            },
+            async translateCollectionLanguage(index) {
+                if (this.collectionTranslating) {
+                    return;
+                }
+
+                await this._translateCollectionLanguage(index);
+            },
+            async translateAllCollectionLanguages() {
+                if (this.collectionTranslating) {
+                    return;
+                }
+
+                this.collectionTranslating = true;
+                this.collectionTranslationError = '';
+                try {
+                    for (let index = 0; index < this.collectionTranslations.length; index += 1) {
+                        const row = this.collectionTranslations[index];
+                        if (!row || !row.included) {
+                            continue;
+                        }
+
+                        await this._translateCollectionLanguage(index);
+                    }
+                } finally {
+                    this.collectionTranslating = false;
+                }
+            },
+            collectionTranslationsValid(announce = false) {
+                let valid = true;
+                this.collectionTranslations.forEach((row) => {
+                    if (!row || !row.included) {
+                        if (row) {
+                            row.error = '';
+                        }
+                        return;
+                    }
+
+                    const name = String(row.name || '').trim();
+                    const slug = String(row.slug || '').trim();
+                    if (name === '' || slug === '') {
+                        valid = false;
+                        if (announce) {
+                            row.error = <?= json_encode(lang('Wizard.wizard_structure_translation_required')) ?>;
+                        }
+                        return;
+                    }
+
+                    if (announce) {
+                        row.error = '';
+                    }
+                });
+
+                if (! valid && announce) {
+                    this.collectionTranslationError = <?= json_encode(lang('Wizard.wizard_structure_translation_review')) ?>;
+                }
+
+                return valid;
+            },
+            start(kind) {
+                this.message = '';
+                this.errorMsg = '';
+                this.createdCollectionId = '';
+                this.collectionCompleted = null;
+                this.collectionErrors = { step1: '', slug_base: '' };
+                this.collectionSlugAvailability = '';
+                this.screen = kind;
+                if (kind === 'collection') {
+                    this.collectionStep = 1;
+                    this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
+                    this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
+                    this.usePreset = true;
+                    this.form.slug_base = '';
+                    this.form.collection_key = '';
+                    this.form.name = '';
+                    this.resetCollectionTranslations();
+                }
+                if (kind === 'page') {
+                    this.page.title = '';
+                    this.page.slug = '';
+                }
+                if (kind === 'menu') {
+                    this.menu.menu_key = '';
+                    this.menu.name = '';
+                }
+            },
+            resetCollectionFlow() {
+                this.createdCollectionId = '';
+                this.collectionCompleted = null;
+                this.message = '';
+                this.errorMsg = '';
+                this.collectionErrors = { step1: '', slug_base: '' };
+                this.collectionSlugAvailability = '';
+                this.collectionStep = 1;
+                this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
+                this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
+                this.usePreset = true;
+                this.form.slug_base = '';
+                this.form.collection_key = '';
+                this.form.name = '';
+                this.resetCollectionTranslations();
+                this.screen = 'collection';
+            },
+            collectionDetailUrl() { return this.collectionCompleted?.id ? '<?= route_to('admin.cms.collections') ?>/' + this.collectionCompleted.id : '<?= route_to('admin.cms.collections') ?>'; },
             selectCollectionType(type) {
                 this.form.collection_type = type || 'other';
                 this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
@@ -348,31 +704,57 @@ $csrfToken ??= csrf_hash();
                 return Boolean(this.form.name) && slugOk;
             },
             canAdvanceCollectionStep() { return this.collectionStep === 1 ? Boolean(this.form.name) && this.collectionSlugStatus() === 'available' : true; },
-            nextCollectionStep() {
+            async nextCollectionStep() {
                 if (!this.validateCollectionStep1(true)) {
                     return;
                 }
                 this.collectionErrors = { step1: '', slug_base: '' };
-                if (this.collectionStep < 2) { this.collectionStep += 1; }
+                if (this.collectionStep < 2) {
+                    this.collectionStep += 1;
+                    this.resetCollectionTranslations();
+                    await this.translateAllCollectionLanguages();
+                }
             },
             prevCollectionStep() { if (this.collectionStep > 1) this.collectionStep -= 1; },
-            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.collection_type); },
-            collectionTypeLabel() { return (this.config?.collection_types || []).find((option) => option.key === this.form.collection_type)?.label || this.form.collection_type || '—'; },
+            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.collection_type) && this.collectionTranslationsValid(false); },
+            collectionTypeLabel(type = null) { const lookupType = type || this.form.collection_type; return (this.config?.collection_types || []).find((option) => option.key === lookupType)?.label || lookupType || '—'; },
             stepLabel() { return <?= json_encode(sprintf(lang('Wizard.step_of'), '%s', '2')) ?>.replace('%s', this.collectionStep); },
             async submitCollection() {
                 this.saving = true; this.message=''; this.errorMsg='';
                 try {
+                    if (!this.collectionTranslationsValid(true)) {
+                        throw new Error(<?= json_encode(lang('Wizard.wizard_structure_translation_review')) ?>);
+                    }
+
+                    const defaultLanguageId = this.resolveDefaultLanguageId();
+                    const translations = [];
+                    if (defaultLanguageId > 0) {
+                        translations.push({
+                            language_id: defaultLanguageId,
+                            slug: this.form.slug_base || this.form.collection_key,
+                            name: this.form.name,
+                            description: '',
+                        });
+                    }
+                    this.collectionTranslations.forEach((row) => {
+                        if (!row || !row.included) {
+                            return;
+                        }
+
+                        translations.push({
+                            language_id: Number(row.language_id || 0),
+                            slug: String(row.slug || '').trim() || slugify(row.name || ''),
+                            name: String(row.name || '').trim(),
+                            description: '',
+                        });
+                    });
+
                     const payload = {
                         collection_type: this.form.collection_type,
                         collection_key: this.form.collection_key || this.form.slug_base,
                         sort_order: this.form.sort_order ?? 0,
                         use_preset: this.usePreset ? 1 : 0,
-                        translations: [{
-                            language_id: this.translation.language_id,
-                            slug: this.form.slug_base || this.form.collection_key,
-                            name: this.form.name,
-                            description: '',
-                        }],
+                        translations,
                     };
                     const res = await req('<?= route_to('admin.cms.wizard.structure.create_collection') ?>', payload); const json = await res.json();
                     if (!json.ok) {
@@ -397,8 +779,15 @@ $csrfToken ??= csrf_hash();
                         throw new Error(<?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>);
                     }
                     const id = json.data?.id || '';
-                    this.message = <?= json_encode(lang('Wizard.wizard_structure_collection_ready')) ?>;
-                    this.createdCollectionId = id ? String(id) : '';
+                    this.collectionCompleted = {
+                        id: id ? String(id) : '',
+                        name: this.form.name || '',
+                        slug: this.form.collection_key || this.form.slug_base || '',
+                        type: this.form.collection_type || '',
+                    };
+                    this.createdCollectionId = this.collectionCompleted.id;
+                    this.screen = 'collection-success';
+                    this.message = '';
                 } catch (e) {
                     this.errorMsg = e.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>;
                 } finally { this.saving = false; }

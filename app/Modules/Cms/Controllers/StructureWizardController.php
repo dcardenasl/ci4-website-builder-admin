@@ -29,25 +29,24 @@ class StructureWizardController extends BaseWebController
 
     public function index(): string
     {
+        $languages = $this->loadActiveLanguages();
+
         return $this->render('cms/wizard/structure', [
             'title'      => lang('Wizard.structure_title'),
             'csrfName'   => csrf_token(),
             'csrfToken'  => csrf_hash(),
+            'languages'  => $languages,
         ]);
     }
 
     public function config(): ResponseInterface
     {
-        $languageService = service('languageApiService');
-        $languagesResponse = $this->safeApiCall(fn () => $languageService->list(['limit' => 100, 'is_active' => true]));
-        $languages = $this->extractItems($languagesResponse);
-        $defaultLanguageId = (int) $languageService->defaultId();
+        $languages = $this->loadActiveLanguages();
 
         return $this->response->setJSON([
             'ok' => true,
             'data' => [
                 'languages' => $languages,
-                'default_language_id' => $defaultLanguageId,
                 'collection_types' => $this->collectionTypeOptions(),
                 'collection_presets' => array_column(CmsPresetCatalog::collectionPresets(), null, 'type_key'),
                 'page_types' => $this->pageTypeOptions(),
@@ -174,6 +173,17 @@ class StructureWizardController extends BaseWebController
         }
 
         return null;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function loadActiveLanguages(): array
+    {
+        $languageService = service('languageApiService');
+        $languagesResponse = $this->safeApiCall(fn () => $languageService->list(['limit' => 100, 'is_active' => true]));
+
+        return $this->extractItems($languagesResponse);
     }
 
     /**

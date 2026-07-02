@@ -137,6 +137,22 @@ final class CollectionFlowTest extends CIUnitTestCase
 
     public function testStructureWizardShowsCollectionTypeAndHidesLegacyLanguageFields(): void
     {
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'label' => 'English', 'is_default' => false],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read', 'cms.entries.read', 'cms.pages.read', 'cms.pages.write', 'cms.menus.read', 'cms.menus.write']],
@@ -148,9 +164,44 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('Resumen del preset', $body);
         $this->assertStringContainsString('Usar preset recomendado', $body);
         $this->assertStringContainsString('Crear sin preset', $body);
+        $this->assertStringContainsString('Idiomas habilitados', $body);
+        $this->assertStringContainsString('collection_translation_name_0', $body);
+        $this->assertStringContainsString('collection_translation_slug_0', $body);
+        $this->assertStringContainsString('Traducir todo', $body);
+        $this->assertStringContainsString('Incluir', $body);
         $this->assertStringNotContainsString('name="collection_type"', $body);
-        $this->assertStringNotContainsString('Idioma base', $body);
+        $this->assertStringContainsString('Idioma base', $body);
         $this->assertStringNotContainsString('name="url_prefix"', $body);
+        $this->assertStringNotContainsString('default_language_id', $body);
+    }
+
+    public function testStructureWizardShowsDedicatedCollectionSuccessScreen(): void
+    {
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read', 'cms.entries.read', 'cms.pages.read', 'cms.pages.write', 'cms.menus.read', 'cms.menus.write']],
+            'permissions_refreshed_at' => time(),
+        ])->get('/admin/cms/wizard/structure');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
+        $this->assertStringContainsString("x-show=\"screen === 'collection-success'\"", $body);
+        $this->assertStringNotContainsString('lg:grid-cols-3', $body);
     }
 
     public function testStoreValidationFailureRedirectsBack(): void
