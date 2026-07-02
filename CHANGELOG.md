@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Structure wizard — multilingual support with automatic translation proposals** — extended the structure wizard with a dedicated language selection step featuring active languages from the hub, automatic translation proposals via MyMemory API, inline editing of translated names and slugs, and language inclusion/exclusion toggles before final collection submission
 - **Interactive multi-step structure wizard** — enhanced wizard with Alpine.js-driven step-by-step flow, intent presets (blog, news, portfolio, services, custom), dynamic form validation, and multi-language support for guided collection creation
 - **Structure wizard** — new guided interface to create and manage pages, collections, menus, and redirects with modal dialogs and hierarchical organization
 - **Default sort on remote tables** — added `defaultSort` configuration to remoteTable component; all data tables now sort by newest records first by default (created_at descending), improving UX by showing the most recently created/updated items at the top
