@@ -1,4 +1,4 @@
-/* global AbortController */
+/* global AbortController, HTMLSelectElement, Event */
 import { devError } from './dev.js';
 
 export const slugify = (value) => String(value || '')
@@ -18,8 +18,12 @@ export const bootSlugFields = () => {
         const sourceInput = sourceSelector === '' ? null : document.querySelector(sourceSelector);
         const regenerateButton = slugInput.closest('[data-slug-field]')?.querySelector('[data-slug-regenerate]');
         const checkUrl = slugInput.dataset.slugCheckUrl || '';
+        const languageIdAttribute = slugInput.dataset.slugLanguageId || '';
+        const languageSelector = slugInput.dataset.slugLanguageSelector || '';
         const currentId = slugInput.dataset.slugCurrentId || '';
+        const invalidMessage = slugInput.dataset.slugInvalidMessage || '';
         const statusIcons = slugInput.closest('[data-slug-field]')?.querySelectorAll('[data-slug-status]') || [];
+        const languageInput = languageSelector === '' ? null : document.querySelector(languageSelector);
 
         if (!(sourceInput instanceof HTMLInputElement)) return;
 
@@ -28,6 +32,14 @@ export const bootSlugFields = () => {
         let availabilityRequest = null;
 
         const showStatus = (status) => {
+            slugInput.dataset.slugAvailability = status || '';
+            window.dispatchEvent(new CustomEvent('slug-availability-changed', {
+                detail: {
+                    id: slugInput.id || '',
+                    status: status || '',
+                    value: slugInput.value.trim(),
+                },
+            }));
             statusIcons.forEach((icon) => {
                 if (!(icon instanceof HTMLElement)) return;
                 const active = icon.dataset.slugStatus === status;
@@ -44,15 +56,28 @@ export const bootSlugFields = () => {
             }
 
             const slug = slugInput.value.trim();
-            if (checkUrl === '' || slug.length < 2 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+            const resolvedLanguageId = String(slugInput.dataset.slugLanguageId || languageIdAttribute || '').trim();
+            if (resolvedLanguageId === '') {
                 showStatus('');
                 slugInput.setCustomValidity('');
+                return;
+            }
+
+            if (checkUrl === '' || slug.length < 2 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+                showStatus('');
+                slugInput.setCustomValidity(invalidMessage || 'Invalid slug format.');
                 return;
             }
 
             availabilityTimer = window.setTimeout(() => {
                 const url = new URL(checkUrl, window.location.origin);
                 url.searchParams.set('slug', slug);
+                if (languageInput instanceof HTMLInputElement || languageInput instanceof HTMLSelectElement) {
+                    const languageId = String(languageInput.value || '').trim();
+                    if (languageId !== '') url.searchParams.set('language_id', languageId);
+                } else {
+                    url.searchParams.set('language_id', resolvedLanguageId);
+                }
                 if (currentId !== '') url.searchParams.set('current_id', currentId);
 
                 const controller = new AbortController();
@@ -88,6 +113,7 @@ export const bootSlugFields = () => {
         const syncFromSource = () => {
             if (manual) return;
             slugInput.value = slugify(sourceInput.value);
+            slugInput.dispatchEvent(new Event('input', { bubbles: true }));
             checkAvailability();
         };
 
