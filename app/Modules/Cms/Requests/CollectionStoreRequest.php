@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Libraries\Cms\CmsPresetCatalog;
 use App\Support\Requests\BaseFormRequest;
 
 class CollectionStoreRequest extends BaseFormRequest
@@ -11,6 +12,7 @@ class CollectionStoreRequest extends BaseFormRequest
     protected function fields(): array
     {
         return [
+            'collection_type',
             'collection_key',
             'default_sitemap_priority',
             'default_changefreq',
@@ -33,7 +35,10 @@ class CollectionStoreRequest extends BaseFormRequest
 
     public function rules(): array
     {
+        $collectionTypes = implode(',', CmsPresetCatalog::collectionTypes());
+
         return [
+            'collection_type' => 'required|in_list[' . $collectionTypes . ']',
             'collection_key' => 'required|min_length[2]|max_length[255]',
             'default_sitemap_priority' => 'permit_empty|decimal',
             'default_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
@@ -87,6 +92,7 @@ class CollectionStoreRequest extends BaseFormRequest
     public function payload(): array
     {
         $payload = [
+            'collection_type' => $this->postString('collection_type') ?: 'other',
             'collection_key' => $this->postString('collection_key'),
             'default_sitemap_priority' => $this->postString('default_sitemap_priority') ?: '0.5',
             'default_changefreq' => $this->postString('default_changefreq') ?: 'weekly',
@@ -95,13 +101,9 @@ class CollectionStoreRequest extends BaseFormRequest
             'requires_approval' => $this->postBool('requires_approval') ? '1' : '0',
             'enables_categories' => $this->postBool('enables_categories') ? '1' : '0',
             'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
+            'block_template' => $this->postString('block_template'),
             'translations' => $this->normalizeTranslations(),
         ];
-
-        $rawTemplate = $this->postString('block_template');
-        if ($rawTemplate !== '') {
-            $payload['block_template'] = $rawTemplate;
-        }
 
         return $payload;
     }

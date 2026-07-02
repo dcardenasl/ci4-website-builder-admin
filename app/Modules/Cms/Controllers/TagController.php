@@ -64,7 +64,8 @@ class TagController extends BaseWebController
     public function create(): string
     {
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'slug'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
@@ -73,6 +74,9 @@ class TagController extends BaseWebController
         return $this->render('cms/tags/create', [
             'title'            => lang('Tags.tags_create'),
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }
@@ -103,7 +107,8 @@ class TagController extends BaseWebController
         }
 
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'slug'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
@@ -113,6 +118,9 @@ class TagController extends BaseWebController
             'title'            => lang('Tags.tags_edit'),
             'item'             => $this->extractData($response),
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }

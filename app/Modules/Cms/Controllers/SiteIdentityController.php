@@ -50,13 +50,13 @@ class SiteIdentityController extends BaseWebController
 
         $langsRes       = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages      = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
-        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
 
         return $this->render('cms/site-identity/show', [
             'title'          => lang('SiteIdentity.page_title'),
             'settingsMap'    => $settingsMap,
             'languages'      => $languages,
-            'baseLanguageId' => $baseLanguageId,
+            'baseLanguageId' => $languageContext['defaultLangId'],
         ]);
     }
 
@@ -72,15 +72,13 @@ class SiteIdentityController extends BaseWebController
 
         $langsRes       = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages      = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
-        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
 
         /** @var SiteIdentityUpdateRequest $formRequest */
         $formRequest = service('formRequest', SiteIdentityUpdateRequest::class, false);
         $formRequest->setIdentitySettings($items);
         $formRequest->setLanguages($languages);
-        if ($baseLanguageId !== null) {
-            $formRequest->setBaseLanguageId($baseLanguageId);
-        }
+        $formRequest->setBaseLanguageId($languageContext['defaultLangId']);
 
         $invalid = $this->validateRequest($formRequest);
         if ($invalid !== null) {

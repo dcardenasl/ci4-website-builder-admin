@@ -69,7 +69,8 @@ class FormController extends BaseWebController
     {
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
         $languages    = $this->extractItems($langResponse) ?: [];
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'submit_label', 'description', 'success_message', 'error_message'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId, 'translations')
@@ -78,6 +79,9 @@ class FormController extends BaseWebController
         return $this->render('cms/forms/create', [
             'title'            => lang('Forms.create_title'),
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }
@@ -126,7 +130,8 @@ class FormController extends BaseWebController
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
         $languages    = $this->extractItems($langResponse) ?: [];
         $form         = $this->normalizeForm($this->extractData($formResponse));
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'submit_label', 'description', 'success_message', 'error_message'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId, 'translations')
@@ -136,6 +141,9 @@ class FormController extends BaseWebController
             'title'            => lang('Forms.edit_title'),
             'form'             => $form,
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }

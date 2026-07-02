@@ -67,7 +67,8 @@ class CategoryController extends BaseWebController
     public function create(): string
     {
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'meta_title', 'meta_description'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
@@ -78,6 +79,9 @@ class CategoryController extends BaseWebController
             'collections'      => $this->collectionsOptions(),
             'categories'       => $this->categoriesOptions(),
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }
@@ -108,7 +112,8 @@ class CategoryController extends BaseWebController
         }
 
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'meta_title', 'meta_description'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
@@ -120,6 +125,9 @@ class CategoryController extends BaseWebController
             'collections'      => $this->collectionsOptions(),
             'categories'       => $this->categoriesOptions($id),
             'languages'        => $languages,
+            'defaultLangId'    => $languageContext['defaultLangId'],
+            'defaultLangCode'  => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
         ]);
     }

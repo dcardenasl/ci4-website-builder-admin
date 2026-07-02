@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Libraries\Cms\CmsPresetCatalog;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
-use App\Modules\Cms\Services\BlockCatalogServiceInterface;
 use App\Modules\Cms\Services\MenuApiServiceInterface;
 use App\Modules\Cms\Services\PageApiServiceInterface;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,7 +16,6 @@ use Psr\Log\LoggerInterface;
 class StructureWizardController extends BaseWebController
 {
     protected CollectionApiServiceInterface $collectionService;
-    protected BlockCatalogServiceInterface $blockCatalogService;
     protected PageApiServiceInterface $pageService;
     protected MenuApiServiceInterface $menuService;
 
@@ -24,7 +23,6 @@ class StructureWizardController extends BaseWebController
     {
         parent::initController($request, $response, $logger);
         $this->collectionService = service('collectionApiService');
-        $this->blockCatalogService = service('blockCatalogService');
         $this->pageService = service('pageApiService');
         $this->menuService = service('menuApiService');
     }
@@ -40,34 +38,20 @@ class StructureWizardController extends BaseWebController
 
     public function config(): ResponseInterface
     {
-        $languagesResponse = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $languageService = service('languageApiService');
+        $languagesResponse = $this->safeApiCall(fn () => $languageService->list(['limit' => 100, 'is_active' => true]));
         $languages = $this->extractItems($languagesResponse);
-        $defaultLanguageId = 0;
-        foreach ($languages as $language) {
-            if (! empty($language['is_default'])) {
-                $defaultLanguageId = (int) ($language['id'] ?? 0);
-                break;
-            }
-        }
-        if ($defaultLanguageId === 0 && $languages !== []) {
-            $defaultLanguageId = (int) ($languages[0]['id'] ?? 0);
-        }
+        $defaultLanguageId = (int) $languageService->defaultId();
 
         return $this->response->setJSON([
             'ok' => true,
             'data' => [
                 'languages' => $languages,
                 'default_language_id' => $defaultLanguageId,
-                'intent_options' => [
-                    ['key' => 'blog', 'label' => lang('Wizard.intent_blog') ?? 'Blog', 'suggestions' => ['requires_approval' => false, 'enables_categories' => true, 'enables_tags' => true, 'default_changefreq' => 'weekly', 'default_sitemap_priority' => 0.7]],
-                    ['key' => 'news', 'label' => lang('Wizard.intent_news') ?? 'Noticias', 'suggestions' => ['requires_approval' => true, 'enables_categories' => true, 'enables_tags' => true, 'default_changefreq' => 'daily', 'default_sitemap_priority' => 0.8]],
-                    ['key' => 'portfolio', 'label' => lang('Wizard.intent_portfolio') ?? 'Portafolio', 'suggestions' => ['requires_approval' => false, 'enables_categories' => false, 'enables_tags' => false, 'default_changefreq' => 'monthly', 'default_sitemap_priority' => 0.6]],
-                    ['key' => 'services', 'label' => lang('Wizard.intent_services') ?? 'Servicios', 'suggestions' => ['requires_approval' => false, 'enables_categories' => false, 'enables_tags' => false, 'default_changefreq' => 'monthly', 'default_sitemap_priority' => 0.6]],
-                    ['key' => 'custom', 'label' => lang('Wizard.intent_custom') ?? 'Otro', 'suggestions' => ['requires_approval' => false, 'enables_categories' => true, 'enables_tags' => true, 'default_changefreq' => 'weekly', 'default_sitemap_priority' => 0.5]],
-                ],
-                'existing_collections' => $this->extractItems($this->safeApiCall(fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true]))),
-                'page_types' => ['generic' => 'Generic', 'home' => 'Home', 'contact' => 'Contact', 'privacy' => 'Privacy'],
-                'block_types' => $this->blockCatalogService->all(),
+                'collection_types' => $this->collectionTypeOptions(),
+                'collection_presets' => array_column(CmsPresetCatalog::collectionPresets(), null, 'type_key'),
+                'page_types' => $this->pageTypeOptions(),
+                'page_presets' => array_column(CmsPresetCatalog::pagePresets(), null, 'type_key'),
             ],
         ]);
     }
@@ -134,11 +118,39 @@ class StructureWizardController extends BaseWebController
 
         $ok = $statusCode >= 200 && $statusCode < 300;
         $data = $ok ? $this->extractData($result) : ($result['data'] ?? []);
+        $fieldErrors = $this->getFieldErrors($result);
+        $message = null;
 
-        return $this->response->setStatusCode($statusCode)->setJSON([
+        if (! $ok) {
+            $message = $this->firstMessage($result, lang('Wizard.wizard_structure_error_collection'));
+
+            if ($fieldErrors !== []) {
+                $message = reset($fieldErrors) ?: $message;
+            }
+        }
+
+        $response = [
             'ok' => $ok,
             'data' => $data,
-        ]);
+        ];
+
+        if (! $ok && $message !== null && $message !== '') {
+            $response['message'] = $message;
+        }
+
+        if (! $ok && $fieldErrors !== []) {
+            $response['fieldErrors'] = $fieldErrors;
+        }
+
+        if (! $ok && isset($result['detail']) && is_scalar($result['detail'])) {
+            $response['detail'] = (string) $result['detail'];
+        }
+
+        if (! $ok && isset($result['errors']) && is_array($result['errors'])) {
+            $response['errors'] = $result['errors'];
+        }
+
+        return $this->response->setStatusCode($statusCode)->setJSON($response);
     }
 
     /**
@@ -147,7 +159,7 @@ class StructureWizardController extends BaseWebController
     private function validateCollectionWizardPayload(array $payload): ?string
     {
         $collectionKey = trim((string) ($payload['collection_key'] ?? ''));
-        $urlPrefix = trim((string) ($payload['url_prefix'] ?? ''));
+        $collectionType = trim((string) ($payload['collection_type'] ?? ''));
 
         if ($collectionKey === '' || strlen($collectionKey) < 2) {
             return 'collection_key is required.';
@@ -157,39 +169,42 @@ class StructureWizardController extends BaseWebController
             return 'collection_key must use lowercase letters, numbers and hyphens only.';
         }
 
-        if ($urlPrefix === '') {
-            return 'url_prefix is required.';
-        }
-
-        if (! preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $urlPrefix)) {
-            return 'url_prefix must use lowercase letters, numbers and hyphens only.';
-        }
-
-        $translations = $payload['translations'] ?? [];
-        if (! is_array($translations) || $translations === []) {
-            return 'At least one base translation is required.';
-        }
-
-        $hasValidTranslation = false;
-        foreach ($translations as $translation) {
-            if (! is_array($translation)) {
-                continue;
-            }
-
-            $languageId = (int) ($translation['language_id'] ?? 0);
-            $name = trim((string) ($translation['name'] ?? ''));
-            $slug = trim((string) ($translation['slug'] ?? ''));
-
-            if ($languageId > 0 && $name !== '' && $slug !== '') {
-                $hasValidTranslation = true;
-                break;
-            }
-        }
-
-        if (! $hasValidTranslation) {
-            return 'A valid base translation is required.';
+        if ($collectionType === '' || ! in_array($collectionType, CmsPresetCatalog::collectionTypes(), true)) {
+            return 'collection_type is required.';
         }
 
         return null;
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function collectionTypeOptions(): array
+    {
+        return array_map(
+            function (string $type): array {
+                return [
+                    'key' => $type,
+                    'label' => lang('Collections.collection_type_' . $type),
+                ];
+            },
+            CmsPresetCatalog::collectionTypes()
+        );
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function pageTypeOptions(): array
+    {
+        return array_map(
+            function (string $type): array {
+                return [
+                    'key' => $type,
+                    'label' => lang('Pages.page_type_' . $type),
+                ];
+            },
+            CmsPresetCatalog::pageTypes()
+        );
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Libraries\Cms\CmsPresetCatalog;
 use App\Support\FileSizeLimits;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -67,6 +68,9 @@ class WizardController extends BaseWebController
                 ]);
             }
         }
+
+        $config['collection_types'] = $this->collectionTypeOptions();
+        $config['page_types'] = $this->pageTypeOptions();
 
         return $this->response->setJSON($config);
     }
@@ -297,6 +301,38 @@ class WizardController extends BaseWebController
 
         return $this->response->setStatusCode($statusCode)->setJSON(
             $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? [])
+        );
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function collectionTypeOptions(): array
+    {
+        return array_map(
+            function (string $type): array {
+                return [
+                    'key' => $type,
+                    'label' => lang('Collections.collection_type_' . $type),
+                ];
+            },
+            CmsPresetCatalog::collectionTypes()
+        );
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function pageTypeOptions(): array
+    {
+        return array_map(
+            function (string $type): array {
+                return [
+                    'key' => $type,
+                    'label' => lang('Pages.page_type_' . $type),
+                ];
+            },
+            CmsPresetCatalog::pageTypes()
         );
     }
 

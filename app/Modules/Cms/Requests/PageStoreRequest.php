@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Libraries\Cms\CmsPresetCatalog;
 use App\Support\Requests\BaseFormRequest;
 
 class PageStoreRequest extends BaseFormRequest
@@ -25,8 +26,10 @@ class PageStoreRequest extends BaseFormRequest
 
     public function rules(): array
     {
+        $pageTypes = implode(',', CmsPresetCatalog::pageTypes());
+
         return [
-            'page_type' => 'required|in_list[home,generic,contact,privacy,terms,404,500,maintenance]',
+            'page_type' => 'required|in_list[' . $pageTypes . ']',
             'status' => 'required|in_list[draft,published,archived]',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',

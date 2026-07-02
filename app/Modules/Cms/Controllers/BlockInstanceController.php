@@ -429,7 +429,8 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
 
         // Extract translatable fields (exclude file, repeater, boolean, integer, select)
         $allFields = is_array($blockType['fields'] ?? null) ? $blockType['fields'] : [];
@@ -452,6 +453,9 @@ class BlockInstanceController extends BaseWebController
             'block'        => $block,
             'blockType'    => $blockType,
             'languages'    => $languages,
+            'defaultLangId' => $languageContext['defaultLangId'],
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
             'ownerType'    => $ownerType,
             'ownerLabel'   => $this->ownerLabel($ownerType),

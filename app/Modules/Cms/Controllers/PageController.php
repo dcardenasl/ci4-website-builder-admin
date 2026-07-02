@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Libraries\Cms\CmsPresetCatalog;
 use App\Modules\Cms\Requests\PageStoreRequest;
 use App\Modules\Cms\Requests\PageUpdateRequest;
 use App\Modules\Cms\Services\PageApiServiceInterface;
@@ -97,17 +98,22 @@ class PageController extends BaseWebController
     public function create(): string
     {
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['title', 'excerpt', 'meta_title', 'meta_description'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
         return $this->render('cms/pages/create', [
-            'title'            => lang('Pages.pages_create'),
-            'pages'            => $this->pagesOptions(),
-            'languages'        => $languages,
+            'title' => lang('Pages.pages_create'),
+            'pages' => $this->pagesOptions(),
+            'languages' => $languages,
+            'defaultLangId' => $languageContext['defaultLangId'],
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'pageTypes' => $this->pageTypeOptions(),
         ]);
     }
 
@@ -142,19 +148,24 @@ class PageController extends BaseWebController
             : 0;
 
         $languages = $this->getLanguages();
-        $defaultLangId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['title', 'excerpt', 'meta_title', 'meta_description'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
         return $this->render('cms/pages/edit', [
-            'title'            => lang('Pages.pages_edit'),
-            'item'             => $this->extractData($response),
-            'pages'            => $this->pagesOptions($id),
-            'languages'        => $languages,
-            'focusLangId'      => $focusLangId,
+            'title' => lang('Pages.pages_edit'),
+            'item' => $this->extractData($response),
+            'pages' => $this->pagesOptions($id),
+            'languages' => $languages,
+            'focusLangId' => $focusLangId,
+            'defaultLangId' => $languageContext['defaultLangId'],
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'pageTypes' => $this->pageTypeOptions(),
         ]);
     }
 
@@ -205,6 +216,22 @@ class PageController extends BaseWebController
         $result = $this->safeApiCall(fn () => $this->pageService->checkSlug($slug, $languageId, $currentId));
         $data   = $this->extractData($result);
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function pageTypeOptions(): array
+    {
+        return array_map(
+            function (string $type): array {
+                return [
+                    'key' => $type,
+                    'label' => lang('Pages.page_type_' . $type),
+                ];
+            },
+            CmsPresetCatalog::pageTypes()
+        );
     }
 
     public function reorder(): string|RedirectResponse

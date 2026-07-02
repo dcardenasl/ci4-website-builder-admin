@@ -102,12 +102,12 @@ class SettingController extends BaseWebController
 
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
-        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
 
         return $this->render('cms/settings/create', [
             'title'     => lang('Settings.settings_create'),
             'languages' => $languages,
-            'baseLanguageId' => $baseLanguageId,
+            'baseLanguageId' => $languageContext['defaultLangId'],
         ]);
     }
 
@@ -128,7 +128,7 @@ class SettingController extends BaseWebController
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
         $request->setLanguages($languages);
-        $request->setBaseLanguageId($this->resolveBaseLanguageId($languages));
+        $request->setBaseLanguageId($this->resolveLanguageContext($languages)['defaultLangId']);
 
         $response = $this->safeApiCall(fn () => $this->settingService->create($request->payload()));
 
@@ -153,13 +153,13 @@ class SettingController extends BaseWebController
 
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
-        $baseLanguageId = $this->resolveBaseLanguageId($languages);
+        $languageContext = $this->resolveLanguageContext($languages);
 
         return $this->render('cms/settings/edit', [
             'title'     => lang('Settings.settings_edit'),
             'item'      => $this->extractData($response),
             'languages' => $languages,
-            'baseLanguageId' => $baseLanguageId,
+            'baseLanguageId' => $languageContext['defaultLangId'],
         ]);
     }
 
@@ -180,7 +180,7 @@ class SettingController extends BaseWebController
         $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
         $request->setLanguages($languages);
-        $request->setBaseLanguageId($this->resolveBaseLanguageId($languages));
+        $request->setBaseLanguageId($this->resolveLanguageContext($languages)['defaultLangId']);
 
         $response = $this->safeApiCall(fn () => $this->settingService->update($id, $request->payload()));
 

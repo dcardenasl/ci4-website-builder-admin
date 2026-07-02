@@ -237,10 +237,23 @@ abstract class BaseWebController extends BaseController
      */
     protected function firstMessage(array $response, string $fallback): string
     {
+        foreach (['message', 'detail', 'title'] as $key) {
+            if (isset($response[$key]) && is_scalar($response[$key])) {
+                $message = $this->localizeApiMessage((string) $response[$key]);
+                if ($message !== '') {
+                    return $message;
+                }
+            }
+        }
+
         $messages = $response['messages'] ?? [];
 
         if (is_array($messages) && isset($messages[0])) {
             return $this->localizeApiMessage((string) $messages[0]);
+        }
+
+        if (isset($response['errors']['general']) && is_scalar($response['errors']['general'])) {
+            return $this->localizeApiMessage((string) $response['errors']['general']);
         }
 
         return $fallback;
@@ -378,6 +391,70 @@ abstract class BaseWebController extends BaseController
         $data[$dataKey] = $this->extractData($response);
 
         return $this->render($view, $data);
+    }
+
+    /**
+     * Resolve the active language context once from the global language preset.
+     *
+     * @param array<array-key, mixed> $languages
+     * @return array{defaultLangId: int, defaultLangCode: string, defaultLangIndex: int}
+     */
+    protected function resolveLanguageContext(array $languages): array
+    {
+        $defaultLangIndex = 0;
+        $defaultLangCode = '';
+        $defaultLangId = 0;
+
+        if (! empty($languages)) {
+            foreach ($languages as $index => $language) {
+                if (! is_array($language)) {
+                    continue;
+                }
+
+                if (! empty($language['is_default']) && isset($language['id']) && is_numeric($language['id'])) {
+                    return [
+                        'defaultLangId' => (int) $language['id'],
+                        'defaultLangCode' => (string) ($language['code'] ?? ''),
+                        'defaultLangIndex' => (int) $index,
+                    ];
+                }
+            }
+
+            $defaultLangId = (int) service('languageApiService')->defaultId();
+
+            if ($defaultLangId > 0) {
+                foreach ($languages as $index => $language) {
+                    if (! is_array($language)) {
+                        continue;
+                    }
+
+                    if ((int) ($language['id'] ?? 0) === $defaultLangId) {
+                        return [
+                            'defaultLangId' => $defaultLangId,
+                            'defaultLangCode' => (string) ($language['code'] ?? ''),
+                            'defaultLangIndex' => (int) $index,
+                        ];
+                    }
+                }
+            }
+
+            foreach ($languages as $index => $language) {
+                if (! is_array($language) || ! isset($language['id']) || ! is_numeric($language['id'])) {
+                    continue;
+                }
+
+                $defaultLangId = (int) $language['id'];
+                $defaultLangIndex = (int) $index;
+                $defaultLangCode = (string) ($language['code'] ?? '');
+                break;
+            }
+        }
+
+        return [
+            'defaultLangId' => $defaultLangId,
+            'defaultLangCode' => $defaultLangCode,
+            'defaultLangIndex' => $defaultLangIndex,
+        ];
     }
 
     /**
