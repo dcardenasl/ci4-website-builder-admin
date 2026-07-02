@@ -33,6 +33,6 @@ interface LanguageApiServiceInterface
     /** @return ApiResponse */
     public function delete(int|string $id): array;
 
-
+    public function defaultId(): int;
 
 }

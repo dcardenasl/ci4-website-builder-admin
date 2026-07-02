@@ -475,6 +475,14 @@ class ApiClient implements ApiClientInterface
             return [(string) $payload['message']];
         }
 
+        if (isset($payload['detail']) && is_scalar($payload['detail'])) {
+            return [(string) $payload['detail']];
+        }
+
+        if (isset($payload['title']) && is_scalar($payload['title'])) {
+            return [(string) $payload['title']];
+        }
+
         if (isset($payload['messages']) && is_array($payload['messages'])) {
             $messages = array_values(array_filter($payload['messages'], 'is_scalar'));
             return array_map('strval', $messages);
@@ -494,37 +502,40 @@ class ApiClient implements ApiClientInterface
             return [];
         }
 
-        $errors = $payload['errors'] ?? [];
-
-        if (! is_array($errors)) {
-            return [];
-        }
-
         $fieldErrors = [];
 
-        foreach ($errors as $key => $value) {
-            if (! is_string($key) || $key === 'general') {
-                continue;
-            }
+        $sources = [];
+        if (isset($payload['fieldErrors']) && is_array($payload['fieldErrors'])) {
+            $sources[] = $payload['fieldErrors'];
+        }
+        if (isset($payload['errors']) && is_array($payload['errors'])) {
+            $sources[] = $payload['errors'];
+        }
 
-            if (is_scalar($value)) {
-                $fieldErrors[$key] = (string) $value;
-                continue;
-            }
+        foreach ($sources as $errors) {
+            foreach ($errors as $key => $value) {
+                if (! is_string($key) || $key === 'general') {
+                    continue;
+                }
 
-            if (is_array($value)) {
-                // If it's an array of errors, take the first one that is a string
-                foreach ($value as $entry) {
-                    if (is_scalar($entry)) {
-                        $fieldErrors[$key] = (string) $entry;
-                        break;
-                    }
-                    if (is_array($entry)) {
-                        // Nested array, try one more level or skip
-                        foreach ($entry as $subEntry) {
-                            if (is_scalar($subEntry)) {
-                                $fieldErrors[$key] = (string) $subEntry;
-                                break 2;
+                if (is_scalar($value)) {
+                    $fieldErrors[$key] = (string) $value;
+                    continue;
+                }
+
+                if (is_array($value)) {
+                    // If it's an array of errors, take the first string we can find.
+                    foreach ($value as $entry) {
+                        if (is_scalar($entry)) {
+                            $fieldErrors[$key] = (string) $entry;
+                            break;
+                        }
+                        if (is_array($entry)) {
+                            foreach ($entry as $subEntry) {
+                                if (is_scalar($subEntry)) {
+                                    $fieldErrors[$key] = (string) $subEntry;
+                                    break 2;
+                                }
                             }
                         }
                     }
