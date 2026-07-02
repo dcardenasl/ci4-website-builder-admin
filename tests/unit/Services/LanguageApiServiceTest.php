@@ -27,6 +27,26 @@ final class LanguageApiServiceTest extends CIUnitTestCase
         $this->assertSame($expected, $service->list());
     }
 
+    public function testDefaultIdPrefersExplicitDefaultLanguage(): void
+    {
+        $mock = $this->createMock(ApiClientInterface::class);
+
+        $mock->expects($this->once())
+            ->method('get')
+            ->with('/cms/languages', ['limit' => 100, 'is_active' => true])
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 7, 'code' => 'en', 'is_default' => false],
+                    ['id' => 3, 'code' => 'es', 'is_default' => true],
+                ],
+            ]);
+
+        $service = new LanguageApiService($mock);
+        $this->assertSame(3, $service->defaultId());
+    }
+
     public function testGetCallsCorrectEndpoint(): void
     {
         $mock     = $this->createMock(ApiClientInterface::class);

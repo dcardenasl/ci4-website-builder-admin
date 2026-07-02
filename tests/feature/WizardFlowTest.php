@@ -6,6 +6,8 @@ namespace Tests\Feature;
 
 use App\Libraries\DomainApiClientInterface;
 use App\Modules\Cms\Controllers\WizardController;
+use App\Modules\Cms\Controllers\StructureWizardController;
+use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
@@ -63,6 +65,50 @@ final class WizardFlowTest extends CIUnitTestCase
         $result->assertSee('¿Qué quieres construir hoy?');
         $result->assertSee('Crear colección');
         $result->assertSee('Crear menú');
+        $body = (string) $result->getBody();
+        $this->assertStringContainsString('Resumen del preset', $body);
+        $this->assertStringContainsString('collectionErrors.slug_base', $body);
+        $this->assertStringContainsString('data-slug-invalid-message', $body);
+        $this->assertStringNotContainsString('name="collection_type"', $body);
+        $this->assertStringNotContainsString('name="url_prefix"', $body);
+        $this->assertStringNotContainsString('Idioma base', $body);
+    }
+
+    public function testStructureWizardConfigPassesThroughDefaultLanguageIdFromLanguageService(): void
+    {
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->expects($this->once())
+            ->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'is_default' => false],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $languageMock->expects($this->once())
+            ->method('defaultId')
+            ->willReturn(1);
+        Services::injectMock('languageApiService', $languageMock);
+
+        $controller = new StructureWizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->config();
+
+        $this->assertSame(200, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('languages', $body['data']);
+        $this->assertArrayHasKey('collection_presets', $body['data']);
+        $this->assertArrayHasKey('default_language_id', $body['data']);
+        $this->assertSame(1, $body['data']['default_language_id']);
+        $this->assertNotEmpty($body['data']['collection_presets']['blog']['block_template']['blocks']);
     }
 
     public function testConfigUnwrapsDomainPayload(): void
@@ -74,10 +120,10 @@ final class WizardFlowTest extends CIUnitTestCase
             'data' => [
                 'status' => 'success',
                 'data' => [
+                    'default_language_id' => 1,
                     'languages' => [
                         ['id' => 1, 'code' => 'es', 'is_default' => true],
                     ],
-                    'default_lang_id' => 1,
                     'collections' => [
                         ['id' => 1, 'name' => 'Noticias'],
                     ],
@@ -146,10 +192,17 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertArrayHasKey('collections', $body);
         $this->assertArrayHasKey('pages', $body);
         $this->assertArrayHasKey('menus', $body);
-        $this->assertSame(1, $body['default_lang_id']);
+        $this->assertArrayHasKey('default_language_id', $body);
+        $this->assertArrayHasKey('collection_types', $body);
+        $this->assertArrayHasKey('page_types', $body);
+        $this->assertArrayHasKey('languages', $body);
+        $this->assertSame(1, $body['default_language_id']);
+        $this->assertTrue($body['languages'][0]['is_default']);
         $this->assertCount(1, $body['collections']);
         $this->assertCount(1, $body['pages']);
         $this->assertCount(1, $body['menus']);
+        $this->assertNotEmpty($body['collection_types']);
+        $this->assertNotEmpty($body['page_types']);
         $this->assertSame(11, $body['block_types']['rich_text']['id']);
         $this->assertTrue($body['block_types']['rich_text']['supports_entries']);
     }
@@ -264,6 +317,44 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertSame(201, $result->getStatusCode());
         $body = json_decode((string) $result->getBody(), true);
         $this->assertSame(42, $body['id']);
+    }
+
+    public function testStructureWizardCreateCollectionSurfacesApiValidationDetail(): void
+    {
+        session()->set('user', ['permissions' => ['cms.collections.write']]);
+
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock->expects($this->once())
+            ->method('create')
+            ->willReturn([
+                'ok' => false,
+                'status' => 422,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => ['Slug already exists'],
+                'fieldErrors' => ['collection_key' => 'Slug already exists'],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $this->injectJsonBody([
+            'collection_type' => 'blog',
+            'collection_key' => 'blog',
+            'sort_order' => 0,
+            'translations' => [
+                ['language_id' => 1, 'slug' => 'blog', 'name' => 'Blog'],
+            ],
+        ]);
+
+        $controller = new StructureWizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createCollection();
+
+        $this->assertSame(422, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertIsArray($body);
+        $this->assertSame('Slug already exists', $body['message']);
+        $this->assertSame(['collection_key' => 'Slug already exists'], $body['fieldErrors']);
     }
 
     // ── uploadImage() validation ──────────────────────────────────────────────

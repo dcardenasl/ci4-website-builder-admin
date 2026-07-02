@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
@@ -66,6 +67,41 @@ final class PageFlowTest extends CIUnitTestCase
         ]);
 
         $result->assertRedirect();
+    }
+
+    public function testCreateRendersPresetDrivenPageTypes(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('pages')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('defaultId')
+            ->willReturn(1);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
+        ])->get('/admin/cms/pages/create');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
+        $this->assertStringContainsString('name="page_type"', $body);
+        $this->assertStringContainsString('Nosotros', $body);
+        $this->assertStringContainsString('Historia', $body);
+        $this->assertStringContainsString('Eventos', $body);
     }
 
     public function testDeleteSuccessRedirectsToList(): void

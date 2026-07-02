@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Modules\Cms\Services\BlockCatalogServiceInterface;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -105,24 +104,13 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('data-slug-check-url="', $body);
         $this->assertStringContainsString('data-slug-current-id="10"', $body);
         $this->assertStringContainsString('name="current_id" value="10"', $body);
+        $this->assertStringContainsString('name="block_template"', $body);
+        $this->assertStringContainsString('collectionBlockTemplateBuilder(', $body);
         $this->assertStringNotContainsString('name="url_prefix"', $body);
     }
 
-    public function testCreateRendersBlockTemplateBuilder(): void
+    public function testCreateRendersCollectionTypeAndTemplateEditor(): void
     {
-        $catalogMock = $this->createMock(BlockCatalogServiceInterface::class);
-        $catalogMock->method('all')
-            ->willReturn([
-                [
-                    'id' => 1,
-                    'block_key' => 'rich_text',
-                    'name' => 'Texto Enriquecido',
-                    'description' => 'Bloque de contenido',
-                    'icon' => 'align-left',
-                ],
-            ]);
-        Services::injectMock('blockCatalogService', $catalogMock);
-
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
             ->willReturn([
@@ -141,9 +129,28 @@ final class CollectionFlowTest extends CIUnitTestCase
 
         $body = (string) $result->getBody();
         $result->assertStatus(200);
+        $this->assertStringContainsString('name="collection_type"', $body);
+        $this->assertStringContainsString('name="collection_key"', $body);
         $this->assertStringContainsString('name="block_template"', $body);
         $this->assertStringContainsString('collectionBlockTemplateBuilder(', $body);
-        $this->assertStringContainsString('rich_text', $body);
+    }
+
+    public function testStructureWizardShowsCollectionTypeAndHidesLegacyLanguageFields(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read', 'cms.entries.read', 'cms.pages.read', 'cms.pages.write', 'cms.menus.read', 'cms.menus.write']],
+            'permissions_refreshed_at' => time(),
+        ])->get('/admin/cms/wizard/structure');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
+        $this->assertStringContainsString('Resumen del preset', $body);
+        $this->assertStringContainsString('Usar preset recomendado', $body);
+        $this->assertStringContainsString('Crear sin preset', $body);
+        $this->assertStringNotContainsString('name="collection_type"', $body);
+        $this->assertStringNotContainsString('Idioma base', $body);
+        $this->assertStringNotContainsString('name="url_prefix"', $body);
     }
 
     public function testStoreValidationFailureRedirectsBack(): void
@@ -186,6 +193,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         ])->post('/admin/cms/collections/10', [
             csrf_token() => csrf_hash(),
             'current_id' => '10',
+            'collection_type' => 'news',
             'collection_key' => 'news',
             'translations' => [
                 [

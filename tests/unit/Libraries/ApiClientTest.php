@@ -108,6 +108,50 @@ final class ApiClientTest extends CIUnitTestCase
         $this->assertArrayNotHasKey('X-API-Key', $headers);
     }
 
+    public function testExtractFieldErrorsReadsFieldErrorsAndErrorsPayloads(): void
+    {
+        $client = new ApiClient(new ApiClientConfig());
+
+        $result = $this->invokeMethod($client, 'extractFieldErrors', [[
+            'fieldErrors' => [
+                'collection_key' => 'key already taken',
+                'translations' => ['translation missing'],
+            ],
+            'errors' => [
+                'collection_type' => ['invalid type'],
+            ],
+        ]]);
+
+        $this->assertSame([
+            'collection_key' => 'key already taken',
+            'translations' => 'translation missing',
+            'collection_type' => 'invalid type',
+        ], $result);
+    }
+
+    public function testExtractMessagesReadsDetailTitleAndGeneralErrors(): void
+    {
+        $client = new ApiClient(new ApiClientConfig());
+
+        $detail = $this->invokeMethod($client, 'extractMessages', [[
+            'detail' => 'Slug already exists',
+        ], 422]);
+
+        $title = $this->invokeMethod($client, 'extractMessages', [[
+            'title' => 'Validation failed',
+        ], 422]);
+
+        $general = $this->invokeMethod($client, 'extractMessages', [[
+            'errors' => [
+                'general' => 'Something went wrong',
+            ],
+        ], 422]);
+
+        $this->assertSame(['Slug already exists'], $detail);
+        $this->assertSame(['Validation failed'], $title);
+        $this->assertSame(['Something went wrong'], $general);
+    }
+
     // ─── Method Contracts ────────────────────────────────────────────
 
     public function testGetForwardsToRequestAsGetMethod(): void
@@ -497,14 +541,17 @@ final class ApiClientTest extends CIUnitTestCase
     /**
      * @return array<string, string>
      */
-    private function invokeMethod(object $object, string $method): array
+    /**
+     * @param array<int, mixed> $args
+     * @return mixed
+     */
+    private function invokeMethod(object $object, string $method, array $args = []): mixed
     {
         $reflection = new \ReflectionClass($object);
         $reflectionMethod = $reflection->getMethod($method);
         $reflectionMethod->setAccessible(true);
 
-        /** @var array<string, string> $result */
-        $result = $reflectionMethod->invoke($object);
+        $result = $reflectionMethod->invokeArgs($object, $args);
 
         return $result;
     }

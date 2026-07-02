@@ -63,6 +63,9 @@ final class EntryEditViewTest extends CIUnitTestCase
                     'code' => 'en',
                 ],
             ],
+            'defaultLangId' => 1,
+            'defaultLangCode' => 'es',
+            'defaultLangIndex' => 0,
             'blockTemplate' => null,
             'translateTargets' => [],
         ]);
