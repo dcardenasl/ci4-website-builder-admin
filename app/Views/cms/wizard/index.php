@@ -192,7 +192,7 @@ $csrfToken ??= csrf_hash();
             // ── State ─────────────────────────────────────────────────────────
             screen: 'loading',
             config: null,
-            defaultLangId: 1,
+            defaultLangId: 0,
             strings: STRINGS,
             errorMsg: '',
 
@@ -540,12 +540,18 @@ $csrfToken ??= csrf_hash();
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     const data = await res.json();
                     this.config = data;
-                    this.defaultLangId = data.default_lang_id ?? 1;
+                    this.defaultLangId = this.resolveDefaultLanguageId();
                     this.screen = 'home';
                 } catch (e) {
                     this.errorMsg = STRINGS.error_load;
                     this.screen = 'error';
                 }
+            },
+
+            resolveDefaultLanguageId() {
+                const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
+                const defaultLanguage = languages.find((language) => language?.is_default);
+                return Number(defaultLanguage?.id || languages[0]?.id || 1);
             },
 
             goHome() {
@@ -723,7 +729,8 @@ $csrfToken ??= csrf_hash();
                 if (Object.keys(extra).length > 0) payload.wizard_extra = extra;
 
                 const baseSlug  = slugify(this.formData.title || 'entry') + '-' + Date.now();
-                const languages = this.config?.languages ?? [];
+                const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
+                const defaultLangId = this.defaultLangId || this.resolveDefaultLanguageId();
                 const sharedData = {
                     title:            this.formData.title ?? '',
                     excerpt:          this.formData.excerpt ?? '',
@@ -734,17 +741,18 @@ $csrfToken ??= csrf_hash();
                 payload.translations = languages.length > 0
                     ? languages.map(lang => ({
                         language_id: lang.id,
-                        slug: lang.id === this.defaultLangId ? baseSlug : baseSlug + '-' + lang.code,
+                        slug: lang.id === defaultLangId ? baseSlug : baseSlug + '-' + lang.code,
                         ...sharedData,
                     }))
-                    : [{ language_id: this.defaultLangId, slug: baseSlug, ...sharedData }];
+                    : [{ language_id: defaultLangId, slug: baseSlug, ...sharedData }];
 
                 return payload;
             },
 
             buildPublishedEntryPreview(payload, response) {
                 const translations = Array.isArray(payload?.translations) ? payload.translations : [];
-                const defaultTranslation = translations.find(t => t?.language_id === this.defaultLangId)
+                const defaultLangId = this.defaultLangId || this.resolveDefaultLanguageId();
+                const defaultTranslation = translations.find(t => t?.language_id === defaultLangId)
                     ?? translations[0]
                     ?? null;
 
@@ -869,7 +877,7 @@ $csrfToken ??= csrf_hash();
                     const payload = {
                         is_active: true,
                         translations: [{
-                            language_id:  t.language_id ?? this.defaultLangId,
+                            language_id:  t.language_id ?? (this.defaultLangId || this.resolveDefaultLanguageId()),
                             block_data:   this.blockEditData,
                             is_published: t.is_published ?? true,
                         }],
@@ -905,7 +913,7 @@ $csrfToken ??= csrf_hash();
                         is_active:          true,
                         block_config:       {},
                         translations: [{
-                            language_id:  this.defaultLangId,
+                            language_id:  this.defaultLangId || this.resolveDefaultLanguageId(),
                             block_data:   this.blockEditData,
                             is_published: true,
                         }],
@@ -1045,7 +1053,7 @@ $csrfToken ??= csrf_hash();
                     const res = await adminFetch(
                         `${WIZARD_BASE}/menus/items/${item.id}`,
                         { method: 'POST', body: JSON.stringify({
-                            translations: [{ language_id: t.language_id ?? this.defaultLangId, label: item._label, custom_url: item._url }],
+                            translations: [{ language_id: t.language_id ?? (this.defaultLangId || this.resolveDefaultLanguageId()), label: item._label, custom_url: item._url }],
                         })}
                     );
                     if (!res.ok) {
@@ -1082,7 +1090,7 @@ $csrfToken ??= csrf_hash();
                         { method: 'POST', body: JSON.stringify({
                             link_type: 'custom_url', link_target: '_self',
                             sort_order: this.menuItems.length, is_active: true,
-                            translations: [{ language_id: this.defaultLangId, label: this.newItemLabel, custom_url: this.newItemUrl || '#' }],
+                            translations: [{ language_id: this.defaultLangId || this.resolveDefaultLanguageId(), label: this.newItemLabel, custom_url: this.newItemUrl || '#' }],
                         })}
                     );
                     const data = await res.json();

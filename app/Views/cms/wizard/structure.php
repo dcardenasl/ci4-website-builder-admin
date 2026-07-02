@@ -7,7 +7,7 @@
 $csrfName  ??= csrf_token();
 $csrfToken ??= csrf_hash();
 ?>
-<div class="max-w-6xl mx-auto space-y-6" x-data="structureWizard()" x-init="init()">
+<div class="max-w-6xl mx-auto space-y-6" x-data="structureWizard()" x-init="init()" @slug-availability-changed.window="onSlugAvailabilityChanged($event)">
     <div x-show="screen === 'loading'" x-cloak class="text-center py-16 text-gray-400">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-600 mx-auto mb-4"></div>
         <p><?= esc(lang('Wizard.loading')) ?></p>
@@ -72,8 +72,8 @@ $csrfToken ??= csrf_hash();
                 <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_step1')) ?></p>
                     <div class="mt-4 space-y-2">
-                        <template x-for="option in config?.intent_options ?? []" :key="option.key">
-                            <button type="button" @click="selectIntent(option)" :class="selectedIntent?.key === option.key ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="w-full rounded-xl border p-3 text-left transition">
+                        <template x-for="option in config?.collection_types ?? []" :key="option.key">
+                            <button type="button" @click="selectCollectionType(option.key)" :class="form.collection_type === option.key ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="w-full rounded-xl border p-3 text-left transition">
                                 <div class="font-semibold" x-text="option.label"></div>
                             </button>
                         </template>
@@ -91,25 +91,80 @@ $csrfToken ??= csrf_hash();
                         <div class="space-y-4">
                             <div x-show="collectionErrors.step1" x-cloak class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700" x-text="collectionErrors.step1"></div>
                             <div class="grid gap-4 md:grid-cols-2">
-                                <?= view('components/forms/text_input', ['name' => 'collection_name', 'label' => lang('Wizard.wizard_structure_field_name'), 'type' => 'text', 'class' => 'block md:col-span-2', 'attrs' => 'x-model="form.name" @input="syncCollection()"']) ?>
-                                <?= view('components/forms/text_input', ['name' => 'collection_slug_base', 'label' => lang('Wizard.wizard_structure_field_slug_base'), 'type' => 'text', 'class' => 'block', 'attrs' => 'x-model="form.slug_base" @input="syncCollection(true)"']) ?>
+                                <?= view('components/forms/text_input', ['name' => 'collection_name', 'label' => lang('Wizard.wizard_structure_field_name'), 'type' => 'text', 'class' => 'block md:col-span-2', 'attrs' => 'x-model="form.name"']) ?>
+                                <?= view('components/form/slug', [
+                                    'name' => 'collection_slug_base',
+                                    'label' => 'Wizard.wizard_structure_field_slug_base',
+                                    'sourceId' => '#collection_name',
+                                    'checkUrl' => route_to('admin.cms.collections.check_slug'),
+                                    'required' => true,
+                                    'help' => 'Wizard.wizard_structure_slug_help',
+                                    'invalidMessage' => lang('Wizard.wizard_structure_slug_invalid'),
+                                    'attrs' => 'x-model="form.slug_base" @input="form.collection_key = form.slug_base; validateCollectionSlug()" @blur="validateCollectionSlug(true)"',
+                                ]) ?>
+                                <p x-show="collectionErrors.slug_base" x-cloak class="md:col-span-2 -mt-2 text-sm text-red-600" x-text="collectionErrors.slug_base"></p>
                             </div>
-                            <p class="text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_slug_help')) ?></p>
                         </div>
                     </template>
-                    <div x-show="collectionStep === 2" class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-                        <p class="font-semibold text-gray-900 mb-3"><?= esc(lang('Wizard.wizard_structure_final_summary')) ?></p>
-                        <p><strong><?= esc(lang('Wizard.wizard_structure_summary_name')) ?>:</strong> <span x-text="form.name || '—'"></span></p>
-                        <p><strong><?= esc(lang('Wizard.wizard_structure_summary_internal_slug')) ?>:</strong> <span x-text="form.collection_key || '—'"></span></p>
-                        <p><strong><?= esc(lang('Wizard.wizard_structure_summary_public_path')) ?>:</strong> <span x-text="form.url_prefix || '—'"></span></p>
-                        <p><strong><?= esc(lang('Wizard.wizard_structure_summary_language')) ?>:</strong> <span x-text="defaultLanguageLabel()"></span></p>
-                        <p><strong><?= esc(lang('Wizard.wizard_structure_summary_assistant')) ?>:</strong> <span x-text="<?= json_encode(lang('Wizard.wizard_structure_base_mode')) ?>"></span></p>
-                        <p class="mt-3 text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3"><?= esc(lang('Wizard.wizard_structure_conflict_warning')) ?></p>
+                    <div x-show="collectionStep === 2" class="space-y-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1"><?= esc(lang('Wizard.wizard_structure_final_summary')) ?></p>
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_name')) ?>:</strong> <span x-text="form.name || '—'"></span></p>
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_internal_slug')) ?>:</strong> <span x-text="form.collection_key || '—'"></span></p>
+                            <p><strong><?= esc(lang('Wizard.wizard_structure_summary_type')) ?>:</strong> <span x-text="collectionTypeLabel()"></span></p>
+                        </div>
+                        <div class="rounded-xl border border-gray-200 bg-white p-4">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_preset_summary_title')) ?></p>
+                                    <h3 class="mt-1 text-base font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_preset_blocks_title')) ?></h3>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" @click="usePreset = true" :class="usePreset ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="rounded-lg border px-3 py-1.5 text-sm font-semibold transition">
+                                        <?= esc(lang('Wizard.wizard_structure_preset_apply')) ?>
+                                    </button>
+                                    <button type="button" @click="usePreset = false" :class="!usePreset ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="rounded-lg border px-3 py-1.5 text-sm font-semibold transition">
+                                        <?= esc(lang('Wizard.wizard_structure_preset_skip')) ?>
+                                    </button>
+                                </div>
+                            </div>
+                            <template x-if="collectionPresetBlocks().length > 0">
+                                <div class="mt-4 space-y-3">
+                                    <template x-for="block in collectionPresetBlocks()" :key="block.sort_order + '-' + block.block_key">
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <div>
+                                                    <p class="font-semibold text-gray-900" x-text="block.label || block.block_key"></p>
+                                                    <p class="text-xs text-gray-500" x-text="block.block_key"></p>
+                                                </div>
+                                                <div class="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                                                    <span :class="block.required ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'" class="rounded-full px-2 py-1" x-text="block.required ? '<?= esc(lang('Wizard.wizard_structure_preset_block_required'), 'js') ?>' : '<?= esc(lang('Wizard.wizard_structure_preset_block_optional'), 'js') ?>'"></span>
+                                                    <span :class="block.locked ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600'" class="rounded-full px-2 py-1" x-text="block.locked ? '<?= esc(lang('Wizard.wizard_structure_preset_block_locked'), 'js') ?>' : '<?= esc(lang('Wizard.wizard_structure_preset_block_editable'), 'js') ?>'"></span>
+                                                </div>
+                                            </div>
+                                            <p class="mt-2 text-sm text-gray-600" x-text="block.help_text || '—'"></p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <p class="mt-4 text-xs leading-5 text-gray-500">
+                                <?= esc(lang('Wizard.wizard_structure_preset_legend')) ?>
+                            </p>
+                            <div x-show="collectionPresetBlocks().length === 0" class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3 text-sm text-gray-500">
+                                <?= esc(lang('Wizard.wizard_structure_preset_empty_hint')) ?>
+                            </div>
+                        </div>
+                        <div class="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                            <p><strong>Estado:</strong> <span x-text="usePreset ? 'Se aplicará el preset recomendado' : 'Se creará sin preset'"></span></p>
+                        </div>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <button type="button" @click="prevCollectionStep()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700" :disabled="collectionStep === 1"><?= esc(lang('Wizard.wizard_structure_prev')) ?></button>
                         <button type="button" @click="nextCollectionStep()" x-show="collectionStep < 2" class="btn-secondary text-sm" :disabled="!canAdvanceCollectionStep()"><?= esc(lang('Wizard.wizard_structure_next')) ?></button>
-                        <button type="submit" x-show="collectionStep === 2" class="btn-primary text-sm" :disabled="saving || !canSubmitCollection()"><span x-show="!saving"><?= esc(lang('Wizard.wizard_structure_create')) ?></span><span x-show="saving"><?= esc(lang('Wizard.wizard_structure_creating')) ?></span></button>
+                        <button type="submit" x-show="collectionStep === 2" class="btn-primary text-sm" :disabled="saving || !canSubmitCollection()">
+                            <span x-show="!saving"><?= esc(lang('Wizard.wizard_structure_create')) ?></span>
+                            <span x-show="saving"><?= esc(lang('Wizard.wizard_structure_creating')) ?></span>
+                        </button>
                         <button type="button" @click="screen = 'home'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></button>
                     </div>
                 </form>
@@ -133,16 +188,28 @@ $csrfToken ??= csrf_hash();
             <button type="button" @click="screen = 'home'" class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-700"><?= esc(lang('App.back')) ?></button>
         </div>
         <form @submit.prevent="submitPage()" class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-6">
-            <div><p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.create_page')) ?></p><h2 class="mt-1 text-2xl font-bold text-gray-900"><?= esc(lang('Wizard.create_page')) ?></h2></div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.create_page')) ?></p>
+                <h2 class="mt-1 text-2xl font-bold text-gray-900"><?= esc(lang('Wizard.create_page')) ?></h2>
+                <p class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_page_review_intro')) ?></p>
+            </div>
             <div class="grid gap-4 md:grid-cols-2">
-                <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_page_type')) ?></span><select x-model="page.page_type" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"><option value="generic"><?= esc(lang('Wizard.wizard_structure_page_type_generic')) ?></option><option value="home"><?= esc(lang('Wizard.wizard_structure_page_type_home')) ?></option><option value="contact"><?= esc(lang('Wizard.wizard_structure_page_type_contact')) ?></option><option value="privacy"><?= esc(lang('Wizard.wizard_structure_page_type_privacy')) ?></option></select></label>
-                <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_page_status')) ?></span><select x-model="page.status" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"><option value="draft"><?= esc(lang('Wizard.confirm_status_draft')) ?></option><option value="published"><?= esc(lang('Wizard.confirm_status_published')) ?></option></select></label>
+                <label class="block">
+                    <span class="mb-1 block text-sm font-medium text-gray-700"><?= esc(lang('Wizard.wizard_structure_page_type')) ?></span>
+                    <select x-model="page.page_type" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <template x-for="option in config?.page_types ?? []" :key="option.key">
+                            <option :value="option.key" x-text="option.label"></option>
+                        </template>
+                    </select>
+                </label>
                 <?= view('components/forms/text_input', ['name' => 'page_title', 'label' => lang('Wizard.wizard_structure_page_title'), 'type' => 'text', 'class' => 'block', 'attrs' => 'x-model="page.title"']) ?>
                 <?= view('components/forms/text_input', ['name' => 'page_slug', 'label' => lang('Wizard.wizard_structure_page_slug'), 'type' => 'text', 'class' => 'block', 'attrs' => 'x-model="page.slug"']) ?>
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <label class="flex items-center gap-3 rounded-xl border border-gray-200 p-4"><input type="checkbox" x-model="page.is_in_sitemap" class="rounded border-gray-300"><span class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_page_sitemap')) ?></span></label>
-                <?= view('components/forms/text_input', ['name' => 'page_sort_order', 'label' => lang('Wizard.wizard_structure_field_order'), 'type' => 'number', 'class' => 'block', 'attrs' => 'x-model.number="page.sort_order"']) ?>
+            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                <p class="font-semibold text-gray-900 mb-3"><?= esc(lang('Wizard.wizard_structure_final_summary')) ?></p>
+                <p><strong><?= esc(lang('Wizard.wizard_structure_page_type')) ?>:</strong> <span x-text="pageTypeLabel()"></span></p>
+                <p><strong><?= esc(lang('Wizard.wizard_structure_page_title')) ?>:</strong> <span x-text="page.title || '—'"></span></p>
+                <p><strong><?= esc(lang('Wizard.wizard_structure_page_slug')) ?>:</strong> <span x-text="page.slug || '—'"></span></p>
             </div>
             <div class="flex flex-wrap gap-3"><button type="submit" class="btn-primary text-sm"><?= esc(lang('Wizard.create_page')) ?></button><button type="button" @click="screen='home'" class="btn-secondary text-sm"><?= esc(lang('Wizard.btn_back_panel')) ?></button></div>
         </form>
@@ -177,71 +244,158 @@ $csrfToken ??= csrf_hash();
     function slugify(v) { return (v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 50); }
     window.structureWizard = function () {
         return {
-            screen: 'loading', config: null, errorMsg: '', message: '', saving: false, selectedIntent: null, createdCollectionId: '',
-            collectionErrors: { step1: '' },
-            form: { name: '', slug_base: '', collection_key: '', url_prefix: '', sort_order: 0, is_active: true, requires_approval: false, enables_categories: true, enables_tags: true, default_sitemap_priority: 0.5, default_changefreq: 'weekly' },
+            screen: 'loading', config: null, errorMsg: '', message: '', saving: false, createdCollectionId: '',
+            collectionErrors: { step1: '', slug_base: '' },
+            collectionSlugAvailability: '',
+            form: { name: '', slug_base: '', collection_key: '', sort_order: 0, collection_type: 'blog' },
             collectionStep: 1,
             translation: { language_id: 0, description: '' },
-            page: { page_type: 'generic', status: 'draft', parent_id: null, sort_order: 0, is_in_sitemap: true, sitemap_priority: 0.5, sitemap_changefreq: 'weekly', translations: [] , title: '', slug: ''},
+            usePreset: true,
+            collectionPreset: null,
+            page: { page_type: 'generic', parent_id: null, translations: [], title: '', slug: ''},
             menu: { menu_key: '', location: 'main', is_active: true, name: '' },
             async init() {
                 try {
                     const res = await fetch('<?= route_to('admin.cms.wizard.structure.config') ?>', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                     const json = await res.json();
                     this.config = json.data || {};
-                    this.translation.language_id = this.config.default_language_id || 0;
+                    this.translation.language_id = this.resolveDefaultLanguageId();
                     this.page.translations = [{ language_id: this.translation.language_id, slug: '', title: '', excerpt: '', meta_title: '', meta_description: '' }];
+                    this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
+                    this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
+                    this.collectionSlugAvailability = '';
+                    this.syncCollectionSlugLanguage();
                     this.screen = 'home';
                 } catch (e) { this.errorMsg = <?= json_encode(lang('Wizard.wizard_structure_error_load')) ?>; this.screen = 'error'; }
             },
-            start(kind) { this.message=''; this.errorMsg=''; this.createdCollectionId=''; this.collectionErrors = { step1: '' }; this.screen = kind; if (kind === 'collection') { this.collectionStep = 1; this.selectIntent((this.config.intent_options || [])[0] || null); } if (kind === 'page') { this.page.title=''; this.page.slug=''; } if (kind==='menu') { this.menu.menu_key=''; this.menu.name=''; } },
-            resetCollectionFlow() { this.createdCollectionId=''; this.message=''; this.errorMsg=''; this.collectionErrors = { step1: '' }; this.collectionStep = 1; this.selectIntent((this.config.intent_options || [])[0] || null); this.screen = 'collection'; },
-            collectionDetailUrl() { return this.createdCollectionId ? '<?= route_to('admin.cms.collections') ?>/' + this.createdCollectionId : '<?= route_to('admin.cms.collections') ?>'; },
-            selectIntent(option) {
-                this.selectedIntent = option;
-                const suggestions = option?.suggestions ?? {};
-                const name = option?.label?.trim() || 'Colección';
-                const key = slugify(this.form.slug_base || option?.key?.trim() || name);
-
-                this.form.name = name;
-                this.form.slug_base = key;
-                this.form.collection_key = key;
-                this.form.url_prefix = key;
-                this.form.requires_approval = !!suggestions.requires_approval;
-                this.form.enables_categories = suggestions.enables_categories !== undefined ? !!suggestions.enables_categories : true;
-                this.form.enables_tags = suggestions.enables_tags !== undefined ? !!suggestions.enables_tags : true;
-                this.form.default_sitemap_priority = suggestions.default_sitemap_priority ?? 0.5;
-                this.form.default_changefreq = suggestions.default_changefreq ?? 'weekly';
-
+            resolveDefaultLanguageId() {
+                const configDefault = Number(this.config?.default_language_id || 0);
+                if (configDefault > 0) {
+                    return configDefault;
+                }
+                const languages = this.config?.languages || [];
+                const defaultLanguage = languages.find((language) => language?.is_default);
+                return Number(defaultLanguage?.id || languages[0]?.id || 0);
             },
-            syncCollection(forceKey = false) {
-                const base = slugify(this.form.slug_base || this.form.name || this.form.collection_key);
-                this.form.slug_base = base;
-                this.form.collection_key = base;
-                this.form.url_prefix = base;
-                if (!this.translation.slug || forceKey) this.translation.slug = base;
-            },
-            canAdvanceCollectionStep() { return this.collectionStep === 1 ? Boolean(this.form.name && this.form.slug_base) : true; },
-            nextCollectionStep() {
-                if (!this.canAdvanceCollectionStep()) {
-                    if (this.collectionStep === 1) this.collectionErrors.step1 = <?= json_encode(lang('Wizard.wizard_structure_step1_error')) ?>;
+            syncCollectionSlugLanguage() {
+                const slugInput = this.collectionSlugInput();
+                if (!(slugInput && slugInput.tagName === 'INPUT')) {
                     return;
                 }
-                this.collectionErrors = { step1: '' };
-                if (this.collectionStep === 1) { this.syncCollection(); }
+                const languageId = Number(this.config?.default_language_id || this.translation.language_id || 0);
+                slugInput.dataset.slugLanguageId = String(languageId > 0 ? languageId : '');
+                slugInput.dispatchEvent(new Event('input', { bubbles: true }));
+            },
+            resolveCollectionPreset(type) {
+                const presets = this.config?.collection_presets || {};
+                return presets?.[type] || presets?.other || null;
+            },
+            collectionPresetBlocks() {
+                return Array.isArray(this.collectionPreset?.block_template?.blocks) ? this.collectionPreset.block_template.blocks : [];
+            },
+            start(kind) { this.message=''; this.errorMsg=''; this.createdCollectionId=''; this.collectionErrors = { step1: '', slug_base: '' }; this.collectionSlugAvailability = ''; this.screen = kind; if (kind === 'collection') { this.collectionStep = 1; this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other'; this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type); this.usePreset = true; this.form.slug_base = ''; this.form.collection_key = ''; this.form.name = ''; } if (kind === 'page') { this.page.title=''; this.page.slug=''; } if (kind==='menu') { this.menu.menu_key=''; this.menu.name=''; } },
+            resetCollectionFlow() { this.createdCollectionId=''; this.message=''; this.errorMsg=''; this.collectionErrors = { step1: '', slug_base: '' }; this.collectionSlugAvailability = ''; this.collectionStep = 1; this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other'; this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type); this.usePreset = true; this.form.slug_base=''; this.form.collection_key=''; this.form.name=''; this.screen = 'collection'; },
+            collectionDetailUrl() { return this.createdCollectionId ? '<?= route_to('admin.cms.collections') ?>/' + this.createdCollectionId : '<?= route_to('admin.cms.collections') ?>'; },
+            selectCollectionType(type) {
+                this.form.collection_type = type || 'other';
+                this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
+                this.usePreset = true;
+            },
+            collectionSlugInput() { return this.$el.querySelector('#collection_slug_base'); },
+            onSlugAvailabilityChanged(event) {
+                const detail = event?.detail || {};
+                if (detail.id !== 'collection_slug_base') {
+                    return;
+                }
+                this.collectionSlugAvailability = String(detail.status || '');
+            },
+            collectionSlugStatus() { return String(this.collectionSlugAvailability || this.collectionSlugInput()?.dataset?.slugAvailability || ''); },
+            isCollectionSlugValid() {
+                const slugInput = this.collectionSlugInput();
+                const status = this.collectionSlugStatus();
+                return Boolean(slugInput && slugInput.tagName === 'INPUT' && status === 'available');
+            },
+            validateCollectionSlug(announce = false) {
+                const slugInput = this.collectionSlugInput();
+                if (!(slugInput && slugInput.tagName === 'INPUT')) {
+                    return true;
+                }
+
+                const status = this.collectionSlugStatus();
+                if (status === 'checking') {
+                    if (announce) {
+                        this.collectionErrors.slug_base = <?= json_encode(lang('Wizard.wizard_structure_slug_checking')) ?>;
+                    }
+                    return false;
+                }
+
+                if (status === 'available') {
+                    this.collectionErrors.slug_base = '';
+                    return true;
+                }
+
+                if (slugInput.value.trim() === '') {
+                    this.collectionErrors.slug_base = announce ? <?= json_encode(lang('Wizard.wizard_structure_step1_error')) ?> : '';
+                    return false;
+                }
+
+                this.collectionErrors.slug_base = slugInput.validationMessage || <?= json_encode(lang('Wizard.wizard_structure_slug_unavailable')) ?>;
+                return false;
+            },
+            validateCollectionStep1(announce = false) {
+                this.collectionErrors.step1 = this.form.name ? '' : <?= json_encode(lang('Wizard.wizard_structure_step1_error')) ?>;
+                const slugOk = this.validateCollectionSlug(announce);
+                return Boolean(this.form.name) && slugOk;
+            },
+            canAdvanceCollectionStep() { return this.collectionStep === 1 ? Boolean(this.form.name) && this.collectionSlugStatus() === 'available' : true; },
+            nextCollectionStep() {
+                if (!this.validateCollectionStep1(true)) {
+                    return;
+                }
+                this.collectionErrors = { step1: '', slug_base: '' };
                 if (this.collectionStep < 2) { this.collectionStep += 1; }
             },
             prevCollectionStep() { if (this.collectionStep > 1) this.collectionStep -= 1; },
-            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.url_prefix && this.translation.language_id); },
-            defaultLanguageLabel() { const lang = (this.config.languages || []).find((i) => Number(i.id) === Number(this.translation.language_id)); return lang ? `${lang.code} - ${lang.name}` : '—'; },
+            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.collection_type); },
+            collectionTypeLabel() { return (this.config?.collection_types || []).find((option) => option.key === this.form.collection_type)?.label || this.form.collection_type || '—'; },
             stepLabel() { return <?= json_encode(sprintf(lang('Wizard.step_of'), '%s', '2')) ?>.replace('%s', this.collectionStep); },
             async submitCollection() {
-                if (!this.canSubmitCollection()) { this.errorMsg = <?= json_encode(lang('Wizard.wizard_structure_collection_payload_error')) ?>; return; }
                 this.saving = true; this.message=''; this.errorMsg='';
                 try {
-                    const payload = { collection_key: this.form.collection_key, url_prefix: this.form.url_prefix, is_active: this.form.is_active ? 1 : 0, requires_approval: this.form.requires_approval ? 1 : 0, enables_categories: this.form.enables_categories ? 1 : 0, enables_tags: this.form.enables_tags ? 1 : 0, default_sitemap_priority: this.form.default_sitemap_priority, default_changefreq: this.form.default_changefreq, sort_order: this.form.sort_order, translations: [{ language_id: this.translation.language_id, slug: this.form.slug_base || this.form.collection_key, name: this.form.name, description: '' }] };
+                    const payload = {
+                        collection_type: this.form.collection_type,
+                        collection_key: this.form.collection_key || this.form.slug_base,
+                        sort_order: this.form.sort_order ?? 0,
+                        use_preset: this.usePreset ? 1 : 0,
+                        translations: [{
+                            language_id: this.translation.language_id,
+                            slug: this.form.slug_base || this.form.collection_key,
+                            name: this.form.name,
+                            description: '',
+                        }],
+                    };
                     const res = await req('<?= route_to('admin.cms.wizard.structure.create_collection') ?>', payload); const json = await res.json();
-                    if (!json.ok) throw new Error(json.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>);
+                    if (!json.ok) {
+                        const fieldErrors = json.fieldErrors && typeof json.fieldErrors === 'object' ? Object.values(json.fieldErrors).filter(Boolean) : [];
+                        const detail = typeof json.detail === 'string' ? json.detail : '';
+                        const errors = json.errors && typeof json.errors === 'object' ? Object.values(json.errors).filter(Boolean) : [];
+                        const generalError = json.errors && typeof json.errors === 'object' && typeof json.errors.general === 'string' ? json.errors.general : '';
+                        const message = fieldErrors.length > 0
+                            ? String(fieldErrors[0])
+                            : (json.message || detail || (errors.length > 0 ? String(errors[0]) : '') || generalError || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>);
+                        if (message) {
+                            this.collectionErrors.step1 = '';
+                            this.collectionErrors.slug_base = message;
+                            this.collectionStep = 1;
+                            const slugInput = this.collectionSlugInput();
+                            if (slugInput && slugInput.tagName === 'INPUT') {
+                                slugInput.setCustomValidity(message);
+                                slugInput.focus();
+                            }
+                            return;
+                        }
+                        throw new Error(<?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>);
+                    }
                     const id = json.data?.id || '';
                     this.message = <?= json_encode(lang('Wizard.wizard_structure_collection_ready')) ?>;
                     this.createdCollectionId = id ? String(id) : '';
@@ -249,10 +403,11 @@ $csrfToken ??= csrf_hash();
                     this.errorMsg = e.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>;
                 } finally { this.saving = false; }
             },
+            pageTypeLabel() { return (this.config?.page_types || []).find((option) => option.key === this.page.page_type)?.label || this.page.page_type || '—'; },
             async submitPage() {
                 this.message=''; this.errorMsg='';
                 try {
-                    const payload = { page_type: this.page.page_type, status: this.page.status, parent_id: null, sort_order: this.page.sort_order, is_in_sitemap: this.page.is_in_sitemap ? 1 : 0, sitemap_priority: this.page.sitemap_priority, sitemap_changefreq: this.page.sitemap_changefreq, translations: [{ language_id: this.translation.language_id, slug: slugify(this.page.slug || this.page.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>), title: this.page.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>, excerpt: '', meta_title: '', meta_description: '' }] };
+                    const payload = { page_type: this.page.page_type, parent_id: null, translations: [{ language_id: this.translation.language_id, slug: slugify(this.page.slug || this.page.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>), title: this.page.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>, excerpt: '', meta_title: '', meta_description: '' }] };
                     const res = await req('<?= route_to('admin.cms.wizard.structure.create_page') ?>', payload); const json = await res.json(); if (!json.ok) throw new Error(json.message || <?= json_encode(lang('Wizard.wizard_structure_error_page')) ?>);
                     const id = json.data?.id || ''; this.message=<?= json_encode(lang('Wizard.wizard_structure_page_created')) ?>; if (id) setTimeout(() => window.location.href = '<?= route_to('admin.cms.pages') ?>/' + id, 700);
                 } catch (e) { this.errorMsg = e.message || <?= json_encode(lang('Wizard.wizard_structure_error_page')) ?>; }

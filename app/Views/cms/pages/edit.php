@@ -110,16 +110,7 @@ if (!empty($languages)) {
                     'required' => true,
                     'placeholder' => 'Pages.field_page_type_placeholder',
                     'help' => 'Pages.field_page_type_help',
-                    'options' => [
-                        'home' => lang('Pages.page_type_home'),
-                        'generic' => lang('Pages.page_type_generic'),
-                        'contact' => lang('Pages.page_type_contact'),
-                        'privacy' => lang('Pages.page_type_privacy'),
-                        'terms' => lang('Pages.page_type_terms'),
-                        '404' => lang('Pages.page_type_404'),
-                        '500' => lang('Pages.page_type_500'),
-                        'maintenance' => lang('Pages.page_type_maintenance')
-                    ],
+                    'options' => array_column($pageTypes ?? [], 'label', 'key'),
                     'value' => $item['page_type'] ?? 'generic',
                     'errors' => $errors ?? []
                 ]) ?>
@@ -170,17 +161,9 @@ if (!empty($languages)) {
         <!-- SECTION: TRANSLATIONS (with collapsible language tabs) -->
         <?php if (!empty($languages)): ?>
             <?php
-            $defaultLangId = 0;
-            $defaultLangCode = '';
-            $defaultLangIndex = 0;
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId = (int) $l['id'];
-                    $defaultLangCode = $l['code'] ?? '';
-                    $defaultLangIndex = $i;
-                    break;
-                }
-            }
+            $defaultLangId = (int) ($defaultLangId ?? 0);
+            $defaultLangCode = (string) ($defaultLangCode ?? '');
+            $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
             $translateUrl = route_to('admin.cms.translate');
             ?>
             <div class="border-b border-gray-200 last:border-b-0">

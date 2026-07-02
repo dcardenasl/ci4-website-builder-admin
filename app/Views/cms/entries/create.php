@@ -56,17 +56,9 @@
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = 0;
-            $defaultLangCode = '';
-            $defaultLangIndex = 0;
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId = (int) $l['id'];
-                    $defaultLangCode = $l['code'] ?? '';
-                    $defaultLangIndex = $i;
-                    break;
-                }
-            }
+                $defaultLangId = (int) ($defaultLangId ?? 0);
+            $defaultLangCode = (string) ($defaultLangCode ?? '');
+            $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
             $translateUrl = route_to('admin.cms.translate');
             ?>
             <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">

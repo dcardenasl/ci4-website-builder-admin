@@ -7,9 +7,12 @@
  * @var string|null $value      Default value (fallback to old input)
  * @var string      $sourceId   CSS selector of source input (e.g. '#name')
  * @var string      $checkUrl   Endpoint route to verify slug availability
+ * @var string|null $languageSelector CSS selector for a hidden language id field
  * @var mixed|null  $currentId   Current model ID to skip inside uniqueness check on edits
  * @var bool|null   $required   Whether the field is required (default: true)
  * @var string|null $help       Help text below the field
+ * @var string|null $attrs      Extra HTML attributes for the input
+ * @var string|null $invalidMessage Custom validation message for pattern mismatches
  */
 
 helper('form');
@@ -20,6 +23,9 @@ $value     = old($name, $value ?? '');
 $required  = $required ?? true;
 $currentId = $currentId ?? '';
 $help      = $help ?? '';
+$attrs     = $attrs ?? '';
+$invalidMessage = $invalidMessage ?? '';
+$languageSelector = $languageSelector ?? '';
 
 // Self-contained localization helper with fallback
 if (!function_exists('safe_lang')) {
@@ -47,12 +53,15 @@ if (!function_exists('safe_lang')) {
             class="<?= esc(input_class($name)) ?>"
             data-slug-source="<?= esc($sourceId, 'attr') ?>"
             data-slug-check-url="<?= esc($checkUrl, 'attr') ?>"
+            data-slug-language-selector="<?= esc($languageSelector, 'attr') ?>"
             data-slug-current-id="<?= esc((string) $currentId, 'attr') ?>"
+            data-slug-invalid-message="<?= esc($invalidMessage, 'attr') ?>"
             <?= $required ? 'required' : '' ?>
             minlength="2" 
             maxlength="255" 
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
             <?= field_aria_attrs($name, $required) ?>
+            <?= $attrs ?>
         >
         <!-- Status icons indicating async check state -->
         <span class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border bg-white" data-slug-status="checking" title="<?= esc(safe_lang('Catalog.slug_checking', 'Verificando...')) ?>" aria-label="Checking">

@@ -4,15 +4,26 @@
 
 <?php ob_start(); ?>
 <form method="post" action="<?= route_to('admin.cms.collections.store') ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <?= csrf_field() ?>
-        <div class="lg:col-span-2 space-y-6">
+    <?= csrf_field() ?>
+    <div class="lg:col-span-2 space-y-6">
         <?php $checkSlugBase = route_to('admin.cms.collections.check_slug'); ?>
 
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
             <div>
                 <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('App.form_core')) ?></h4>
-                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_key_help')) ?></p>
+                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_type_help')) ?></p>
             </div>
+
+            <?= view('components/form/select', [
+                'name' => 'collection_type',
+                'label' => 'Collections.field_collection_type',
+                'required' => true,
+                'placeholder' => 'Collections.field_collection_type_placeholder',
+                'help' => 'Collections.field_collection_type_help',
+                'options' => array_column($collectionTypes ?? [], 'label', 'key'),
+                'value' => $item['collection_type'] ?? 'other',
+                'errors' => $errors ?? []
+            ]) ?>
 
             <?= view('components/form/text', [
                 'name' => 'collection_key',
@@ -119,16 +130,21 @@
             </div>
         </details>
 
-        <!-- Translations with language tabs -->
+        <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title')) ?></h4>
+                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.block_template_builder_template_help')) ?></p>
+            </div>
+            <?= view('cms/collections/partials/block_template_editor', [
+                'value' => $item['block_template'] ?? null,
+                'blockTypes' => $blockTypes ?? [],
+                'errors' => $errors ?? [],
+            ]) ?>
+        </div>
+
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = 0;
-            foreach ($languages as $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId = (int) $l['id'];
-                    break;
-                }
-            }
+            $defaultLangId = (int) ($defaultLangId ?? 0);
             ?>
             <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
                 <div class="mb-4">
@@ -158,15 +174,15 @@
                             <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
 
                             <?= view('components/form/text', [
-                            'name' => "translations[{$index}][name]",
-                            'label' => 'Collections.translation_name_label',
-                            'required' => !empty($lang['is_default']),
-                            'placeholder' => 'Collections.translation_name_placeholder',
-                            'help' => 'Collections.translation_name_help',
-                            'value' => old("translations.{$index}.name", ''),
-                            'maxlength' => 150,
-                            'errors' => $errors ?? []
-                        ]) ?>
+                                'name' => "translations[{$index}][name]",
+                                'label' => 'Collections.translation_name_label',
+                                'required' => !empty($lang['is_default']),
+                                'placeholder' => 'Collections.translation_name_placeholder',
+                                'help' => 'Collections.translation_name_help',
+                                'value' => old("translations.{$index}.name", ''),
+                                'maxlength' => 150,
+                                'errors' => $errors ?? []
+                            ]) ?>
 
                             <?= view('components/form/slug', [
                                 'name' => "translations[{$index}][slug]",
@@ -194,32 +210,16 @@
                 </div>
             </div>
         <?php endif; ?>
+    </div>
 
-        <!-- Block Template Section -->
-        <details class="group rounded-xl border border-gray-200 bg-white">
-            <summary class="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg select-none">
-                <span><?= esc(lang('Collections.section_block_template')) ?></span>
-                <svg class="h-4 w-4 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-            </summary>
-            <div class="px-4 pb-4 pt-2 border-t border-gray-100">
-                <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_help')) ?></p>
-                <?= view('cms/collections/partials/block_template_editor', [
-                    'value' => old('block_template', ''),
-                    'blockTypes' => $blockTypes ?? [],
-                    'errors' => $errors ?? []
-                ]) ?>
-            </div>
-        </details>
-
-        </div>
-        <aside class="space-y-6">
-            <?php ob_start(); ?>
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.create')) ?></button>
-            <a href="<?= route_to('admin.cms.collections') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
-            <?php $actionsContent = ob_get_clean(); ?>
-            <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
-        </aside>
-    </form>
+    <aside class="space-y-6">
+        <?php ob_start(); ?>
+        <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.create')) ?></button>
+        <a href="<?= route_to('admin.cms.collections') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5"><?= esc(lang('App.cancel')) ?></a>
+        <?php $actionsContent = ob_get_clean(); ?>
+        <?= view('components/display/admin_actions_panel', ['content' => $actionsContent]) ?>
+    </aside>
+</form>
 <?php $sectionContent = ob_get_clean(); ?>
 <?= view('components/display/form_section', [
     'title' => 'Collections.collections_create',

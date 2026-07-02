@@ -20,16 +20,7 @@
                     'required' => true,
                     'placeholder' => 'Pages.field_page_type_placeholder',
                     'help' => 'Pages.field_page_type_help',
-                    'options' => [
-                        'home' => lang('Pages.page_type_home'),
-                        'generic' => lang('Pages.page_type_generic'),
-                        'contact' => lang('Pages.page_type_contact'),
-                        'privacy' => lang('Pages.page_type_privacy'),
-                        'terms' => lang('Pages.page_type_terms'),
-                        '404' => lang('Pages.page_type_404'),
-                        '500' => lang('Pages.page_type_500'),
-                        'maintenance' => lang('Pages.page_type_maintenance')
-                    ],
+                    'options' => array_column($pageTypes ?? [], 'label', 'key'),
                     'value' => $item['page_type'] ?? 'generic',
                     'errors' => $errors ?? []
                 ]) ?>
@@ -78,17 +69,9 @@
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId    = 0;
-            $defaultLangIndex = 0;
-            $defaultLangCode  = 'EN';
-            foreach ($languages as $i => $l) {
-                if (!empty($l['is_default'])) {
-                    $defaultLangId    = (int) $l['id'];
-                    $defaultLangIndex = $i;
-                    $defaultLangCode  = strtoupper($l['code'] ?? 'EN');
-                    break;
-                }
-            }
+                $defaultLangId    = (int) ($defaultLangId ?? 0);
+            $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
+            $defaultLangCode  = (string) ($defaultLangCode ?? '');
             $translateUrl = route_to('admin.cms.translate');
             $checkSlugBase = route_to('admin.cms.pages.check_slug');
             ?>

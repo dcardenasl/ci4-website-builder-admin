@@ -83,15 +83,8 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
 
     <?php if (!empty($languages)): ?>
         <?php
-            $defaultLangId = 0;
-        $defaultLangCode = '';
-        foreach ($languages as $i => $l) {
-            if (!empty($l['is_default'])) {
-                $defaultLangId = (int) $l['id'];
-                $defaultLangCode = $l['code'] ?? '';
-                break;
-            }
-        }
+            $defaultLangId = (int) ($defaultLangId ?? 0);
+        $defaultLangCode = (string) ($defaultLangCode ?? '');
         $translateUrl = route_to('admin.cms.translate');
         ?>
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

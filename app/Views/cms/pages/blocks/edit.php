@@ -44,19 +44,8 @@ $sortOrderValue = old('sort_order', $block['sort_order'] ?? 0);
 $isActiveValue  = (bool) old('is_active', ! empty($block['is_active']));
 $blockIdValue   = old('block_id', (string) ($block['block_id'] ?? ''));
 
-$defaultLangId = 0;
-$defaultLangCode = 'EN';
-foreach ($languages as $l) {
-    if (! empty($l['is_default'])) {
-        $defaultLangId = (int) $l['id'];
-        $defaultLangCode = strtoupper((string) ($l['code'] ?? 'EN'));
-        break;
-    }
-}
-if ($defaultLangId === 0 && ! empty($languages)) {
-    $defaultLangId = (int) $languages[0]['id'];
-    $defaultLangCode = strtoupper((string) ($languages[0]['code'] ?? 'EN'));
-}
+$defaultLangId = (int) ($defaultLangId ?? 0);
+$defaultLangCode = strtoupper((string) ($defaultLangCode ?? 'EN'));
 
 $blockKey    = $blockType['block_key'] ?? '';
 $previewUrl  = route_to('admin.cms.blocks.preview');
