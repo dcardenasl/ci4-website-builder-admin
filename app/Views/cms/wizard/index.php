@@ -169,6 +169,15 @@ $csrfToken ??= csrf_hash();
             .replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 100);
     }
 
+    function truncateText(value, maxLength) {
+        const text = String(value ?? '').trim();
+        if (text === '' || text.length <= maxLength) {
+            return text;
+        }
+
+        return text.slice(0, maxLength).trim();
+    }
+
     function schemaTypeToUiType(schemaType, accept) {
         if (schemaType === 'file')    return accept === 'image' ? 'image' : 'text';
         if (schemaType === 'richtext' || schemaType === 'rich_text') return 'richtext';
@@ -880,6 +889,10 @@ $csrfToken ??= csrf_hash();
                         await this.prepareEntryReview();
                     }
                     const payload = this.buildEntryPayload();
+                    const clientErrors = this.validateEntryPayload(payload);
+                    if (clientErrors.length > 0) {
+                        throw new Error(clientErrors.join(' '));
+                    }
                     const res  = await adminFetch(WIZARD_BASE + '/publish', { method: 'POST', body: JSON.stringify(payload) });
                     const raw = await res.text();
                     let data = {};
@@ -892,7 +905,11 @@ $csrfToken ??= csrf_hash();
                         const msg = data?.message
                             ?? data?.messages?.[0]
                             ?? (raw ? raw : `${STRINGS.error_publish} (HTTP ${res.status})`);
-                        throw new Error(msg);
+                        const fieldErrors = data?.errors && typeof data.errors === 'object'
+                            ? Object.entries(data.errors).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : String(value)}`)
+                            : [];
+
+                        throw new Error([msg, ...fieldErrors].filter(Boolean).join(' '));
                     }
                     this.publishedEntry = data;
                     this.clearDraft();
@@ -946,11 +963,11 @@ $csrfToken ??= csrf_hash();
                 if (defaultLanguageId > 0) {
                     translations.push({
                         language_id: defaultLanguageId,
-                        slug: baseSlug,
-                        title: source.title,
-                        excerpt: source.excerpt,
-                        meta_title: source.meta_title,
-                        meta_description: source.meta_description,
+                        slug: truncateText(baseSlug, 150),
+                        title: truncateText(source.title, 255),
+                        excerpt: truncateText(source.excerpt, 500),
+                        meta_title: truncateText(source.meta_title, 255),
+                        meta_description: truncateText(source.meta_description, 500),
                         featured_file_id: source.featured_file_id,
                         featured_image_url: source.featured_image_url,
                     });
@@ -960,13 +977,15 @@ $csrfToken ??= csrf_hash();
                     this.entryTranslationRows
                         .filter((row) => !row?.is_base && Number(row?.language_id || 0) > 0)
                         .forEach((row) => {
+                            const title = truncateText(row.title || source.title, 255);
+                            const slugBase = slugify(title || source.title || 'entry');
                             translations.push({
                                 language_id: Number(row.language_id || 0),
-                                slug: String(row.slug || '').trim() || `${slugify(row.title || source.title || 'entry')}-${String(row.code || '').toLowerCase()}`,
-                                title: String(row.title || '').trim() || source.title,
-                                excerpt: String(row.excerpt || '').trim(),
-                                meta_title: String(row.meta_title || '').trim(),
-                                meta_description: String(row.meta_description || '').trim(),
+                                slug: truncateText(String(row.slug || '').trim() || `${slugBase}-${String(row.code || '').toLowerCase()}`, 150),
+                                title,
+                                excerpt: truncateText(row.excerpt, 500),
+                                meta_title: truncateText(row.meta_title, 255),
+                                meta_description: truncateText(row.meta_description, 500),
                                 featured_file_id: source.featured_file_id,
                                 featured_image_url: source.featured_image_url,
                             });
@@ -976,17 +995,56 @@ $csrfToken ??= csrf_hash();
                 if (translations.length === 0) {
                     translations.push({
                         language_id: defaultLanguageId || 1,
-                        slug: baseSlug,
-                        title: source.title,
-                        excerpt: source.excerpt,
-                        meta_title: source.meta_title,
-                        meta_description: source.meta_description,
+                        slug: truncateText(baseSlug, 150),
+                        title: truncateText(source.title, 255),
+                        excerpt: truncateText(source.excerpt, 500),
+                        meta_title: truncateText(source.meta_title, 255),
+                        meta_description: truncateText(source.meta_description, 500),
                         featured_file_id: source.featured_file_id,
                         featured_image_url: source.featured_image_url,
                     });
                 }
 
                 return translations;
+            },
+
+            validateEntryPayload(payload) {
+                const errors = [];
+
+                if (!payload || typeof payload !== 'object') {
+                    return ['<?= esc(lang('Wizard.error_publish'), 'js') ?>'];
+                }
+
+                if (!payload.collection_id || Number(payload.collection_id) <= 0) {
+                    errors.push('<?= esc(lang('Entries.collection_not_exists'), 'js') ?>');
+                }
+
+                if (String(payload.title || '').trim() === '') {
+                    errors.push('<?= esc(lang('Wizard.default_field_title'), 'js') ?>');
+                }
+
+                const translations = Array.isArray(payload.translations) ? payload.translations : [];
+                translations.forEach((translation) => {
+                    const languageId = Number(translation?.language_id || 0);
+                    const prefix = languageId > 0 ? `translation[${languageId}]` : 'translation';
+                    const title = String(translation?.title || '').trim();
+                    const slug = String(translation?.slug || '').trim();
+
+                    if (title === '') {
+                        errors.push(`${prefix}.title required`);
+                    }
+                    if (title.length > 255) {
+                        errors.push(`${prefix}.title max_length 255`);
+                    }
+                    if (slug === '') {
+                        errors.push(`${prefix}.slug required`);
+                    }
+                    if (slug.length > 150) {
+                        errors.push(`${prefix}.slug max_length 150`);
+                    }
+                });
+
+                return errors;
             },
 
             buildPublishedEntryPreview(payload, response) {
