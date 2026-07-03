@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Applications index — read-only clarity** — removed duplicate subtitle text; `empty_state` now uses `Iam.applications_empty` and `Iam.applications_managed_server_side` as title/description instead of generic defaults
 
 ### Fixed
+- **Block type preview** — the rich-text block preview now falls back to legacy `body`/`html` payload keys via `block_text_content()` when `content` is empty, matching the domain's normalized rich-text contract
+- **Auto-translate** — switched the `TranslateController` provider from MyMemory to Google Translate's unofficial endpoint for more reliable results; translated text now propagates into rich-text editors (`richTextEditor.js`) and keeps file field previews in sync (`translatableFileField.js`); the "Traducir automáticamente" button and its error banner are hidden when there are no translation targets
+- **CMS wizard — entry publish payload** — client-side validation now blocks publish when required fields (collection, title, per-language slug/title) are missing or exceed API limits, and long text fields (title, excerpt, meta_title, meta_description, slug) are truncated before submission to prevent 422s from the domain API
 - **CMS request validation** — strengthen translation normalization in `CategoryStoreRequest`, `CollectionStoreRequest`, `EntryStoreRequest`, and `PageStoreRequest` with proper trimming and empty-value filtering
 - **API call logging in development** — add `ApiCallsCollector` to track method, URL, status, latency, and body for debugging API interactions locally
 - **Domain API configuration** — enforce required `DOMAIN_API_BASE_URL` with clear error messages when missing
