@@ -58,24 +58,28 @@
     ]) ?>
 
     <?php ob_start(); ?>
-    <a href="<?= route_to('admin.cms.categories.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
-        <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
-        <?= lang('App.edit') ?>
-    </a>
-    <a href="<?= route_to('admin.cms.categories.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
-        <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-        <?= esc(lang('Categories.field_sort_order') ?? lang('App.reorder')) ?>
-    </a>
+    <?php if (has_permission('cms.categories.write')): ?>
+        <a href="<?= route_to('admin.cms.categories.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <?= lang('App.edit') ?>
+        </a>
+        <a href="<?= route_to('admin.cms.categories.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('Categories.field_sort_order') ?? lang('App.reorder')) ?>
+        </a>
+    <?php endif; ?>
     <?php $actionsContent = ob_get_clean(); ?>
 
     <?php ob_start(); ?>
-    <form method="post" action="<?= route_to('admin.cms.categories.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($category['name'] ?? $category['slug'] ?? null), 'js') ?>', () => $el.submit())">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
+    <?php if (has_permission('cms.categories.write')): ?>
+        <form method="post" action="<?= route_to('admin.cms.categories.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($category['name'] ?? $category['slug'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+    <?php endif; ?>
     <?php $dangerContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_actions_panel', [

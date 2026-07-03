@@ -44,6 +44,7 @@ foreach ($languages as $lang) {
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
+                        <?php if (has_permission('cms.menus.write')): ?>
                         <a href="<?= route_to('admin.cms.menus.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?>">
                             <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
                             <?= lang('App.edit') ?>
@@ -55,6 +56,7 @@ foreach ($languages as $lang) {
                                 <?= esc(lang('App.delete')) ?>
                             </button>
                         </form>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -121,10 +123,12 @@ foreach ($languages as $lang) {
                             </span>
                         <?php endif; ?>
                     </div>
+                    <?php if (has_permission('cms.menus.write')): ?>
                     <a href="<?= route_to('admin.cms.menus.items.create', $itemId) ?>" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700">
                         <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
                         <?= lang('Menus.menus_items_create') ?>
                     </a>
+                    <?php endif; ?>
                 </div>
 
                 <?php if (empty($items)): ?>
@@ -257,11 +261,13 @@ foreach ($languages as $lang) {
 
                                         <div class="flex items-center gap-2 shrink-0 ml-3">
                                             <span class="text-[10px] text-gray-400 font-mono" title="<?= esc(lang('Menus.items_sort_order_label')) ?>">#<?= esc((string) ($item['sort_order'] ?? 0)) ?></span>
+                                            <?php if (has_permission('cms.menus.write')): ?>
                                             <a href="<?= route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_edit')) ?></a>
                                             <form method="post" action="<?= route_to('admin.cms.menus.items.delete', $item['menu_id'], $item['id']) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($label ?: ($item['translations'][0]['label'] ?? null)), 'js') ?>', () => $el.submit())" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit" class="px-2.5 py-1 text-xs border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_delete')) ?></button>
                                             </form>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <?php

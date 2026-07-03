@@ -123,8 +123,39 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('Idioma base', $body);
     }
 
+    public function testStructureWizardRedirectsForCMSReaderWithoutWritePermissions(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user' => ['permissions' => [
+                'cms.entries.read',
+                'cms.pages.read',
+                'cms.menus.read',
+                'cms.collections.read',
+            ]],
+        ])->get('/admin/cms/wizard/structure');
+
+        $result->assertRedirectTo(site_url('dashboard'));
+    }
+
+    public function testStructureWizardConfigAccessDeniedWithoutWritePermissions(): void
+    {
+        session()->set('user', ['permissions' => ['cms.pages.read']]);
+
+        $controller = new StructureWizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->config();
+
+        $this->assertSame(403, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertFalse($body['ok']);
+        $this->assertSame(lang('App.access_denied'), $body['message']);
+    }
+
     public function testStructureWizardConfigExposesActiveLanguagesWithoutDefaultLanguageId(): void
     {
+        session()->set('user', ['permissions' => ['cms.collections.write']]);
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->expects($this->once())
             ->method('list')

@@ -28,8 +28,12 @@ class StructureWizardController extends BaseWebController
         $this->menuService = service('menuApiService');
     }
 
-    public function index(): string
+    public function index(): ResponseInterface|string
     {
+        if (! (has_permission('cms.pages.write') || has_permission('cms.menus.write') || has_permission('cms.collections.write'))) {
+            return redirect()->to(site_url('dashboard'))->with('error', lang('Auth.noPermission'));
+        }
+
         $languages = $this->loadActiveLanguages();
 
         return $this->render('cms/wizard/structure', [
@@ -42,6 +46,10 @@ class StructureWizardController extends BaseWebController
 
     public function config(): ResponseInterface
     {
+        if (! (has_permission('cms.pages.write') || has_permission('cms.menus.write') || has_permission('cms.collections.write'))) {
+            return $this->response->setStatusCode(403)->setJSON(['ok' => false, 'message' => lang('App.access_denied')]);
+        }
+
         $languages = $this->loadActiveLanguages();
 
         return $this->response->setJSON([

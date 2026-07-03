@@ -306,26 +306,26 @@ foreach ($languages as $l) {
 
                             <!-- Quick actions -->
                             <div class="flex items-center gap-1 flex-shrink-0">
-                                <?php if (! empty($blockTypeData['supports_children'])): ?>
-                                <a href="<?= route_to('admin.cms.pages.blocks.children', $itemId, $blockId) ?>"
-                                   class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
-                                    <?= ui_icon('layers', 'h-3 w-3') ?>
-                                    <?= esc(lang('Pages.blocks_action_slides')) ?>
-                                </a>
-                                <?php endif; ?>
-                                <a href="<?= route_to('admin.cms.pages.blocks.edit', $itemId, $blockId) ?>"
-                                   class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
-                                    <?= ui_icon('pencil', 'h-3 w-3') ?>
-                                    <?= esc(lang('Pages.blocks_action_edit')) ?>
-                                </a>
                                 <?php if (has_permission('cms.pages.write')): ?>
-                                <form method="post" action="<?= route_to('admin.cms.pages.blocks.delete', $itemId, $blockId) ?>"
-                                      x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockTypeData['name'] ?? $blockTypeData['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="<?= esc(action_button_class('danger')) ?> !text-xs !py-1 !px-2">
-                                        <?= ui_icon('trash', 'h-3 w-3') ?>
-                                    </button>
-                                </form>
+                                    <?php if (! empty($blockTypeData['supports_children'])): ?>
+                                    <a href="<?= route_to('admin.cms.pages.blocks.children', $itemId, $blockId) ?>"
+                                       class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
+                                        <?= ui_icon('layers', 'h-3 w-3') ?>
+                                        <?= esc(lang('Pages.blocks_action_slides')) ?>
+                                    </a>
+                                    <?php endif; ?>
+                                    <a href="<?= route_to('admin.cms.pages.blocks.edit', $itemId, $blockId) ?>"
+                                       class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
+                                        <?= ui_icon('pencil', 'h-3 w-3') ?>
+                                        <?= esc(lang('Pages.blocks_action_edit')) ?>
+                                    </a>
+                                    <form method="post" action="<?= route_to('admin.cms.pages.blocks.delete', $itemId, $blockId) ?>"
+                                          x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockTypeData['name'] ?? $blockTypeData['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="<?= esc(action_button_class('danger')) ?> !text-xs !py-1 !px-2">
+                                            <?= ui_icon('trash', 'h-3 w-3') ?>
+                                        </button>
+                                    </form>
                                 <?php endif; ?>
                             </div>
                         </li>
@@ -333,9 +333,11 @@ foreach ($languages as $l) {
                     </ul>
 
                     <!-- Drag hint -->
-                    <p class="mt-3 text-xs text-gray-400 text-center">
-                        <?= esc(lang('Pages.blocks_drag_hint')) ?>
-                    </p>
+                    <?php if (has_permission('cms.pages.write')): ?>
+                        <p class="mt-3 text-xs text-gray-400 text-center">
+                            <?= esc(lang('Pages.blocks_drag_hint')) ?>
+                        </p>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -364,43 +366,47 @@ foreach ($languages as $l) {
                 <span><?= esc(lang('Pages.blocks_view_page')) ?></span>
             </a>
         <?php endif; ?>
-        <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
-            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
-            <span><?= lang('App.edit') ?></span>
-        </a>
-        <a href="<?= route_to('admin.cms.pages.blocks', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
-            <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
-            <span><?= esc(lang('Pages.manage_blocks')) ?></span>
-        </a>
-        <?php if ($status !== 'published'): ?>
-            <form method="post" action="<?= route_to('admin.cms.pages.publish', $itemId) ?>">
-                <?= csrf_field() ?>
-                <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
-                    <?= ui_icon('globe', 'h-3.5 w-3.5') ?>
-                    <span><?= esc(lang('Pages.pages_publish')) ?></span>
-                </button>
-            </form>
-        <?php endif; ?>
-        <?php if ($status !== 'archived'): ?>
-            <form method="post" action="<?= route_to('admin.cms.pages.archive', $itemId) ?>">
-                <?= csrf_field() ?>
-                <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
-                    <?= ui_icon('archive', 'h-3.5 w-3.5') ?>
-                    <span><?= esc(lang('Pages.pages_archive')) ?></span>
-                </button>
-            </form>
+        <?php if (has_permission('cms.pages.write')): ?>
+            <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+                <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+                <span><?= lang('App.edit') ?></span>
+            </a>
+            <a href="<?= route_to('admin.cms.pages.blocks', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+                <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+                <span><?= esc(lang('Pages.manage_blocks')) ?></span>
+            </a>
+            <?php if ($status !== 'published'): ?>
+                <form method="post" action="<?= route_to('admin.cms.pages.publish', $itemId) ?>">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                        <?= ui_icon('globe', 'h-3.5 w-3.5') ?>
+                        <span><?= esc(lang('Pages.pages_publish')) ?></span>
+                    </button>
+                </form>
+            <?php endif; ?>
+            <?php if ($status !== 'archived'): ?>
+                <form method="post" action="<?= route_to('admin.cms.pages.archive', $itemId) ?>">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                        <?= ui_icon('archive', 'h-3.5 w-3.5') ?>
+                        <span><?= esc(lang('Pages.pages_archive')) ?></span>
+                    </button>
+                </form>
+            <?php endif; ?>
         <?php endif; ?>
         <?php $actionsContent = ob_get_clean(); ?>
 
         <?php ob_start(); ?>
-        <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemId) ?>"
-              x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($page['title'] ?? $page['slug'] ?? null), 'js') ?>', () => $el.submit())">
-            <?= csrf_field() ?>
-            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                <span><?= esc(lang('App.delete')) ?></span>
-            </button>
-        </form>
+        <?php if (has_permission('cms.pages.write')): ?>
+            <form method="post" action="<?= route_to('admin.cms.pages.delete', $itemId) ?>"
+                  x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($page['title'] ?? $page['slug'] ?? null), 'js') ?>', () => $el.submit())">
+                <?= csrf_field() ?>
+                <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                    <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                    <span><?= esc(lang('App.delete')) ?></span>
+                </button>
+            </form>
+        <?php endif; ?>
         <?php $dangerContent = ob_get_clean(); ?>
 
         <?= view('components/display/admin_actions_panel', [

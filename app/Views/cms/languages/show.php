@@ -59,24 +59,28 @@
             </button>
         </form>
     <?php endif; ?>
-    <a href="<?= route_to('admin.cms.languages.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
-        <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
-        <?= lang('App.edit') ?>
-    </a>
-    <a href="<?= route_to('admin.cms.languages.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
-        <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-        <?= esc(lang('CmsLanguages.field_sort_order') ?? lang('App.reorder')) ?>
-    </a>
+    <?php if (has_permission('cms.languages.write')): ?>
+        <a href="<?= route_to('admin.cms.languages.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <?= lang('App.edit') ?>
+        </a>
+        <a href="<?= route_to('admin.cms.languages.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('CmsLanguages.field_sort_order') ?? lang('App.reorder')) ?>
+        </a>
+    <?php endif; ?>
     <?php $actionsContent = ob_get_clean(); ?>
 
     <?php ob_start(); ?>
-    <form method="post" action="<?= route_to('admin.cms.languages.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($language['name'] ?? $language['code'] ?? null), 'js') ?>', () => $el.submit())">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
+    <?php if (has_permission('cms.languages.write')): ?>
+        <form method="post" action="<?= route_to('admin.cms.languages.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($language['name'] ?? $language['code'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+    <?php endif; ?>
     <?php $dangerContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_actions_panel', [

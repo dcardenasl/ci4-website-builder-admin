@@ -151,10 +151,12 @@
     ]) ?>
 
     <?php ob_start(); ?>
-    <a href="<?= route_to('admin.cms.forms.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
-        <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
-        <?= lang('App.edit') ?>
-    </a>
+    <?php if (has_permission('cms.forms.write')): ?>
+        <a href="<?= route_to('admin.cms.forms.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <?= lang('App.edit') ?>
+        </a>
+    <?php endif; ?>
     <a href="<?= route_to('admin.cms.form_submissions') ?>?form_key=<?= urlencode((string) ($form['form_key'] ?? '')) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
         <?= ui_icon('mail', 'h-3.5 w-3.5') ?>
         <span><?= esc(lang('Forms.view_submissions')) ?></span>
@@ -162,13 +164,15 @@
     <?php $actionsContent = ob_get_clean(); ?>
 
     <?php ob_start(); ?>
-    <form method="post" action="<?= route_to('admin.cms.forms.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($form['form_key'] ?? null), 'js') ?>', () => $el.submit())">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
+    <?php if (has_permission('cms.forms.write')): ?>
+        <form method="post" action="<?= route_to('admin.cms.forms.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($form['form_key'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+    <?php endif; ?>
     <?php $dangerContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_actions_panel', [

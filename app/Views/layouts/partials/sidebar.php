@@ -120,7 +120,7 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
                 </a>
             <?php endif; ?>
 
-            <?php if (has_permission('cms.pages.read') || has_permission('cms.menus.read') || has_permission('cms.collections.read') || has_permission('cms.redirects.read')): ?>
+            <?php if (has_permission('cms.pages.write') || has_permission('cms.menus.write') || has_permission('cms.collections.write')): ?>
                 <a href="<?= site_url('admin/cms/wizard/structure') ?>" class="<?= $navItemClass ?> <?= url_is('admin/cms/wizard/structure*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <span aria-hidden="true">🏗️</span>
                     <span><?= lang('Wizard.structure_sidebar_label') ?></span>

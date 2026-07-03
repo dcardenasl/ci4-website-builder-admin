@@ -19,17 +19,19 @@
                 <h2 class="text-xl font-bold text-gray-900 mt-0.5"><?= esc($setting['setting_key'] ?? '—') ?></h2>
             </div>
             <div class="flex items-center gap-2">
-                <a href="<?= route_to('admin.cms.settings.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?>">
-                    <?= esc(lang('App.edit')) ?>
-                </a>
-                
-                <form method="post" action="<?= route_to('admin.cms.settings.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($setting['setting_key'] ?? $setting['setting_group'] ?? null), 'js') ?>', () => $el.submit())">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
-                        <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                        <?= esc(lang('App.delete')) ?>
-                    </button>
-                </form>
+                <?php if (has_permission('cms.settings.write')): ?>
+                    <a href="<?= route_to('admin.cms.settings.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?>">
+                        <?= esc(lang('App.edit')) ?>
+                    </a>
+                    
+                    <form method="post" action="<?= route_to('admin.cms.settings.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($setting['setting_key'] ?? $setting['setting_group'] ?? null), 'js') ?>', () => $el.submit())">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
+                            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('App.delete')) ?>
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
 

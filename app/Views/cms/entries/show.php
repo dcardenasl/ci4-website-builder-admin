@@ -116,40 +116,44 @@
     <?php endif; ?>
 
     <?php ob_start(); ?>
-    <a href="<?= route_to('admin.cms.entries.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
-        <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
-        <?= lang('App.edit') ?>
-    </a>
-    <a href="<?= route_to('admin.cms.entries.blocks', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
-        <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
-        <?= esc(lang('Entries.blocks_title')) ?>
-    </a>
-    <form method="post" action="<?= route_to('admin.cms.entries.publish', $itemId) ?>">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
-            <?= esc(lang('Entries.entries_publish')) ?>
-        </button>
-    </form>
-    <form method="post" action="<?= route_to('admin.cms.entries.archive', $itemId) ?>">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
-            <?= esc(lang('Entries.entries_archive')) ?>
-        </button>
-    </form>
-    <a href="<?= route_to('admin.cms.entries.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
-        <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-        <?= esc(lang('App.reorder')) ?>
-    </a>
+    <?php if (has_permission('cms.entries.write')): ?>
+        <a href="<?= route_to('admin.cms.entries.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
+            <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+            <?= lang('App.edit') ?>
+        </a>
+        <a href="<?= route_to('admin.cms.entries.blocks', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('Entries.blocks_title')) ?>
+        </a>
+        <form method="post" action="<?= route_to('admin.cms.entries.publish', $itemId) ?>">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                <?= esc(lang('Entries.entries_publish')) ?>
+            </button>
+        </form>
+        <form method="post" action="<?= route_to('admin.cms.entries.archive', $itemId) ?>">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class()) ?> w-full justify-center">
+                <?= esc(lang('Entries.entries_archive')) ?>
+            </button>
+        </form>
+        <a href="<?= route_to('admin.cms.entries.reorder') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('App.reorder')) ?>
+        </a>
+    <?php endif; ?>
     <?php $actionsContent = ob_get_clean(); ?>
 
     <?php ob_start(); ?>
-    <form method="post" action="<?= route_to('admin.cms.entries.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($entry['title'] ?? $entry['slug'] ?? null), 'js') ?>', () => $el.submit())">
-        <?= csrf_field() ?>
-        <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-            <?= esc(lang('App.delete')) ?>
-        </button>
-    </form>
+    <?php if (has_permission('cms.entries.write')): ?>
+        <form method="post" action="<?= route_to('admin.cms.entries.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($entry['title'] ?? $entry['slug'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                <?= esc(lang('App.delete')) ?>
+            </button>
+        </form>
+    <?php endif; ?>
     <?php $dangerContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_actions_panel', [
