@@ -45,6 +45,36 @@ final class WizardFlowTest extends CIUnitTestCase
         $result->assertSee('Reintentar');
     }
 
+    public function testTranslateProxyDoesNotRequirePageReadPermission(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user'         => ['permissions' => ['cms.entries.read']],
+        ])->get('/admin/cms/translate');
+
+        $result->assertStatus(400);
+        $this->assertStringContainsString('Missing required parameters', (string) $result->getBody());
+    }
+
+    public function testContentWizardRendersTranslationReviewSection(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user'         => ['permissions' => ['cms.entries.read']],
+        ])->get('/admin/cms/wizard');
+
+        $result->assertStatus(200);
+        $body = html_entity_decode((string) $result->getBody(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $this->assertStringContainsString('Revisa el contenido antes de publicar', $body);
+        $this->assertStringContainsString('Traducciones automáticas', $body);
+        $this->assertStringContainsString('Idiomas listos', $body);
+        $this->assertStringContainsString('Generando traducciones...', $body);
+        $this->assertStringContainsString('Proceso completado', $body);
+        $this->assertStringContainsString('Acciones', $body);
+    }
+
     public function testStructureWizardIndexRendersForAdmin(): void
     {
         $languageMock = $this->createMock(LanguageApiService::class);
@@ -371,6 +401,45 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertIsArray($body);
         $this->assertSame('Slug already exists', $body['message']);
         $this->assertSame(['collection_key' => 'Slug already exists'], $body['fieldErrors']);
+    }
+
+    public function testStructureWizardCreateCollectionRejectsSuccessfulResponseWithoutId(): void
+    {
+        session()->set('user', ['permissions' => ['cms.collections.write']]);
+
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock->expects($this->once())
+            ->method('create')
+            ->willReturn([
+                'ok' => true,
+                'status' => 201,
+                'data' => ['collection_key' => 'blog'],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $this->injectJsonBody([
+            'collection_type' => 'blog',
+            'collection_key' => 'blog',
+            'sort_order' => 0,
+            'translations' => [
+                ['language_id' => 1, 'slug' => 'blog', 'name' => 'Blog'],
+            ],
+        ]);
+
+        $controller = new StructureWizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createCollection();
+
+        $this->assertSame(502, $result->getStatusCode());
+        $body = json_decode((string) $result->getBody(), true);
+        $this->assertIsArray($body);
+        $this->assertFalse($body['ok']);
+        $this->assertSame(lang('Wizard.wizard_structure_error_collection_missing_id'), $body['message']);
+        $this->assertArrayNotHasKey('fieldErrors', $body);
     }
 
     // ── uploadImage() validation ──────────────────────────────────────────────

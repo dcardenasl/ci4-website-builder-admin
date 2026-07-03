@@ -202,6 +202,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
         $this->assertStringContainsString("x-show=\"screen === 'collection-success'\"", $body);
         $this->assertStringNotContainsString('lg:grid-cols-3', $body);
+        $this->assertStringContainsString(lang('Wizard.wizard_structure_create_first_entry'), $body);
     }
 
     public function testStoreValidationFailureRedirectsBack(): void

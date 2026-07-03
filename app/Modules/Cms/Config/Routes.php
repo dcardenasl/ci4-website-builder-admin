@@ -69,7 +69,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('settings/(:segment)/delete', '\App\Modules\Cms\Controllers\SettingController::delete/$1', ['as' => 'admin.cms.settings.delete', 'filter' => 'permission:cms.settings.write']);
 
     // Translate proxy (DeepL)
-    $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate']);
 
     // Translation Auditing
     $routes->get('translations/audit', '\App\Modules\Cms\Controllers\TranslationAuditController::index', ['as' => 'admin.cms.translations.audit', 'filter' => 'permission:cms.languages.read']);

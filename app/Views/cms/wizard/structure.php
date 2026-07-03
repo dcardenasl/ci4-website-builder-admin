@@ -181,10 +181,10 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                             </div>
                         </div>
                         <div class="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
-                            <p><strong>Estado:</strong> <span x-text="usePreset ? 'Se aplicará el preset recomendado' : 'Se creará sin preset'"></span></p>
+                            <p><strong>Estado:</strong> <span x-text="usePreset ? 'Preset activo' : 'Sin preset'"></span></p>
                         </div>
                         <?php if ($wizardLanguages !== []): ?>
-                            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                            <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4" :aria-busy="collectionTranslationBusy() ? 'true' : 'false'">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div>
                                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_languages_section_title')) ?></p>
@@ -197,7 +197,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                 </div>
 
                                 <?php if ($wizardTranslationLanguages !== []): ?>
-                                    <div class="mt-4 space-y-4">
+                                    <div class="mt-4 space-y-4" :class="collectionTranslationBusy() ? 'opacity-35 pointer-events-none select-none' : ''">
                                         <?php foreach ($wizardTranslationLanguages as $translationIndex => $language): ?>
                                             <?php
                                                 $languageId = (int) ($language['id'] ?? 0);
@@ -213,12 +213,12 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                                     </div>
                                                     <div class="flex flex-wrap items-center gap-2">
                                                         <label class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700">
-                                                            <input type="checkbox" x-model="collectionTranslations[<?= $translationIndex ?>].included" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                                                            <input type="checkbox" x-model="collectionTranslations[<?= $translationIndex ?>].included" :disabled="collectionTranslationBusy()" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50">
                                                             <span><?= esc(lang('Wizard.wizard_structure_language_include')) ?></span>
                                                         </label>
-                                                        <button type="button" @click="translateCollectionLanguage(<?= $translationIndex ?>)" :disabled="collectionTranslating || !collectionTranslations[<?= $translationIndex ?>].included" class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
-                                                            <span x-show="!collectionTranslations[<?= $translationIndex ?>].translating"><?= esc(lang('Wizard.wizard_structure_language_translate')) ?></span>
-                                                            <span x-show="collectionTranslations[<?= $translationIndex ?>].translating" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating')) ?></span>
+                                                        <button type="button" @click="translateCollectionLanguage(<?= $translationIndex ?>)" :disabled="collectionTranslationBusy() || !collectionTranslations[<?= $translationIndex ?>].included" class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                            <span x-show="!collectionTranslationBusy()"><?= esc(lang('Wizard.wizard_structure_language_translate')) ?></span>
+                                                            <span x-show="collectionTranslationBusy()" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating')) ?></span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -231,7 +231,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                                         'label' => lang('Wizard.wizard_structure_translation_name_label'),
                                                         'type' => 'text',
                                                         'class' => 'block',
-                                                        'attrs' => ':disabled="!collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].name" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
+                                                        'attrs' => ':disabled="collectionTranslationBusy() || !collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].name" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
                                                     ]) ?>
 
                                                     <?= view('components/form/slug', [
@@ -242,7 +242,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                                         'required' => false,
                                                         'languageSelector' => '#collection_translation_language_' . $translationIndex,
                                                         'help' => 'Wizard.wizard_structure_translation_slug_help',
-                                                        'attrs' => ':disabled="!collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].slug" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
+                                                        'attrs' => ':disabled="collectionTranslationBusy() || !collectionTranslations[' . $translationIndex . '].included" x-model="collectionTranslations[' . $translationIndex . '].slug" @input="clearCollectionTranslationError(' . $translationIndex . ')"',
                                                     ]) ?>
                                                 </div>
 
@@ -250,6 +250,24 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                                 <p class="mt-3 text-xs text-red-600" x-show="collectionTranslations[<?= $translationIndex ?>].error" x-cloak x-text="collectionTranslations[<?= $translationIndex ?>].error"></p>
                                             </div>
                                         <?php endforeach; ?>
+                                    </div>
+                                    <div x-show="collectionTranslationBusy()" x-cloak class="absolute inset-0 z-10 flex items-center justify-center bg-white/75 px-6 py-8 backdrop-blur-[1px]" aria-live="polite">
+                                        <div class="w-full max-w-xl rounded-2xl border border-brand-200 bg-brand-50 px-5 py-4 text-brand-800 shadow-lg">
+                                            <div class="flex items-start gap-4">
+                                                <div class="mt-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm">
+                                                    <svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                        <circle cx="12" cy="12" r="9" class="opacity-20" stroke="currentColor" stroke-width="3"></circle>
+                                                        <path d="M21 12a9 9 0 0 1-9 9" class="opacity-90" stroke="currentColor" stroke-linecap="round" stroke-width="3"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="text-base font-semibold"><?= esc(lang('Wizard.wizard_structure_languages_busy_title')) ?></p>
+                                                    <p class="mt-1 text-sm leading-6 text-brand-700">
+                                                        <?= esc(lang('Wizard.wizard_structure_languages_busy_body_short')) ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 <?php else: ?>
                                     <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
@@ -261,9 +279,9 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                     <p x-show="collectionTranslationError" x-cloak class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-text="collectionTranslationError"></p>
                                     <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                                         <p class="text-xs text-gray-500"><?= esc(lang('Wizard.wizard_structure_languages_section_footer')) ?></p>
-                                        <button type="button" @click="translateAllCollectionLanguages()" :disabled="collectionTranslating" class="rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
-                                            <span x-show="!collectionTranslating"><?= esc(lang('Wizard.wizard_structure_language_translate_all')) ?></span>
-                                            <span x-show="collectionTranslating" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating_all')) ?></span>
+                                        <button type="button" @click="translateAllCollectionLanguages()" :disabled="collectionTranslationBusy()" class="rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                            <span x-show="!collectionTranslationBusy()"><?= esc(lang('Wizard.wizard_structure_language_translate_all')) ?></span>
+                                            <span x-show="collectionTranslationBusy()" x-cloak><?= esc(lang('Wizard.wizard_structure_language_translating_all')) ?></span>
                                         </button>
                                     </div>
                                 <?php endif; ?>
@@ -273,7 +291,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                     <div class="flex flex-wrap gap-3">
                         <button type="button" @click="prevCollectionStep()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700" :disabled="collectionStep === 1"><?= esc(lang('Wizard.wizard_structure_prev')) ?></button>
                         <button type="button" @click="nextCollectionStep()" x-show="collectionStep < 2" class="btn-secondary text-sm" :disabled="!canAdvanceCollectionStep()"><?= esc(lang('Wizard.wizard_structure_next')) ?></button>
-                        <button type="submit" x-show="collectionStep === 2" class="btn-primary text-sm" :disabled="saving || !canSubmitCollection()">
+                        <button type="submit" x-show="collectionStep === 2" class="btn-primary text-sm" :disabled="saving || collectionTranslationBusy() || !canSubmitCollection()">
                             <span x-show="!saving"><?= esc(lang('Wizard.wizard_structure_create')) ?></span>
                             <span x-show="saving"><?= esc(lang('Wizard.wizard_structure_creating')) ?></span>
                         </button>
@@ -285,46 +303,51 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
     </div>
 
     <div x-show="screen === 'collection-success'" x-cloak class="space-y-6">
-        <div class="rounded-xl border border-green-200 bg-green-50 p-6 shadow-sm">
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div class="flex items-start gap-4">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl shadow-sm">✅</div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-2xl text-green-700">✅</div>
                 <div class="min-w-0 flex-1">
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-green-700"><?= esc(lang('Wizard.wizard_structure_completion_kicker')) ?></p>
-                    <h2 class="mt-2 text-3xl font-bold text-green-950"><?= esc(lang('Wizard.wizard_structure_completion_title')) ?></h2>
-                    <p class="mt-3 max-w-3xl text-sm text-green-900/80"><?= esc(lang('Wizard.wizard_structure_completion_body')) ?></p>
+                    <h2 class="mt-2 text-3xl font-bold text-gray-900"><?= esc(lang('Wizard.wizard_structure_completion_title')) ?></h2>
+                    <p class="mt-3 max-w-3xl text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_completion_body')) ?></p>
                 </div>
+                <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-green-800"><?= esc(lang('Wizard.wizard_structure_completion_ready_badge')) ?></span>
             </div>
 
-            <div class="mt-6 rounded-2xl border border-green-200 bg-white p-5">
+            <div class="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-green-700"><?= esc(lang('Wizard.wizard_structure_completion_created_title')) ?></p>
-                        <div class="mt-2 space-y-1 text-sm text-gray-700">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500"><?= esc(lang('Wizard.wizard_structure_completion_created_title')) ?></p>
+                        <div class="mt-3 grid gap-2 text-sm text-gray-700">
                             <p><strong><?= esc(lang('Wizard.wizard_structure_summary_name')) ?>:</strong> <span x-text="collectionCompleted?.name || '—'"></span></p>
                             <p><strong><?= esc(lang('Wizard.wizard_structure_summary_internal_slug')) ?>:</strong> <span x-text="collectionCompleted?.slug || '—'"></span></p>
                             <p><strong><?= esc(lang('Wizard.wizard_structure_summary_type')) ?>:</strong> <span x-text="collectionTypeLabel(collectionCompleted?.type)"></span></p>
                         </div>
                     </div>
-                    <div class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-green-800">
-                        <?= esc(lang('Wizard.wizard_structure_completion_next_steps_title')) ?>
-                    </div>
+                    <p class="max-w-md text-sm text-gray-600"><?= esc(lang('Wizard.wizard_structure_completion_hint_body_short')) ?></p>
                 </div>
-
-                <ol class="mt-5 space-y-3 text-sm text-gray-700 list-decimal pl-4">
-                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_detail')) ?></li>
-                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_entry')) ?></li>
-                    <li><?= esc(lang('Wizard.wizard_structure_completion_step_advanced')) ?></li>
-                </ol>
-
-                <p class="mt-5 rounded-xl border border-dashed border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
-                    <?= esc(lang('Wizard.wizard_structure_completion_hint_body')) ?>
-                </p>
             </div>
 
-            <div class="mt-6 flex flex-wrap gap-3">
-                <a :href="collectionDetailUrl()" class="btn-primary text-sm"><?= esc(lang('Wizard.wizard_structure_go_detail')) ?></a>
-                <button type="button" @click="resetCollectionFlow()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.wizard_structure_create_another')) ?></button>
-                <a href="<?= route_to('admin.cms.wizard') ?>" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></a>
+            <div class="mt-6">
+                <p class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_completion_next_steps_title')) ?></p>
+                <div class="mt-3 grid gap-3 md:grid-cols-3">
+                    <a :href="collectionEntryCreateUrl()" class="flex items-center justify-between gap-3 rounded-xl border border-green-200 bg-white px-4 py-3 text-sm font-semibold text-green-800 shadow-sm hover:border-green-300 hover:bg-green-50">
+                        <span><?= esc(lang('Wizard.wizard_structure_create_first_entry')) ?></span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                    <a :href="collectionDetailUrl()" class="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 hover:bg-gray-50">
+                        <span><?= esc(lang('Wizard.wizard_structure_go_detail')) ?></span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                    <a href="<?= route_to('admin.cms.collections') ?>" class="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 hover:bg-gray-50">
+                        <span><?= esc(lang('Wizard.wizard_structure_go_collections')) ?></span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <button type="button" @click="resetCollectionFlow()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.wizard_structure_create_another')) ?></button>
+                    <a href="<?= route_to('admin.cms.wizard') ?>" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700"><?= esc(lang('Wizard.btn_back_panel')) ?></a>
+                </div>
             </div>
         </div>
     </div>
@@ -401,7 +424,16 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
             translation: { language_id: 0, description: '' },
             usePreset: true,
             collectionPreset: null,
-            collectionTranslations: [],
+            collectionTranslations: COLLECTION_TRANSLATION_LANGUAGES.map((language) => ({
+                language_id: Number(language?.id || 0),
+                code: String(language?.code || '').toUpperCase(),
+                label: String(language?.label || language?.name || language?.code || '').trim() || '—',
+                included: true,
+                name: '',
+                slug: '',
+                translating: false,
+                error: '',
+            })),
             collectionTranslationError: '',
             collectionTranslating: false,
             collectionTranslationLanguages: COLLECTION_TRANSLATION_LANGUAGES,
@@ -443,6 +475,9 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
             defaultCollectionLanguageLabel() {
                 return this.languageLabel(this.resolveDefaultLanguage());
             },
+            collectionTranslationBusy() {
+                return this.collectionTranslating || this.collectionTranslations.some((row) => Boolean(row?.translating));
+            },
             syncCollectionSlugLanguage() {
                 const slugInput = this.collectionSlugInput();
                 if (!(slugInput && slugInput.tagName === 'INPUT')) {
@@ -460,9 +495,8 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 return Array.isArray(this.collectionPreset?.block_template?.blocks) ? this.collectionPreset.block_template.blocks : [];
             },
             buildCollectionTranslations() {
-                const defaultLanguageId = Number(this.resolveDefaultLanguageId() || 0);
                 return (this.collectionTranslationLanguages || [])
-                    .filter((language) => Number(language?.id || 0) > 0 && Number(language.id) !== defaultLanguageId)
+                    .filter((language) => Number(language?.id || 0) > 0)
                     .map((language) => ({
                         language_id: Number(language.id || 0),
                         code: String(language.code || '').toUpperCase(),
@@ -554,7 +588,12 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                     return;
                 }
 
-                await this._translateCollectionLanguage(index);
+                this.collectionTranslating = true;
+                try {
+                    await this._translateCollectionLanguage(index);
+                } finally {
+                    this.collectionTranslating = false;
+                }
             },
             async translateAllCollectionLanguages() {
                 if (this.collectionTranslating) {
@@ -614,6 +653,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 this.collectionCompleted = null;
                 this.collectionErrors = { step1: '', slug_base: '' };
                 this.collectionSlugAvailability = '';
+                this.collectionTranslating = false;
                 this.screen = kind;
                 if (kind === 'collection') {
                     this.collectionStep = 1;
@@ -641,6 +681,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 this.errorMsg = '';
                 this.collectionErrors = { step1: '', slug_base: '' };
                 this.collectionSlugAvailability = '';
+                this.collectionTranslating = false;
                 this.collectionStep = 1;
                 this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
                 this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
@@ -652,6 +693,11 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 this.screen = 'collection';
             },
             collectionDetailUrl() { return this.collectionCompleted?.id ? '<?= route_to('admin.cms.collections') ?>/' + this.collectionCompleted.id : '<?= route_to('admin.cms.collections') ?>'; },
+            collectionEntryCreateUrl() {
+                return this.collectionCompleted?.id
+                    ? '<?= route_to('admin.cms.entries.create') ?>?collection_id=' + this.collectionCompleted.id
+                    : '<?= route_to('admin.cms.entries.create') ?>';
+            },
             selectCollectionType(type) {
                 this.form.collection_type = type || 'other';
                 this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
@@ -716,7 +762,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 }
             },
             prevCollectionStep() { if (this.collectionStep > 1) this.collectionStep -= 1; },
-            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.collection_type) && this.collectionTranslationsValid(false); },
+            canSubmitCollection() { return Boolean(this.form.name && this.form.collection_key && this.form.collection_type) && this.collectionTranslationsValid(false) && !this.collectionTranslationBusy(); },
             collectionTypeLabel(type = null) { const lookupType = type || this.form.collection_type; return (this.config?.collection_types || []).find((option) => option.key === lookupType)?.label || lookupType || '—'; },
             stepLabel() { return <?= json_encode(sprintf(lang('Wizard.step_of'), '%s', '2')) ?>.replace('%s', this.collectionStep); },
             async submitCollection() {
@@ -749,11 +795,22 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                         });
                     });
 
+                    const selectedPreset = this.usePreset ? (this.collectionPreset || this.resolveCollectionPreset(this.form.collection_type)) : null;
+                    const blockTemplate = selectedPreset?.block_template || { version: '1.0', blocks: [] };
+                    const wizardConfig = selectedPreset?.wizard_config || null;
+
                     const payload = {
                         collection_type: this.form.collection_type,
                         collection_key: this.form.collection_key || this.form.slug_base,
+                        default_sitemap_priority: '0.5',
+                        default_changefreq: 'weekly',
                         sort_order: this.form.sort_order ?? 0,
-                        use_preset: this.usePreset ? 1 : 0,
+                        is_active: '1',
+                        requires_approval: '0',
+                        enables_categories: '1',
+                        enables_tags: '1',
+                        block_template: JSON.stringify(blockTemplate),
+                        wizard_config: wizardConfig ? JSON.stringify(wizardConfig) : null,
                         translations,
                     };
                     const res = await req('<?= route_to('admin.cms.wizard.structure.create_collection') ?>', payload); const json = await res.json();
@@ -779,8 +836,11 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                         throw new Error(<?= json_encode(lang('Wizard.wizard_structure_error_collection')) ?>);
                     }
                     const id = json.data?.id || '';
+                    if (!id) {
+                        throw new Error(json.message || <?= json_encode(lang('Wizard.wizard_structure_error_collection_missing_id')) ?>);
+                    }
                     this.collectionCompleted = {
-                        id: id ? String(id) : '',
+                        id: String(id),
                         name: this.form.name || '',
                         slug: this.form.collection_key || this.form.slug_base || '',
                         type: this.form.collection_type || '',

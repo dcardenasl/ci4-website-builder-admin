@@ -72,6 +72,7 @@ $csrfToken ??= csrf_hash();
     const WIZARD_BASE = '<?= site_url('admin/cms/wizard') ?>';
     const ADMIN_CMS_BASE = '<?= site_url('admin/cms') ?>';
     const PUBLIC_SITE_URL = '<?= rtrim((string) env('PUBLIC_SITE_URL'), '/') ?>';
+    const TRANSLATE_URL = '<?= route_to('admin.cms.translate') ?>';
 
     const DEFAULT_STEPS = [
         {
@@ -203,6 +204,9 @@ $csrfToken ??= csrf_hash();
             publishedEntry: null,
             publishing: false,
             publishError: '',
+            entryReviewLoading: false,
+            entryReviewError: '',
+            entryTranslationRows: [],
 
             // Image upload (shared)
             uploading: false,
@@ -255,6 +259,16 @@ $csrfToken ??= csrf_hash();
             get totalSteps() {
                 return this.steps.length;
             },
+            get defaultLanguage() {
+                const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
+                return languages.find((language) => language?.is_default) || languages[0] || null;
+            },
+            get defaultLanguageId() {
+                return Number(this.defaultLanguage?.id || this.resolveDefaultLanguageId());
+            },
+            get defaultLanguageCode() {
+                return String(this.defaultLanguage?.code || '').trim().toUpperCase();
+            },
 
             // ── Helpers ───────────────────────────────────────────────────────
             stepLabel() {
@@ -296,6 +310,174 @@ $csrfToken ??= csrf_hash();
             blockTypeInfo(blockKey) {
                 if (!blockKey || !this.config?.block_types) return null;
                 return this.config.block_types[blockKey] ?? null;
+            },
+
+            entryReviewLanguages() {
+                return (Array.isArray(this.config?.languages) ? this.config.languages : [])
+                    .filter((language) => Number(language?.id || 0) > 0);
+            },
+
+            entryTranslationCount() {
+                return this.entryTranslationRows.length;
+            },
+
+            entryTranslationBusy() {
+                return this.entryReviewLoading || this.entryTranslationRows.some((row) => Boolean(row?.translating));
+            },
+
+            entryReviewSourceContent() {
+                return {
+                    title: String(this.formData.title || this.selectedCollection?.name || STRINGS.content_fallback || '').trim(),
+                    excerpt: String(this.formData.excerpt || '').trim(),
+                    meta_title: String(this.formData.meta_title || '').trim(),
+                    meta_description: String(this.formData.meta_description || '').trim(),
+                    featured_file_id: this.formData.featured_image_id ?? null,
+                    featured_image_url: this.formData.featured_image_url ?? null,
+                };
+            },
+
+            entryReviewFields() {
+                return this.steps.flatMap((step) => Array.isArray(step.fields) ? step.fields : []);
+            },
+
+            entryReviewPreviewFields() {
+                const values = this.entryReviewSourceContent();
+                return this.entryReviewFields()
+                    .filter((field) => !['date', 'select'].includes(String(field?.type || '')))
+                    .map((field) => ({
+                        key: field.key,
+                        label: field.label,
+                        value: values[field.key] || this.formData[field.key] || '',
+                    }))
+                    .filter((field) => String(field.value || '').trim() !== '');
+            },
+
+            entryBaseSlug() {
+                return slugify(this.formData.title || 'entry');
+            },
+
+            async translateEntryText(text, sourceLang, targetLang) {
+                const value = String(text || '').trim();
+                const source = String(sourceLang || '').trim().toUpperCase();
+                const target = String(targetLang || '').trim().toUpperCase();
+                if (value === '' || source === '' || target === '') {
+                    return '';
+                }
+
+                const url = new URL(TRANSLATE_URL, window.location.origin);
+                url.searchParams.set('text', value);
+                url.searchParams.set('source_lang', source);
+                url.searchParams.set('target_lang', target);
+
+                const response = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+                const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+                const rawBody = await response.text();
+                let json = null;
+
+                if (contentType.includes('application/json')) {
+                    try {
+                        json = rawBody ? JSON.parse(rawBody) : null;
+                    } catch (_) {
+                        json = null;
+                    }
+                }
+
+                if (response.ok && json && typeof json.translated === 'string' && json.translated.trim() !== '') {
+                    return json.translated.trim();
+                }
+
+                if (rawBody.trim().startsWith('<')) {
+                    throw new Error(<?= json_encode(lang('Wizard.wizard_structure_languages_translate_error')) ?>);
+                }
+
+                throw new Error(json?.error || json?.message || <?= json_encode(lang('Wizard.wizard_structure_languages_translate_error')) ?>);
+            },
+
+            async prepareEntryReview() {
+                if (this.entryReviewLoading) {
+                    return;
+                }
+
+                this.entryReviewLoading = true;
+                this.entryReviewError = '';
+                this.entryTranslationRows = [];
+
+                try {
+                    const sourceLanguage = this.defaultLanguageCode || 'EN';
+                    const source = this.entryReviewSourceContent();
+                    const defaultLanguageId = this.defaultLanguageId;
+                    const defaultLanguageCode = sourceLanguage;
+                    const defaultLanguageLabel = String(this.defaultLanguage?.label || this.defaultLanguage?.name || this.defaultLanguage?.code || '—').trim() || '—';
+                    const translatedRows = [];
+                    const targets = this.entryReviewLanguages()
+                        .filter((language) => Number(language?.id || 0) !== defaultLanguageId)
+                        .map((language) => ({
+                            id: Number(language.id || 0),
+                            code: String(language.code || '').trim().toUpperCase(),
+                            label: String(language.label || language.name || language.code || '').trim() || '—',
+                        }));
+
+                    const tasks = targets.map(async (target) => {
+                        const row = {
+                            language_id: target.id,
+                            code: target.code,
+                            label: target.label,
+                            title: '',
+                            slug: '',
+                            excerpt: '',
+                            meta_title: '',
+                            meta_description: '',
+                            translating: true,
+                            error: '',
+                        };
+
+                        try {
+                            row.title = source.title ? await this.translateEntryText(source.title, sourceLanguage, target.code) : '';
+                            row.excerpt = source.excerpt ? await this.translateEntryText(source.excerpt, sourceLanguage, target.code) : '';
+                            row.meta_title = source.meta_title ? await this.translateEntryText(source.meta_title, sourceLanguage, target.code) : '';
+                            row.meta_description = source.meta_description ? await this.translateEntryText(source.meta_description, sourceLanguage, target.code) : '';
+                            const slugBase = slugify(row.title || source.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>);
+                            row.slug = `${slugBase}-${target.code.toLowerCase()}`;
+                        } catch (error) {
+                            row.error = error instanceof Error ? error.message : String(error);
+                            row.title = source.title;
+                            row.excerpt = source.excerpt;
+                            row.meta_title = source.meta_title;
+                            row.meta_description = source.meta_description;
+                            row.slug = `${slugify(source.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>)}-${target.code.toLowerCase()}`;
+                        } finally {
+                            row.translating = false;
+                            translatedRows.push(row);
+                        }
+                    });
+
+                    await Promise.all(tasks);
+                    this.entryTranslationRows = translatedRows.sort((a, b) => a.label.localeCompare(b.label));
+
+                    if (translatedRows.some((row) => row.error)) {
+                        this.entryReviewError = <?= json_encode(lang('Wizard.wizard_content_review_translation_partial')) ?>;
+                    }
+
+                    if (defaultLanguageId > 0) {
+                        this.entryTranslationRows.unshift({
+                            language_id: defaultLanguageId,
+                            code: defaultLanguageCode,
+                            label: defaultLanguageLabel,
+                            title: source.title,
+                            slug: slugify(source.title || <?= json_encode(lang('Wizard.wizard_structure_page_default_title')) ?>),
+                            excerpt: source.excerpt,
+                            meta_title: source.meta_title,
+                            meta_description: source.meta_description,
+                            translating: false,
+                            error: '',
+                            is_base: true,
+                        });
+                    }
+                } catch (error) {
+                    this.entryReviewError = error instanceof Error ? error.message : String(error);
+                } finally {
+                    this.entryReviewLoading = false;
+                }
             },
 
             blockIsContainer(block) {
@@ -413,7 +595,19 @@ $csrfToken ??= csrf_hash();
                 const t = (block.translations ?? [])[0];
                 if (!t?.block_data) return null;
                 const data = t.block_data;
-                // Only pick *_url fields that have a matching *_file_id — that confirms it's an image field, not a link/button URL
+                // Prefer explicit image URLs first so blocks created before the file-id convention
+                // still show a useful thumbnail in the wizard.
+                const explicitImageEntry = Object.entries(data).find(([k, v]) => {
+                    if (typeof v !== 'string' || v.length === 0) return false;
+                    if (!v.startsWith('http') && !v.startsWith('/')) return false;
+                    return k === 'image_url' || k.endsWith('_image_url') || /(^|_)(photo|picture|thumbnail|thumb|cover|poster|banner)(_url)?$/i.test(k);
+                });
+                if (explicitImageEntry) {
+                    return explicitImageEntry[1];
+                }
+
+                // Fallback: pick *_url fields that have a matching *_file_id — that confirms it's an image field,
+                // not a link/button URL.
                 const entry = Object.entries(data).find(([k, v]) => {
                     if (!k.endsWith('_url')) return false;
                     if (typeof v !== 'string' || v.length === 0) return false;
@@ -587,6 +781,9 @@ $csrfToken ??= csrf_hash();
                 this.selectedCollection = col;
                 this.currentStep = 0;
                 this.formData = { status: 'published' };
+                this.entryReviewLoading = false;
+                this.entryReviewError = '';
+                this.entryTranslationRows = [];
                 for (const step of this.steps) {
                     for (const field of step.fields) {
                         if (field.default !== undefined && field.default !== null) {
@@ -606,13 +803,14 @@ $csrfToken ??= csrf_hash();
                 }
             },
 
-            nextStep() {
+            async nextStep() {
                 if (!this.canAdvance()) return;
                 if (this.currentStep < this.steps.length - 1) {
                     this.currentStep++;
                     this.saveDraft();
                 } else {
                     this.screen = 'confirm';
+                    await this.prepareEntryReview();
                 }
             },
 
@@ -675,6 +873,12 @@ $csrfToken ??= csrf_hash();
                 this.publishing = true;
                 this.publishError = '';
                 try {
+                    if (this.entryReviewLoading) {
+                        throw new Error(<?= json_encode(lang('Wizard.wizard_content_confirm_translations_loading')) ?>);
+                    }
+                    if (this.entryTranslationRows.length === 0) {
+                        await this.prepareEntryReview();
+                    }
                     const payload = this.buildEntryPayload();
                     const res  = await adminFetch(WIZARD_BASE + '/publish', { method: 'POST', body: JSON.stringify(payload) });
                     const raw = await res.text();
@@ -728,25 +932,61 @@ $csrfToken ??= csrf_hash();
 
                 if (Object.keys(extra).length > 0) payload.wizard_extra = extra;
 
-                const baseSlug  = slugify(this.formData.title || 'entry') + '-' + Date.now();
-                const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
-                const defaultLangId = this.defaultLangId || this.resolveDefaultLanguageId();
-                const sharedData = {
-                    title:            this.formData.title ?? '',
-                    excerpt:          this.formData.excerpt ?? '',
-                    featured_file_id: this.formData.featured_image_id ?? null,
-                    featured_image_url: this.formData.featured_image_url ?? null,
-                };
-
-                payload.translations = languages.length > 0
-                    ? languages.map(lang => ({
-                        language_id: lang.id,
-                        slug: lang.id === defaultLangId ? baseSlug : baseSlug + '-' + lang.code,
-                        ...sharedData,
-                    }))
-                    : [{ language_id: defaultLangId, slug: baseSlug, ...sharedData }];
+                payload.translations = this.buildEntryTranslations();
 
                 return payload;
+            },
+
+            buildEntryTranslations() {
+                const source = this.entryReviewSourceContent();
+                const defaultLanguageId = this.defaultLanguageId || this.resolveDefaultLanguageId();
+                const baseSlug = this.entryBaseSlug() + '-' + Date.now();
+                const translations = [];
+
+                if (defaultLanguageId > 0) {
+                    translations.push({
+                        language_id: defaultLanguageId,
+                        slug: baseSlug,
+                        title: source.title,
+                        excerpt: source.excerpt,
+                        meta_title: source.meta_title,
+                        meta_description: source.meta_description,
+                        featured_file_id: source.featured_file_id,
+                        featured_image_url: source.featured_image_url,
+                    });
+                }
+
+                if (Array.isArray(this.entryTranslationRows) && this.entryTranslationRows.length > 0) {
+                    this.entryTranslationRows
+                        .filter((row) => !row?.is_base && Number(row?.language_id || 0) > 0)
+                        .forEach((row) => {
+                            translations.push({
+                                language_id: Number(row.language_id || 0),
+                                slug: String(row.slug || '').trim() || `${slugify(row.title || source.title || 'entry')}-${String(row.code || '').toLowerCase()}`,
+                                title: String(row.title || '').trim() || source.title,
+                                excerpt: String(row.excerpt || '').trim(),
+                                meta_title: String(row.meta_title || '').trim(),
+                                meta_description: String(row.meta_description || '').trim(),
+                                featured_file_id: source.featured_file_id,
+                                featured_image_url: source.featured_image_url,
+                            });
+                        });
+                }
+
+                if (translations.length === 0) {
+                    translations.push({
+                        language_id: defaultLanguageId || 1,
+                        slug: baseSlug,
+                        title: source.title,
+                        excerpt: source.excerpt,
+                        meta_title: source.meta_title,
+                        meta_description: source.meta_description,
+                        featured_file_id: source.featured_file_id,
+                        featured_image_url: source.featured_image_url,
+                    });
+                }
+
+                return translations;
             },
 
             buildPublishedEntryPreview(payload, response) {
@@ -771,6 +1011,9 @@ $csrfToken ??= csrf_hash();
                 this.currentStep = 0;
                 this.publishedEntry = null;
                 this.publishError = '';
+                this.entryReviewLoading = false;
+                this.entryReviewError = '';
+                this.entryTranslationRows = [];
                 this.selectedPage = null;
                 this.selectedOwnerType = 'page';
                 this.pageBlocks = [];
@@ -872,13 +1115,14 @@ $csrfToken ??= csrf_hash();
                 this.blockSaveError = '';
                 try {
                     const t = (this.selectedBlock.translations ?? [])[0] ?? {};
+                    const blockData = this.normalizeBlockPayload(this.blockEditData);
                     // is_active ensures data is never empty after the domain extracts translations,
                     // which would otherwise trigger BaseCrudService's noFieldsToUpdate check.
                     const payload = {
                         is_active: true,
                         translations: [{
                             language_id:  t.language_id ?? (this.defaultLangId || this.resolveDefaultLanguageId()),
-                            block_data:   this.blockEditData,
+                            block_data:   blockData,
                             is_published: t.is_published ?? true,
                         }],
                     };
@@ -903,6 +1147,7 @@ $csrfToken ??= csrf_hash();
                 try {
                     const typeInfo = this.blockTypeInfo(this.editBlockTypeKey);
                     if (!typeInfo?.id) throw new Error(STRINGS.error_block_type_missing);
+                    const blockData = this.normalizeBlockPayload(this.blockEditData);
 
                     const payload = {
                         block_id:           typeInfo.id,
@@ -914,7 +1159,7 @@ $csrfToken ??= csrf_hash();
                         block_config:       {},
                         translations: [{
                             language_id:  this.defaultLangId || this.resolveDefaultLanguageId(),
-                            block_data:   this.blockEditData,
+                            block_data:   blockData,
                             is_published: true,
                         }],
                     };
@@ -937,6 +1182,21 @@ $csrfToken ??= csrf_hash();
                 } finally {
                     this.blockSaving = false;
                 }
+            },
+
+            normalizeBlockPayload(blockData) {
+                const normalized = { ...(blockData ?? {}) };
+                for (const [key, value] of Object.entries(normalized)) {
+                    if (!key.endsWith('_url')) continue;
+                    if (typeof value !== 'string' || value.trim() === '') continue;
+
+                    const fileIdKey = key.replace(/_url$/, '_file_id');
+                    if (normalized[fileIdKey] === undefined || normalized[fileIdKey] === null || normalized[fileIdKey] === '') {
+                        // Preserve image URLs even when the picker did not provide a file id.
+                        normalized[fileIdKey] = normalized[fileIdKey] ?? null;
+                    }
+                }
+                return normalized;
             },
 
             confirmDeleteBlock(block) {

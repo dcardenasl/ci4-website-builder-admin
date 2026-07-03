@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsPresetCatalog;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use App\Modules\Cms\Services\MenuApiServiceInterface;
 use App\Modules\Cms\Services\PageApiServiceInterface;
+use App\Modules\Cms\Support\CmsPresetCatalog;
+use App\Modules\Cms\Support\PagePresetApplier;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -68,6 +69,13 @@ class StructureWizardController extends BaseWebController
         if ($statusCode < 100 || $statusCode > 599) {
             $statusCode = 502;
         }
+        if ($statusCode >= 200 && $statusCode < 300) {
+            $data = $this->extractData($result);
+            $pageId = (int) ($data['id'] ?? 0);
+            if ($pageId > 0) {
+                PagePresetApplier::fromServices()->apply($pageId, (string) ($payload['page_type'] ?? 'generic'));
+            }
+        }
         return $this->response->setStatusCode($statusCode)->setJSON([
             'ok' => $statusCode >= 200 && $statusCode < 300,
             'data' => $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? []),
@@ -120,8 +128,17 @@ class StructureWizardController extends BaseWebController
         $fieldErrors = $this->getFieldErrors($result);
         $message = null;
 
+        if ($ok) {
+            $createdId = (string) ($data['id'] ?? '');
+            if ($createdId === '') {
+                $ok = false;
+                $statusCode = 502;
+                $message = lang('Wizard.wizard_structure_error_collection_missing_id');
+            }
+        }
+
         if (! $ok) {
-            $message = $this->firstMessage($result, lang('Wizard.wizard_structure_error_collection'));
+            $message = $message ?? $this->firstMessage($result, lang('Wizard.wizard_structure_error_collection'));
 
             if ($fieldErrors !== []) {
                 $message = reset($fieldErrors) ?: $message;

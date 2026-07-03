@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsPresetCatalog;
 use App\Modules\Cms\Requests\PageStoreRequest;
 use App\Modules\Cms\Requests\PageUpdateRequest;
+use App\Modules\Cms\Support\CmsPresetCatalog;
+use App\Modules\Cms\Support\PagePresetApplier;
 use App\Modules\Cms\Services\PageApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -126,10 +127,16 @@ class PageController extends BaseWebController
             return $invalid;
         }
 
-        $response = $this->safeApiCall(fn () => $this->pageService->create($request->payload()));
+        $payload = $request->payload();
+        $response = $this->safeApiCall(fn () => $this->pageService->create($payload));
 
         if (! $response['ok']) {
             return $this->failApi($response, lang('Pages.pages_create_failed'));
+        }
+
+        $pageId = (int) ($this->extractData($response)['id'] ?? 0);
+        if ($pageId > 0) {
+            $this->applyPagePreset($pageId, (string) ($payload['page_type'] ?? 'generic'));
         }
 
         return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_create_success'));
@@ -216,6 +223,11 @@ class PageController extends BaseWebController
         $result = $this->safeApiCall(fn () => $this->pageService->checkSlug($slug, $languageId, $currentId));
         $data   = $this->extractData($result);
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
+    }
+
+    private function applyPagePreset(int $pageId, string $pageType): void
+    {
+        PagePresetApplier::fromServices()->apply($pageId, $pageType);
     }
 
     /**

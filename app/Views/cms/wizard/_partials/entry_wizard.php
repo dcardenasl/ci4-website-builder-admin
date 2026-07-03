@@ -118,77 +118,186 @@
 </template>
 
 <!-- ── SCREEN: CONFIRM ── -->
-<div x-show="screen === 'confirm'" x-cloak>
-    <h2 class="text-lg font-semibold text-gray-900 mb-4"><?= lang('Wizard.confirm_title') ?></h2>
-
-    <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-3">
-        <div class="flex items-center gap-3 pb-3 border-b border-gray-200">
-            <span x-text="selectedCollection?.icon ?? '📄'" class="text-3xl"></span>
-            <span class="font-bold text-lg text-gray-800" x-text="collectionDisplayLabel(selectedCollection)"></span>
+<div x-show="screen === 'confirm'" x-cloak class="space-y-6">
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600"><?= lang('Wizard.wizard_content_confirm_badge') ?></p>
+                <h2 class="text-2xl font-semibold text-gray-900"><?= lang('Wizard.wizard_content_confirm_title') ?></h2>
+                <p class="max-w-3xl text-sm text-gray-600"><?= lang('Wizard.wizard_content_confirm_body') ?></p>
+            </div>
+            <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand-700"><?= lang('Wizard.wizard_content_confirm_badge') ?></span>
         </div>
 
-        <template x-for="step in steps" :key="step.step_title">
-            <template x-for="field in step.fields" :key="field.key">
-                <div x-show="field.type !== 'select' || field.key !== 'status'" class="flex gap-3 text-sm">
-                    <span class="text-gray-500 shrink-0 w-32 truncate" x-text="field.label + ':'"></span>
-                    <template x-if="field.type === 'image'">
-                        <span>
-                            <img x-show="formData[field.key + '_url']" :src="formData[field.key + '_url']"
-                                 class="rounded max-h-20 object-cover" />
-                            <span x-show="!formData[field.key + '_url']"
-                                  class="text-gray-300 italic"><?= lang('Wizard.confirm_no_value') ?></span>
-                        </span>
+        <div class="mt-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <section class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500"><?= lang('Wizard.wizard_content_confirm_base_title') ?></p>
+                        <p class="mt-1 text-sm text-gray-600"><?= lang('Wizard.wizard_content_confirm_base_help') ?></p>
+                    </div>
+                    <span class="text-3xl" x-text="selectedCollection?.icon ?? '📄'"></span>
+                </div>
+
+                <div class="mt-4 space-y-3 text-sm text-gray-700">
+                    <p><strong><?= lang('Wizard.select_collection') ?>:</strong> <span class="ml-1" x-text="collectionDisplayLabel(selectedCollection)"></span></p>
+                    <p><strong><?= lang('Wizard.status') ?>:</strong> <span class="ml-1" x-text="formData.status === 'published' ? '<?= esc(lang('Wizard.confirm_status_published'), 'js') ?>' : '<?= esc(lang('Wizard.confirm_status_draft'), 'js') ?>'"></span></p>
+                    <template x-for="field in entryReviewPreviewFields()" :key="field.key">
+                        <div class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500" x-text="field.label"></p>
+                            <template x-if="field.key === 'featured_image'">
+                                <div class="mt-2">
+                                    <img x-show="formData[field.key + '_url']" :src="formData[field.key + '_url']" class="max-h-32 rounded-lg border border-gray-200 object-cover" />
+                                    <p x-show="!formData[field.key + '_url']" class="text-sm text-gray-400 italic"><?= lang('Wizard.confirm_no_value') ?></p>
+                                </div>
+                            </template>
+                            <template x-if="field.key !== 'featured_image'">
+                                <p class="mt-2 text-sm text-gray-800 whitespace-pre-line break-words" x-text="field.value || '<?= esc(lang('Wizard.confirm_no_value'), 'js') ?>'"></p>
+                            </template>
+                        </div>
                     </template>
-                    <template x-if="field.type !== 'image'">
-                        <span class="text-gray-800 break-words"
-                              x-text="formData[field.key] || '<?= lang('Wizard.confirm_no_value') ?>'"></span>
+                    <p class="text-sm text-gray-500"><?= lang('Wizard.wizard_content_confirm_review_hint') ?></p>
+                </div>
+            </section>
+
+            <section class="relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-5">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500"><?= lang('Wizard.wizard_content_confirm_translations_title') ?></p>
+                        <p class="mt-1 text-sm text-gray-600"><?= lang('Wizard.wizard_content_confirm_translations_help') ?></p>
+                    </div>
+                    <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-gray-700 shadow-sm">
+                        <span x-text="entryTranslationRows.length + 1"></span> <?= lang('Wizard.wizard_content_confirm_languages_ready') ?>
+                    </div>
+                </div>
+
+                <div class="mt-4 space-y-3" :class="entryTranslationBusy() ? 'opacity-35 pointer-events-none select-none' : ''">
+                    <div class="rounded-xl border border-brand-200 bg-white px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500"><?= lang('Wizard.wizard_content_confirm_translation_auto') ?></p>
+                        <div class="mt-2 grid gap-2 text-sm text-gray-700">
+                            <p><strong><?= lang('Wizard.wizard_structure_summary_name') ?>:</strong> <span x-text="formData.title || '<?= esc(lang('Wizard.confirm_no_value'), 'js') ?>'"></span></p>
+                            <p><strong><?= lang('Wizard.wizard_structure_summary_internal_slug') ?>:</strong> <span x-text="entryBaseSlug()"></span></p>
+                        </div>
+                    </div>
+
+                    <template x-if="entryTranslationRows.length === 0 && !entryReviewLoading">
+                        <div class="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-4 text-sm text-gray-500">
+                            <?= lang('Wizard.wizard_content_confirm_translations_empty') ?>
+                        </div>
+                    </template>
+
+                    <template x-for="row in entryTranslationRows" :key="row.language_id">
+                        <div class="rounded-xl border border-gray-200 bg-white p-4">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900" x-text="row.label"></p>
+                                    <p class="text-xs text-gray-500" x-text="row.code"></p>
+                                </div>
+                                <span class="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-700"><?= lang('Wizard.wizard_content_confirm_translation_auto') ?></span>
+                            </div>
+                            <div class="mt-3 grid gap-3 text-sm text-gray-700">
+                                <p><strong><?= lang('Wizard.wizard_structure_summary_name') ?>:</strong> <span class="ml-1" x-text="row.title || '<?= esc(lang('Wizard.confirm_no_value'), 'js') ?>'"></span></p>
+                                <p><strong><?= lang('Wizard.wizard_structure_summary_internal_slug') ?>:</strong> <span class="ml-1" x-text="row.slug || '<?= esc(lang('Wizard.confirm_no_value'), 'js') ?>'"></span></p>
+                                <p x-show="row.excerpt" x-cloak><strong><?= lang('Wizard.wizard_structure_completion_hint_body_short') ?>:</strong> <span class="ml-1" x-text="row.excerpt"></span></p>
+                            </div>
+                            <p x-show="row.error" x-cloak class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800" x-text="row.error"></p>
+                        </div>
                     </template>
                 </div>
-            </template>
-        </template>
 
-        <div class="flex gap-3 text-sm pt-3 border-t border-gray-200">
-            <span class="text-gray-500 shrink-0 w-32"><?= lang('Wizard.status') ?>:</span>
-            <span x-text="formData.status === 'published' ? '<?= lang('Wizard.confirm_status_published') ?>' : '<?= lang('Wizard.confirm_status_draft') ?>'"></span>
+                <div x-show="entryReviewLoading" x-cloak class="absolute inset-0 z-10 flex items-center justify-center bg-white/75 px-6 py-8 backdrop-blur-[1px]" aria-live="polite">
+                    <div class="w-full max-w-lg rounded-2xl border border-brand-200 bg-brand-50 px-5 py-4 text-brand-800 shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-0.5 flex h-11 w-11 items-center justify-center rounded-full bg-white text-brand-600 shadow-sm">
+                                <svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="9" class="opacity-20" stroke="currentColor" stroke-width="3"></circle>
+                                    <path d="M21 12a9 9 0 0 1-9 9" class="opacity-90" stroke="currentColor" stroke-linecap="round" stroke-width="3"></path>
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-base font-semibold"><?= lang('Wizard.wizard_content_confirm_translations_loading') ?></p>
+                                <p class="mt-1 text-sm leading-6 text-brand-700"><?= lang('Wizard.wizard_content_confirm_body') ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p x-show="entryReviewError" x-cloak class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" x-text="entryReviewError"></p>
+            </section>
+        </div>
+
+        <p x-show="publishError" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" x-text="publishError"></p>
+
+        <div class="flex flex-wrap gap-3">
+            <button @click="formData.status = 'draft'; publish()" class="btn-secondary" :disabled="publishing || entryTranslationBusy()">
+                <?= lang('Wizard.btn_draft') ?>
+            </button>
+            <button @click="formData.status = 'published'; publish()" class="btn-primary" :disabled="publishing || entryTranslationBusy()">
+                <span x-show="!publishing"><?= lang('Wizard.btn_publish') ?></span>
+                <span x-show="publishing"><?= lang('Wizard.btn_publishing') ?></span>
+            </button>
+            <button @click="currentStep = steps.length - 1; screen = 'steps'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700">
+                <?= lang('Wizard.btn_back') ?>
+            </button>
         </div>
     </div>
-
-    <p x-show="publishError" class="text-red-600 text-sm mt-3" x-text="publishError"></p>
-
-    <div class="flex gap-3 mt-6">
-        <button @click="formData.status = 'draft'; publish()" class="btn-secondary" :disabled="publishing">
-            <?= lang('Wizard.btn_draft') ?>
-        </button>
-        <button @click="formData.status = 'published'; publish()" class="btn-primary" :disabled="publishing">
-            <span x-show="!publishing"><?= lang('Wizard.btn_publish') ?></span>
-            <span x-show="publishing"><?= lang('Wizard.btn_publishing') ?></span>
-        </button>
-    </div>
-
-    <button @click="currentStep = steps.length - 1; screen = 'steps'" class="mt-3 text-sm text-gray-500 hover:text-gray-700">
-        <?= lang('Wizard.btn_back') ?>
-    </button>
 </div>
 
 <!-- ── SCREEN: SUCCESS ── -->
-<div x-show="screen === 'success'" x-cloak class="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-    <div class="text-4xl mb-4">✅</div>
-    <h2 class="text-lg font-semibold mb-2 text-gray-900"
-        x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_title_draft') ?>' : '<?= lang('Wizard.success_title') ?>'"></h2>
-    <p class="text-gray-500 mb-6">
-        "<span x-text="formData.title"></span>"
-        <span x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_subtitle_draft') ?>' : '<?= lang('Wizard.success_subtitle') ?>'"></span>
-    </p>
-    <div class="flex flex-col gap-3 items-center">
-        <a x-show="publishedEntry?.public_url"
-           :href="publishedEntry?.public_url ?? '#'" target="_blank" class="btn-primary">
-            <?= lang('Wizard.btn_view_site') ?>
-        </a>
-        <a x-show="publishedEntry?.id"
-           :href="'<?= site_url('admin/cms/entries') ?>/' + publishedEntry?.id + '/edit'"
-           class="btn-secondary">
-            <?= lang('Wizard.btn_edit_entry') ?>
-        </a>
-        <button @click="restart()" class="text-sm text-brand-600 hover:text-brand-800"><?= lang('Wizard.btn_add_more') ?></button>
+<div x-show="screen === 'success'" x-cloak class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-green-600">
+                <?= lang('Wizard.wizard_content_success_kicker') ?>
+            </p>
+            <h2 class="text-2xl font-semibold text-gray-900"
+                x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_title_draft') ?>' : '<?= lang('Wizard.success_title') ?>'"></h2>
+            <p class="max-w-3xl text-sm text-gray-600">
+                <span x-text="formData.title || '<?= esc(lang('Wizard.confirm_no_value'), 'js') ?>'"></span>
+                <span x-text="formData.status === 'draft' ? '<?= lang('Wizard.success_subtitle_draft') ?>' : '<?= lang('Wizard.success_subtitle') ?>'"></span>
+            </p>
+        </div>
+        <div class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-green-700">
+            <?= lang('Wizard.wizard_content_success_ready_badge') ?>
+        </div>
+    </div>
+
+    <div class="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <section class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                <?= lang('Wizard.wizard_content_success_next_steps_title') ?>
+            </p>
+            <div class="mt-4 space-y-3 text-sm text-gray-700">
+                <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                    <?= lang('Wizard.wizard_content_success_step_detail') ?>
+                </p>
+                <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                    <?= lang('Wizard.wizard_content_success_step_blocks') ?>
+                </p>
+                <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                    <?= lang('Wizard.wizard_content_success_step_more') ?>
+                </p>
+            </div>
+        </section>
+
+        <section class="rounded-2xl border border-gray-200 bg-white p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                <?= lang('Wizard.wizard_content_success_actions_title') ?>
+            </p>
+            <div class="mt-4 flex flex-col gap-3">
+                <a x-show="publishedEntry?.public_url"
+                   :href="publishedEntry?.public_url ?? '#'" target="_blank" class="btn-primary justify-center">
+                    <?= lang('Wizard.btn_view_site') ?>
+                </a>
+                <a x-show="publishedEntry?.id"
+                   :href="'<?= site_url('admin/cms/entries') ?>/' + publishedEntry?.id + '/edit'"
+                   class="btn-secondary justify-center">
+                    <?= lang('Wizard.btn_edit_entry') ?>
+                </a>
+                <button @click="restart()" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    <?= lang('Wizard.btn_add_more') ?>
+                </button>
+            </div>
+        </section>
     </div>
 </div>

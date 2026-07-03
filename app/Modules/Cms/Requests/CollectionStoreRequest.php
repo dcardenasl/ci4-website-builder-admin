@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
-use App\Libraries\Cms\CmsPresetCatalog;
 use App\Support\Requests\BaseFormRequest;
+use App\Modules\Cms\Support\CmsPresetCatalog;
 
 class CollectionStoreRequest extends BaseFormRequest
 {
@@ -22,6 +22,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_categories',
             'enables_tags',
             'block_template',
+            'wizard_config',
         ];
     }
 
@@ -48,6 +49,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_categories' => 'permit_empty|in_list[0,1]',
             'enables_tags' => 'permit_empty|in_list[0,1]',
             'block_template' => 'permit_empty',
+            'wizard_config' => 'permit_empty',
             'translations' => 'permit_empty',
             'translations.*.slug' => 'required_with[translations]|string|min_length[1]|max_length[150]',
         ];
@@ -102,6 +104,7 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_categories' => $this->postBool('enables_categories') ? '1' : '0',
             'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
             'block_template' => $this->postString('block_template'),
+            'wizard_config' => $this->postString('wizard_config'),
             'translations' => $this->normalizeTranslations(),
         ];
 

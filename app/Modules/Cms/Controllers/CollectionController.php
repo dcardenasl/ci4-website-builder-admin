@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsPresetCatalog;
 use App\Modules\Cms\Requests\CollectionStoreRequest;
 use App\Modules\Cms\Requests\CollectionUpdateRequest;
+use App\Modules\Cms\Support\CmsPresetCatalog;
 use App\Modules\Cms\Services\CollectionApiServiceInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;

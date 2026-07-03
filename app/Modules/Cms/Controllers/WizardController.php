@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsPresetCatalog;
 use App\Support\FileSizeLimits;
+use App\Modules\Cms\Support\CmsPresetCatalog;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
