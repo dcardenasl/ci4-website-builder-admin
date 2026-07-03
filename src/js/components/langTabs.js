@@ -25,6 +25,12 @@ const findTranslatableFileFieldComponent = (input) => {
     return component && typeof component.applyFile === 'function' ? component : null;
 };
 
+const findRichTextEditorComponent = (input) => {
+    const container = input instanceof HTMLElement ? input.closest('[x-data*="richTextEditor"]') : null;
+    const component = container?._x_dataStack?.[0];
+    return component && typeof component.applyContent === 'function' ? component : null;
+};
+
 const applyTargetValue = (targetInput, fileIdValue, fileUrlValue) => {
     if (!(targetInput instanceof HTMLInputElement)) {
         return;
@@ -36,6 +42,20 @@ const applyTargetValue = (targetInput, fileIdValue, fileUrlValue) => {
     const componentData = findTranslatableFileFieldComponent(targetInput);
     if (componentData) {
         componentData.applyFile(fileIdValue, fileUrlValue);
+    }
+};
+
+const applyTranslatedText = (targetInput, translatedValue) => {
+    if (!(targetInput instanceof HTMLInputElement || targetInput instanceof HTMLTextAreaElement)) {
+        return;
+    }
+
+    targetInput.value = translatedValue;
+    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const richTextComponent = findRichTextEditorComponent(targetInput);
+    if (richTextComponent) {
+        richTextComponent.applyContent(translatedValue);
     }
 };
 
@@ -133,8 +153,7 @@ export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN'
             const res = await fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
             const json = await res.json();
             if (json && typeof json.translated === 'string') {
-                targetEl.value = json.translated;
-                targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+                applyTranslatedText(targetEl, json.translated);
             } else if (json && json.error) {
                 throw new Error(json.error);
             }

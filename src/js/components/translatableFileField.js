@@ -34,6 +34,7 @@ export const translatableFileField = (initialId = '', initialUrl = '', accept = 
         const normalizedUrl = resolveTranslatableFilePreviewUrl(normalizedId, fileUrl);
         this.fileId = normalizedId;
         this.fileUrl = normalizedUrl;
+        this.previewUrl = normalizedUrl;
     },
 
     clearFile() { this.applyFile('', ''); },

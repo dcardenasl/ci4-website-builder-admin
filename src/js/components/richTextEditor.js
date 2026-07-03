@@ -8,6 +8,15 @@ export const richTextEditor = function richTextEditor(initialContent, fieldName)
         if (input instanceof HTMLInputElement) input.value = value;
     };
 
+    const normalizeContent = (value) => {
+        const text = String(value ?? '').trim();
+        if (text === '') {
+            return '';
+        }
+
+        return text.startsWith('<') ? text : `<p>${text}</p>`;
+    };
+
     const teardown = (component) => {
         if (toolbar && onToolbarClick) toolbar.removeEventListener('click', onToolbarClick);
         toolbar = null;
@@ -76,6 +85,14 @@ export const richTextEditor = function richTextEditor(initialContent, fieldName)
                 };
                 toolbar.addEventListener('click', onToolbarClick);
             }
+        },
+
+        applyContent(value) {
+            const content = normalizeContent(value);
+            if (editor) {
+                editor.commands.setContent(content, false);
+            }
+            syncHiddenInput(this, content);
         },
 
         destroy() { teardown(this); },

@@ -144,12 +144,51 @@ final class BlockEditViewTest extends CIUnitTestCase
                     'code' => 'en',
                 ],
             ],
+            'defaultLangId' => 1,
+            'defaultLangCode' => 'pt',
             'ownerBlocksRoute' => 'admin.cms.pages.blocks',
             'ownerUpdateRoute' => 'admin.cms.pages.blocks.update',
         ]);
 
-        $this->assertStringContainsString("langTabs(1, '", $html);
-        $this->assertStringContainsString("', 'PT')", $html);
-        $this->assertStringNotContainsString("', 'ES')", $html);
+        $this->assertStringContainsString("langTabs(1, '', 'PT')", $html);
+        $this->assertStringNotContainsString("langTabs(1, '', 'ES')", $html);
+    }
+
+    public function testEditViewHidesAutoTranslateButtonWhenNoTargetsExist(): void
+    {
+        $html = view('cms/pages/blocks/edit', [
+            'page' => ['id' => 21, 'title' => 'Page 21'],
+            'block' => [
+                'id' => 12,
+                'block_id' => 5,
+                'sort_order' => 1,
+                'is_active' => true,
+                'block_config' => [],
+                'translations' => [],
+            ],
+            'blockType' => [
+                'block_key' => 'hero',
+                'fields' => [
+                    'title' => [
+                        'type' => 'text',
+                        'label' => 'Title',
+                    ],
+                ],
+                'config_fields' => [],
+            ],
+            'languages' => [
+                [
+                    'id' => 1,
+                    'is_default' => true,
+                    'code' => 'en',
+                ],
+            ],
+            'translateTargets' => [],
+            'ownerBlocksRoute' => 'admin.cms.pages.blocks',
+            'ownerUpdateRoute' => 'admin.cms.pages.blocks.update',
+        ]);
+
+        $this->assertStringNotContainsString('Traducir automáticamente', $html);
+        $this->assertStringNotContainsString('autoTranslateAll(', $html);
     }
 }
