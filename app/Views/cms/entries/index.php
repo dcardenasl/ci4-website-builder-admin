@@ -104,10 +104,10 @@
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.collection_key ?? row.collection_id ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span :class="{
-                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800': row.status === 'published',
-                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800': row.status === 'archived',
-                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800': row.status !== 'published' && row.status !== 'archived'
-                                }" x-text="row.status === 'published' ? '<?= esc(lang('Entries.status_published')) ?>' : row.status === 'archived' ? '<?= esc(lang('Entries.status_archived')) ?>' : '<?= esc(lang('Entries.status_draft')) ?>'"></span>
+                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800': (row.workflow_status ?? row.status) === 'published',
+                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800': (row.workflow_status ?? row.status) === 'archived',
+                                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800': (row.workflow_status ?? row.status) !== 'published' && (row.workflow_status ?? row.status) !== 'archived'
+                                }" x-text="(row.workflow_status ?? row.status) === 'published' ? '<?= esc(lang('Entries.status_published')) ?>' : (row.workflow_status ?? row.status) === 'archived' ? '<?= esc(lang('Entries.status_archived')) ?>' : '<?= esc(lang('Entries.status_draft')) ?>'"></span>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.published_at)"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.scheduled_at)"></td>

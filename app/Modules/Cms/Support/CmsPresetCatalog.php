@@ -43,10 +43,11 @@ final class CmsPresetCatalog
                 ['step_title' => 'Resumen', 'step_hint' => 'Una breve bajada informativa', 'fields' => [['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false]]],
             ]),
             self::collectionPreset('portfolio', [
-                ['block_key' => 'image', 'label' => 'Proyecto', 'help_text' => 'Imagen o captura del trabajo', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
-                ['block_key' => 'rich_text', 'label' => 'Descripción', 'help_text' => 'Resumen de lo realizado', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
+                ['block_key' => 'image', 'label' => 'Imagen del Proyecto', 'help_text' => 'Imagen principal del proyecto realizado', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
+                ['block_key' => 'rich_text', 'label' => 'Detalle del Proyecto', 'help_text' => 'Descripción detallada del caso de estudio', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Nombre', 'step_hint' => 'Identifica el proyecto', 'fields' => [['key' => 'title', 'label' => 'Nombre', 'type' => 'text', 'required' => true]]],
+                ['step_title' => 'Proyecto', 'step_hint' => 'Nombre o título del proyecto', 'fields' => [['key' => 'title', 'label' => 'Proyecto', 'type' => 'text', 'required' => true]]],
+                ['step_title' => 'Resumen', 'step_hint' => 'Una breve descripción del trabajo realizado', 'fields' => [['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false]]],
             ]),
             self::collectionPreset('services', [
                 ['block_key' => 'rich_text', 'label' => 'Servicio', 'help_text' => 'Descripción principal del servicio', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],

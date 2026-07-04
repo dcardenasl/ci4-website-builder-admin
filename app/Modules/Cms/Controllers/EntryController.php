@@ -224,12 +224,30 @@ class EntryController extends BaseWebController
             return $deny;
         }
 
-        $response = $this->safeApiCall(fn () => $this->entryService->list(['limit' => 250, 'sort' => 'sort_order']));
-        $items = $this->extractItems($response);
+        $collections = $this->collectionsOptions();
+        $collectionId = $this->request->getGet('collection_id');
+
+        if (($collectionId === null || $collectionId === '') && ! empty($collections)) {
+            $collectionId = array_key_first($collections);
+        }
+
+        $items = [];
+        if ($collectionId !== null && $collectionId !== '') {
+            $response = $this->safeApiCall(fn () => $this->entryService->list([
+                'limit' => 250,
+                'sort' => 'sort_order',
+                'filter' => [
+                    'collection_id' => (int) $collectionId,
+                ],
+            ]));
+            $items = $this->extractItems($response);
+        }
 
         return $this->render('cms/entries/reorder', [
             'title' => lang('Entries.entries_title') . ' - ' . lang('Entries.field_sort_order'),
             'items' => $items,
+            'collections' => $collections,
+            'selectedCollectionId' => $collectionId,
         ]);
     }
 
