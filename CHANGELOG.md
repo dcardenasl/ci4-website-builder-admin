@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Entry reordering — collection filtering** — added dropdown filter to the entry reorder view to filter entries by collection; when a collection is selected, the reorder list displays only entries belonging to that collection; improved portfolio preset labels for better clarity
 - **CMS wizard — permission enforcement** — added permission validation to the structure wizard controller (`cms.pages.write`, `cms.menus.write`, `cms.collections.write`) and reorganized CMS view controls to gate edit/delete buttons and the drag-hint prompt within permission checks, ensuring only authorized users can manage blocks and drag operations
 - **Structure wizard — multilingual support with automatic translation proposals** — extended the structure wizard with a dedicated language selection step featuring active languages from the hub, automatic translation proposals via MyMemory API, inline editing of translated names and slugs, and language inclusion/exclusion toggles before final collection submission
 - **Interactive multi-step structure wizard** — enhanced wizard with Alpine.js-driven step-by-step flow, intent presets (blog, news, portfolio, services, custom), dynamic form validation, and multi-language support for guided collection creation
