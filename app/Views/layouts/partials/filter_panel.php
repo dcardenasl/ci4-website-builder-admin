@@ -44,6 +44,7 @@ $ignoredJson = json_encode($normalizedIgnoredKeys);
 if (! is_string($ignoredJson) || $ignoredJson === '') {
     $ignoredJson = '[]';
 }
+
 ?>
 <form
     method="<?= esc($method) ?>"

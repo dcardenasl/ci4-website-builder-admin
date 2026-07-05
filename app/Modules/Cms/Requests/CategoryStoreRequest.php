@@ -10,7 +10,7 @@ class CategoryStoreRequest extends BaseFormRequest
 {
     protected function fields(): array
     {
-        return ['collection_id', 'parent_id', 'sort_order', 'is_active'];
+        return ['collection_id', 'parent_id', 'is_active'];
     }
 
     public function rules(): array
@@ -18,7 +18,6 @@ class CategoryStoreRequest extends BaseFormRequest
         return [
             'collection_id' => 'required|integer',
             'parent_id' => 'permit_empty',
-            'sort_order' => 'permit_empty|integer',
             'is_active' => 'permit_empty|in_list[0,1]',
             'translations' => 'permit_empty',
         ];
@@ -63,7 +62,6 @@ class CategoryStoreRequest extends BaseFormRequest
         return [
             'collection_id' => $this->postInt('collection_id'),
             'parent_id' => $this->postNullableInt('parent_id'),
-            'sort_order' => $this->postInt('sort_order', 0),
             'is_active' => $this->postBool('is_active') ? '1' : '0',
             'translations' => $this->normalizeTranslations(),
         ];

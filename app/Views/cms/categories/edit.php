@@ -37,16 +37,6 @@
             'errors' => $errors ?? []
         ]) ?>
 
-        <?= view('components/form/number', [
-            'name' => 'sort_order',
-            'label' => 'Categories.field_sort_order',
-            'required' => false,
-            'value' => $item['sort_order'] ?? 0,
-            'placeholder' => 'Categories.field_sort_order_placeholder',
-            'help' => 'Categories.field_sort_order_help',
-            'errors' => $errors ?? []
-        ]) ?>
-
         <?= view('components/form/boolean', [
             'name' => 'is_active',
             'label' => 'Categories.field_is_active',
