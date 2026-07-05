@@ -65,6 +65,40 @@ final class CmsPresetCatalog
     }
 
     /**
+     * Keeps optional starter presets only when all referenced block types exist.
+     *
+     * @param array<int, array<string, mixed>> $presets
+     * @param list<string> $activeBlockKeys
+     * @return array<int, array<string, mixed>>
+     */
+    public static function filterAvailablePresets(array $presets, array $activeBlockKeys): array
+    {
+        if ($activeBlockKeys === []) {
+            return [];
+        }
+
+        return array_values(array_filter($presets, static function (array $preset) use ($activeBlockKeys): bool {
+            $blocks = $preset['block_template']['blocks'] ?? [];
+            if (! is_array($blocks) || $blocks === []) {
+                return true;
+            }
+
+            foreach ($blocks as $block) {
+                if (! is_array($block)) {
+                    continue;
+                }
+
+                $blockKey = (string) ($block['block_key'] ?? '');
+                if ($blockKey !== '' && ! in_array($blockKey, $activeBlockKeys, true)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
+    }
+
+    /**
      * @return array<int, array{type_key: string, label: string, version: string, block_template: array<string, mixed>, wizard_config: null}>
      */
     public static function pagePresets(): array

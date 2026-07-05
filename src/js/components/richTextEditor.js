@@ -5,7 +5,10 @@ export const richTextEditor = function richTextEditor(initialContent, fieldName)
 
     const syncHiddenInput = (component, value) => {
         const input = component.$refs.hiddenInput;
-        if (input instanceof HTMLInputElement) input.value = value;
+        if (input instanceof HTMLInputElement) {
+            input.value = value;
+            input.dispatchEvent(new window.Event('input', { bubbles: true }));
+        }
     };
 
     const normalizeContent = (value) => {
