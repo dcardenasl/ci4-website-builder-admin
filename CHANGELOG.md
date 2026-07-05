@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Collection management UI with dynamic types** — new collection CRUD interface (create, edit, list, show) supporting dynamic collection types; enhanced `CollectionStoreRequest` with improved validation; added block template editor partial for configuring collection block structures; multilingual UI support with Spanish/English translations
+- **Enhanced entry wizard with structure and block templates** — redesigned wizard flow with structure management UI; enhanced `WizardController` and `StructureWizardController` to support collection-aware entry creation; improved entry wizard partial with block template configuration; enriched language keys for wizard workflow
+- **CMS preset catalog and block template system** — new `CmsPresetCatalog` for managing preset configurations; enhanced `richTextEditor.js` component for improved content editing; updated JavaScript modules to support dynamic block templates in the wizard interface
 - **Menu items reordering interface** — new reorder view for menu items with hierarchical display, drag-and-drop capability, and AJAX persistence; simplified create/edit forms by moving sort_order to dedicated reorder interface
 - **Entry reordering — collection filtering** — added dropdown filter to the entry reorder view to filter entries by collection; when a collection is selected, the reorder list displays only entries belonging to that collection; improved portfolio preset labels for better clarity
 - **CMS wizard — permission enforcement** — added permission validation to the structure wizard controller (`cms.pages.write`, `cms.menus.write`, `cms.collections.write`) and reorganized CMS view controls to gate edit/delete buttons and the drag-hint prompt within permission checks, ensuring only authorized users can manage blocks and drag operations
