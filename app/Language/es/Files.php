@@ -97,4 +97,7 @@ return [
     'picker_empty'       => 'No hay archivos disponibles.',
     'picker_upload_first' => 'Subir el primer archivo',
     'picker_files'       => 'archivos',
+
+    'cannot_delete_in_use' => 'No se puede eliminar el archivo porque está en uso en otros recursos.',
+    'bulk_failed_in_use'   => 'Algunos archivos no se pudieron eliminar porque están en uso en otros recursos.',
 ];

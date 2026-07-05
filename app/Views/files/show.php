@@ -20,19 +20,25 @@ $smUrl    = is_array($variants['sm'] ?? null) ? (string) ($variants['sm']['url']
                 <?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('FileTranslations.sidebar_label')) ?>
             </a>
         <?php endif; ?>
-        <form method="post" action="<?= route_to('files') ?>/<?= esc($id) ?>/delete"
-              x-data @submit.prevent="$store.confirm.show(window.confirmDeleteMessage('<?= esc($file['original_name'] ?? $file['name'] ?? $id, 'js') ?>'), () => $el.submit())">
-            <?= csrf_field() ?>
-            <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
+        <?php if ($usages === []): ?>
+            <form method="post" action="<?= route_to('files') ?>/<?= esc($id) ?>/delete"
+                  x-data @submit.prevent="$store.confirm.show(window.confirmDeleteMessage('<?= esc($file['original_name'] ?? $file['name'] ?? $id, 'js') ?>'), () => $el.submit())">
+                <?= csrf_field() ?>
+                <button type="submit" class="<?= esc(action_button_class('danger')) ?>">
+                    <?= ui_icon('trash', 'h-3.5 w-3.5') ?> <?= esc(lang('App.delete')) ?>
+                </button>
+            </form>
+        <?php else: ?>
+            <button type="button" class="<?= esc(action_button_class('danger')) ?> opacity-50 cursor-not-allowed" disabled title="<?= esc(lang('Files.cannot_delete_in_use')) ?>">
                 <?= ui_icon('trash', 'h-3.5 w-3.5') ?> <?= esc(lang('App.delete')) ?>
             </button>
-        </form>
+        <?php endif; ?>
     </div>
 </div>
 
 <?php if ($usages !== []): ?>
-<div class="mb-4 flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800" role="alert">
-    <?= ui_icon('triangle-alert', 'mt-0.5 h-4 w-4 shrink-0 text-yellow-600') ?>
+<div class="mb-4 flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800" role="alert">
+    <?= ui_icon('triangle-alert', 'mt-0.5 h-4 w-4 shrink-0 text-red-600') ?>
     <div>
         <strong><?= esc(lang('Files.in_use_warning_title')) ?></strong>
         <?= esc(lang('Files.in_use_warning_body', [count($usages)])) ?>

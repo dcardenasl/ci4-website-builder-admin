@@ -651,9 +651,21 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->injectJsonBody($payload);
 
         $mock = $this->createMock(DomainApiClientInterface::class);
+        $mock->method('get')
+            ->with('/cms/menu-items/9')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => ['id' => 9, 'translations' => [['language_id' => 1, 'label' => 'Contacto']]],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+
+        $expectedPayload = array_merge($payload, [
+            'translations' => [['language_id' => 1, 'label' => 'Contacto']]
+        ]);
+
         $mock->expects($this->once())
             ->method('put')
-            ->with('/cms/menu-items/9', $payload)
+            ->with('/cms/menu-items/9', $expectedPayload)
             ->willReturn([
                 'ok' => true, 'status' => 200,
                 'data' => ['id' => 9],

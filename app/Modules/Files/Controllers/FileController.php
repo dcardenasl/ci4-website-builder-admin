@@ -275,12 +275,25 @@ class FileController extends BaseWebController
         $items   = isset($data['data']) && is_array($data['data']) ? $data['data'] : $data;
         $total   = count($items);
         $okCount = 0;
+        $errors  = [];
         foreach ($items as $item) {
-            if (is_array($item) && ! empty($item['ok'])) {
-                $okCount++;
+            if (is_array($item)) {
+                if (! empty($item['ok'])) {
+                    $okCount++;
+                } else {
+                    $errors[] = '#' . ($item['id'] ?? '') . ': ' . ($item['error'] ?? lang('Files.bulk_item_failed'));
+                }
             }
         }
         $message = lang('Files.bulk_summary', [$okCount, $total]);
+
+        if ($errors !== []) {
+            $errorMessage = lang('Files.bulk_failed_in_use') . ' ' . implode(' | ', $errors);
+            if ($okCount > 0) {
+                session()->setFlashdata('success', $message);
+            }
+            return redirect()->to($back)->with('error', $errorMessage);
+        }
 
         return redirect()->to($back)->with('success', $message);
     }
@@ -340,6 +353,16 @@ class FileController extends BaseWebController
 
     public function delete(string $id): RedirectResponse
     {
+        $usages    = $this->safeApiCall(fn () => $this->fileService->usages($id));
+        $usageData = ($usages['ok'] ?? false) ? $this->extractData($usages) : [];
+        if (isset($usageData['data']) && is_array($usageData['data'])) {
+            $usageData = $usageData['data'];
+        }
+
+        if (! empty($usageData)) {
+            return redirect()->to(route_to('files'))->with('error', lang('Files.cannot_delete_in_use'));
+        }
+
         $response = $this->safeApiCall(fn () => $this->fileService->delete($id));
 
         if (! $response['ok']) {

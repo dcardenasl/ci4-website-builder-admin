@@ -111,5 +111,7 @@ return [
     'gallery_add_success'      => 'Images added.',
 
     'in_use_warning_title' => 'This file is currently in use. ',
-    'in_use_warning_body'  => 'Referenced by {0} resource(s). Permanent deletion will be blocked until unlinked.',
+    'in_use_warning_body'  => 'Referenced by {0} resource(s). It cannot be deleted until it is replaced or unlinked in each of them.',
+    'cannot_delete_in_use' => 'Cannot delete the file because it is in use by other resources.',
+    'bulk_failed_in_use'   => 'Some files could not be deleted because they are in use by other resources.',
 ];
