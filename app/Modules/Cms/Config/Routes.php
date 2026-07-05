@@ -132,6 +132,8 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('menus/(:num)/items/(:num)/edit', '\App\Modules\Cms\Controllers\MenuController::editItem/$1/$2', ['as' => 'admin.cms.menus.items.edit', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)', '\App\Modules\Cms\Controllers\MenuController::updateItem/$1/$2', ['as' => 'admin.cms.menus.items.update', 'filter' => 'permission:cms.menus.write']);
     $routes->post('menus/(:num)/items/(:num)/delete', '\App\Modules\Cms\Controllers\MenuController::deleteItem/$1/$2', ['as' => 'admin.cms.menus.items.delete', 'filter' => 'permission:cms.menus.write']);
+    $routes->get('menus/(:num)/items/reorder', '\App\Modules\Cms\Controllers\MenuController::reorderItems/$1', ['as' => 'admin.cms.menus.items.reorder', 'filter' => 'permission:cms.menus.write']);
+    $routes->post('menus/(:num)/items/reorder', '\App\Modules\Cms\Controllers\MenuController::saveItemsOrder/$1', ['as' => 'admin.cms.menus.items.save_order', 'filter' => 'permission:cms.menus.write']);
 
     // Block Preview (AJAX — must be before block-types to avoid segment collision)
     $routes->post('blocks/preview', '\App\Modules\Cms\Controllers\BlockPreviewController::preview', ['as' => 'admin.cms.blocks.preview', 'filter' => 'permission:cms.pages.read']);

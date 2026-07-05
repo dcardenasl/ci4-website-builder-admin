@@ -406,4 +406,82 @@ class MenuController extends BaseWebController
 
         return redirect()->back()->withInput()->with('error', lang('Menus.field_custom_url_required') ?? 'Custom URL is required for Custom URL link type.');
     }
+
+    public function reorderItems(string $menuId): string|RedirectResponse
+    {
+        $menuResponse = $this->safeApiCall(fn () => $this->menuService->get($menuId));
+        if (! $menuResponse['ok']) {
+            return redirect()->to(route_to('admin.cms.menus'))->with('error', lang('Menus.menus_not_found') ?? 'Menu not found.');
+        }
+
+        $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
+        $items = $this->extractItems($itemsResponse);
+
+        // Sort items by sort_order initially
+        usort($items, static function (array $a, array $b): int {
+            return ($a['sort_order'] ?? 0) <=> ($b['sort_order'] ?? 0);
+        });
+
+        return $this->render('cms/menus/items/reorder', [
+            'title'     => (lang('Menus.menus_items_title') ?? 'Menu Items') . ' - ' . (lang('App.reorder') ?? 'Reorder'),
+            'menuId'    => $menuId,
+            'menu'      => $this->extractData($menuResponse),
+            'items'     => $items,
+        ]);
+    }
+
+    public function saveItemsOrder(string $menuId): ResponseInterface
+    {
+        $request = $this->request;
+        if (! $request instanceof \CodeIgniter\HTTP\IncomingRequest) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid request type',
+            ])->setStatusCode(400);
+        }
+
+        $json = $request->getJSON(true);
+        $jsonArray = is_array($json) ? $json : [];
+        $items = $jsonArray['items'] ?? [];
+
+        if (! is_array($items)) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid payload structure',
+            ])->setStatusCode(400);
+        }
+
+        $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
+        $existingItems = $this->extractItems($itemsResponse);
+        $itemsById = [];
+        foreach ($existingItems as $existingItem) {
+            $itemsById[(string) ($existingItem['id'] ?? '')] = $existingItem;
+        }
+
+        foreach ($items as $item) {
+            $id = (string) ($item['id'] ?? '');
+            $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
+
+            if ($id !== '' && isset($itemsById[$id])) {
+                $payload = [
+                    'sort_order'   => $value,
+                    'translations' => $itemsById[$id]['translations'] ?? [],
+                ];
+                // Call updateItem directly with partial payload and validate response
+                $response = $this->menuService->updateItem($id, $payload);
+                if (! isset($response['ok']) || ! $response['ok']) {
+                    return $this->response->setJSON([
+                        'ok' => false,
+                        'message' => $response['messages'][0] ?? $response['message'] ?? 'Error al guardar el orden del elemento #' . $id,
+                    ])->setStatusCode(400);
+                }
+            }
+        }
+
+        return $this->response->setJSON([
+            'ok' => true,
+            'message' => lang('Files.gallery_save_success') ?? 'Order saved successfully.',
+        ]);
+    }
 }
+

@@ -126,4 +126,76 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
         $result->assertRedirectTo(site_url('admin/cms/menus/1'));
     }
+
+    public function testReorderItemsRendersComponent(): void
+    {
+        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'menu_key' => 'main'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        $menuMock->method('listItems')
+            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'menu_id' => 1, 'sort_order' => 1, 'label' => 'Item 1'],
+                    ['id' => 2, 'menu_id' => 1, 'sort_order' => 0, 'label' => 'Item 2'],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('menuApiService', $menuMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
+        ])->get('/admin/cms/menus/1/items/reorder');
+
+        $result->assertStatus(200);
+        $this->assertStringContainsString('Reordenar', (string) $result->getBody());
+    }
+
+    public function testSaveItemsOrderUpdatesAndReturnsOk(): void
+    {
+        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock->method('listItems')
+            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'menu_id' => 1, 'sort_order' => 1, 'translations' => []],
+                    ['id' => 2, 'menu_id' => 1, 'sort_order' => 0, 'translations' => []],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        $menuMock->expects($this->exactly(2))
+            ->method('updateItem')
+            ->willReturnCallback(static function (string $id, array $payload): array {
+                if ($id === '2') {
+                    self::assertSame(0, $payload['sort_order']);
+                } elseif ($id === '1') {
+                    self::assertSame(1, $payload['sort_order']);
+                }
+                return ['ok' => true];
+            });
+        Services::injectMock('menuApiService', $menuMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
+        ])->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            csrf_header()      => csrf_hash(),
+            'Content-Type'     => 'application/json',
+        ])->withBody(json_encode([
+            'items' => [
+                ['id' => 2, 'sort_order' => 0],
+                ['id' => 1, 'sort_order' => 1],
+            ],
+        ]))->post('/admin/cms/menus/1/items/reorder');
+
+        $result->assertStatus(200);
+        $this->assertStringContainsString('"ok": true', (string) $result->getBody());
+    }
 }
+

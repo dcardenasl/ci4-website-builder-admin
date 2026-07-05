@@ -410,6 +410,16 @@ class WizardController extends BaseWebController
         }
 
         $domainClient = service('domainApiClient');
+
+        // Fetch current item to merge translations and prevent validation failures
+        $currentItemResult = $this->safeApiCall(static fn () => $domainClient->get("/cms/menu-items/{$itemId}"));
+        if (isset($currentItemResult['ok']) && $currentItemResult['ok']) {
+            $currentItem = $currentItemResult['data'] ?? [];
+            if (! isset($payload['translations']) && isset($currentItem['translations'])) {
+                $payload['translations'] = $currentItem['translations'];
+            }
+        }
+
         $result = $this->safeApiCall(static fn () => $domainClient->put("/cms/menu-items/{$itemId}", $payload));
 
         $statusCode = (int) ($result['status'] ?? 502);
