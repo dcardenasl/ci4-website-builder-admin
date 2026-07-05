@@ -165,10 +165,25 @@ $blockTypesJson = json_encode($availableBlockTypes, JSON_UNESCAPED_UNICODE | JSO
 if ($blockTypesJson === false) {
     $blockTypesJson = '[]';
 }
+
+$collectionPresets = $collectionPresets ?? [];
+$collectionPresetsJson = json_encode($collectionPresets, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+if ($collectionPresetsJson === false) {
+    $collectionPresetsJson = '[]';
+}
+
+$rawWizardConfig = old('wizard_config', $wizardConfig ?? null);
+$initialWizardConfigJson = 'null';
+if (is_array($rawWizardConfig)) {
+    $initialWizardConfigJson = json_encode($rawWizardConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: 'null';
+} elseif (is_string($rawWizardConfig) && trim($rawWizardConfig) !== '') {
+    $initialWizardConfigJson = $rawWizardConfig;
+}
 ?>
 
-<div x-data="collectionBlockTemplateBuilder(<?= esc($blockTypesJson, 'attr') ?>, <?= esc($initialJson, 'attr') ?>)" x-init="init()" class="space-y-6">
+<div x-data="collectionBlockTemplateBuilder(<?= esc($blockTypesJson, 'attr') ?>, <?= esc($initialJson, 'attr') ?>, <?= esc($collectionPresetsJson, 'attr') ?>, <?= esc($initialWizardConfigJson, 'attr') ?>)" x-init="init()" class="space-y-6">
     <input type="hidden" name="block_template" x-ref="blockTemplateInput" :value="json">
+    <input type="hidden" name="wizard_config" x-ref="wizardConfigInput" :value="wizardConfigJson">
 
     <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
@@ -181,6 +196,21 @@ if ($blockTypesJson === false) {
             <div class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700">
                 <span><?= esc(lang('Collections.block_template_builder_count')) ?>:</span>
                 <span x-text="rows.length"></span>
+            </div>
+        </div>
+
+        <div x-show="collectionPresets.length > 0" class="mt-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <h6 class="text-xs font-semibold text-gray-900 mb-1"><?= esc(lang('Collections.block_template_preset_title')) ?></h6>
+            <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_preset_help')) ?></p>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="preset in collectionPresets" :key="preset.type_key">
+                    <button type="button"
+                        @click="loadPreset(preset.type_key)"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:border-brand-400">
+                        <i :data-lucide="preset.type_key === 'blog' ? 'book-open' : (preset.type_key === 'news' ? 'newspaper' : (preset.type_key === 'portfolio' ? 'briefcase' : (preset.type_key === 'services' ? 'cog' : 'layout')))" class="h-3.5 w-3.5 text-gray-500"></i>
+                        <span x-text="preset.label || preset.type_key"></span>
+                    </button>
+                </template>
             </div>
         </div>
 
@@ -380,9 +410,12 @@ if ($blockTypesJson === false) {
 </div>
 
 <script>
-function collectionBlockTemplateBuilder(blockTypes, initialTemplate) {
+function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionPresets, initialWizardConfig) {
     return {
         blockTypes: Array.isArray(blockTypes) ? blockTypes : [],
+        collectionPresets: Array.isArray(collectionPresets) ? collectionPresets : [],
+        wizardConfig: initialWizardConfig || null,
+        wizardConfigJson: '',
         rows: [],
         json: '',
         valid: false,
@@ -486,6 +519,21 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate) {
                 sort_order: index + 1,
                 defaults: Array.isArray(row.defaults) ? row.defaults : [],
             }));
+        },
+
+        loadPreset(presetTypeKey) {
+            if (!presetTypeKey) return;
+            const preset = this.collectionPresets.find((p) => p.type_key === presetTypeKey);
+            if (!preset) return;
+
+            const confirmMsg = <?= json_encode(lang('Collections.block_template_preset_confirm')) ?> || '¿Estás seguro de que quieres cargar este preset? Sobrescribirá la plantilla de bloques actual.';
+            if (this.rows.length > 0 && !confirm(confirmMsg)) {
+                return;
+            }
+
+            this.rows = this.normalizeRowsFromTemplate(preset.block_template);
+            this.wizardConfig = preset.wizard_config || null;
+            this.sync();
         },
 
         addBlock(blockKey) {
@@ -616,8 +664,17 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate) {
             this.valid = template.blocks.length > 0;
             this.error = '';
 
+            if (this.wizardConfig) {
+                this.wizardConfigJson = JSON.stringify(this.wizardConfig, null, 2);
+            } else {
+                this.wizardConfigJson = '';
+            }
+
             if (this.$refs.blockTemplateInput) {
                 this.$refs.blockTemplateInput.value = this.json;
+            }
+            if (this.$refs.wizardConfigInput) {
+                this.$refs.wizardConfigInput.value = this.wizardConfigJson;
             }
         },
 

@@ -16,7 +16,7 @@ return [
     'fields'         => [
         'collection_type' => 'Tipo de colección',
         'collection_type_placeholder' => 'Seleccione tipo de colección',
-        'collection_type_help' => 'Elige el preset editorial para esta colección.',
+        'collection_type_help' => 'Usa un tipo técnico como blog, news o un slug personalizado. Los presets son sugerencias opcionales, no requisitos estructurales.',
         'collection_key' => 'Clave de colección',
         'collection_key_placeholder' => 'Ingresa clave de colección',
         'collection_key_help' => 'Ingresa clave de colección.',

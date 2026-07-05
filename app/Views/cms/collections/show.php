@@ -47,6 +47,45 @@
                 </div>
             </div>
         <?php endif; ?>
+        
+        <?php if (!empty($collection['block_template'])): ?>
+            <?php
+            $templateData = is_string($collection['block_template']) ? json_decode($collection['block_template'], true) : $collection['block_template'];
+            $blocks = $templateData['blocks'] ?? [];
+            ?>
+            <?php if (!empty($blocks) && is_array($blocks)): ?>
+                <div class="mt-6 border-t border-gray-100 pt-6">
+                    <h4 class="text-md font-semibold text-gray-800 mb-3"><?= esc(lang('Collections.block_template_show_title')) ?></h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <?php foreach ($blocks as $block): ?>
+                            <div class="flex items-center justify-between border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                                        <?= ui_icon('layout-template', 'h-5 w-5') ?>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-sm font-semibold text-gray-900"><?= esc($block['label'] ?? $block['block_key']) ?></h5>
+                                        <code class="text-[10px] font-mono text-gray-400"><?= esc($block['block_key']) ?></code>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <?php if (!empty($block['required'])): ?>
+                                        <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                                            <?= esc(lang('Collections.block_template_builder_required')) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($block['locked'])): ?>
+                                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                            <?= esc(lang('Collections.block_template_builder_locked')) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
     </section>
     <?php $mainContent = ob_get_clean(); ?>
 

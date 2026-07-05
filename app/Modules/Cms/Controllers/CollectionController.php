@@ -76,12 +76,20 @@ class CollectionController extends BaseWebController
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
 
+        $blockTypes = service('blockCatalogService')->all();
+        $activeBlockKeys = array_values(array_unique(array_filter(array_map(
+            static fn ($bt) => (string) ($bt['block_key'] ?? ''),
+            $blockTypes
+        ))));
+        $collectionPresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $activeBlockKeys);
+
         return $this->render('cms/collections/create', [
             'title' => lang('Collections.collections_create'),
             'languages' => $languages,
             'defaultLangId' => $languageContext['defaultLangId'],
             'collectionTypes' => $this->collectionTypeOptions(),
-            'blockTypes' => service('blockCatalogService')->all(),
+            'blockTypes' => $blockTypes,
+            'collectionPresets' => $collectionPresets,
         ]);
     }
 
@@ -113,13 +121,21 @@ class CollectionController extends BaseWebController
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
 
+        $blockTypes = service('blockCatalogService')->all();
+        $activeBlockKeys = array_values(array_unique(array_filter(array_map(
+            static fn ($bt) => (string) ($bt['block_key'] ?? ''),
+            $blockTypes
+        ))));
+        $collectionPresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $activeBlockKeys);
+
         return $this->render('cms/collections/edit', [
             'title' => lang('Collections.collections_edit'),
             'item' => $this->extractData($response),
             'languages' => $languages,
             'defaultLangId' => $languageContext['defaultLangId'],
             'collectionTypes' => $this->collectionTypeOptions(),
-            'blockTypes' => service('blockCatalogService')->all(),
+            'blockTypes' => $blockTypes,
+            'collectionPresets' => $collectionPresets,
         ]);
     }
 

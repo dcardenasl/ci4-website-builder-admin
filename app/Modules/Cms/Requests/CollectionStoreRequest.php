@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Requests;
 
 use App\Support\Requests\BaseFormRequest;
-use App\Modules\Cms\Support\CmsPresetCatalog;
-
 class CollectionStoreRequest extends BaseFormRequest
 {
     protected function fields(): array
@@ -36,10 +34,8 @@ class CollectionStoreRequest extends BaseFormRequest
 
     public function rules(): array
     {
-        $collectionTypes = implode(',', CmsPresetCatalog::collectionTypes());
-
         return [
-            'collection_type' => 'required|in_list[' . $collectionTypes . ']',
+            'collection_type' => 'permit_empty|string|max_length[50]|regex_match[/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/]',
             'collection_key' => 'required|min_length[2]|max_length[255]',
             'default_sitemap_priority' => 'permit_empty|decimal',
             'default_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
@@ -93,8 +89,20 @@ class CollectionStoreRequest extends BaseFormRequest
 
     public function payload(): array
     {
+        $wizardConfig = $this->postString('wizard_config');
+        $resolvedType = 'other';
+        if ($wizardConfig) {
+            $decoded = json_decode($wizardConfig, true);
+            if (json_last_error() === JSON_ERROR_NONE && !empty($decoded['type'])) {
+                $resolvedType = (string) $decoded['type'];
+            }
+        }
+
+        $passedType = $this->postString('collection_type');
+        $collectionType = ($passedType && $passedType !== 'other') ? $passedType : $resolvedType;
+
         $payload = [
-            'collection_type' => $this->postString('collection_type') ?: 'other',
+            'collection_type' => $collectionType,
             'collection_key' => $this->postString('collection_key'),
             'default_sitemap_priority' => $this->postString('default_sitemap_priority') ?: '0.5',
             'default_changefreq' => $this->postString('default_changefreq') ?: 'weekly',

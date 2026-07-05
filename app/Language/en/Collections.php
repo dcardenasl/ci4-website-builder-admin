@@ -16,7 +16,7 @@ return [
     'fields'         => [
         'collection_type' => 'Collection Type',
         'collection_type_placeholder' => 'Select Collection Type',
-        'collection_type_help' => 'Choose the editorial preset for this collection.',
+        'collection_type_help' => 'Use a technical type such as blog, news, or a custom slug. Presets are optional suggestions, not structural requirements.',
         'collection_key' => 'Collection Key',
         'collection_key_placeholder' => 'Enter Collection Key',
         'collection_key_help' => 'Enter Collection Key.',

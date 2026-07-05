@@ -11,19 +11,8 @@
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
             <div>
                 <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('App.form_core')) ?></h4>
-                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_type_help')) ?></p>
+                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_key_help')) ?></p>
             </div>
-
-            <?= view('components/form/select', [
-                'name' => 'collection_type',
-                'label' => 'Collections.field_collection_type',
-                'required' => true,
-                'placeholder' => 'Collections.field_collection_type_placeholder',
-                'help' => 'Collections.field_collection_type_help',
-                'options' => array_column($collectionTypes ?? [], 'label', 'key'),
-                'value' => $item['collection_type'] ?? 'other',
-                'errors' => $errors ?? []
-            ]) ?>
 
             <?= view('components/form/text', [
                 'name' => 'collection_key',
@@ -138,6 +127,7 @@
             <?= view('cms/collections/partials/block_template_editor', [
                 'value' => $item['block_template'] ?? null,
                 'blockTypes' => $blockTypes ?? [],
+                'collectionPresets' => $collectionPresets ?? [],
                 'errors' => $errors ?? [],
             ]) ?>
         </div>

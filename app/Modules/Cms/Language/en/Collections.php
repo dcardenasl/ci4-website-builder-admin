@@ -31,6 +31,9 @@ return [
     'field_collection_key'              => 'Collection Key',
     'field_collection_key_placeholder'  => 'Enter Collection Key',
     'field_collection_key_help'         => 'Enter Collection Key.',
+    'field_collection_type'              => 'Collection Type',
+    'field_collection_type_placeholder'  => 'Select collection type',
+    'field_collection_type_help'         => 'Use a technical type like blog, news or a custom slug. Presets are optional suggestions, not structural requirements.',
     'field_default_sitemap_priority'    => 'Default sitemap priority',
     'field_default_sitemap_priority_placeholder' => '0.5',
     'field_default_sitemap_priority_help' => 'Default sitemap priority for generated URLs.',
@@ -135,4 +138,8 @@ return [
     'translation_description_help' => 'Enter the collection description for this language.',
     'translations_help'              => 'Use the language tabs to complete the collection content for each locale.',
     'collections_entries' => 'View Entries',
+    'block_template_preset_title' => 'Load Block Preset',
+    'block_template_preset_help' => 'Load a recommended predefined structure (will overwrite current blocks):',
+    'block_template_preset_confirm' => 'Are you sure you want to load this preset? This will overwrite the current block template.',
+    'block_template_show_title' => 'Inherited block template',
 ];

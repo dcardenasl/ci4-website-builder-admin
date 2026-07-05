@@ -31,6 +31,9 @@ return [
     'field_collection_key'              => 'Clave de Colección',
     'field_collection_key_placeholder'  => 'Ingrese la Clave de Colección',
     'field_collection_key_help'         => 'Ingrese la Clave de Colección.',
+    'field_collection_type'              => 'Tipo de Colección',
+    'field_collection_type_placeholder'  => 'Seleccione tipo de colección',
+    'field_collection_type_help'         => 'Usa un tipo técnico como blog, news o un slug personalizado. Los presets son sugerencias opcionales, no requisitos estructurales.',
     'field_default_sitemap_priority'    => 'Prioridad de mapa de sitio predeterminada',
     'field_default_sitemap_priority_placeholder' => '0.5',
     'field_default_sitemap_priority_help' => 'Prioridad de mapa de sitio predeterminada para URLs generadas.',
@@ -135,4 +138,8 @@ return [
     'translation_description_help' => 'Ingrese la descripción de la colección para este idioma.',
     'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la colección para cada locale.',
     'collections_entries' => 'Ver Entradas',
+    'block_template_preset_title' => 'Cargar Preset de Bloques',
+    'block_template_preset_help' => 'Carga una estructura predefinida recomendada (sobrescribirá la plantilla de bloques actual):',
+    'block_template_preset_confirm' => '¿Estás seguro de que deseas cargar este preset? Esto sobrescribirá la plantilla de bloques actual.',
+    'block_template_show_title' => 'Plantilla de bloques heredada',
 ];
