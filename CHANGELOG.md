@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Slug availability validation** — `checkSlug()` method to validate page slug uniqueness across languages
 
 ### Changed
+- **Category form and reorder UI** — removed `sort_order` field from category form (order managed via reorder interface); enhanced reorder view to display category names with subtitles showing collection and parent category labels for improved relational context
 - **Confirm modal — accepting state with spinner** — `$store.confirm.accept()` now sets `accepting: true` before calling the callback; the "Confirmar" button shows an animated spinner and is disabled while accepting; backdrop and Escape key blocked during action; 5-second safety timeout auto-closes if navigation does not occur (`app.js`, `confirm_modal.php`)
 - **Destructive confirmations — 4 views migrated to modal pattern** — `cms/pages/blocks/index.php`, `cms/pages/blocks/children/index.php`, `cms/menus/show.php`, and `admin/universal/index.php` replaced native `onsubmit="return confirm()"` with `@submit.prevent="$store.confirm.show(...)"` using the exact resource name
 - **Role-permissions matrix — orientation and change tracking** — added a per-role orientation callout with reactive permissions counter (`selectedCount`) updated on every checkbox change; `isDirty` flag shows "Tienes cambios sin guardar" warning next to the save button; new language keys `role_permissions_hint`, `role_permissions_selected_label`, `unsaved_changes` added in `es`/`en` (`Iam.php`, `App.php`)
