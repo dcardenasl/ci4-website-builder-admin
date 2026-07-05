@@ -163,25 +163,18 @@ $suggestedSortOrder = count($items);
                 </select>
             </div>
 
-            <!-- Structure: parent + sort order -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_parent_label')) ?></label>
-                    <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                        <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
-                        <?php foreach ($parentOptions as $opt): ?>
-                            <option value="<?= esc($opt['id']) ?>"><?= esc($opt['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_parent_help')) ?></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_sort_order_label')) ?></label>
-                    <input type="number" name="sort_order" value="<?= esc(old('sort_order', (string) $suggestedSortOrder)) ?>" min="0" required
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_sort_order_help')) ?></p>
-                </div>
+            <!-- Structure: parent -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1"><?= esc(lang('Menus.items_parent_label')) ?></label>
+                <select name="parent_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                    <option value=""><?= esc(lang('Menus.items_parent_placeholder')) ?></option>
+                    <?php foreach ($parentOptions as $opt): ?>
+                        <option value="<?= esc($opt['id']) ?>"><?= esc($opt['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.items_parent_help')) ?></p>
             </div>
+            <input type="hidden" name="sort_order" value="<?= esc(old('sort_order', (string) $suggestedSortOrder)) ?>">
 
             <!-- Appearance: link target + icon + css class -->
             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
