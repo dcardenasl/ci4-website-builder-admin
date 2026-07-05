@@ -117,6 +117,149 @@
     </div>
 </template>
 
+<!-- ── SCREEN: BLOCK CONTENT STEPS (collection block_template) ── -->
+<template x-if="screen === 'block-steps' && blockContentSteps[blockContentStepIndex]">
+    <div>
+        <!-- Progress bar -->
+        <div class="mb-4">
+            <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                <span x-text="blockStepLabel()"></span>
+                <span x-text="collectionDisplayLabel(selectedCollection)"></span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-gray-200">
+                <div class="h-2 rounded-full bg-brand-600 transition-all"
+                     :style="`width: ${Math.round(((blockContentStepIndex + 1) / totalBlockSteps) * 100)}%`"></div>
+            </div>
+        </div>
+
+        <!-- Step header -->
+        <h2 class="text-lg font-semibold text-gray-900 mb-1" x-text="blockContentSteps[blockContentStepIndex].label"></h2>
+        <p class="text-sm text-gray-500 mb-1" x-show="blockContentSteps[blockContentStepIndex].help_text" x-text="blockContentSteps[blockContentStepIndex].help_text"></p>
+        <p class="text-xs font-medium mb-5"
+           :class="blockContentSteps[blockContentStepIndex].required ? 'text-red-500' : 'text-gray-400'"
+           x-text="blockContentSteps[blockContentStepIndex].required ? '<?= esc(lang('Wizard.wizard_content_block_required'), 'js') ?>' : '<?= esc(lang('Wizard.wizard_content_block_optional'), 'js') ?>'"></p>
+
+        <!-- No fields notice -->
+        <template x-if="blockContentSteps[blockContentStepIndex].fields.length === 0">
+            <p class="text-sm text-gray-400 py-6 text-center"><?= lang('Wizard.no_block_fields') ?></p>
+        </template>
+
+        <!-- Dynamic fields, reusing the schema-driven rendering from _partials/block_edit.php,
+             bound to blockContentDrafts[blockContentStepIndex] instead of blockEditData. -->
+        <template x-for="field in blockContentSteps[blockContentStepIndex].fields" :key="field.key">
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                       x-text="field.label + (field.required ? '<?= lang('Wizard.required_suffix') ?>' : '')"></label>
+
+                <template x-if="field.uiType === 'text'">
+                    <input type="text" x-model="blockContentDrafts[blockContentStepIndex][field.key]"
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                </template>
+
+                <template x-if="field.uiType === 'date'">
+                    <input type="date" x-model="blockContentDrafts[blockContentStepIndex][field.key]"
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                </template>
+
+                <template x-if="field.uiType === 'number'">
+                    <input type="number" x-model="blockContentDrafts[blockContentStepIndex][field.key]"
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                </template>
+
+                <template x-if="field.uiType === 'boolean'">
+                    <select x-model="blockContentDrafts[blockContentStepIndex][field.key]"
+                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <option value="1"><?= lang('Wizard.bool_yes') ?></option>
+                        <option value="0"><?= lang('Wizard.bool_no') ?></option>
+                    </select>
+                </template>
+
+                <template x-if="field.uiType === 'select'">
+                    <select x-model="blockContentDrafts[blockContentStepIndex][field.key]"
+                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <template x-for="opt in (field.options || [])" :key="opt">
+                            <option :value="opt" x-text="opt"></option>
+                        </template>
+                    </select>
+                </template>
+
+                <template x-if="field.uiType === 'image'">
+                    <div>
+                        <template x-if="blockContentDrafts[blockContentStepIndex][field.key + '_url']">
+                            <div class="relative inline-block">
+                                <img :src="blockContentDrafts[blockContentStepIndex][field.key + '_url']"
+                                     class="rounded-lg max-h-48 object-cover border border-gray-200" />
+                                <button type="button"
+                                        @click="blockContentDrafts[blockContentStepIndex][field.key + '_file_id'] = null; blockContentDrafts[blockContentStepIndex][field.key + '_url'] = null"
+                                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                            </div>
+                        </template>
+                        <template x-if="!blockContentDrafts[blockContentStepIndex][field.key + '_url']">
+                            <label :class="{'opacity-60': uploading}"
+                                   class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                                <span class="text-4xl">📷</span>
+                                <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
+                                <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
+                                <span x-show="uploading" class="text-xs text-brand-600"><?= lang('Wizard.upload_uploading') ?></span>
+                                <input type="file" accept="image/*" class="hidden"
+                                       @change="uploadBlockContentImage(blockContentStepIndex, field, $event.target.files[0])" />
+                            </label>
+                        </template>
+                        <p x-show="uploadError" class="mt-1 text-xs text-red-600" x-text="uploadError"></p>
+                    </div>
+                </template>
+
+                <template x-if="field.uiType === 'richtext'">
+                    <div :data-wizard-content-richtext-field="blockContentStepIndex + ':' + field.key"
+                         :data-field-key="field.key"
+                         x-data="richTextEditor(blockContentDrafts[blockContentStepIndex][field.key] || '', '')"
+                         x-init="init()"
+                         class="border border-gray-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
+                        <?= view('partials/richtext_toolbar') ?>
+                        <div x-ref="editorEl" class="richtext-content px-3 py-2.5 min-h-[130px] text-sm text-gray-800 cursor-text"></div>
+                        <input type="hidden"
+                               x-ref="hiddenInput"
+                               @input="syncBlockContentRichTextDraft(blockContentStepIndex, field.key, $event.target.value)">
+                    </div>
+                </template>
+
+                <template x-if="field.uiType === 'textarea'">
+                    <textarea x-model="blockContentDrafts[blockContentStepIndex][field.key]" rows="4"
+                              class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
+                </template>
+
+                <template x-if="field.uiType === 'url'">
+                    <input type="url" x-model="blockContentDrafts[blockContentStepIndex][field.key]" placeholder="https://"
+                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                </template>
+
+                <template x-if="field.uiType === 'unsupported' || field.uiType === 'file' || field.uiType === 'datetime'">
+                    <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                        <?= lang('Wizard.wizard_content_unsupported_field') ?>
+                    </p>
+                </template>
+            </div>
+        </template>
+
+        <!-- Navigation -->
+        <div class="flex justify-between mt-6">
+            <button @click="prevBlockStep()" class="btn-secondary"><?= lang('Wizard.btn_back') ?></button>
+            <div class="flex gap-3">
+                <button x-show="!blockContentSteps[blockContentStepIndex].required"
+                        @click="skipBlockStep()" class="btn-secondary">
+                    <?= lang('Wizard.btn_skip_block') ?>
+                </button>
+                <button @click="nextBlockStep()"
+                        :disabled="!canAdvanceBlockStep()"
+                        :class="canAdvanceBlockStep() ? 'btn-primary' : 'btn-primary opacity-50 cursor-not-allowed'">
+                    <span x-show="blockContentStepIndex < blockContentSteps.length - 1"><?= lang('Wizard.btn_next') ?></span>
+                    <span x-show="blockContentStepIndex === blockContentSteps.length - 1"><?= lang('Wizard.btn_review') ?></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
 <!-- ── SCREEN: CONFIRM ── -->
 <div x-show="screen === 'confirm'" x-cloak class="space-y-6">
     <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -236,7 +379,7 @@
                 <span x-show="!publishing"><?= lang('Wizard.btn_publish') ?></span>
                 <span x-show="publishing"><?= lang('Wizard.btn_publishing') ?></span>
             </button>
-            <button @click="currentStep = steps.length - 1; screen = 'steps'" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700">
+            <button @click="blockContentSteps.length > 0 ? (blockContentStepIndex = blockContentSteps.length - 1, screen = 'block-steps') : (currentStep = steps.length - 1, screen = 'steps')" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700">
                 <?= lang('Wizard.btn_back') ?>
             </button>
         </div>
@@ -271,8 +414,20 @@
                 <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
                     <?= lang('Wizard.wizard_content_success_step_detail') ?>
                 </p>
-                <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                <p x-show="blockContentSteps.length === 0" class="rounded-xl border border-gray-200 bg-white px-4 py-3">
                     <?= lang('Wizard.wizard_content_success_step_blocks') ?>
+                </p>
+                <p x-show="blockContentSteps.length > 0 && publishBlockWarnings.length === 0" x-cloak
+                   class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                    <?= lang('Wizard.wizard_content_success_step_blocks_filled') ?>
+                </p>
+                <p x-show="publishBlockWarnings.length > 0" x-cloak
+                   class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
+                    <?= lang('Wizard.wizard_content_success_block_warning_intro') ?>
+                    <span class="font-medium" x-text="publishBlockWarnings.map(w => w.label).join(', ')"></span>.
+                    <a :href="'<?= site_url('admin/cms/entries') ?>/' + publishedEntry?.id + '/blocks'" class="underline font-medium">
+                        <?= lang('Wizard.wizard_content_success_block_warning_link') ?>
+                    </a>
                 </p>
                 <p class="rounded-xl border border-gray-200 bg-white px-4 py-3">
                     <?= lang('Wizard.wizard_content_success_step_more') ?>

@@ -24,7 +24,7 @@ return [
     'edit_menu'              => 'Change the menu',
     'edit_menu_desc'         => 'Add, remove or reorder items',
     'structure_heading'      => 'What do you want to build today?',
-    'structure_intro'        => 'Create the site foundation with guided flows. The wizard applies server presets and the expert CRUD is for fine-tuning.',
+    'structure_intro'        => 'Create the site foundation with guided flows. The wizard can use available presets, but it also works without starter block data.',
     'create_page'            => 'Create page',
     'create_page_desc'       => 'Home, About, Contact and nested pages',
     'create_collection'      => 'Create collection',
@@ -176,7 +176,16 @@ return [
     'wizard_content_success_actions_title' => 'Actions',
     'wizard_content_success_step_detail' => 'Open the detail page to review how the published entry looks.',
     'wizard_content_success_step_blocks' => 'If you need to adjust blocks or extra content, open the entry editor.',
+    'wizard_content_success_step_blocks_filled' => 'Your block content was saved. You can always fine-tune it from the entry editor.',
+    'wizard_content_success_block_warning_intro' => "Some block content couldn't be saved automatically:",
+    'wizard_content_success_block_warning_link' => 'Finish editing blocks',
     'wizard_content_success_step_more' => 'You can create another entry without leaving the assistant.',
+
+    // Block content steps (collection block_template)
+    'wizard_content_block_required' => 'Required',
+    'wizard_content_block_optional' => 'Optional',
+    'wizard_content_unsupported_field' => 'This field type is not supported by the quick assistant yet. Finish it from the full editor before publishing.',
+    'btn_skip_block'          => 'Skip',
 
     // Confirm & publish
     'confirm_title'          => 'Review before publishing',

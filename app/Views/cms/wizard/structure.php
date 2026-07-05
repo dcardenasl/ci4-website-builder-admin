@@ -146,7 +146,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                     <h3 class="mt-1 text-base font-semibold text-gray-900"><?= esc(lang('Wizard.wizard_structure_preset_blocks_title')) ?></h3>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
-                                    <button type="button" @click="usePreset = true" :class="usePreset ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="rounded-lg border px-3 py-1.5 text-sm font-semibold transition">
+                                    <button type="button" @click="collectionPreset && (usePreset = true)" :disabled="!collectionPreset" :class="usePreset && collectionPreset ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'" class="rounded-lg border px-3 py-1.5 text-sm font-semibold transition">
                                         <?= esc(lang('Wizard.wizard_structure_preset_apply')) ?>
                                     </button>
                                     <button type="button" @click="usePreset = false" :class="!usePreset ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-gray-200 bg-white text-gray-700'" class="rounded-lg border px-3 py-1.5 text-sm font-semibold transition">
@@ -181,7 +181,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                             </div>
                         </div>
                         <div class="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
-                            <p><strong>Estado:</strong> <span x-text="usePreset ? 'Preset activo' : 'Sin preset'"></span></p>
+                            <p><strong>Estado:</strong> <span x-text="usePreset && collectionPreset ? 'Preset activo' : 'Sin preset'"></span></p>
                         </div>
                         <?php if ($wizardLanguages !== []): ?>
                             <div class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4" :aria-busy="collectionTranslationBusy() ? 'true' : 'false'">
@@ -450,6 +450,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                     this.page.translations = [{ language_id: defaultLanguageId, slug: '', title: '', excerpt: '', meta_title: '', meta_description: '' }];
                     this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
                     this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
+                    this.usePreset = this.collectionPreset !== null;
                     this.collectionSlugAvailability = '';
                     this.collectionTranslations = this.buildCollectionTranslations();
                     this.syncCollectionSlugLanguage();
@@ -659,7 +660,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                     this.collectionStep = 1;
                     this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
                     this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
-                    this.usePreset = true;
+                    this.usePreset = this.collectionPreset !== null;
                     this.form.slug_base = '';
                     this.form.collection_key = '';
                     this.form.name = '';
@@ -685,7 +686,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 this.collectionStep = 1;
                 this.form.collection_type = (this.config.collection_types || [])[0]?.key || 'other';
                 this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
-                this.usePreset = true;
+                this.usePreset = this.collectionPreset !== null;
                 this.form.slug_base = '';
                 this.form.collection_key = '';
                 this.form.name = '';
@@ -701,7 +702,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
             selectCollectionType(type) {
                 this.form.collection_type = type || 'other';
                 this.collectionPreset = this.resolveCollectionPreset(this.form.collection_type);
-                this.usePreset = true;
+                this.usePreset = this.collectionPreset !== null;
             },
             collectionSlugInput() { return this.$el.querySelector('#collection_slug_base'); },
             onSlugAvailabilityChanged(event) {
@@ -795,8 +796,8 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                         });
                     });
 
-                    const selectedPreset = this.usePreset ? (this.collectionPreset || this.resolveCollectionPreset(this.form.collection_type)) : null;
-                    const blockTemplate = selectedPreset?.block_template || { version: '1.0', blocks: [] };
+                    const selectedPreset = this.usePreset && this.collectionPreset ? this.collectionPreset : null;
+                    const blockTemplate = selectedPreset?.block_template || null;
                     const wizardConfig = selectedPreset?.wizard_config || null;
 
                     const payload = {
@@ -809,7 +810,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                         requires_approval: '0',
                         enables_categories: '1',
                         enables_tags: '1',
-                        block_template: JSON.stringify(blockTemplate),
+                        block_template: blockTemplate ? JSON.stringify(blockTemplate) : null,
                         wizard_config: wizardConfig ? JSON.stringify(wizardConfig) : null,
                         translations,
                     };

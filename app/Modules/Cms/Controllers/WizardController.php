@@ -71,6 +71,25 @@ class WizardController extends BaseWebController
 
         $config['collection_types'] = $this->collectionTypeOptions();
         $config['page_types'] = $this->pageTypeOptions();
+        $config['field_primitives'] = $config['field_primitives'] ?? [
+            'text',
+            'textarea',
+            'richtext',
+            'image',
+            'file',
+            'url',
+            'number',
+            'boolean',
+            'select',
+            'date',
+            'datetime',
+        ];
+        $config['block_capabilities'] = $config['block_capabilities'] ?? [];
+        $config['setup_state'] = array_merge([
+            'has_languages' => ! empty($config['languages']),
+            'has_collections' => ! empty($config['collections']),
+            'has_active_block_types' => ! empty($config['block_types']),
+        ], is_array($config['setup_state'] ?? null) ? $config['setup_state'] : []);
 
         return $this->response->setJSON($config);
     }

@@ -178,15 +178,23 @@ $csrfToken ??= csrf_hash();
         return text.slice(0, maxLength).trim();
     }
 
-    function schemaTypeToUiType(schemaType, accept) {
-        if (schemaType === 'file')    return accept === 'image' ? 'image' : 'text';
-        if (schemaType === 'richtext' || schemaType === 'rich_text') return 'richtext';
-        if (schemaType === 'string')  return 'text';
-        if (schemaType === 'number')  return 'number';
-        if (schemaType === 'boolean') return 'boolean';
-        if (schemaType === 'url')     return 'url';
-        if (schemaType === 'select')  return 'select';
-        return 'textarea';
+    function schemaTypeToUiType(schemaType, accept, primitive = '') {
+        const rawPrimitive = String(primitive || '').trim().toLowerCase();
+        if (rawPrimitive) return rawPrimitive;
+
+        const type = String(schemaType || '').trim().toLowerCase();
+        const accepts = String(accept || '').trim().toLowerCase();
+        if (type === 'file') return accepts === 'image' || accepts === 'image/*' || accepts.startsWith('image/') ? 'image' : 'file';
+        if (type === 'image') return 'image';
+        if (type === 'richtext' || type === 'rich_text') return 'richtext';
+        if (type === 'string') return 'text';
+        if (type === 'text') return 'textarea';
+        if (type === 'number' || type === 'integer' || type === 'int') return 'number';
+        if (type === 'boolean' || type === 'bool') return 'boolean';
+        if (type === 'url') return 'url';
+        if (type === 'select') return 'select';
+        if (type === 'date' || type === 'datetime') return type;
+        return 'unsupported';
     }
 
     function humanizeKey(key) {
@@ -216,6 +224,12 @@ $csrfToken ??= csrf_hash();
             entryReviewLoading: false,
             entryReviewError: '',
             entryTranslationRows: [],
+
+            // Block content steps (collection block_template → per-block content prompts)
+            blockContentDrafts: {},
+            blockContentStepIndex: 0,
+            blockContentSkipped: {},
+            publishBlockWarnings: [],
 
             // Image upload (shared)
             uploading: false,
@@ -268,6 +282,26 @@ $csrfToken ??= csrf_hash();
             get totalSteps() {
                 return this.steps.length;
             },
+            get blockTemplateBlocks() {
+                const blocks = this.selectedCollection?.block_template?.blocks;
+                return Array.isArray(blocks)
+                    ? [...blocks].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+                    : [];
+            },
+            get blockContentSteps() {
+                return this.blockTemplateBlocks.map((blockDef, idx) => ({
+                    idx,
+                    block_key: blockDef.block_key,
+                    label: blockDef.label || this.blockTypeInfo(blockDef.block_key)?.name || humanizeKey(blockDef.block_key),
+                    help_text: blockDef.help_text || '',
+                    required: !!blockDef.required,
+                    locked: !!blockDef.locked,
+                    fields: this.blockContentFieldsFor(blockDef.block_key),
+                }));
+            },
+            get totalBlockSteps() {
+                return this.blockContentSteps.length;
+            },
             get defaultLanguage() {
                 const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
                 return languages.find((language) => language?.is_default) || languages[0] || null;
@@ -282,6 +316,10 @@ $csrfToken ??= csrf_hash();
             // ── Helpers ───────────────────────────────────────────────────────
             stepLabel() {
                 return STRINGS.step_of.replace('%s', this.currentStep + 1).replace('%s', this.totalSteps);
+            },
+
+            blockStepLabel() {
+                return STRINGS.step_of.replace('%s', this.blockContentStepIndex + 1).replace('%s', this.totalBlockSteps);
             },
 
             deleteConfirmText() {
@@ -652,7 +690,7 @@ $csrfToken ??= csrf_hash();
                         key:      k,
                         label:    def.label ?? humanizeKey(k),
                         required: def.required ?? false,
-                        uiType:   schemaTypeToUiType(def.type ?? '', def.accept ?? ''),
+                        uiType:   schemaTypeToUiType(def.type ?? '', def.accept ?? '', def.primitive ?? ''),
                         options:  def.options ?? [],
                     }));
                 }
@@ -668,6 +706,21 @@ $csrfToken ??= csrf_hash();
                     required: false,
                     uiType:   'textarea',
                     options:  [],
+                }));
+            },
+
+            // Field descriptors for a block-content wizard step, keyed by block_key directly
+            // (no editMode/selectedBlock dependency — the entry doesn't exist yet at this point).
+            blockContentFieldsFor(blockKey) {
+                const schemaFields = blockKey ? (this.config?.block_types?.[blockKey]?.fields ?? null) : null;
+                if (!schemaFields || Object.keys(schemaFields).length === 0) return [];
+
+                return Object.entries(schemaFields).map(([k, def]) => ({
+                    key:      k,
+                    label:    def.label ?? humanizeKey(k),
+                    required: def.required ?? false,
+                    uiType:   schemaTypeToUiType(def.type ?? '', def.accept ?? '', def.primitive ?? ''),
+                    options:  def.options ?? [],
                 }));
             },
 
@@ -793,6 +846,11 @@ $csrfToken ??= csrf_hash();
                 this.entryReviewLoading = false;
                 this.entryReviewError = '';
                 this.entryTranslationRows = [];
+                this.blockContentDrafts = {};
+                this.blockContentSkipped = {};
+                this.blockContentStepIndex = 0;
+                this.publishBlockWarnings = [];
+                this.blockTemplateBlocks.forEach((_, idx) => { this.blockContentDrafts[idx] = {}; });
                 for (const step of this.steps) {
                     for (const field of step.fields) {
                         if (field.default !== undefined && field.default !== null) {
@@ -817,6 +875,9 @@ $csrfToken ??= csrf_hash();
                 if (this.currentStep < this.steps.length - 1) {
                     this.currentStep++;
                     this.saveDraft();
+                } else if (this.blockContentSteps.length > 0) {
+                    this.blockContentStepIndex = 0;
+                    this.screen = 'block-steps';
                 } else {
                     this.screen = 'confirm';
                     await this.prepareEntryReview();
@@ -833,6 +894,92 @@ $csrfToken ??= csrf_hash();
                         const val = this.formData[f.key];
                         return val !== undefined && val !== null && String(val).trim() !== '';
                     });
+            },
+
+            // ── Block content steps (collection block_template) ─────────────────
+            // Richtext fields don't use x-model (see block_content_richtext binding below) —
+            // their live value sits in a hidden input in the DOM, so it must be pulled in
+            // before we validate/advance/leave the step, mirroring syncRichTextFields()
+            // for the canonical block editor.
+            syncBlockContentRichTextFields(stepIdx) {
+                const nodes = document.querySelectorAll('[data-wizard-content-richtext-field]');
+                nodes.forEach((node) => {
+                    const key = node?.dataset?.fieldKey;
+                    if (!key) return;
+                    const input = node.querySelector('input[type="hidden"]');
+                    if (!input) return;
+                    if (!this.blockContentDrafts[stepIdx]) this.blockContentDrafts[stepIdx] = {};
+                    this.blockContentDrafts[stepIdx][key] = input.value ?? '';
+                });
+            },
+
+            syncBlockContentRichTextDraft(stepIdx, key, value) {
+                if (!key) return;
+                if (!this.blockContentDrafts[stepIdx]) this.blockContentDrafts[stepIdx] = {};
+                this.blockContentDrafts[stepIdx][key] = value ?? '';
+            },
+
+            prevBlockStep() {
+                this.syncBlockContentRichTextFields(this.blockContentStepIndex);
+                if (this.blockContentStepIndex > 0) {
+                    this.blockContentStepIndex--;
+                } else {
+                    this.currentStep = this.steps.length - 1;
+                    this.screen = 'steps';
+                }
+            },
+
+            async nextBlockStep() {
+                this.syncBlockContentRichTextFields(this.blockContentStepIndex);
+                if (!this.canAdvanceBlockStep()) return;
+                if (this.blockContentStepIndex < this.blockContentSteps.length - 1) {
+                    this.blockContentStepIndex++;
+                } else {
+                    this.screen = 'confirm';
+                    await this.prepareEntryReview();
+                }
+            },
+
+            skipBlockStep() {
+                const step = this.blockContentSteps[this.blockContentStepIndex];
+                if (!step || step.required) return;
+                this.blockContentSkipped[step.idx] = true;
+                this.nextBlockStep();
+            },
+
+            isBlockFieldFilled(draft, field) {
+                if (field.uiType === 'image') return Boolean(draft[field.key + '_file_id']);
+                const val = draft[field.key];
+                if (field.uiType === 'richtext') {
+                    const plain = String(val ?? '')
+                        .replace(/<[^>]*>/g, ' ')
+                        .replace(/&nbsp;/gi, ' ')
+                        .trim();
+                    return plain !== '';
+                }
+                return val !== undefined && val !== null && String(val).trim() !== '';
+            },
+
+            canAdvanceBlockStep() {
+                const step = this.blockContentSteps[this.blockContentStepIndex];
+                if (!step) return false;
+                if (this.blockContentSkipped[step.idx]) return true;
+                if ((step.fields || []).some(f => ['unsupported', 'file', 'datetime'].includes(f.uiType))) return false;
+                if (!step.required) return true;
+                const draft = this.blockContentDrafts[step.idx] ?? {};
+
+                const explicitlyRequired = step.fields.filter(f => f.required);
+                if (!explicitlyRequired.every(f => this.isBlockFieldFilled(draft, f))) return false;
+
+                // Some block types (e.g. "image") don't mark any individual field as
+                // required in their schema, even though the collection's block_template
+                // flags the whole block as required. In that case, fall back to requiring
+                // at least one field to be filled so a required block can't be left empty.
+                if (explicitlyRequired.length === 0 && step.fields.length > 0) {
+                    return step.fields.some(f => this.isBlockFieldFilled(draft, f));
+                }
+
+                return true;
             },
 
             // ── Image upload (entry wizard) ────────────────────────────────────
@@ -877,6 +1024,28 @@ $csrfToken ??= csrf_hash();
                 }
             },
 
+            // ── Image upload (block content wizard step) ────────────────────────
+            async uploadBlockContentImage(stepIdx, field, file) {
+                if (!file) return;
+                this.uploading = true;
+                this.uploadError = '';
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const res  = await adminFetch(WIZARD_BASE + '/upload', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data?.message ?? STRINGS.error_upload_failed);
+                    const fileData = data?.file ?? data;
+                    if (!this.blockContentDrafts[stepIdx]) this.blockContentDrafts[stepIdx] = {};
+                    this.blockContentDrafts[stepIdx][field.key + '_file_id'] = fileData?.id ?? null;
+                    this.blockContentDrafts[stepIdx][field.key + '_url']     = fileData?.url ?? fileData?.variants?.md?.url ?? null;
+                } catch (e) {
+                    this.uploadError = STRINGS.error_upload;
+                } finally {
+                    this.uploading = false;
+                }
+            },
+
             // ── Publish (entry wizard) ─────────────────────────────────────────
             async publish() {
                 this.publishing = true;
@@ -911,6 +1080,11 @@ $csrfToken ??= csrf_hash();
 
                         throw new Error([msg, ...fieldErrors].filter(Boolean).join(' '));
                     }
+                    this.publishBlockWarnings = [];
+                    const entryId = data?.id ?? data?.entry?.id ?? null;
+                    if (entryId && this.blockContentSteps.length > 0) {
+                        await this.saveBlockContentDrafts(entryId);
+                    }
                     this.publishedEntry = data;
                     this.clearDraft();
                     this.screen = 'success';
@@ -919,6 +1093,95 @@ $csrfToken ??= csrf_hash();
                 } finally {
                     this.publishing = false;
                 }
+            },
+
+            // ── Block content drafts (collection block_template) ─────────────────
+            // The entry was just created via POST /cms/entries, which auto-creates
+            // one empty block instance per collection.block_template block (Domain's
+            // EntryService::initializeBlocksFromTemplate). We now fetch those instances
+            // and PUT (via the wizard's POST proxy) the content the user entered during
+            // the block-content steps. Failures here are non-blocking: the entry itself
+            // already exists, so we just surface which block(s) still need manual content.
+            async saveBlockContentDrafts(entryId) {
+                let instances = [];
+                try {
+                    const res  = await adminFetch(`${WIZARD_BASE}/entries/${entryId}/blocks`);
+                    const body = await res.json();
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    instances = body?.items ?? body?.data ?? (Array.isArray(body) ? body : []);
+                } catch (e) {
+                    this.publishBlockWarnings.push({ label: STRINGS.error_blocks_load, blockKey: null });
+                    return;
+                }
+
+                const sortedInstances = [...instances].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+                const templateBlocks  = this.blockTemplateBlocks;
+                const defaultLangId   = this.defaultLanguageId;
+                const defaultLangCode = this.defaultLanguageCode || 'EN';
+                const otherLanguages  = this.entryReviewLanguages().filter((l) => Number(l.id || 0) !== defaultLangId);
+
+                for (let i = 0; i < templateBlocks.length; i++) {
+                    const blockDef = templateBlocks[i];
+                    const instance = sortedInstances[i];
+                    const draft    = this.blockContentDrafts[i];
+                    const skipped  = !!this.blockContentSkipped[i];
+                    const label    = blockDef.label || blockDef.block_key;
+
+                    if (!instance) {
+                        this.publishBlockWarnings.push({ label, blockKey: blockDef.block_key });
+                        continue;
+                    }
+                    if (skipped || !draft || Object.keys(draft).length === 0) {
+                        continue; // nothing entered — leave the auto-created empty block as-is
+                    }
+
+                    const instanceBlockKey = instance?.block_config?.block_key;
+                    if (instanceBlockKey && instanceBlockKey !== blockDef.block_key) {
+                        // Defensive: template/instance order mismatch — do not write content to the wrong block.
+                        this.publishBlockWarnings.push({ label, blockKey: blockDef.block_key });
+                        continue;
+                    }
+
+                    try {
+                        const translations = await this.buildBlockTranslations(blockDef.block_key, draft, defaultLangId, defaultLangCode, otherLanguages);
+                        const res = await adminFetch(`${WIZARD_BASE}/entries/${entryId}/blocks/${instance.id}`, {
+                            method: 'POST',
+                            body: JSON.stringify({ is_active: true, translations }),
+                        });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                    } catch (e) {
+                        this.publishBlockWarnings.push({ label, blockKey: blockDef.block_key });
+                    }
+                }
+            },
+
+            async buildBlockTranslations(blockKey, draft, defaultLangId, defaultLangCode, otherLanguages) {
+                const schemaFields = this.config?.block_types?.[blockKey]?.fields ?? {};
+                // Mirror BlockInstanceController.php's translatable-field exclusion list.
+                const NON_TRANSLATABLE_TYPES = ['file', 'image', 'repeater', 'boolean', 'integer', 'select', 'number'];
+                const translatableKeys = Object.entries(schemaFields)
+                    .filter(([, def]) => !NON_TRANSLATABLE_TYPES.includes(def?.primitive ?? def?.type ?? 'string'))
+                    .map(([key]) => key);
+
+                const baseData = this.normalizeBlockPayload(draft);
+                const rows = [{ language_id: defaultLangId, block_data: baseData, is_published: true }];
+
+                for (const lang of otherLanguages) {
+                    const translatedData = { ...baseData };
+                    for (const key of translatableKeys) {
+                        const val = draft[key];
+                        if (typeof val === 'string' && val.trim() !== '') {
+                            try {
+                                translatedData[key] = await this.translateEntryText(val, defaultLangCode, lang.code);
+                            } catch (e) {
+                                translatedData[key] = val; // fall back to source text, matching prepareEntryReview()
+                            }
+                        }
+                    }
+                    rows.push({ language_id: Number(lang.id || 0), block_data: translatedData, is_published: true });
+                }
+
+                return rows;
             },
 
             buildEntryPayload() {
@@ -1072,6 +1335,10 @@ $csrfToken ??= csrf_hash();
                 this.entryReviewLoading = false;
                 this.entryReviewError = '';
                 this.entryTranslationRows = [];
+                this.blockContentDrafts = {};
+                this.blockContentSkipped = {};
+                this.blockContentStepIndex = 0;
+                this.publishBlockWarnings = [];
                 this.selectedPage = null;
                 this.selectedOwnerType = 'page';
                 this.pageBlocks = [];

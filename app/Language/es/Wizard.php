@@ -24,7 +24,7 @@ return [
     'edit_menu'              => 'Cambiar el menú',
     'edit_menu_desc'         => 'Agregar, quitar o reordenar ítems',
     'structure_heading'      => '¿Qué quieres construir hoy?',
-    'structure_intro'        => 'Crea la base del sitio con flujos guiados. El wizard aplica presets del servidor y el CRUD experto queda para ajustes finos.',
+    'structure_intro'        => 'Crea la base del sitio con flujos guiados. El wizard puede usar presets disponibles, pero también funciona sin bloques starter.',
     'create_page'            => 'Crear página',
     'create_page_desc'       => 'Inicio, Nosotros, Contacto y páginas anidadas',
     'create_collection'      => 'Crear colección',
@@ -176,7 +176,16 @@ return [
     'wizard_content_success_actions_title' => 'Acciones',
     'wizard_content_success_step_detail' => 'Abre el detalle para revisar cómo quedó la entrada publicada.',
     'wizard_content_success_step_blocks' => 'Si necesitas ajustar bloques o contenido adicional, entra al editor de la entrada.',
+    'wizard_content_success_step_blocks_filled' => 'El contenido de los bloques quedó guardado. Siempre puedes ajustarlo desde el editor de la entrada.',
+    'wizard_content_success_block_warning_intro' => 'El contenido de algunos bloques no se pudo guardar automáticamente:',
+    'wizard_content_success_block_warning_link' => 'Terminar de editar bloques',
     'wizard_content_success_step_more' => 'Puedes crear otra entrada sin salir del asistente.',
+
+    // Pasos de contenido de bloques (block_template de la colección)
+    'wizard_content_block_required' => 'Obligatorio',
+    'wizard_content_block_optional' => 'Opcional',
+    'wizard_content_unsupported_field' => 'Este tipo de campo todavía no está soportado por el asistente rápido. Complétalo desde el editor completo antes de publicar.',
+    'btn_skip_block'          => 'Omitir',
 
     // Confirm & publish
     'confirm_title'          => 'Revisa antes de publicar',

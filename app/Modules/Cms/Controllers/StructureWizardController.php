@@ -51,15 +51,24 @@ class StructureWizardController extends BaseWebController
         }
 
         $languages = $this->loadActiveLanguages();
+        $activeBlockKeys = $this->activeBlockKeys();
+        $collectionPresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $activeBlockKeys);
+        $pagePresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::pagePresets(), $activeBlockKeys);
 
         return $this->response->setJSON([
             'ok' => true,
             'data' => [
                 'languages' => $languages,
                 'collection_types' => $this->collectionTypeOptions(),
-                'collection_presets' => array_column(CmsPresetCatalog::collectionPresets(), null, 'type_key'),
+                'collection_presets' => array_column($collectionPresets, null, 'type_key'),
                 'page_types' => $this->pageTypeOptions(),
-                'page_presets' => array_column(CmsPresetCatalog::pagePresets(), null, 'type_key'),
+                'page_presets' => array_column($pagePresets, null, 'type_key'),
+                'setup_state' => [
+                    'has_languages' => $languages !== [],
+                    'has_active_block_types' => $activeBlockKeys !== [],
+                    'has_collection_presets' => $collectionPresets !== [],
+                    'has_page_presets' => $pagePresets !== [],
+                ],
             ],
         ]);
     }
@@ -193,11 +202,28 @@ class StructureWizardController extends BaseWebController
             return 'collection_key must use lowercase letters, numbers and hyphens only.';
         }
 
-        if ($collectionType === '' || ! in_array($collectionType, CmsPresetCatalog::collectionTypes(), true)) {
+        if ($collectionType === '' || ! preg_match('/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/', $collectionType)) {
             return 'collection_type is required.';
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function activeBlockKeys(): array
+    {
+        $catalog = service('blockCatalogService')->all();
+        $keys = [];
+        foreach ($catalog as $blockType) {
+            $key = (string) ($blockType['block_key'] ?? '');
+            if ($key !== '') {
+                $keys[] = $key;
+            }
+        }
+
+        return array_values(array_unique($keys));
     }
 
     /**
