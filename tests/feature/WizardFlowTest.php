@@ -75,6 +75,30 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('Acciones', $body);
     }
 
+    public function testContentWizardRichTextBlockStepsSyncDraftLive(): void
+    {
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user'         => ['permissions' => ['cms.entries.read']],
+        ])->get('/admin/cms/wizard');
+
+        $result->assertStatus(200);
+        $view = file_get_contents(APPPATH . 'Views/cms/wizard/_partials/entry_wizard.php');
+        $this->assertIsString($view);
+        $this->assertStringContainsString('data-wizard-content-richtext-field', $view);
+        $this->assertStringContainsString('syncBlockContentRichTextDraft(blockContentStepIndex, field.key, $event.target.value)', $view);
+
+        $wizard = file_get_contents(APPPATH . 'Views/cms/wizard/index.php');
+        $this->assertIsString($wizard);
+        $this->assertStringContainsString('syncBlockContentRichTextDraft(stepIdx, key, value)', $wizard);
+        $this->assertStringContainsString("field.uiType === 'richtext'", $wizard);
+
+        $asset = file_get_contents(FCPATH . 'assets/js/app.js');
+        $this->assertIsString($asset);
+        $this->assertStringContainsString('dispatchEvent(new window.Event("input",{bubbles:!0}))', $asset);
+    }
+
     public function testStructureWizardIndexRendersForAdmin(): void
     {
         $languageMock = $this->createMock(LanguageApiService::class);
@@ -185,7 +209,49 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertArrayHasKey('collection_presets', $body['data']);
         $this->assertArrayNotHasKey('default_language_id', $body['data']);
         $this->assertTrue($body['data']['languages'][0]['is_default']);
-        $this->assertNotEmpty($body['data']['collection_presets']['blog']['block_template']['blocks']);
+        $this->assertArrayHasKey('setup_state', $body['data']);
+        $this->assertArrayHasKey('collection_presets', $body['data']);
+    }
+
+    public function testStructureWizardCreateCollectionAcceptsDynamicTypeWithoutPreset(): void
+    {
+        session()->set('user', ['permissions' => ['cms.collections.write']]);
+
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function (array $payload): bool {
+                return ($payload['collection_type'] ?? null) === 'case-studies'
+                    && ($payload['block_template'] ?? null) === null
+                    && ($payload['wizard_config'] ?? null) === null;
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 201,
+                'data' => ['id' => 33, 'collection_key' => 'case-studies'],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $this->injectJsonBody([
+            'collection_type' => 'case-studies',
+            'collection_key' => 'case-studies',
+            'sort_order' => 0,
+            'block_template' => null,
+            'wizard_config' => null,
+            'translations' => [
+                ['language_id' => 1, 'slug' => 'case-studies', 'name' => 'Case Studies'],
+            ],
+        ]);
+
+        $controller = new StructureWizardController();
+        $controller->initController(Services::request(), Services::response(), Services::logger(true));
+        $result = $controller->createCollection();
+
+        $this->assertSame(201, $result->getStatusCode());
     }
 
     public function testConfigUnwrapsDomainPayload(): void

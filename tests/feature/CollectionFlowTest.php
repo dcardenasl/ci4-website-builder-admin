@@ -260,6 +260,48 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertRedirect();
     }
 
+    public function testStoreAcceptsDynamicCollectionType(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function (array $payload): bool {
+                return ($payload['collection_type'] ?? null) === 'case-studies'
+                    && ($payload['collection_key'] ?? null) === 'case-studies';
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 201,
+                'data' => ['id' => 44],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections', [
+            csrf_token() => csrf_hash(),
+            'collection_type' => 'case-studies',
+            'collection_key' => 'case-studies',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'Case Studies',
+                    'slug' => 'case-studies',
+                    'description' => '',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+    }
+
     public function testDeleteSuccessRedirectsToList(): void
     {
         $mock = $this->createMock(CollectionApiService::class);
