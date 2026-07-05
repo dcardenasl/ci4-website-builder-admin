@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Menu items reordering interface** — new reorder view for menu items with hierarchical display, drag-and-drop capability, and AJAX persistence; simplified create/edit forms by moving sort_order to dedicated reorder interface
 - **Entry reordering — collection filtering** — added dropdown filter to the entry reorder view to filter entries by collection; when a collection is selected, the reorder list displays only entries belonging to that collection; improved portfolio preset labels for better clarity
 - **CMS wizard — permission enforcement** — added permission validation to the structure wizard controller (`cms.pages.write`, `cms.menus.write`, `cms.collections.write`) and reorganized CMS view controls to gate edit/delete buttons and the drag-hint prompt within permission checks, ensuring only authorized users can manage blocks and drag operations
 - **Structure wizard — multilingual support with automatic translation proposals** — extended the structure wizard with a dedicated language selection step featuring active languages from the hub, automatic translation proposals via MyMemory API, inline editing of translated names and slugs, and language inclusion/exclusion toggles before final collection submission
@@ -41,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Applications index — read-only clarity** — removed duplicate subtitle text; `empty_state` now uses `Iam.applications_empty` and `Iam.applications_managed_server_side` as title/description instead of generic defaults
 
 ### Fixed
+- **File deletion protection** — admin now prevents deletion of files with active references (used by pages, blocks, collections); displays user-friendly error messages and bulk operation feedback when deletion is blocked due to active usage
 - **Block type preview** — the rich-text block preview now falls back to legacy `body`/`html` payload keys via `block_text_content()` when `content` is empty, matching the domain's normalized rich-text contract
 - **Auto-translate** — switched the `TranslateController` provider from MyMemory to Google Translate's unofficial endpoint for more reliable results; translated text now propagates into rich-text editors (`richTextEditor.js`) and keeps file field previews in sync (`translatableFileField.js`); the "Traducir automáticamente" button and its error banner are hidden when there are no translation targets
 - **CMS wizard — entry publish payload** — client-side validation now blocks publish when required fields (collection, title, per-language slug/title) are missing or exceed API limits, and long text fields (title, excerpt, meta_title, meta_description, slug) are truncated before submission to prevent 422s from the domain API
