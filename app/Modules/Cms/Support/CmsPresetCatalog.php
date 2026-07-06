@@ -115,8 +115,8 @@ final class CmsPresetCatalog
             ]),
             self::pagePreset('contact', [
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
-                ['block_key' => 'contact_form', 'label' => 'Formulario', 'help_text' => 'Formulario de contacto', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['form_key' => 'contact', 'show_info_boxes' => true, 'css_class' => '']],
-                ['block_key' => 'location_info', 'label' => 'Ubicación', 'help_text' => 'Datos de contacto y mapa', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['map_embed_url' => '', 'css_class' => '']],
+                ['block_key' => 'form_embed', 'label' => 'Formulario', 'help_text' => 'Formulario CMS embebido', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['form_key' => 'contact', 'show_info_boxes' => true, 'css_class' => '']],
+                ['block_key' => 'contact_info', 'label' => 'Datos de contacto', 'help_text' => 'Información estructurada y mapa', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['map_embed_url' => '', 'css_class' => '']],
                 ['block_key' => 'social_links', 'label' => 'Redes', 'help_text' => 'Enlaces sociales', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
             ]),
             self::pagePreset('privacy', [
@@ -137,8 +137,8 @@ final class CmsPresetCatalog
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
                 ['block_key' => 'rich_text', 'label' => 'Historia', 'help_text' => 'Bloque editorial base', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
                 ['block_key' => 'image', 'label' => 'Imagen', 'help_text' => 'Apoyo visual', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['aspect_ratio' => '16/9', 'css_class' => '']],
-                ['block_key' => 'stats_section', 'label' => 'Estadísticas', 'help_text' => 'Contenedor de hitos', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['variant' => 'dark', 'css_class' => '']],
-                ['block_key' => 'faq_accordion', 'label' => 'Preguntas frecuentes', 'help_text' => 'Contenedor de FAQ', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
+                ['block_key' => 'metrics_grid', 'label' => 'Métricas', 'help_text' => 'Grilla de cifras o hitos', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['variant' => 'dark', 'css_class' => '']],
+                ['block_key' => 'accordion', 'label' => 'Acordeón', 'help_text' => 'Lista de elementos desplegables', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
                 ['block_key' => 'cta', 'label' => 'Llamado a la acción', 'help_text' => 'Invitación final', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['variant' => 'blue', 'css_class' => '']],
             ]),
             self::pagePreset('events', [

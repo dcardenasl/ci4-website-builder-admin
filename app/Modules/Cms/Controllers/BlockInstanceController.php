@@ -640,7 +640,7 @@ class BlockInstanceController extends BaseWebController
     }
 
     /**
-     * Dynamically inject active form keys as select options for contact_form blocks.
+     * Dynamically inject active form keys as select options for form_embed blocks.
      *
      * @param array<string, mixed> $blockType
      */
@@ -650,14 +650,14 @@ class BlockInstanceController extends BaseWebController
             ? ($blockType['schema_definition'] ?? [])
             : json_decode((string) ($blockType['schema_definition'] ?? '{}'), true);
 
-        $hasContactForm   = ($blockType['block_key'] ?? '') === 'contact_form';
+        $hasFormEmbed     = ($blockType['block_key'] ?? '') === 'form_embed';
         $hasCollectionKey = isset($schema['config_fields']['collection_key']) || isset($blockType['config_fields']['collection_key']);
 
-        if (! $hasContactForm && ! $hasCollectionKey) {
+        if (! $hasFormEmbed && ! $hasCollectionKey) {
             return;
         }
 
-        if ($hasContactForm) {
+        if ($hasFormEmbed) {
             $forms = [];
             try {
                 $formsResponse = $this->safeApiCall(
