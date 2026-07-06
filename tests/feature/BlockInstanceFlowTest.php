@@ -431,7 +431,7 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => [
                     'id' => 5,
-                    'block_key' => 'news_grid',
+                    'block_key' => 'collection_grid',
                     'schema_definition' => [
                         'config_fields' => [
                             'collection_key' => ['type' => 'string', 'label' => 'Clave de Colección (CMS)', 'required' => true, 'default' => 'noticias'],
@@ -507,9 +507,9 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
                 'ok' => true, 'status' => 200, 'data' => [
                     [
                         'id' => 5,
-                        'block_key' => 'news_grid',
-                        'name' => 'Grilla de Noticias',
-                        'icon' => 'newspaper',
+                    'block_key' => 'collection_grid',
+                    'name' => 'Grilla de Colección',
+                    'icon' => 'layout-grid',
                         'schema_definition' => [
                             'config_fields' => [
                                 'collection_key' => ['type' => 'string', 'label' => 'Clave de Colección (CMS)', 'required' => true, 'default' => 'noticias'],
