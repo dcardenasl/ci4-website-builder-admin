@@ -227,14 +227,21 @@ class StructureWizardController extends BaseWebController
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return list<array<mixed>>
      */
     private function loadActiveLanguages(): array
     {
         $languageService = service('languageApiService');
         $languagesResponse = $this->safeApiCall(fn () => $languageService->list(['limit' => 100, 'is_active' => true]));
 
-        return $this->extractItems($languagesResponse);
+        $rows = [];
+        foreach ($this->extractItems($languagesResponse) as $row) {
+            if (is_array($row)) {
+                $rows[] = $row;
+            }
+        }
+
+        return $rows;
     }
 
     /**

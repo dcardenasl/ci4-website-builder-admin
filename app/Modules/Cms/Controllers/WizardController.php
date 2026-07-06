@@ -420,9 +420,10 @@ class WizardController extends BaseWebController
 
     public function updateMenuItem(int $itemId): ResponseInterface
     {
-        $payload = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
-            ? ($this->request->getJSON(true) ?? [])
-            : [];
+        $payloadRaw = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+            ? $this->request->getJSON(true)
+            : null;
+        $payload = is_array($payloadRaw) ? $payloadRaw : [];
 
         if (empty($payload)) {
             return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Empty payload']);
@@ -434,7 +435,7 @@ class WizardController extends BaseWebController
         $currentItemResult = $this->safeApiCall(static fn () => $domainClient->get("/cms/menu-items/{$itemId}"));
         if (isset($currentItemResult['ok']) && $currentItemResult['ok']) {
             $currentItem = $currentItemResult['data'] ?? [];
-            if (! isset($payload['translations']) && isset($currentItem['translations'])) {
+            if (! isset($payload['translations']) && is_array($currentItem) && isset($currentItem['translations'])) {
                 $payload['translations'] = $currentItem['translations'];
             }
         }

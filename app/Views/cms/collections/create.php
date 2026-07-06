@@ -24,6 +24,16 @@
                 'errors' => $errors ?? []
             ]) ?>
 
+            <?= view('components/form/select', [
+                'name' => 'collection_type',
+                'label' => 'Collections.field_collection_type',
+                'placeholder' => 'Collections.field_collection_type_placeholder',
+                'help' => 'Collections.field_collection_type_help',
+                'options' => array_column($collectionTypes ?? [], 'label', 'key'),
+                'value' => $item['collection_type'] ?? '',
+                'errors' => $errors ?? []
+            ]) ?>
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <?= view('components/form/boolean', [
                     'name' => 'is_active',

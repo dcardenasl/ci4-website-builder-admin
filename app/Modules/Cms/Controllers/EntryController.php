@@ -225,14 +225,15 @@ class EntryController extends BaseWebController
         }
 
         $collections = $this->collectionsOptions();
-        $collectionId = $this->request->getGet('collection_id');
+        $collectionIdParam = $this->request->getGet('collection_id');
+        $collectionId = is_numeric($collectionIdParam) ? (int) $collectionIdParam : null;
 
-        if (($collectionId === null || $collectionId === '') && ! empty($collections)) {
+        if ($collectionId === null && ! empty($collections)) {
             $collectionId = array_key_first($collections);
         }
 
         $items = [];
-        if ($collectionId !== null && $collectionId !== '') {
+        if ($collectionId !== null) {
             $response = $this->safeApiCall(fn () => $this->entryService->list([
                 'limit' => 250,
                 'sort' => 'sort_order',
