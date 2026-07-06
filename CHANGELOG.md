@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Unified collection grid block** — consolidated a set of collection-specific grid block types into a single `collection_grid` block with flexible configuration (order_by, order_direction, layout_variant); updated preset catalog and block type previews to use the new unified block
 - **Collection management UI with dynamic types** — new collection CRUD interface (create, edit, list, show) supporting dynamic collection types; enhanced `CollectionStoreRequest` with improved validation; added block template editor partial for configuring collection block structures; multilingual UI support with Spanish/English translations
 - **Enhanced entry wizard with structure and block templates** — redesigned wizard flow with structure management UI; enhanced `WizardController` and `StructureWizardController` to support collection-aware entry creation; improved entry wizard partial with block template configuration; enriched language keys for wizard workflow
 - **CMS preset catalog and block template system** — new `CmsPresetCatalog` for managing preset configurations; enhanced `richTextEditor.js` component for improved content editing; updated JavaScript modules to support dynamic block templates in the wizard interface
@@ -37,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Slug availability validation** — `checkSlug()` method to validate page slug uniqueness across languages
 
 ### Changed
+- **Content Security Policy (CSP) headers** — added conservative CSP headers to admin panel for enhanced security; restricts inline scripts, external stylesheets to allowlist, and frames to same-origin only; enables CSRF token injection protection via CSP nonce mechanism
 - **Category form and reorder UI** — removed `sort_order` field from category form (order managed via reorder interface); enhanced reorder view to display category names with subtitles showing collection and parent category labels for improved relational context
 - **Confirm modal — accepting state with spinner** — `$store.confirm.accept()` now sets `accepting: true` before calling the callback; the "Confirmar" button shows an animated spinner and is disabled while accepting; backdrop and Escape key blocked during action; 5-second safety timeout auto-closes if navigation does not occur (`app.js`, `confirm_modal.php`)
 - **Destructive confirmations — 4 views migrated to modal pattern** — `cms/pages/blocks/index.php`, `cms/pages/blocks/children/index.php`, `cms/menus/show.php`, and `admin/universal/index.php` replaced native `onsubmit="return confirm()"` with `@submit.prevent="$store.confirm.show(...)"` using the exact resource name
@@ -45,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Applications index — read-only clarity** — removed duplicate subtitle text; `empty_state` now uses `Iam.applications_empty` and `Iam.applications_managed_server_side` as title/description instead of generic defaults
 
 ### Fixed
+- **Type safety in CMS controllers and views** — improved null handling and type hinting in `cms` module controllers and views; added proper type declarations to prevent type-related errors and improve PHPStan compliance
 - **File deletion protection** — admin now prevents deletion of files with active references (used by pages, blocks, collections); displays user-friendly error messages and bulk operation feedback when deletion is blocked due to active usage
 - **Block type preview** — the rich-text block preview now falls back to legacy `body`/`html` payload keys via `block_text_content()` when `content` is empty, matching the domain's normalized rich-text contract
 - **Auto-translate** — switched the `TranslateController` provider from MyMemory to Google Translate's unofficial endpoint for more reliable results; translated text now propagates into rich-text editors (`richTextEditor.js`) and keeps file field previews in sync (`translatableFileField.js`); the "Traducir automáticamente" button and its error banner are hidden when there are no translation targets
