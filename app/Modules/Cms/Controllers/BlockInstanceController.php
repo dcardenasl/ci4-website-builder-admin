@@ -6,6 +6,7 @@ namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Services\BlockInstanceApiServiceInterface;
+use App\Modules\Cms\Support\BlockOwnerRouting;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -29,7 +30,7 @@ class BlockInstanceController extends BaseWebController
         $ownerType = $this->ownerTypeFromRequest();
         $permission = $ownerType === self::OWNER_ENTRY ? 'cms.entries.write' : 'cms.pages.write';
         if (! has_permission($permission)) {
-            return redirect()->to($this->ownerListRoute($ownerType))->with('error', lang('App.access_denied'));
+            return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', lang('App.access_denied'));
         }
         return null;
     }
@@ -39,78 +40,6 @@ class BlockInstanceController extends BaseWebController
         $segments = service('request')->getUri()->getSegments();
 
         return in_array('entries', $segments, true) ? self::OWNER_ENTRY : self::OWNER_PAGE;
-    }
-
-    private function ownerLabel(string $ownerType): string
-    {
-        return $ownerType === self::OWNER_ENTRY
-            ? lang('Pages.owner_label_entry')
-            : lang('Pages.owner_label_page');
-    }
-
-    private function childLabel(string $ownerType): string
-    {
-        return $ownerType === self::OWNER_ENTRY
-            ? lang('Pages.child_label_subblock')
-            : lang('Pages.child_label_slide');
-    }
-
-    private function ownerListRoute(string $ownerType): string
-    {
-        return $ownerType === self::OWNER_ENTRY ? route_to('admin.cms.entries') : route_to('admin.cms.pages');
-    }
-
-    private function ownerShowRoute(string $ownerType): string
-    {
-        return $ownerType === self::OWNER_ENTRY ? 'admin.cms.entries.show' : 'admin.cms.pages.show';
-    }
-
-    /**
-     * @return array{index:string,create:string,store:string,edit:string,update:string,delete:string,reorder:string,children:string,childrenReorder:string}
-     */
-    private function ownerRoutes(string $ownerType): array
-    {
-        $prefix = $ownerType === self::OWNER_ENTRY ? 'admin.cms.entries.blocks' : 'admin.cms.pages.blocks';
-
-        return [
-            'index'           => $prefix,
-            'create'          => $prefix . '.create',
-            'store'           => $prefix . '.store',
-            'edit'            => $prefix . '.edit',
-            'update'          => $prefix . '.update',
-            'delete'          => $prefix . '.delete',
-            'reorder'         => $prefix . '.reorder',
-            'children'        => $prefix . '.children',
-            'childrenReorder' => $prefix . '.children.reorder',
-        ];
-    }
-
-    /** @param array<string, mixed> $owner */
-    private function ownerPreviewUrl(string $ownerType, array $owner): string
-    {
-        if ($ownerType !== self::OWNER_PAGE) {
-            return '';
-        }
-
-        foreach (($owner['translations'] ?? []) as $translation) {
-            if (! is_array($translation)) {
-                continue;
-            }
-
-            $slug = (string) ($translation['slug'] ?? '');
-            if ($slug === '') {
-                continue;
-            }
-
-            $publicSiteUrl = rtrim((string) env('PUBLIC_SITE_URL'), '/');
-            if ($publicSiteUrl === '') {
-                return '';
-            }
-
-            return $publicSiteUrl . '/' . ltrim($slug, '/');
-        }
-
-        return '';
     }
 
     /**
@@ -123,13 +52,6 @@ class BlockInstanceController extends BaseWebController
             : $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
 
         return $response['ok'] ? $this->extractData($response) : [];
-    }
-
-    private function ownerNotFoundMessage(string $ownerType): string
-    {
-        return $ownerType === self::OWNER_ENTRY
-            ? lang('Pages.owner_not_found_entry')
-            : lang('Pages.pages_not_found');
     }
 
     /**
@@ -186,9 +108,9 @@ class BlockInstanceController extends BaseWebController
         $ownerType = $this->ownerTypeFromRequest();
         $page = $this->fetchOwner($ownerType, $ownerId);
         if ($page === []) {
-            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
+            return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
-        $routes = $this->ownerRoutes($ownerType);
+        $routes = BlockOwnerRouting::routes($ownerType);
 
         $blocksResponse = $this->safeApiCall(fn () => $this->blockInstanceService->list($ownerId, $ownerType));
         $allBlocks = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
@@ -197,18 +119,18 @@ class BlockInstanceController extends BaseWebController
         $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
 
         $typesIndexed = $this->fetchBlockTypes();
-        $routes = $this->ownerRoutes($ownerType);
+        $routes = BlockOwnerRouting::routes($ownerType);
 
         return $this->render('cms/pages/blocks/index', [
-            'title'             => lang('Pages.blocks_section_title') . ': ' . ($page['title'] ?? $this->ownerLabel($ownerType)),
+            'title'             => lang('Pages.blocks_section_title') . ': ' . ($page['title'] ?? BlockOwnerRouting::label($ownerType)),
             'page'              => $page,
             'blocks'            => $blocks,
             'blockTypes'        => $typesIndexed,
             'collectionsMap'    => $this->collectionsMap(),
             'publicSiteUrl'     => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
             'ownerType'         => $ownerType,
-            'ownerLabel'        => $this->ownerLabel($ownerType),
-            'ownerShowRoute'    => $this->ownerShowRoute($ownerType),
+            'ownerLabel'        => BlockOwnerRouting::label($ownerType),
+            'ownerShowRoute'    => BlockOwnerRouting::showRoute($ownerType),
             'ownerBlocksRoute'   => $routes['index'],
             'ownerCreateRoute'   => $routes['create'],
             'ownerStoreRoute'    => $routes['store'],
@@ -218,8 +140,8 @@ class BlockInstanceController extends BaseWebController
             'ownerChildrenRoute' => $routes['children'],
             'ownerReorderRoute'  => $routes['reorder'],
             'ownerChildrenReorderRoute' => $routes['childrenReorder'],
-            'showPreview'        => $this->ownerPreviewUrl($ownerType, $page) !== '',
-            'previewUrl'         => $this->ownerPreviewUrl($ownerType, $page),
+            'showPreview'        => BlockOwnerRouting::previewUrl($ownerType, $page) !== '',
+            'previewUrl'         => BlockOwnerRouting::previewUrl($ownerType, $page),
         ]);
     }
 
@@ -233,7 +155,7 @@ class BlockInstanceController extends BaseWebController
         $ownerType = $this->ownerTypeFromRequest();
         $page = $this->fetchOwner($ownerType, $ownerId);
         if ($page === []) {
-            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
+            return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
         $typesIndexed = $this->fetchBlockTypes();
@@ -258,11 +180,11 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
-        $routes = $this->ownerRoutes($ownerType);
+        $routes = BlockOwnerRouting::routes($ownerType);
 
         return $this->render('cms/pages/blocks/create', [
             'title'             => $parentInstanceId !== null
-                ? lang('Pages.blocks_add') . ' ' . $this->childLabel($ownerType)
+                ? lang('Pages.blocks_add') . ' ' . BlockOwnerRouting::childLabel($ownerType)
                 : lang('Pages.block_add_title'),
             'page'              => $page,
             'blockTypes'        => $types,
@@ -270,12 +192,12 @@ class BlockInstanceController extends BaseWebController
             'parentInstanceId'  => $parentInstanceId,
             'parentBlockType'   => $parentBlockType,
             'ownerType'         => $ownerType,
-            'ownerLabel'        => $this->ownerLabel($ownerType),
+            'ownerLabel'        => BlockOwnerRouting::label($ownerType),
             'ownerBlocksRoute'   => $routes['index'],
             'ownerCreateRoute'   => $routes['create'],
             'ownerStoreRoute'    => $routes['store'],
             'ownerChildrenRoute' => $routes['children'],
-            'ownerChildLabel'    => $this->childLabel($ownerType),
+            'ownerChildLabel'    => BlockOwnerRouting::childLabel($ownerType),
         ]);
     }
 
@@ -383,10 +305,10 @@ class BlockInstanceController extends BaseWebController
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_added_success', [$this->childLabel($ownerType)]));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_added_success', [BlockOwnerRouting::childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_added_success'));
+        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_added_success'));
     }
 
     public function edit(string $ownerId, string $id): string|RedirectResponse
@@ -399,12 +321,12 @@ class BlockInstanceController extends BaseWebController
         $ownerType = $this->ownerTypeFromRequest();
         $page = $this->fetchOwner($ownerType, $ownerId);
         if ($page === []) {
-            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
+            return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
         $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
         if (!$blockResponse['ok']) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
         }
         $block = $this->extractData($blockResponse);
 
@@ -458,13 +380,13 @@ class BlockInstanceController extends BaseWebController
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
             'ownerType'    => $ownerType,
-            'ownerLabel'   => $this->ownerLabel($ownerType),
-            'ownerBlocksRoute' => $this->ownerRoutes($ownerType)['index'],
-            'ownerStoreRoute' => $this->ownerRoutes($ownerType)['store'],
-            'ownerEditRoute' => $this->ownerRoutes($ownerType)['edit'],
-            'ownerUpdateRoute' => $this->ownerRoutes($ownerType)['update'],
-            'ownerDeleteRoute' => $this->ownerRoutes($ownerType)['delete'],
-            'ownerChildrenRoute' => $this->ownerRoutes($ownerType)['children'],
+            'ownerLabel'   => BlockOwnerRouting::label($ownerType),
+            'ownerBlocksRoute' => BlockOwnerRouting::routes($ownerType)['index'],
+            'ownerStoreRoute' => BlockOwnerRouting::routes($ownerType)['store'],
+            'ownerEditRoute' => BlockOwnerRouting::routes($ownerType)['edit'],
+            'ownerUpdateRoute' => BlockOwnerRouting::routes($ownerType)['update'],
+            'ownerDeleteRoute' => BlockOwnerRouting::routes($ownerType)['delete'],
+            'ownerChildrenRoute' => BlockOwnerRouting::routes($ownerType)['children'],
         ]);
     }
 
@@ -546,10 +468,10 @@ class BlockInstanceController extends BaseWebController
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_updated_success', [$this->childLabel($ownerType)]));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_updated_success', [BlockOwnerRouting::childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_updated_success'));
+        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_updated_success'));
     }
 
     public function delete(string $ownerId, string $id): RedirectResponse
@@ -569,16 +491,16 @@ class BlockInstanceController extends BaseWebController
 
         if (!$response['ok']) {
             if ($parentInstanceId !== null) {
-                return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('error', lang('Pages.block_delete_failed'));
+                return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('error', lang('Pages.block_delete_failed'));
             }
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_delete_failed'));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_delete_failed'));
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_deleted_success', [$this->childLabel($ownerType)]));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_deleted_success', [BlockOwnerRouting::childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_deleted_success'));
+        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_deleted_success'));
     }
 
     public function reorder(string $ownerId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -615,7 +537,7 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('success', lang('Pages.blocks_reorder_success'));
+        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.blocks_reorder_success'));
     }
 
     public function reorderChildren(string $ownerId, string $instanceId): RedirectResponse|\CodeIgniter\HTTP\ResponseInterface
@@ -653,7 +575,7 @@ class BlockInstanceController extends BaseWebController
                 ->setBody(json_encode(['ok' => true]) ?: '{}');
         }
 
-        return redirect()->to(route_to($this->ownerRoutes($ownerType)['children'], $ownerId, $instanceId))->with('success', lang('Pages.child_reorder_success'));
+        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, $instanceId))->with('success', lang('Pages.child_reorder_success'));
     }
 
     public function children(string $ownerId, string $instanceId): string|RedirectResponse
@@ -661,12 +583,12 @@ class BlockInstanceController extends BaseWebController
         $ownerType = $this->ownerTypeFromRequest();
         $page = $this->fetchOwner($ownerType, $ownerId);
         if ($page === []) {
-            return redirect()->to($this->ownerListRoute($ownerType))->with('error', $this->ownerNotFoundMessage($ownerType));
+            return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
         $parentResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $instanceId));
         if (!$parentResponse['ok']) {
-            return redirect()->to(route_to($this->ownerRoutes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
         }
         $parentBlock = $this->extractData($parentResponse);
 
@@ -680,7 +602,7 @@ class BlockInstanceController extends BaseWebController
         $parentType = $typesIndexed[$parentBlock['block_id']] ?? [];
 
         return $this->render('cms/pages/blocks/children/index', [
-            'title'                => $this->childLabel($ownerType) . ': ' . ($parentType['name'] ?? $this->ownerLabel($ownerType)),
+            'title'                => BlockOwnerRouting::childLabel($ownerType) . ': ' . ($parentType['name'] ?? BlockOwnerRouting::label($ownerType)),
             'page'                 => $page,
             'parentBlock'          => $parentBlock,
             'parentType'           => $parentType,
@@ -688,15 +610,15 @@ class BlockInstanceController extends BaseWebController
             'blockTypes'           => $typesIndexed,
             'collectionsMap'       => $this->collectionsMap(),
             'ownerType'            => $ownerType,
-            'ownerLabel'           => $this->ownerLabel($ownerType),
-            'ownerBlocksRoute'     => $this->ownerRoutes($ownerType)['index'],
-            'ownerCreateRoute'     => $this->ownerRoutes($ownerType)['create'],
-            'ownerStoreRoute'      => $this->ownerRoutes($ownerType)['store'],
-            'ownerEditRoute'       => $this->ownerRoutes($ownerType)['edit'],
-            'ownerUpdateRoute'     => $this->ownerRoutes($ownerType)['update'],
-            'ownerDeleteRoute'     => $this->ownerRoutes($ownerType)['delete'],
-            'ownerChildrenReorderRoute' => $this->ownerRoutes($ownerType)['childrenReorder'],
-            'childLabel'           => $this->childLabel($ownerType),
+            'ownerLabel'           => BlockOwnerRouting::label($ownerType),
+            'ownerBlocksRoute'     => BlockOwnerRouting::routes($ownerType)['index'],
+            'ownerCreateRoute'     => BlockOwnerRouting::routes($ownerType)['create'],
+            'ownerStoreRoute'      => BlockOwnerRouting::routes($ownerType)['store'],
+            'ownerEditRoute'       => BlockOwnerRouting::routes($ownerType)['edit'],
+            'ownerUpdateRoute'     => BlockOwnerRouting::routes($ownerType)['update'],
+            'ownerDeleteRoute'     => BlockOwnerRouting::routes($ownerType)['delete'],
+            'ownerChildrenReorderRoute' => BlockOwnerRouting::routes($ownerType)['childrenReorder'],
+            'childLabel'           => BlockOwnerRouting::childLabel($ownerType),
         ]);
     }
 
@@ -784,10 +706,6 @@ class BlockInstanceController extends BaseWebController
                 }
             } catch (\Throwable $e) {
                 log_message('error', '[BlockInstanceController] Failed to fetch collections for options: ' . $e->getMessage());
-            }
-
-            if ($collections === []) {
-                $collections = ['noticias', 'cartelera'];
             }
 
             if (isset($schema['config_fields']['collection_key'])) {
