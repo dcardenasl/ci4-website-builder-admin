@@ -15,7 +15,7 @@ $linkLabel = $data['link_label'] ?? '';
         <?php endif; ?>
     </div>
     <div class="flex-grow min-w-0">
-        <div class="text-[10px] font-bold text-violet-500 uppercase mb-0.5">Tarjeta de Característica</div>
+        <div class="text-[10px] font-bold text-violet-500 uppercase mb-0.5">Tarjeta</div>
         <h4 class="text-xs font-bold text-slate-800 truncate"><?= $title !== '' ? esc($title) : 'Sin título' ?></h4>
         <?php if ($description !== ''): ?>
             <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5"><?= esc($description) ?></p>

@@ -1,7 +1,7 @@
 <?php
 /** @var array<string, mixed> $config */
 /** @var array<string, mixed> $data */
-$heading        = esc($data['heading'] ?? 'Send Us a Message');
+$heading        = esc($data['heading'] ?? 'Formulario');
 $submitLabel    = esc($data['submit_label'] ?? 'Submit');
 $showCompany    = ! empty($config['show_company']) && $config['show_company'] !== false && $config['show_company'] !== 'false';
 $phonePrefix    = esc($config['phone_prefix'] ?? '');
@@ -17,13 +17,13 @@ $cssClass       = esc($config['css_class'] ?? '');
             <?php if ($showCompany): ?>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Company <span class="text-gray-400 font-normal">(optional)</span></label>
-                    <input type="text" placeholder="Your company name" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                    <input type="text" placeholder="Organización opcional" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
                 </div>
             <?php endif; ?>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-                <input type="text" placeholder="Your full name" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                <input type="text" placeholder="Nombre completo" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
             </div>
 
             <div>
@@ -42,8 +42,8 @@ $cssClass       = esc($config['css_class'] ?? '');
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Message <span class="text-red-500">*</span></label>
-                <textarea rows="5" placeholder="Write your message here..." class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contenido <span class="text-red-500">*</span></label>
+                <textarea rows="5" placeholder="Escribe tu mensaje..." class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"></textarea>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm">

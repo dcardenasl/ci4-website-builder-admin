@@ -14,7 +14,7 @@ $icon = $data['icon'] ?? '';
         <?php endif; ?>
     </div>
     <div class="flex-grow min-w-0">
-        <div class="text-[10px] font-bold text-violet-500 uppercase mb-0.5">Cifra de Estadística</div>
+        <div class="text-[10px] font-bold text-violet-500 uppercase mb-0.5">Métrica</div>
         <div class="text-xs font-black text-slate-800"><?= $number !== '' ? esc($number) : '0' ?></div>
         <div class="text-[9px] text-slate-500 truncate mt-0.5"><?= $label !== '' ? esc($label) : 'Sin etiqueta' ?></div>
     </div>

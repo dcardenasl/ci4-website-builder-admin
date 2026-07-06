@@ -8,14 +8,14 @@ $avatar = $data['avatar_url'] ?? '';
 $rating = (int) ($data['rating'] ?? 5);
 ?>
 <div class="border border-slate-200 bg-white rounded-lg p-3">
-    <div class="text-[10px] font-bold text-violet-500 uppercase mb-1">Tarjeta de Testimonio</div>
+    <div class="text-[10px] font-bold text-violet-500 uppercase mb-1">Tarjeta de Slider</div>
     <div class="flex gap-0.5 text-amber-400 text-[9px] mb-2">
         <?php for ($i = 0; $i < 5; $i++): ?>
             <span><?= $i < $rating ? '★' : '☆' ?></span>
         <?php endfor; ?>
     </div>
     <p class="text-[10px] italic text-slate-600 line-clamp-3">
-        <?= $quote !== '' ? '"' . esc($quote) . '"' : 'Sin contenido de testimonio.' ?>
+        <?= $quote !== '' ? '"' . esc($quote) . '"' : 'Sin contenido.' ?>
     </p>
     <div class="flex items-center gap-2 mt-3 pt-2 border-t border-slate-50">
         <?php if ($avatar !== ''): ?>
