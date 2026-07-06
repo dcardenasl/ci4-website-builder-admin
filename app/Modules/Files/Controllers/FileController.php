@@ -29,7 +29,7 @@ class FileController extends BaseWebController
         return $this->render('files/index', [
             'title'          => lang('Files.title'),
             'limitOptions'   => CatalogOptions::limitOptions([]),
-            'categoryOptions'=> $this->categoryOptions(),
+            'categoryOptions' => $this->categoryOptions(),
         ]);
     }
 

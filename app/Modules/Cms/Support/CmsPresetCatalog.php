@@ -116,7 +116,8 @@ final class CmsPresetCatalog
             self::pagePreset('contact', [
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
                 ['block_key' => 'form_embed', 'label' => 'Formulario', 'help_text' => 'Formulario CMS embebido', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['form_key' => 'contact', 'show_info_boxes' => true, 'css_class' => '']],
-                ['block_key' => 'contact_info', 'label' => 'Datos de contacto', 'help_text' => 'Información estructurada y mapa', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['map_embed_url' => '', 'css_class' => '']],
+                ['block_key' => 'contact_info', 'label' => 'Datos de contacto', 'help_text' => 'Información estructurada de contacto', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['layout' => 'stacked', 'css_class' => '']],
+                ['block_key' => 'map_embed', 'label' => 'Mapa', 'help_text' => 'Mapa o iframe embebido', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['embed_url' => '', 'aspect_ratio' => '16/9', 'height' => 360, 'css_class' => '']],
                 ['block_key' => 'social_links', 'label' => 'Redes', 'help_text' => 'Enlaces sociales', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
             ]),
             self::pagePreset('privacy', [
