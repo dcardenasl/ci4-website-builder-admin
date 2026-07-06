@@ -11,7 +11,7 @@ $content = $data['content'] ?? '';
     </div>
     <?php if ($content !== ''): ?>
         <div class="text-[10px] text-slate-500 border-t border-slate-50 pt-2 line-clamp-2">
-            <?= $content // Rich text output ?>
+            <?= $content // Rich text output?>
         </div>
     <?php endif; ?>
 </div>

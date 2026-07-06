@@ -5,14 +5,15 @@ $addressLabel = esc($data['address_label'] ?? 'Address');
 $address      = esc($data['address'] ?? '');
 $phoneLabel   = esc($data['phone_label'] ?? 'Phone');
 $phone        = esc($data['phone'] ?? '');
+$emailLabel   = esc($data['email_label'] ?? 'Email');
+$email        = esc($data['email'] ?? '');
 $hoursLabel   = esc($data['hours_label'] ?? 'Office Hours');
 $hours        = esc($data['hours'] ?? '');
-$mapEmbedUrl  = $config['map_embed_url'] ?? '';
 $cssClass     = esc($config['css_class'] ?? '');
 ?>
 <section class="py-10 <?= $cssClass ?>">
     <div class="max-w-5xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Contact details -->
             <div class="space-y-6">
                 <?php if ($address): ?>
@@ -48,6 +49,23 @@ $cssClass     = esc($config['css_class'] ?? '');
                     </div>
                 <?php endif; ?>
 
+                <?php if ($email): ?>
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 6.75 8.954 5.97a1.5 1.5 0 0 0 1.592 0l8.954-5.97"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <?php if ($emailLabel): ?>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><?= $emailLabel ?></p>
+                            <?php endif; ?>
+                            <p class="text-sm text-gray-800 mt-0.5"><?= $email ?></p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($hours): ?>
                     <div class="flex items-start gap-3">
                         <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
@@ -64,23 +82,9 @@ $cssClass     = esc($config['css_class'] ?? '');
                     </div>
                 <?php endif; ?>
 
-                <?php if (! $address && ! $phone && ! $hours): ?>
+                <?php if (! $address && ! $phone && ! $email && ! $hours): ?>
                     <div class="p-4 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-sm text-gray-400 text-center">
-                        Configure address, phone, and hours in the form.
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Map -->
-            <div class="rounded-xl overflow-hidden bg-gray-100 h-56 flex items-center justify-center">
-                <?php if ($mapEmbedUrl): ?>
-                    <iframe src="<?= esc($mapEmbedUrl) ?>" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                <?php else: ?>
-                    <div class="text-center text-gray-400 p-4">
-                        <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/>
-                        </svg>
-                        <p class="text-xs">Enter Google Maps embed URL in the configuration</p>
+                        Configure address, phone, email, and hours in the form.
                     </div>
                 <?php endif; ?>
             </div>

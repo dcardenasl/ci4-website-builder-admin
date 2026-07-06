@@ -3,6 +3,10 @@
 /** @var array<string, mixed> $data */
 $number = $data['number'] ?? '';
 $label = $data['label'] ?? '';
+$prefix = $data['prefix'] ?? '';
+$suffix = $data['suffix'] ?? '';
+$description = $data['description'] ?? '';
+$sourceLabel = $data['source_label'] ?? '';
 $icon = $data['icon'] ?? '';
 ?>
 <div class="border border-slate-200 bg-white rounded-lg p-3 flex gap-3 items-center">
@@ -15,7 +19,13 @@ $icon = $data['icon'] ?? '';
     </div>
     <div class="flex-grow min-w-0">
         <div class="text-[10px] font-bold text-violet-500 uppercase mb-0.5">Métrica</div>
-        <div class="text-xs font-black text-slate-800"><?= $number !== '' ? esc($number) : '0' ?></div>
+        <div class="text-xs font-black text-slate-800"><?= esc($prefix) ?><?= $number !== '' ? esc($number) : '0' ?><?= esc($suffix) ?></div>
         <div class="text-[9px] text-slate-500 truncate mt-0.5"><?= $label !== '' ? esc($label) : 'Sin etiqueta' ?></div>
+        <?php if ($description !== ''): ?>
+            <div class="text-[8px] text-slate-400 truncate mt-0.5"><?= esc($description) ?></div>
+        <?php endif; ?>
+        <?php if ($sourceLabel !== ''): ?>
+            <div class="text-[8px] text-slate-400 truncate mt-0.5">Fuente: <?= esc($sourceLabel) ?></div>
+        <?php endif; ?>
     </div>
 </div>
