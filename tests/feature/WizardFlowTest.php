@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Libraries\DomainApiClientInterface;
-use App\Modules\Cms\Controllers\WizardController;
 use App\Modules\Cms\Controllers\StructureWizardController;
+use App\Modules\Cms\Controllers\WizardController;
 use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;

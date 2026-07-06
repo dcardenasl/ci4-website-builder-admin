@@ -198,4 +198,3 @@ final class MenuItemFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('"ok": true', (string) $result->getBody());
     }
 }
-

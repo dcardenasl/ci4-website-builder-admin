@@ -140,7 +140,7 @@ $actionBadgeClass = static function (string $action): string {
                 <?php foreach ($permissionGroups as $group): ?>
                     <?php
                         $groupPermissions = $group['permissions'];
-                        $resourceKey = (string) ($group['resource'] ?? $group['label'] ?? '');
+                    $resourceKey = (string) ($group['resource'] ?? $group['label'] ?? '');
                     ?>
                     <section class="rounded-xl border border-gray-200 bg-gray-50/60 p-3">
                         <div class="mb-3 flex items-center justify-between gap-3">
@@ -168,9 +168,9 @@ $actionBadgeClass = static function (string $action): string {
                             <?php foreach ($groupPermissions as $permission): ?>
                                 <?php
                                     $permissionId = (string) ($permission['id'] ?? '');
-                                    $permissionCode = strtolower((string) ($permission['code'] ?? ''));
-                                    $permissionDescription = strtolower((string) ($permission['description'] ?? ''));
-                                    $permissionAction = strtolower((string) ($permission['action'] ?? ''));
+                                $permissionCode = strtolower((string) ($permission['code'] ?? ''));
+                                $permissionDescription = strtolower((string) ($permission['description'] ?? ''));
+                                $permissionAction = strtolower((string) ($permission['action'] ?? ''));
                                 ?>
                                 <label class="inline-flex items-start gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
                                     x-show="search === '' || '<?= esc($permissionCode) ?>'.includes(search.toLowerCase()) || '<?= esc($permissionDescription) ?>'.includes(search.toLowerCase())"

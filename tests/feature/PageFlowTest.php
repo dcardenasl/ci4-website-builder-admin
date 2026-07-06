@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Services\LanguageApiService;
+use App\Modules\Cms\Services\PageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
