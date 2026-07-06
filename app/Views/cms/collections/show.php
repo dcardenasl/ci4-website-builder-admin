@@ -54,21 +54,24 @@
             $blocks = $templateData['blocks'] ?? [];
             ?>
             <?php if (!empty($blocks) && is_array($blocks)): ?>
-                <div class="mt-6 border-t border-gray-100 pt-6">
-                    <h4 class="text-md font-semibold text-gray-800 mb-3"><?= esc(lang('Collections.block_template_show_title')) ?></h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mt-6 border-t border-gray-200 pt-6">
+                    <h4 class="text-base font-semibold text-gray-900">
+                        <?= esc(lang('Collections.block_template_show_title')) ?>
+                    </h4>
+                    <p class="text-sm text-gray-500 mt-0.5">
+                        <?= esc(lang('Collections.block_template_show_desc')) ?>
+                    </p>
+                    <ul class="mt-4 space-y-2">
                         <?php foreach ($blocks as $block): ?>
-                            <div class="flex items-center justify-between border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                                        <?= ui_icon('layout-template', 'h-5 w-5') ?>
-                                    </div>
-                                    <div>
-                                        <h5 class="text-sm font-semibold text-gray-900"><?= esc($block['label'] ?? $block['block_key']) ?></h5>
-                                        <code class="text-[10px] font-mono text-gray-400"><?= esc($block['block_key']) ?></code>
-                                    </div>
+                            <li class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5 shadow-sm">
+                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                                    <?= ui_icon('layout-template', 'h-4 w-4') ?>
                                 </div>
-                                <div class="flex gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-xs font-semibold text-gray-700"><?= esc($block['label'] ?? $block['block_key']) ?></span>
+                                    <p class="text-xs text-gray-400 mt-0.5 font-mono"><?= esc($block['block_key']) ?></p>
+                                </div>
+                                <div class="flex gap-2 flex-shrink-0">
                                     <?php if (!empty($block['required'])): ?>
                                         <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
                                             <?= esc(lang('Collections.block_template_builder_required')) ?>
@@ -80,9 +83,9 @@
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                            </div>
+                            </li>
                         <?php endforeach; ?>
-                    </div>
+                    </ul>
                 </div>
             <?php endif; ?>
         <?php endif; ?>

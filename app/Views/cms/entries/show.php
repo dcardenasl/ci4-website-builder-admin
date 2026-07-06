@@ -56,19 +56,15 @@
         <?php endif; ?>
     </section>
 
-    <?php if (! empty($entry['blocks']) && is_array($entry['blocks'])): ?>
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Entries.blocks_title')) ?></h3>
-            <ul class="mt-4 divide-y divide-gray-100 border border-gray-200 rounded-lg">
-                <?php foreach ($entry['blocks'] as $b): ?>
-                    <li class="flex items-center justify-between p-3 text-xs">
-                        <span class="font-medium text-gray-900"><?= esc($b['block_type'] ?? 'Block') ?></span>
-                        <span class="text-gray-500 font-mono">ID: <?= esc($b['id'] ?? '—') ?> (Sort: <?= esc($b['sort_order'] ?? '0') ?>)</span>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </section>
-    <?php endif; ?>
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+        <?= view('cms/partials/block_instances_panel', [
+            'blocks'          => $blocks ?? [],
+            'blockTypes'      => $blockTypes ?? [],
+            'itemId'          => $itemId,
+            'ownerType'       => 'entry',
+            'writePermission' => 'cms.entries.write',
+        ]) ?>
+    </section>
     <?php $mainContent = ob_get_clean(); ?>
 
     <?php ob_start(); ?>

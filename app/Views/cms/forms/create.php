@@ -65,10 +65,10 @@
         <?php if (!empty($languages)): ?>
             <?php
             $defaultLangId = (int) ($defaultLangId ?? 0);
-        $defaultLangCode = (string) ($defaultLangCode ?? '');
-        $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
-        $translateUrl = route_to('admin.cms.translate');
-        ?>
+            $defaultLangCode = (string) ($defaultLangCode ?? '');
+            $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
+            $translateUrl = route_to('admin.cms.translate');
+            ?>
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-base font-semibold text-gray-800"><?= lang('Forms.section_translations') ?></h2>
 
