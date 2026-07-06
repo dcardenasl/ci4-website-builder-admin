@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Generic block naming normalization** — consolidated domain-specific block preview views (faq_accordion, contact_form, location_info, logo_showcase, etc.) into unified generic names (accordion, form_embed, contact_info, asset_showcase, etc.); updated block instance controller, preset catalog, and wizard UI to reflect new names; improves consistency and reduces block type proliferation
+
 ### Added
 - **Unified collection grid block** — consolidated a set of collection-specific grid block types into a single `collection_grid` block with flexible configuration (order_by, order_direction, layout_variant); updated preset catalog and block type previews to use the new unified block
 - **Collection management UI with dynamic types** — new collection CRUD interface (create, edit, list, show) supporting dynamic collection types; enhanced `CollectionStoreRequest` with improved validation; added block template editor partial for configuring collection block structures; multilingual UI support with Spanish/English translations
