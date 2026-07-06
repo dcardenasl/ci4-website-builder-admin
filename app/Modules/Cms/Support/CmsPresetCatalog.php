@@ -106,7 +106,7 @@ final class CmsPresetCatalog
         return [
             self::pagePreset('home', [
                 ['block_key' => 'hero_slider', 'label' => 'Hero principal', 'help_text' => 'Bloque de bienvenida', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) []],
-                ['block_key' => 'news_grid', 'label' => 'Últimas noticias', 'help_text' => 'Sección de contenido reciente', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['collection_key' => '', 'items_limit' => 3, 'css_class' => '']],
+                ['block_key' => 'collection_grid', 'label' => 'Últimas entradas', 'help_text' => 'Grilla de una colección', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['collection_key' => '', 'items_limit' => 3, 'order_by' => 'published_at', 'order_direction' => 'desc', 'layout_variant' => 'cards', 'css_class' => '']],
                 ['block_key' => 'cta', 'label' => 'Llamado a la acción', 'help_text' => 'Invitación final', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['variant' => 'blue', 'css_class' => '']],
             ]),
             self::pagePreset('generic', [
@@ -143,7 +143,7 @@ final class CmsPresetCatalog
             ]),
             self::pagePreset('events', [
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
-                ['block_key' => 'events_grid', 'label' => 'Cartelera', 'help_text' => 'Bloque de eventos relacionados', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['collection_key' => '', 'items_limit' => 6, 'css_class' => '']],
+                ['block_key' => 'collection_grid', 'label' => 'Cartelera', 'help_text' => 'Grilla de una colección', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['collection_key' => '', 'items_limit' => 6, 'order_by' => 'published_at', 'order_direction' => 'asc', 'layout_variant' => 'cards', 'css_class' => '']],
                 ['block_key' => 'image', 'label' => 'Imagen', 'help_text' => 'Apoyo visual', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['aspect_ratio' => '16/9', 'css_class' => '']],
             ]),
             self::pagePreset('maintenance', [
