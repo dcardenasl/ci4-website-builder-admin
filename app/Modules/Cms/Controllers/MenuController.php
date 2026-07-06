@@ -484,4 +484,3 @@ class MenuController extends BaseWebController
         ]);
     }
 }
-

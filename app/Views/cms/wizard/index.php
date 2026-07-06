@@ -140,6 +140,7 @@ $csrfToken ??= csrf_hash();
         asset_showcase:       '◇',
         asset_item:           '◇',
         contact_info:         '📍',
+        map_embed:            '🗺️',
         social_links:         '🔗',
         container:            '📦',
         page_header:          '📄',

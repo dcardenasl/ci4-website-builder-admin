@@ -34,54 +34,53 @@ $wizardDefaultLanguageCode = strtoupper((string) ($wizardDefaultLanguage['code']
 $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wizardDefaultLanguage['name'] ?? $wizardDefaultLanguageCode);
 ?>
 <div class="max-w-6xl mx-auto space-y-6" x-data="structureWizard()" x-init="init()" @slug-availability-changed.window="onSlugAvailabilityChanged($event)">
-    <div x-show="screen === 'loading'" x-cloak class="text-center py-16 text-gray-400">
+    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500"><?= esc(lang('Wizard.structure_sidebar_label')) ?></p>
+                <h1 class="text-2xl font-semibold text-gray-900"><?= esc(lang('Wizard.structure_heading')) ?></h1>
+                <p class="max-w-3xl text-sm text-gray-600"><?= esc(lang('Wizard.structure_intro')) ?></p>
+            </div>
+            <a href="<?= site_url('dashboard') ?>" class="btn-secondary"><?= esc(lang('Wizard.btn_back_panel')) ?></a>
+        </div>
+    </div>
+
+    <div x-show="screen === 'loading'" x-cloak class="rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-600 mx-auto mb-4"></div>
-        <p><?= esc(lang('Wizard.loading')) ?></p>
+        <p class="text-sm text-gray-500"><?= esc(lang('Wizard.loading')) ?></p>
     </div>
 
     <div x-show="screen === 'error'" x-cloak class="rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm">
         <p class="text-sm font-semibold text-red-700" x-text="errorMsg"></p>
-        <div class="mt-4 flex gap-3">
+        <div class="mt-4 flex flex-wrap gap-3">
             <button type="button" @click="init()" class="btn-secondary"><?= esc(lang('Wizard.btn_retry')) ?></button>
             <a href="<?= route_to('admin.cms.wizard') ?>" class="btn-primary"><?= esc(lang('Wizard.btn_back_panel')) ?></a>
         </div>
     </div>
 
-    <div x-show="screen === 'home'" x-cloak class="space-y-8">
-        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500"><?= esc(lang('Wizard.structure_sidebar_label')) ?></p>
-            <h1 class="mt-2 text-3xl font-bold text-gray-900"><?= esc(lang('Wizard.structure_heading')) ?></h1>
-            <p class="mt-3 max-w-2xl text-sm text-gray-600"><?= esc(lang('Wizard.structure_intro')) ?></p>
-        </div>
-
+    <div x-show="screen === 'home'" x-cloak class="space-y-6">
         <div class="grid gap-4 md:grid-cols-3">
-            <button type="button" @click="start('collection')" class="min-h-[140px] rounded-2xl border-2 border-gray-200 bg-white p-6 text-left shadow-sm transition hover:border-brand-400 hover:shadow-md">
-                <div class="text-4xl">🗂️</div>
-                <div class="mt-3 text-lg font-semibold text-gray-900"><?= esc(lang('Wizard.create_collection')) ?></div>
-                <div class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.create_collection_desc')) ?></div>
+            <button type="button" @click="start('collection')" class="flex min-h-[140px] flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <span class="text-3xl">🗂️</span>
+                <span class="space-y-1">
+                    <span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.create_collection')) ?></span>
+                    <span class="block text-xs text-gray-500"><?= esc(lang('Wizard.create_collection_desc')) ?></span>
+                </span>
             </button>
-            <button type="button" @click="start('page')" class="min-h-[140px] rounded-2xl border-2 border-gray-200 bg-white p-6 text-left shadow-sm transition hover:border-brand-400 hover:shadow-md">
-                <div class="text-4xl">📄</div>
-                <div class="mt-3 text-lg font-semibold text-gray-900"><?= esc(lang('Wizard.create_page')) ?></div>
-                <div class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.create_page_desc')) ?></div>
+            <button type="button" @click="start('page')" class="flex min-h-[140px] flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <span class="text-3xl">📄</span>
+                <span class="space-y-1">
+                    <span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.create_page')) ?></span>
+                    <span class="block text-xs text-gray-500"><?= esc(lang('Wizard.create_page_desc')) ?></span>
+                </span>
             </button>
-            <button type="button" @click="start('menu')" class="min-h-[140px] rounded-2xl border-2 border-gray-200 bg-white p-6 text-left shadow-sm transition hover:border-brand-400 hover:shadow-md">
-                <div class="text-4xl">🔗</div>
-                <div class="mt-3 text-lg font-semibold text-gray-900"><?= esc(lang('Wizard.create_menu')) ?></div>
-                <div class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.create_menu_desc')) ?></div>
+            <button type="button" @click="start('menu')" class="flex min-h-[140px] flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <span class="text-3xl">🔗</span>
+                <span class="space-y-1">
+                    <span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.create_menu')) ?></span>
+                    <span class="block text-xs text-gray-500"><?= esc(lang('Wizard.create_menu_desc')) ?></span>
+                </span>
             </button>
-        </div>
-
-        <div x-show="screen === 'collection' && collectionStep === 1" x-cloak class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.collection_wizard_intro')) ?></h2>
-                    <p class="mt-1 text-sm text-gray-600"><?= esc(lang('Wizard.collection_wizard_minimum')) ?></p>
-                </div>
-                <a href="<?= route_to('admin.cms.collections') ?>" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-400">
-                    <?= esc(lang('Wizard.go_structure_panel')) ?>
-                </a>
-            </div>
         </div>
     </div>
 
@@ -201,9 +200,9 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                         <?php foreach ($wizardTranslationLanguages as $translationIndex => $language): ?>
                                             <?php
                                                 $languageId = (int) ($language['id'] ?? 0);
-                                                $languageCode = strtoupper((string) ($language['code'] ?? ''));
-                                                $languageLabel = (string) ($language['label'] ?? $language['name'] ?? $languageCode ?: ('#' . $languageId));
-                                                $translationFieldPrefix = "collectionTranslationRows[{$translationIndex}]";
+                                            $languageCode = strtoupper((string) ($language['code'] ?? ''));
+                                            $languageLabel = (string) ($language['label'] ?? $language['name'] ?? $languageCode ?: ('#' . $languageId));
+                                            $translationFieldPrefix = "collectionTranslationRows[{$translationIndex}]";
                                             ?>
                                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 transition" :class="collectionTranslations[<?= $translationIndex ?>]?.included ? 'opacity-100' : 'opacity-60'">
                                                 <div class="flex flex-wrap items-start justify-between gap-3">
