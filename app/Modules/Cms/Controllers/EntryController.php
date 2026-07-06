@@ -53,7 +53,9 @@ class EntryController extends BaseWebController
                 'title' => lang('Entries.entries_details'),
                 'entry' => [],
                 'error' => $this->firstMessage($response, lang('Entries.entries_not_found')),
-            'collections' => $this->collectionsOptions(),
+                'collections' => $this->collectionsOptions(),
+                'blocks' => [],
+                'blockTypes' => [],
             ]);
         }
 
@@ -61,7 +63,41 @@ class EntryController extends BaseWebController
             'title' => lang('Entries.entries_details'),
             'entry' => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
+            'blocks' => $this->entryBlocks($id),
+            'blockTypes' => $this->fetchBlockTypesIndexed(),
         ]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function entryBlocks(string $id): array
+    {
+        $response = $this->safeApiCall(fn () => service('blockInstanceApiService')->list($id, 'entry', ['sort' => 'sort_order']));
+        if (! $response['ok']) {
+            return [];
+        }
+
+        $blocks = $this->extractItems($response);
+
+        return array_values(array_filter($blocks, static fn (array $b) => empty($b['parent_instance_id'])));
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchBlockTypesIndexed(): array
+    {
+        $types = service('blockCatalogService')->indexed();
+
+        $indexed = [];
+        foreach ((array) $types as $t) {
+            if (is_array($t) && isset($t['id'])) {
+                $indexed[(int) $t['id']] = $t;
+            }
+        }
+
+        return $indexed;
     }
 
     public function create(): string
