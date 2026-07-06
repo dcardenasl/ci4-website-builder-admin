@@ -7,7 +7,7 @@ return [
     'title'                  => 'Content assistant',
     'structure_title'        => 'Structure assistant',
     'sidebar_label'          => 'Content assistant',
-    'structure_sidebar_label'=> 'Structure assistant',
+    'structure_sidebar_label' => 'Structure assistant',
     'loading'                => 'Loading...',
     'error_load'             => 'Could not load the assistant. Please try again.',
     'status'                 => 'Status',

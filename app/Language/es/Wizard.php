@@ -7,7 +7,7 @@ return [
     'title'                  => 'Asistente de contenido',
     'structure_title'        => 'Asistente de estructura',
     'sidebar_label'          => 'Asistente de contenido',
-    'structure_sidebar_label'=> 'Asistente de estructura',
+    'structure_sidebar_label' => 'Asistente de estructura',
     'loading'                => 'Cargando...',
     'error_load'             => 'No se pudo cargar el asistente. Intenta de nuevo.',
     'status'                 => 'Estado',

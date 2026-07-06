@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
-use App\Support\Requests\BaseFormRequest;
 use App\Modules\Cms\Support\CmsPresetCatalog;
+use App\Support\Requests\BaseFormRequest;
 
 class PageStoreRequest extends BaseFormRequest
 {

@@ -142,4 +142,5 @@ return [
     'block_template_preset_help' => 'Carga una estructura predefinida recomendada (sobrescribirá la plantilla de bloques actual):',
     'block_template_preset_confirm' => '¿Estás seguro de que deseas cargar este preset? Esto sobrescribirá la plantilla de bloques actual.',
     'block_template_show_title' => 'Plantilla de bloques heredada',
+    'block_template_show_desc' => 'Tipos de bloque que heredan por defecto las entradas de esta colección.',
 ];

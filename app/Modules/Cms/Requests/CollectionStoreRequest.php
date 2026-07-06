@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Requests;
 
 use App\Support\Requests\BaseFormRequest;
+
 class CollectionStoreRequest extends BaseFormRequest
 {
     protected function fields(): array

@@ -142,4 +142,5 @@ return [
     'block_template_preset_help' => 'Load a recommended predefined structure (will overwrite current blocks):',
     'block_template_preset_confirm' => 'Are you sure you want to load this preset? This will overwrite the current block template.',
     'block_template_show_title' => 'Inherited block template',
+    'block_template_show_desc' => 'Block types that entries in this collection inherit by default.',
 ];
