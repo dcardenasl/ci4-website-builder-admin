@@ -18,11 +18,13 @@ use Psr\Log\LoggerInterface;
 class PageController extends BaseWebController
 {
     protected PageApiServiceInterface $pageService;
+    protected \App\Modules\Cms\Services\CollectionApiServiceInterface $collectionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->pageService = service('pageApiService');
+        $this->collectionService = service('collectionApiService');
     }
 
     public function index(): string
@@ -72,6 +74,7 @@ class PageController extends BaseWebController
             'title'         => lang('Pages.pages_details'),
             'page'          => $this->extractData($response),
             'pages'         => $this->pagesOptions(),
+            'collections'   => $this->collectionsOptions(),
             'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
             'blocks'        => $blocks,
             'blockTypes'    => $this->fetchBlockTypesIndexed(),
@@ -110,6 +113,7 @@ class PageController extends BaseWebController
             'title' => lang('Pages.pages_create'),
             'pages' => $this->pagesOptions(),
             'languages' => $languages,
+            'collections' => $this->collectionsOptions(),
             'defaultLangId' => $languageContext['defaultLangId'],
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
@@ -136,7 +140,7 @@ class PageController extends BaseWebController
 
         $pageId = (int) ($this->extractData($response)['id'] ?? 0);
         if ($pageId > 0) {
-            $this->applyPagePreset($pageId, (string) ($payload['page_type'] ?? 'generic'));
+            $this->applyPagePreset($pageId, (string) ($payload['page_type'] ?? 'generic'), $payload);
         }
 
         return redirect()->to(route_to('admin.cms.pages'))->with('success', lang('Pages.pages_create_success'));
@@ -167,6 +171,7 @@ class PageController extends BaseWebController
             'item' => $this->extractData($response),
             'pages' => $this->pagesOptions($id),
             'languages' => $languages,
+            'collections' => $this->collectionsOptions(),
             'focusLangId' => $focusLangId,
             'defaultLangId' => $languageContext['defaultLangId'],
             'defaultLangCode' => $languageContext['defaultLangCode'],
@@ -225,9 +230,9 @@ class PageController extends BaseWebController
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
     }
 
-    private function applyPagePreset(int $pageId, string $pageType): void
+    private function applyPagePreset(int $pageId, string $pageType, array $context = []): void
     {
-        PagePresetApplier::fromServices()->apply($pageId, $pageType);
+        PagePresetApplier::fromServices()->apply($pageId, $pageType, $context);
     }
 
     /**
@@ -244,6 +249,31 @@ class PageController extends BaseWebController
             },
             CmsPresetCatalog::pageTypes()
         );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function collectionsOptions(): array
+    {
+        $response = $this->safeApiCall(fn () => $this->collectionService->list(['limit' => 200, 'is_active' => true]));
+        $items = $this->extractItems($response);
+        $options = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $id = (string) ($item['id'] ?? '');
+            if ($id === '') {
+                continue;
+            }
+
+            $options[$id] = (string) ($item['name'] ?? $item['collection_key'] ?? $id);
+        }
+
+        return $options;
     }
 
     public function reorder(): string|RedirectResponse

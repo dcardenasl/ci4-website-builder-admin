@@ -4,6 +4,7 @@ $publicSiteUrl = $publicSiteUrl ?? '';
 $blocks        = $blocks        ?? [];
 $blockTypes    = $blockTypes    ?? [];
 $languages     = $languages     ?? [];
+$collections   = $collections   ?? [];
 
 // Build preview URL from the first translation slug
 $previewSlug = '';
@@ -118,9 +119,13 @@ foreach ($languages as $l) {
             <?= view('components/display/field_row', [
                 'label' => 'Pages.field_page_type',
                 'value' => ! empty($page['page_type'])
-                    ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc($page['page_type']) . '</span>'
+                    ? '<span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">' . esc(lang('Pages.page_type_' . $page['page_type']) ?? $page['page_type']) . '</span>'
                     : '—',
                 'isHtml' => true
+            ]) ?>
+            <?= view('components/display/field_row', [
+                'label' => 'Pages.field_collection_id',
+                'value' => ($collections[(string) ($page['collection_id'] ?? '')] ?? ($page['collection_id'] ?? '—'))
             ]) ?>
             <?= view('components/display/field_row', [
                 'label' => 'Pages.field_status',
@@ -227,7 +232,8 @@ foreach ($languages as $l) {
         <?= view('components/display/admin_meta_panel', [
             'title' => 'Pages.pages_details',
             'items' => [
-                ['label' => 'Pages.field_page_type', 'value' => $page['page_type'] ?? '—'],
+                ['label' => 'Pages.field_page_type', 'value' => lang('Pages.page_type_' . ($page['page_type'] ?? '')) ?? ($page['page_type'] ?? '—')],
+                ['label' => 'Pages.field_collection_id', 'value' => ($collections[(string) ($page['collection_id'] ?? '')] ?? ($page['collection_id'] ?? '—'))],
                 ['label' => 'Pages.field_status', 'value' => ! empty($page['status']) ? cms_status_badge($page['status']) : '—', 'isHtml' => true],
                 ['label' => 'Pages.field_parent_id', 'value' => ($pages[(string) ($page['parent_id'] ?? '')] ?? ($page['parent_id'] ?? '—'))],
                 ['label' => 'Pages.field_is_in_sitemap', 'value' => view('components/table/boolean_cell', ['value' => $page['is_in_sitemap'] ?? false]), 'isHtml' => true],

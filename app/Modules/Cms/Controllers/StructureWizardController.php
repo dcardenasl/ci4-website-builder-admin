@@ -90,7 +90,7 @@ class StructureWizardController extends BaseWebController
             $data = $this->extractData($result);
             $pageId = (int) ($data['id'] ?? 0);
             if ($pageId > 0) {
-                PagePresetApplier::fromServices()->apply($pageId, (string) ($payload['page_type'] ?? 'generic'));
+                PagePresetApplier::fromServices()->apply($pageId, (string) ($payload['page_type'] ?? 'generic'), $payload);
             }
         }
         return $this->response->setStatusCode($statusCode)->setJSON([

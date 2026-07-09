@@ -26,7 +26,10 @@ final class PagePresetApplier
         );
     }
 
-    public function apply(int $pageId, string $pageType): void
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function apply(int $pageId, string $pageType, array $context = []): void
     {
         $preset = CmsPresetCatalog::resolvePage($pageType);
         $blocks = $preset['block_template']['blocks'] ?? [];
@@ -62,12 +65,36 @@ final class PagePresetApplier
                 'parent_instance_id' => null,
                 'sort_order' => (int) ($blockDef['sort_order'] ?? 1),
                 'is_active' => true,
-                'block_config' => $blockDef['block_config_defaults'] ?? new \stdClass(),
+                'block_config' => $this->resolveBlockConfigDefaults($blockDef, $context),
                 'translations' => $this->blankTranslations($languages),
             ];
 
             $this->blockInstanceService->create($pageId, 'page', $payload);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $blockDef
+     * @param array<string, mixed> $context
+     * @return array<string, mixed>|object
+     */
+    private function resolveBlockConfigDefaults(array $blockDef, array $context): array|object
+    {
+        $defaults = $blockDef['block_config_defaults'] ?? new \stdClass();
+        if (is_object($defaults)) {
+            $defaults = json_decode(json_encode($defaults, JSON_THROW_ON_ERROR), true) ?: [];
+        }
+        if (! is_array($defaults)) {
+            $defaults = [];
+        }
+
+        $blockKey = (string) ($blockDef['block_key'] ?? '');
+        if ($blockKey === 'collection_listing') {
+            $collectionId = isset($context['collection_id']) ? (int) $context['collection_id'] : 0;
+            $defaults['collection_id'] = $collectionId > 0 ? $collectionId : (int) ($defaults['collection_id'] ?? 0);
+        }
+
+        return $defaults;
     }
 
     /**

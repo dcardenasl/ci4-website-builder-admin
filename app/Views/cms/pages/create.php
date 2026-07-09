@@ -43,6 +43,19 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <?= view('components/form/relation', [
+                    'name' => 'collection_id',
+                    'label' => 'Pages.field_collection_id',
+                    'required' => false,
+                    'options' => $collections ?? [],
+                    'placeholder' => 'Pages.field_collection_id_placeholder',
+                    'help' => 'Pages.field_collection_id_help',
+                    'value' => $item['collection_id'] ?? '',
+                    'errors' => $errors ?? []
+                ]) ?>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <?= view('components/form/relation', [
                     'name' => 'parent_id',
                     'label' => 'Pages.field_parent_id',
                     'required' => false,

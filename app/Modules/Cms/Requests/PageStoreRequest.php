@@ -13,6 +13,7 @@ class PageStoreRequest extends BaseFormRequest
     {
         return [
             'page_type',
+            'collection_id',
             'status',
             'parent_id',
             'sort_order',
@@ -30,6 +31,7 @@ class PageStoreRequest extends BaseFormRequest
 
         return [
             'page_type' => 'required|in_list[' . $pageTypes . ']',
+            'collection_id' => 'permit_empty|integer',
             'status' => 'required|in_list[draft,published,archived]',
             'parent_id' => 'permit_empty',
             'sort_order' => 'permit_empty|integer',
@@ -48,6 +50,7 @@ class PageStoreRequest extends BaseFormRequest
 
         return [
             'page_type' => $this->postString('page_type') ?: 'generic',
+            'collection_id' => $this->postNullableInt('collection_id'),
             'status' => $this->postString('status') ?: 'draft',
             'parent_id' => $this->postNullableInt('parent_id'),
             'sort_order' => $this->postInt('sort_order', 0),

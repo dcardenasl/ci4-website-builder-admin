@@ -35,6 +35,10 @@ return [
     'page_type_404'              => '404',
     'page_type_500'              => '500',
     'page_type_maintenance'      => 'Maintenance',
+    'page_type_collection_index' => 'Collection Index',
+    'field_collection_id'        => 'Collection',
+    'field_collection_id_placeholder' => 'Select collection',
+    'field_collection_id_help'    => 'Link this page to a collection when the page type is Collection Index.',
 
     'field_status'               => 'Status',
     'field_status_placeholder'    => 'Select status',

@@ -197,7 +197,7 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <template x-if="row.is_image || (row.variants && row.variants.sm && row.variants.sm.url)">
-                                    <button type="button" @click="$dispatch('open-preview', (row.variants && row.variants.lg && row.variants.lg.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view'))">
+                                    <button type="button" @click="$dispatch('open-preview', (row.variants && row.variants.md && row.variants.md.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view'))">
                                         <img :src="(row.variants && row.variants.sm && row.variants.sm.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view')"
                                              class="h-10 w-10 rounded-lg object-cover border border-gray-200 hover:scale-110 transition-transform shadow-sm"
                                              :alt="row.alt_text || row.original_name">

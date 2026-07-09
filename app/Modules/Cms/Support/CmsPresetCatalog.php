@@ -19,7 +19,7 @@ final class CmsPresetCatalog
      */
     public static function pageTypes(): array
     {
-        return ['home', 'generic', 'contact', 'privacy', 'terms', '404', '500', 'maintenance', 'about', 'history', 'events'];
+        return ['home', 'generic', 'contact', 'privacy', 'terms', '404', '500', 'maintenance', 'about', 'history', 'events', 'collection_index'];
     }
 
     /**
@@ -146,6 +146,12 @@ final class CmsPresetCatalog
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
                 ['block_key' => 'collection_grid', 'label' => 'Cartelera', 'help_text' => 'Grilla de una colección', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['collection_key' => '', 'items_limit' => 6, 'order_by' => 'published_at', 'order_direction' => 'asc', 'layout_variant' => 'cards', 'css_class' => '']],
                 ['block_key' => 'image', 'label' => 'Imagen', 'help_text' => 'Apoyo visual', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['aspect_ratio' => '16/9', 'css_class' => '']],
+            ]),
+            self::pagePreset('collection_index', [
+                ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página índice', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
+                ['block_key' => 'rich_text', 'label' => 'Introducción', 'help_text' => 'Contenido editorial antes del listado', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
+                ['block_key' => 'collection_listing', 'label' => 'Listado de colección', 'help_text' => 'Listado completo administrable', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['collection_id' => 0, 'per_page' => 12, 'order_by' => 'published_at', 'order_direction' => 'desc', 'layout_variant' => 'cards', 'show_search' => true, 'show_categories' => true, 'show_tags' => false, 'css_class' => '']],
+                ['block_key' => 'cta', 'label' => 'Cierre', 'help_text' => 'Contenido editorial después del listado', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['variant' => 'blue', 'css_class' => '']],
             ]),
             self::pagePreset('maintenance', [
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
