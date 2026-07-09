@@ -82,7 +82,7 @@ final class ComponentsTest extends CIUnitTestCase
     {
         $html = view('components/form/select', [
             'name' => 'status',
-            'label' => 'App.status',
+            'label' => 'App.name',
             'value' => 'draft',
             'options' => [
                 'draft' => 'Draft State',

@@ -652,8 +652,9 @@ class BlockInstanceController extends BaseWebController
 
         $hasFormEmbed     = ($blockType['block_key'] ?? '') === 'form_embed';
         $hasCollectionKey = isset($schema['config_fields']['collection_key']) || isset($blockType['config_fields']['collection_key']);
+        $hasCollectionId  = isset($schema['config_fields']['collection_id'])  || isset($blockType['config_fields']['collection_id']);
 
-        if (! $hasFormEmbed && ! $hasCollectionKey) {
+        if (! $hasFormEmbed && ! $hasCollectionKey && ! $hasCollectionId) {
             return;
         }
 
@@ -690,8 +691,9 @@ class BlockInstanceController extends BaseWebController
             }
         }
 
-        if ($hasCollectionKey) {
-            $collections = [];
+        if ($hasCollectionKey || $hasCollectionId) {
+            $collectionsForKeys = [];
+            $collectionsForIds  = [];
             try {
                 $collectionsResponse = $this->safeApiCall(
                     fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true])
@@ -700,7 +702,14 @@ class BlockInstanceController extends BaseWebController
                     $items = $this->extractItems($collectionsResponse);
                     foreach ($items as $c) {
                         if (! empty($c['collection_key'])) {
-                            $collections[] = (string) $c['collection_key'];
+                            $collectionsForKeys[] = (string) $c['collection_key'];
+                        }
+                        if (isset($c['id'])) {
+                            $label = $c['name'] ?? $c['collection_key'] ?? $c['title'] ?? $c['label'] ?? $c['id'];
+                            $collectionsForIds[] = [
+                                'value' => (int) $c['id'],
+                                'label' => (string) $label,
+                            ];
                         }
                     }
                 }
@@ -708,14 +717,26 @@ class BlockInstanceController extends BaseWebController
                 log_message('error', '[BlockInstanceController] Failed to fetch collections for options: ' . $e->getMessage());
             }
 
-            if (isset($schema['config_fields']['collection_key'])) {
-                $schema['config_fields']['collection_key']['type']    = 'select';
-                $schema['config_fields']['collection_key']['options'] = $collections;
+            if ($hasCollectionKey) {
+                if (isset($schema['config_fields']['collection_key'])) {
+                    $schema['config_fields']['collection_key']['type']    = 'select';
+                    $schema['config_fields']['collection_key']['options'] = $collectionsForKeys;
+                }
+                if (isset($blockType['config_fields']['collection_key'])) {
+                    $blockType['config_fields']['collection_key']['type']    = 'select';
+                    $blockType['config_fields']['collection_key']['options'] = $collectionsForKeys;
+                }
             }
 
-            if (isset($blockType['config_fields']['collection_key'])) {
-                $blockType['config_fields']['collection_key']['type']    = 'select';
-                $blockType['config_fields']['collection_key']['options'] = $collections;
+            if ($hasCollectionId) {
+                if (isset($schema['config_fields']['collection_id'])) {
+                    $schema['config_fields']['collection_id']['type']    = 'select';
+                    $schema['config_fields']['collection_id']['options'] = $collectionsForIds;
+                }
+                if (isset($blockType['config_fields']['collection_id'])) {
+                    $blockType['config_fields']['collection_id']['type']    = 'select';
+                    $blockType['config_fields']['collection_id']['options'] = $collectionsForIds;
+                }
             }
         }
 

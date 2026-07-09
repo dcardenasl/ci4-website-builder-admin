@@ -47,7 +47,7 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
             <?php if (has_permission('audit.read')): ?>
                 <a href="<?= route_to('admin.audit') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/audit*', $navItemActiveClass) ?> <?= url_is('admin/audit*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
                     <?= ui_icon('audit') ?>
-                    <span><?= lang('App.audit') ?></span>
+                    <span><?= lang('Audit.title') ?></span>
                 </a>
             <?php endif; ?>
             <?php if (has_permission('apikeys.read')): ?>

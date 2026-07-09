@@ -230,6 +230,9 @@ class PageController extends BaseWebController
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function applyPagePreset(int $pageId, string $pageType, array $context = []): void
     {
         PagePresetApplier::fromServices()->apply($pageId, $pageType, $context);

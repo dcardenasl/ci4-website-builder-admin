@@ -76,9 +76,9 @@ final class PagePresetApplier
     /**
      * @param array<string, mixed> $blockDef
      * @param array<string, mixed> $context
-     * @return array<string, mixed>|object
+     * @return array<string, mixed>
      */
-    private function resolveBlockConfigDefaults(array $blockDef, array $context): array|object
+    private function resolveBlockConfigDefaults(array $blockDef, array $context): array
     {
         $defaults = $blockDef['block_config_defaults'] ?? new \stdClass();
         if (is_object($defaults)) {

@@ -8,16 +8,6 @@ $isConfig = ($section ?? 'content') === 'config';
 $arrayVar = $isConfig ? 'configFields' : 'schemaFields';
 $sectionKey = $isConfig ? 'config' : 'content';
 ?>
-<?php
-/**
- * Schema field row partial — used in both create and edit BlockType forms.
- * Requires Alpine.js context with `schemaFields` / `configFields` arrays.
- * @var string $section  'content' | 'config'
- */
-$isConfig = ($section ?? 'content') === 'config';
-$arrayVar = $isConfig ? 'configFields' : 'schemaFields';
-$sectionKey = $isConfig ? 'config' : 'content';
-?>
 <div class="flex flex-col p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors w-full">
     <div class="flex items-start gap-2 w-full">
         <!-- Key -->
@@ -43,6 +33,7 @@ $sectionKey = $isConfig ? 'config' : 'content';
                 <option value="integer">integer</option>
                 <option value="boolean">boolean</option>
                 <option value="select">select</option>
+                <option value="color">color</option>
                 <?php if (!$isConfig): ?>
                     <option value="file">file</option>
                     <option value="repeater">repeater</option>

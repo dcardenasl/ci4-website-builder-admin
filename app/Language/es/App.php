@@ -12,7 +12,6 @@ return [
     'administration'  => 'Administración',
     'dashboard'       => 'Escritorio',
     'users'           => 'Usuarios',
-    'audit'           => 'Auditoría',
     'files'           => 'Archivos',
     'api_keys'        => 'API Keys',
     'metrics'         => 'Métricas',

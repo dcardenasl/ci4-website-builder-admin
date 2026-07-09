@@ -134,20 +134,37 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                             </label>
                         <?php elseif ($cfType === 'select' && ! empty($cfOptions)): ?>
                             <?php
-                            if ($cfVal !== '' && $cfVal !== null && is_scalar($cfVal) && ! in_array((string) $cfVal, array_map('strval', $cfOptions), true)) {
-                                $cfOptions[] = (string) $cfVal;
+                            $flatOptionValues = array_map(function ($opt) {
+                                return is_array($opt) ? (string) ($opt['value'] ?? '') : (string) $opt;
+                            }, $cfOptions);
+                            if ($cfVal !== '' && $cfVal !== null && is_scalar($cfVal) && ! in_array((string) $cfVal, $flatOptionValues, true)) {
+                                $cfOptions[] = [
+                                    'value' => $cfVal,
+                                    'label' => $cfVal,
+                                ];
                             }
                             ?>
                             <select name="<?= esc($cfFieldName, 'attr') ?>"
-                                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                                    class="<?= esc(input_class($cfFieldName)) ?>"
                                     <?= $cfReq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
-                                <?php foreach ($cfOptions as $opt): ?>
-                                    <option value="<?= esc((string) $opt) ?>" <?= (string) $cfVal === (string) $opt ? 'selected' : '' ?>>
-                                        <?= esc((string) $opt) ?>
+                                <?php foreach ($cfOptions as $opt):
+                                    $val = is_array($opt) ? $opt['value'] : $opt;
+                                    $lbl = is_array($opt) ? $opt['label'] : $opt;
+                                    ?>
+                                    <option value="<?= esc((string) $val) ?>" <?= (string) $cfVal === (string) $val ? 'selected' : '' ?>>
+                                        <?= esc((string) $lbl) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                        <?php elseif ($cfType === 'color'): ?>
+                            <?= view('components/form/color', [
+                                'name'       => $cfFieldName,
+                                'value'      => $cfVal,
+                                'required'   => $cfReq,
+                                'label'      => '',
+                                'show_error' => false,
+                            ]) ?>
                         <?php else: ?>
                             <input type="<?= $cfType === 'url' ? 'url' : ($cfType === 'integer' ? 'number' : 'text') ?>"
                                    name="<?= esc($cfFieldName, 'attr') ?>"
@@ -299,12 +316,24 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                     class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                     <?= $freq ? 'required' : '' ?>>
                                 <option value="">— Seleccionar —</option>
-                                <?php foreach ($foptions as $opt): ?>
-                                    <option value="<?= esc((string) $opt) ?>" <?= (string) old($fieldName, $fval) === (string) $opt ? 'selected' : '' ?>>
-                                        <?= esc((string) $opt) ?>
+                                <?php foreach ($foptions as $opt):
+                                    $val = is_array($opt) ? $opt['value'] : $opt;
+                                    $lbl = is_array($opt) ? $opt['label'] : $opt;
+                                    ?>
+                                    <option value="<?= esc((string) $val) ?>" <?= (string) old($fieldName, $fval) === (string) $val ? 'selected' : '' ?>>
+                                        <?= esc((string) $lbl) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <?= render_field_error($fieldName) ?>
+                        <?php elseif ($ft === 'color'): ?>
+                            <?= view('components/form/color', [
+                                'name'       => $fieldName,
+                                'value'      => $fval,
+                                'required'   => $freq,
+                                'label'      => '',
+                                'show_error' => false,
+                            ]) ?>
                             <?= render_field_error($fieldName) ?>
                         <?php elseif ($ft === 'file'): ?>
                             <?php

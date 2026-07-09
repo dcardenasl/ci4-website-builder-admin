@@ -128,19 +128,88 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <template x-if="field.type === 'select'">
                                 <select :name="`block_config[${key}]`"
                                         class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                    <template x-for="opt in (field.options || [])" :key="opt">
-                                        <option :value="opt" :selected="opt === (field.default || '')" x-text="opt"></option>
+                                    <template x-for="opt in (field.options || [])" :key="typeof opt === 'object' ? opt.value : opt">
+                                        <option :value="typeof opt === 'object' ? opt.value : opt" :selected="(typeof opt === 'object' ? opt.value : opt) == (field.default || '')" x-text="typeof opt === 'object' ? opt.label : opt"></option>
                                     </template>
                                 </select>
                             </template>
-
-                            <template x-if="field.type === 'boolean'">
-                                <input type="checkbox" :name="`block_config[${key}]`" value="1"
-                                       :checked="field.default == '1' || field.default === true"
-                                       class="h-4 w-4 rounded border-gray-300 text-brand-600">
+                            <template x-if="field.type === 'color'">
+                                <div x-data="{ 
+                                    value: field.default || '', 
+                                    open: false,
+                                    presets: [
+                                        { hex: '', name: 'Transparent' },
+                                        { hex: '#ffffff', name: 'Blanco' },
+                                        { hex: '#000000', name: 'Negro' },
+                                        { hex: '#3b82f6', name: 'Azul' },
+                                        { hex: '#10b981', name: 'Verde' },
+                                        { hex: '#ef4444', name: 'Rojo' },
+                                        { hex: '#f59e0b', name: 'Naranja' },
+                                        { hex: '#8b5cf6', name: 'Violeta' },
+                                        { hex: '#6b7280', name: 'Gris' },
+                                        { hex: '#f3f4f6', name: 'Gris Claro' },
+                                        { hex: '#1e3a8a', name: 'Azul Oscuro' },
+                                        { hex: '#065f46', name: 'Verde Oscuro' },
+                                        { hex: '#991b1b', name: 'Rojo Oscuro' }
+                                    ]
+                                }" @click.outside="open = false" class="relative">
+                                    <div class="mt-1 flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            @click="open = !open"
+                                            class="h-10 w-10 shrink-0 rounded-lg border border-gray-300 shadow-sm transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                            :style="value ? `background-color: ${value}` : 'background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; background-color: #fff;'"
+                                        ></button>
+                                        <div class="flex-1 relative">
+                                            <input
+                                                type="text"
+                                                :name="`block_config[${key}]`"
+                                                x-model="value"
+                                                placeholder="#ffffff o rgb(...)"
+                                                class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-900 uppercase shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 pl-3 pr-10"
+                                            >
+                                            <button
+                                                type="button"
+                                                @click="open = !open"
+                                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div
+                                        x-show="open"
+                                        class="absolute left-0 z-50 mt-2 p-3 bg-white border border-gray-200 rounded-xl shadow-xl w-64 max-w-sm"
+                                        x-cloak
+                                    >
+                                        <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Paleta Predefinida</span>
+                                        <div class="grid grid-cols-5 gap-2 mb-3">
+                                            <template x-for="p in presets" :key="p.hex">
+                                                <button
+                                                    type="button"
+                                                    @click="value = p.hex; open = false"
+                                                    :title="p.name"
+                                                    class="h-8 w-8 rounded-lg border border-gray-200 shadow-sm transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                                    :class="value === p.hex ? 'ring-2 ring-brand-500 scale-105 border-brand-500' : ''"
+                                                    :style="p.hex ? `background-color: ${p.hex}` : 'background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; background-color: #fff;'"
+                                                ></button>
+                                            </template>
+                                        </div>
+                                        <div class="border-t border-gray-100 pt-3 flex items-center justify-between gap-2">
+                                            <span class="text-xs text-gray-500">Personalizado:</span>
+                                            <input
+                                                type="color"
+                                                x-model="value"
+                                                class="h-8 w-8 cursor-pointer rounded border border-gray-200 p-0 bg-transparent"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
                             </template>
 
-                            <template x-if="field.type !== 'select' && field.type !== 'boolean'">
+                            <template x-if="field.type !== 'select' && field.type !== 'boolean' && field.type !== 'color'">
                                 <input type="text" :name="`block_config[${key}]`"
                                        :value="field.default || ''"
                                        :placeholder="field.default || ''"
@@ -217,8 +286,8 @@ $parentIdJs    = json_encode($parentInstanceId);
                                     <select :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                             :required="field.required && lang.is_default == 1"
                                             class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                        <template x-for="opt in (field.options || [])" :key="opt">
-                                            <option :value="opt" :selected="opt === (field.default || '')" x-text="opt"></option>
+                                        <template x-for="opt in (field.options || [])" :key="typeof opt === 'object' ? opt.value : opt">
+                                            <option :value="typeof opt === 'object' ? opt.value : opt" :selected="(typeof opt === 'object' ? opt.value : opt) == (field.default || '')" x-text="typeof opt === 'object' ? opt.label : opt"></option>
                                         </template>
                                     </select>
                                 </template>
@@ -338,7 +407,84 @@ $parentIdJs    = json_encode($parentInstanceId);
                                         </button>
                                     </div>
                                 </template>
-                                <template x-if="!['richtext','text','textarea','url','integer','int','select','file','repeater'].includes(field.type)">
+                                <template x-if="field.type === 'color'">
+                                    <div x-data="{ 
+                                        value: field.default || '', 
+                                        open: false,
+                                        presets: [
+                                            { hex: '', name: 'Transparent' },
+                                            { hex: '#ffffff', name: 'Blanco' },
+                                            { hex: '#000000', name: 'Negro' },
+                                            { hex: '#3b82f6', name: 'Azul' },
+                                            { hex: '#10b981', name: 'Verde' },
+                                            { hex: '#ef4444', name: 'Rojo' },
+                                            { hex: '#f59e0b', name: 'Naranja' },
+                                            { hex: '#8b5cf6', name: 'Violeta' },
+                                            { hex: '#6b7280', name: 'Gris' },
+                                            { hex: '#f3f4f6', name: 'Gris Claro' },
+                                            { hex: '#1e3a8a', name: 'Azul Oscuro' },
+                                            { hex: '#065f46', name: 'Verde Oscuro' },
+                                            { hex: '#991b1b', name: 'Rojo Oscuro' }
+                                        ]
+                                    }" @click.outside="open = false" class="relative">
+                                        <div class="mt-1 flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                @click="open = !open"
+                                                class="h-10 w-10 shrink-0 rounded-lg border border-gray-300 shadow-sm transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                                :style="value ? `background-color: ${value}` : 'background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; background-color: #fff;'"
+                                            ></button>
+                                            <div class="flex-1 relative">
+                                                <input
+                                                    type="text"
+                                                    :name="`translations[${langIndex}][block_data][${fieldKey}]`"
+                                                    x-model="value"
+                                                    placeholder="#ffffff o rgb(...)"
+                                                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-900 uppercase shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 pl-3 pr-10"
+                                                    :required="field.required && lang.is_default == 1"
+                                                >
+                                                <button
+                                                    type="button"
+                                                    @click="open = !open"
+                                                    class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                >
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div
+                                            x-show="open"
+                                            class="absolute left-0 z-50 mt-2 p-3 bg-white border border-gray-200 rounded-xl shadow-xl w-64 max-w-sm"
+                                            x-cloak
+                                        >
+                                            <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Paleta Predefinida</span>
+                                            <div class="grid grid-cols-5 gap-2 mb-3">
+                                                <template x-for="p in presets" :key="p.hex">
+                                                    <button
+                                                        type="button"
+                                                        @click="value = p.hex; open = false"
+                                                        :title="p.name"
+                                                        class="h-8 w-8 rounded-lg border border-gray-200 shadow-sm transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                                        :class="value === p.hex ? 'ring-2 ring-brand-500 scale-105 border-brand-500' : ''"
+                                                        :style="p.hex ? `background-color: ${p.hex}` : 'background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; background-color: #fff;'"
+                                                    ></button>
+                                                </template>
+                                            </div>
+                                            <div class="border-t border-gray-100 pt-3 flex items-center justify-between gap-2">
+                                                <span class="text-xs text-gray-500">Personalizado:</span>
+                                                <input
+                                                    type="color"
+                                                    x-model="value"
+                                                    class="h-8 w-8 cursor-pointer rounded border border-gray-200 p-0 bg-transparent"
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="!['richtext','text','textarea','url','integer','int','select','file','repeater','color'].includes(field.type)">
                                     <input type="text" :name="`translations[${langIndex}][block_data][${fieldKey}]`"
                                            :required="field.required && lang.is_default == 1"
                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
