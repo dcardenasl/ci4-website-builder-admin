@@ -167,7 +167,12 @@ final class ComponentsTest extends CIUnitTestCase
             'value' => ['alpha', 'beta'],
         ], ['saveData' => false]);
 
-        $this->assertStringContainsString('tags: ["alpha","beta"]', $html);
+        // The JSON is HTML-attribute-escaped (esc(..., 'attr')) because it sits inside
+        // x-data="..." — a literal, unescaped '"' from json_encode() would terminate the
+        // HTML attribute early and break Alpine's initialization. Decode before asserting
+        // to verify the browser round-trips it back to the correct JSON.
+        $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5);
+        $this->assertStringContainsString('tags: ["alpha","beta"]', $decoded);
     }
 
     public function testTableCellsFormating(): void
