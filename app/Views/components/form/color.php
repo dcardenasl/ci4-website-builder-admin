@@ -49,7 +49,7 @@ $presets = [
 <div x-data="{
     value: '<?= esc((string) $value, 'attr') ?>',
     open: false,
-    presets: <?= json_encode($presets) ?>
+    presets: <?= esc(json_encode($presets, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG), 'attr') ?>
 }"
     @click.outside="open = false"
     @keydown.escape.window="open = false"
