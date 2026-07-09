@@ -3,16 +3,23 @@
  * Color Picker Component
  *
  * Renders an interactive color picker with preset palette and custom input.
- * Uses Alpine.js for interactivity.
+ * Uses Alpine.js for interactivity. Follows the same $name/$value/$label
+ * contract as the other components/form/* partials (see text.php, select.php).
  *
- * @var string $inputName The name attribute for the input element
- * @var string $inputValue The current color value (hex, rgb, etc)
- * @var bool $required Whether the field is required
- * @var string $placeholder Placeholder text for manual input
+ * @var string $name
+ * @var string|null $label
+ * @var mixed|null $value
+ * @var bool|null $required
+ * @var bool|null $show_error
+ * @var string|null $placeholder
  */
-$inputName = $inputName ?? '';
-$inputValue = $inputValue ?? '';
-$required = $required ?? false;
+
+helper('form');
+
+$required   = $required ?? false;
+$label      = $label ?? '';
+$show_error = $show_error ?? true;
+$value      = old($name, $value ?? '');
 $placeholder = $placeholder ?? '#ffffff o rgb(...)';
 $presets = [
     ['hex' => '', 'name' => 'Transparente'],
@@ -31,11 +38,24 @@ $presets = [
 ];
 ?>
 
+<?php if ($label !== ''): ?>
+    <label class="block text-sm font-medium text-gray-700" for="<?= esc($name, 'attr') ?>">
+        <?= lang($label) ?>
+        <?php if ($required): ?>
+            <span class="text-red-500" aria-hidden="true">*</span>
+        <?php endif; ?>
+    </label>
+<?php endif; ?>
 <div x-data="{
-    value: '<?= esc($inputValue, 'attr') ?>',
+    value: '<?= esc((string) $value, 'attr') ?>',
     open: false,
     presets: <?= json_encode($presets) ?>
-}" @click.outside="open = false" class="relative">
+}"
+    @click.outside="open = false"
+    @keydown.escape.window="open = false"
+    @color-picker-toggle.window="if ($event.detail !== $el) open = false"
+    x-effect="if (open) $dispatch('color-picker-toggle', $el)"
+    class="relative">
     <div class="mt-1 flex items-center gap-2">
         <!-- Color swatch button -->
         <button
@@ -49,12 +69,14 @@ $presets = [
         <!-- Text input -->
         <div class="flex-1 relative">
             <input
+                id="<?= esc($name, 'attr') ?>"
                 type="text"
-                name="<?= esc($inputName, 'attr') ?>"
+                name="<?= esc($name, 'attr') ?>"
                 x-model="value"
                 placeholder="<?= esc($placeholder, 'attr') ?>"
                 class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-900 uppercase shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 pl-3 pr-10"
-                <?php if ($required): ?>required<?php endif; ?>
+                <?= $required ? 'required' : '' ?>
+                <?= field_aria_attrs($name, $required) ?>
             >
             <!-- Dropdown toggle -->
             <button
@@ -76,8 +98,14 @@ $presets = [
         class="absolute left-0 z-50 mt-2 p-3 bg-white border border-gray-200 rounded-xl shadow-xl w-64 max-w-sm"
         x-cloak
     >
-        <!-- Preset label -->
-        <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Paleta Predefinida</span>
+        <div class="flex items-center justify-between mb-2">
+            <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400">Paleta Predefinida</span>
+            <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600" aria-label="Cerrar selector de color">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
 
         <!-- Preset grid -->
         <div class="grid grid-cols-5 gap-2 mb-3">
@@ -105,3 +133,6 @@ $presets = [
         </div>
     </div>
 </div>
+<?php if ($show_error): ?>
+    <?= render_field_error($name) ?>
+<?php endif; ?>
