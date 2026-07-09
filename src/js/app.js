@@ -72,7 +72,8 @@ let lucideBootstrapped = false;
 document.addEventListener('DOMContentLoaded', () => {
     if (!lucideBootstrapped) { bootLucideIcons(); lucideBootstrapped = true; }
     bootSlugFields();
-    bootSessionExpiryWatcher();
+    const config = window.__componentConfig || {};
+    bootSessionExpiryWatcher({ expiringMessage: config.sessionExpiringMessage });
 });
 
 window.addEventListener('load', () => {

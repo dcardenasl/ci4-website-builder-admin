@@ -5,7 +5,7 @@ export const localeTag = () => (localePrefix() === 'en' ? 'en-US' : 'es-ES');
 
 export const focusableSelector = 'a[href], button:not([disabled]), textarea, input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export const uiLabels = {
+const defaultUiLabels = {
     es: {
         confirmAction: 'Confirmar acción',
         confirm: 'Confirmar',
@@ -28,6 +28,8 @@ export const uiLabels = {
     }
 };
 
+export const uiLabels = window.uiLabels || defaultUiLabels;
+
 export const buildConfirmDeleteMessage = (itemLabel = '', fallback = '') => {
     const labels = uiLabels[localePrefix()] || uiLabels.es;
     const label = String(itemLabel ?? '').trim();
@@ -36,30 +38,37 @@ export const buildConfirmDeleteMessage = (itemLabel = '', fallback = '') => {
         .replace('{item}', label);
 };
 
-export const paginationLabels = {
+const defaultPaginationLabels = {
     es: { visibleResults: 'Resultados visibles', showing: 'Mostrando', of: 'de' },
     en: { visibleResults: 'Visible results', showing: 'Showing', of: 'of' }
 };
 
-const statusLabels = {
+export const paginationLabels = window.paginationLabels || defaultPaginationLabels;
+
+const defaultStatusLabels = {
     es: { active: 'Activo', pending: 'Pendiente', pending_approval: 'Pendiente de aprobacion', suspended: 'Suspendido', approved: 'Aprobado', rejected: 'Rechazado', processing: 'Procesando', success: 'Exitoso', failed: 'Fallido' },
     en: { active: 'Active', pending: 'Pending', pending_approval: 'Pending approval', suspended: 'Suspended', approved: 'Approved', rejected: 'Rejected', processing: 'Processing', success: 'Success', failed: 'Failed' }
 };
 
-const auditActionLabels = {
+const defaultAuditActionLabels = {
     es: { create: 'Crear', update: 'Actualizar', delete: 'Eliminar', login: 'Iniciar sesion', login_success: 'Inicio de sesion exitoso', login_failure: 'Inicio de sesion fallido', logout: 'Cerrar sesion', approve: 'Aprobar' },
     en: { create: 'Create', update: 'Update', delete: 'Delete', login: 'Login', login_success: 'Login Success', login_failure: 'Login Failure', logout: 'Logout', approve: 'Approve' }
 };
 
-const auditResultLabels = {
+const defaultAuditResultLabels = {
     es: { success: 'Exito', failure: 'Fallo', denied: 'Denegado' },
     en: { success: 'Success', failure: 'Failure', denied: 'Denied' }
 };
 
-const auditSeverityLabels = {
+const defaultAuditSeverityLabels = {
     es: { info: 'Info', warning: 'Advertencia', critical: 'Critico' },
     en: { info: 'Info', warning: 'Warning', critical: 'Critical' }
 };
+
+const statusLabels = window.statusLabels || defaultStatusLabels;
+const auditActionLabels = window.auditActionLabels || defaultAuditActionLabels;
+const auditResultLabels = window.auditResultLabels || defaultAuditResultLabels;
+const auditSeverityLabels = window.auditSeverityLabels || defaultAuditSeverityLabels;
 
 /** @param {string} status @returns {string} */
 export const statusLabel = (status) => {

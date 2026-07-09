@@ -1,7 +1,11 @@
-export const richTextEditor = function richTextEditor(initialContent, fieldName) {
+export const richTextEditor = function richTextEditor(initialContent, fieldName, config = {}) {
     let editor = null;
     let toolbar = null;
     let onToolbarClick = null;
+    const messages = {
+        linkUrlPrompt: config.linkUrlPrompt || 'URL del enlace:',
+        placeholder: config.placeholder || 'Escribe aquí…',
+    };
 
     const syncHiddenInput = (component, value) => {
         const input = component.$refs.hiddenInput;
@@ -46,7 +50,7 @@ export const richTextEditor = function richTextEditor(initialContent, fieldName)
             case 'redo': chain.redo(); break;
             case 'link': {
                 const currentHref = editor.getAttributes('link').href || '';
-                const url = window.prompt('URL del enlace:', currentHref);
+                const url = window.prompt(messages.linkUrlPrompt, currentHref);
                 if (url === null) return;
                 if (url === '') chain.extendMarkRange('link').unsetLink();
                 else chain.extendMarkRange('link').setLink({ href: url });
@@ -71,7 +75,7 @@ export const richTextEditor = function richTextEditor(initialContent, fieldName)
                 element: editorHost,
                 extensions: [
                     StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
-                    Placeholder.configure({ placeholder: 'Escribe aquí…' }),
+                    Placeholder.configure({ placeholder: messages.placeholder }),
                 ],
                 content: initialContent || '',
                 onUpdate: ({ editor: currentEditor }) => { syncHiddenInput(this, currentEditor.getHTML()); },

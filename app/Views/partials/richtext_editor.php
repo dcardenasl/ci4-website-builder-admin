@@ -20,7 +20,10 @@ $encodedName     = htmlspecialchars($fieldName, ENT_QUOTES | ENT_SUBSTITUTE, 'UT
 $jsonContent     = json_encode($initialValue, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
 $jsonName        = json_encode($fieldName, JSON_UNESCAPED_UNICODE);
 ?>
-<div x-data='richTextEditor(<?= esc($jsonContent, "attr") ?>, <?= esc($jsonName, "attr") ?>)'
+<div x-data='richTextEditor(<?= esc($jsonContent, "attr") ?>, <?= esc($jsonName, "attr") ?>, {
+         linkUrlPrompt: <?= esc(json_encode(lang('Labels.link_url_prompt'), JSON_THROW_ON_ERROR), 'attr') ?>,
+         placeholder: <?= esc(json_encode(lang('Labels.rich_text_placeholder'), JSON_THROW_ON_ERROR), 'attr') ?>
+     })'
      x-init="init()"
      class="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500 transition-shadow">
 
