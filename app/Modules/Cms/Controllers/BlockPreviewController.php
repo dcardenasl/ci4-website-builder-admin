@@ -42,7 +42,8 @@ class BlockPreviewController extends BaseWebController
                 ]);
 
                 if ($response->getStatusCode() === 200) {
-                    $resJson = json_decode($response->getBody(), true);
+                    $responseBody = $response->getBody();
+                    $resJson = $responseBody !== null ? json_decode($responseBody, true) : null;
                     if (is_array($resJson) && isset($resJson['html'])) {
                         $html = (string) $resJson['html'];
                     }
