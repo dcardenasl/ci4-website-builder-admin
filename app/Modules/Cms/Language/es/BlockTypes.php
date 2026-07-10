@@ -87,4 +87,12 @@ return [
     'field_is_active_help'          => 'Alternar Está Activo.',
     'field_is_active_on'            => 'Activo',
     'field_is_active_off'           => 'Inactivo',
+
+    'where_used'            => 'Usado en',
+    'where_used_empty'      => 'Este tipo de bloque no está en uso en ninguna página o entrada.',
+    'in_use_warning_title'  => 'Este tipo de bloque está en uso. ',
+    'in_use_warning_body'   => 'Usado en {0} lugar(es). No se puede eliminar hasta que esos bloques se quiten o reemplacen.',
+    'cannot_delete_in_use'  => 'No se puede eliminar: este tipo de bloque está en uso.',
+    'usage_page'            => 'Página',
+    'usage_entry'           => 'Entrada',
 ];

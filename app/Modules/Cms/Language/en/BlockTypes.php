@@ -87,4 +87,12 @@ return [
     'field_is_active_help'          => 'Toggle Is Active.',
     'field_is_active_on'            => 'Active',
     'field_is_active_off'           => 'Inactive',
+
+    'where_used'            => 'Used in',
+    'where_used_empty'      => 'This block type is not used on any page or entry.',
+    'in_use_warning_title'  => 'This block type is in use. ',
+    'in_use_warning_body'   => 'Used in {0} place(s). It cannot be deleted until those blocks are removed or replaced.',
+    'cannot_delete_in_use'  => 'Cannot delete: this block type is in use.',
+    'usage_page'            => 'Page',
+    'usage_entry'           => 'Entry',
 ];

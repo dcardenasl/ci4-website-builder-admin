@@ -35,4 +35,7 @@ interface BlockTypeApiServiceInterface
 
     /** @return array<int, array<string, mixed>> */
     public function templates(): array;
+
+    /** @return ApiResponse */
+    public function usages(int|string $id): array;
 }

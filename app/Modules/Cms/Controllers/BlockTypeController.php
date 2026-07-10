@@ -54,11 +54,40 @@ class BlockTypeController extends BaseWebController
             ]);
         }
 
+        $usagesResponse = $this->safeApiCall(fn () => $this->blockTypeService->usages($id));
+        $usages         = ($usagesResponse['ok'] ?? false) ? $this->extractItems($usagesResponse) : [];
+        $usages         = array_map(fn (array $usage) => array_merge($usage, [
+            'edit_url' => $this->resolveUsageEditUrl(
+                is_array($usage['context'] ?? null) ? (array) $usage['context'] : [],
+                (int) ($usage['resource_id'] ?? 0),
+            ),
+        ]), array_values($usages));
+
         return $this->render('cms/block_types/show', [
             'title' => lang('BlockTypes.block_types_details'),
             'blockType' => $this->extractData($response),
+            'usages' => $usages,
 
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function resolveUsageEditUrl(array $context, int $instanceId): ?string
+    {
+        $ownerType = (string) ($context['owner_type'] ?? '');
+        $ownerId   = (int) ($context['owner_id'] ?? 0);
+
+        if ($ownerId <= 0) {
+            return null;
+        }
+
+        return match ($ownerType) {
+            'page' => site_url('admin/cms/pages/' . $ownerId . '/blocks/' . $instanceId . '/edit'),
+            'entry' => site_url('admin/cms/entries/' . $ownerId . '/blocks/' . $instanceId . '/edit'),
+            default => null,
+        };
     }
 
     public function create(): string

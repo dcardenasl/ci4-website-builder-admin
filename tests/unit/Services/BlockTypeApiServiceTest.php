@@ -69,4 +69,18 @@ final class BlockTypeApiServiceTest extends CIUnitTestCase
         $service = new BlockTypeApiService($mock);
         $this->assertSame($expected, $service->delete('uuid-3'));
     }
+
+    public function testUsagesCallsCorrectEndpoint(): void
+    {
+        $mock     = $this->createMock(ApiClientInterface::class);
+        $expected = ['ok' => true, 'status' => 200, 'data' => []];
+
+        $mock->expects($this->once())
+            ->method('get')
+            ->with('/cms/block-types/uuid-4/usages')
+            ->willReturn($expected);
+
+        $service = new BlockTypeApiService($mock);
+        $this->assertSame($expected, $service->usages('uuid-4'));
+    }
 }

@@ -30,4 +30,9 @@ class BlockTypeApiService extends ResourceApiService implements BlockTypeApiServ
         }
         return is_array($payload) ? array_values($payload) : [];
     }
+
+    public function usages(int|string $id): array
+    {
+        return $this->apiClient->get('/cms/block-types/' . $id . '/usages');
+    }
 }

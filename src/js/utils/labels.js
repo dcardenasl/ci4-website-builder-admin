@@ -9,7 +9,7 @@ const defaultUiLabels = {
     es: {
         confirmAction: 'Confirmar acción',
         confirm: 'Confirmar',
-        confirmDeleteNamed: '¿Seguro que quieres eliminar "{item}"?',
+        confirmDeleteNamed: '¿Seguro que quieres eliminar "{0}"?',
         confirmDeleteFallback: '¿Seguro que quieres eliminar este elemento?',
         requestFailed: 'La solicitud falló (HTTP {status}).',
         loadRetry: 'No se pudo cargar la información. Intenta nuevamente.',
@@ -19,7 +19,7 @@ const defaultUiLabels = {
     en: {
         confirmAction: 'Confirm action',
         confirm: 'Confirm',
-        confirmDeleteNamed: 'Are you sure you want to delete "{item}"?',
+        confirmDeleteNamed: 'Are you sure you want to delete "{0}"?',
         confirmDeleteFallback: 'Are you sure you want to delete this item?',
         requestFailed: 'Request failed (HTTP {status}).',
         loadRetry: 'Could not load the information. Please try again.',
@@ -35,7 +35,7 @@ export const buildConfirmDeleteMessage = (itemLabel = '', fallback = '') => {
     const label = String(itemLabel ?? '').trim();
     if (label === '') return String(fallback || labels.confirmDeleteFallback || labels.confirm);
     return String(labels.confirmDeleteNamed || labels.confirmDeleteFallback || labels.confirm)
-        .replace('{item}', label);
+        .replace('{0}', label);
 };
 
 const defaultPaginationLabels = {
