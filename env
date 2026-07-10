@@ -148,3 +148,13 @@ DOMAIN_API_BASE_URL = http://localhost:8190
 # URL of the ci4-website-builder-web frontend. Used in the page blocks editor
 # to open a live preview of the page. No trailing slash.
 PUBLIC_SITE_URL = http://localhost:8186
+
+#--------------------------------------------------------------------
+# CMS PREVIEW LINKS
+#--------------------------------------------------------------------
+# Shared with ci4-website-builder-domain's CMS_PREVIEW_SECRET — must match.
+# Signs preview links so unpublished pages/entries can only be viewed via a
+# link generated here, never by guessing ?preview=1 on the public site.
+# Generate with: php -r "echo bin2hex(random_bytes(32));"
+
+# CMS_PREVIEW_SECRET =

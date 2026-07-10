@@ -137,6 +137,7 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         ])->get('/admin/cms/pages/1/blocks/create');
 
         $result->assertStatus(200);
+        $this->assertStringContainsString('blockInstanceBuilder(', (string) $result->getBody());
     }
 
     public function testEntryCreateRendersForAdmin(): void
@@ -172,6 +173,42 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         ])->get('/admin/cms/entries/4/blocks/create');
 
         $result->assertStatus(200);
+    }
+
+    public function testCollectionEntryOptionsEndpointReturnsOptions(): void
+    {
+        $entryMock = $this->createMock(EntryApiService::class);
+        $entryMock->expects($this->once())
+            ->method('list')
+            ->with($this->callback(static function (array $filters): bool {
+                return ($filters['collection_id'] ?? null) === 7;
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    [
+                        'id' => 42,
+                        'title' => 'Entrada destacada',
+                        'collection_id' => 7,
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('entryApiService', $entryMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.entries.read']],
+        ])->get('/admin/cms/blocks/entries?collection_id=7');
+
+        $result->assertStatus(200);
+        $this->assertStringContainsString('"ok":true', (string) $result->getBody());
+        $this->assertStringContainsString('"value":"42"', (string) $result->getBody());
+        $this->assertStringContainsString('"label":"Entrada destacada"', (string) $result->getBody());
     }
 
     public function testEditRendersRelativeUrlInputsAsText(): void
