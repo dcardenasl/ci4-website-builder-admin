@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Expanded form field builder UI** — enhanced `formFieldBuilder.js` component with support for new form field types; improved field validation and configuration UI; updated language strings in English and Spanish for new field type labels and help text; form submission detail view now displays expanded field type information
+
 ### Changed
 - **Generic block naming normalization** — consolidated domain-specific block preview views (faq_accordion, contact_form, location_info, logo_showcase, etc.) into unified generic names (accordion, form_embed, contact_info, asset_showcase, etc.); updated block instance controller, preset catalog, and wizard UI to reflect new names; improves consistency and reduces block type proliferation
 
