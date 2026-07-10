@@ -7,6 +7,12 @@ $fieldTypes = [
     'email'    => lang('Forms.field_type_email'),
     'phone'    => lang('Forms.field_type_phone'),
     'textarea' => lang('Forms.field_type_textarea'),
+    'select'   => lang('Forms.field_type_select'),
+    'radio'    => lang('Forms.field_type_radio'),
+    'checkbox' => lang('Forms.field_type_checkbox'),
+    'date'     => lang('Forms.field_type_date'),
+    'number'   => lang('Forms.field_type_number'),
+    'url'      => lang('Forms.field_type_url'),
 ];
 
 // Index translations by language_id for the form
@@ -174,8 +180,12 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
 	         deleteUrlTemplate: <?= esc(json_encode($apiFieldsUrl, JSON_THROW_ON_ERROR), 'attr') ?>,
 	         csrfName: <?= esc(json_encode($csrfName, JSON_THROW_ON_ERROR), 'attr') ?>,
 	         csrfToken: <?= esc(json_encode($csrfToken, JSON_THROW_ON_ERROR), 'attr') ?>,
+	         translateUrl: <?= esc(json_encode(route_to('admin.cms.translate'), JSON_THROW_ON_ERROR), 'attr') ?>,
+	         defaultLangId: <?= (int) ($defaultLangId ?? 0) ?>,
+	         defaultLangCode: <?= esc(json_encode((string) ($defaultLangCode ?? ''), JSON_THROW_ON_ERROR), 'attr') ?>,
 	         fieldKeyRequiredMessage: <?= esc(json_encode(lang('Forms.field_key_required'), JSON_THROW_ON_ERROR), 'attr') ?>,
 	         saveFieldFailedMessage: <?= esc(json_encode(lang('Forms.save_field_failed'), JSON_THROW_ON_ERROR), 'attr') ?>,
+	         optionsRequiredMessage: <?= esc(json_encode(lang('Forms.options_required'), JSON_THROW_ON_ERROR), 'attr') ?>,
 	         confirmDeleteFieldMessage: <?= esc(json_encode(lang('Forms.confirm_delete_field'), JSON_THROW_ON_ERROR), 'attr') ?>,
 	         deleteFailedMessage: <?= esc(json_encode(lang('Forms.delete_failed'), JSON_THROW_ON_ERROR), 'attr') ?>,
 	     })"
@@ -191,12 +201,14 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
 
     <p x-show="fields.length === 0" class="py-8 text-center text-sm text-gray-400"><?= lang('Forms.fields_empty') ?></p>
 
-    <ul x-sortable @sortable:end="onReorder($event)" class="space-y-2">
+    <ul data-fields-list class="space-y-2">
         <template x-for="field in fields" :key="field.id">
             <li :data-id="field.id"
-                class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 cursor-grab">
+                class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="grip-vertical" class="h-4 w-4 text-gray-400"></i>
+                    <span data-drag-handle class="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing">
+                        <i data-lucide="grip-vertical" class="h-4 w-4"></i>
+                    </span>
                     <div>
                         <span class="font-medium text-gray-800 text-sm" x-text="field.field_key"></span>
                         <span class="ml-2 text-xs text-gray-400" x-text="field.field_type"></span>
@@ -241,6 +253,31 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
                             </select>
                         </div>
 
+                        <div x-show="isChoiceType()" x-cloak class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <label class="mb-1 block text-xs font-medium text-gray-700"><?= lang('Forms.field_options') ?></label>
+                            <p class="mb-3 text-xs text-gray-500"><?= lang('Forms.field_options_hint') ?></p>
+                            <div class="space-y-2">
+                                <template x-for="(option, index) in fieldForm.options" :key="index">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" x-model="option.label" @input="onOptionLabelInput(option)"
+                                               class="form-input w-full text-sm" placeholder="<?= esc(lang('Forms.option_label')) ?>">
+                                        <input type="text" x-model="option.value" @input="onOptionValueInput(option)"
+                                               class="form-input w-28 shrink-0 text-xs font-mono text-gray-500" placeholder="<?= esc(lang('Forms.option_value')) ?>">
+                                        <button type="button" @click="regenerateOptionValue(option)" class="shrink-0 text-gray-400 hover:text-brand-600" title="<?= esc(lang('Forms.btn_regenerate_option_value')) ?>" aria-label="<?= esc(lang('Forms.btn_regenerate_option_value')) ?>">
+                                            <i data-lucide="refresh-ccw" class="h-3.5 w-3.5"></i>
+                                        </button>
+                                        <button type="button" @click="removeOption(index)" class="shrink-0 text-gray-400 hover:text-red-600" aria-label="<?= esc(lang('Forms.btn_remove_option')) ?>">
+                                            <i data-lucide="x" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <button type="button" @click="addOption()" class="btn btn-secondary mt-3 inline-flex items-center gap-1.5 text-xs">
+                                <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                                <?= lang('Forms.btn_add_option') ?>
+                            </button>
+                        </div>
+
                         <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <div class="space-y-3">
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -256,15 +293,26 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
                     </div>
 
                     <div class="min-w-0">
-                        <div class="mb-4 flex flex-wrap gap-1 border-b border-gray-200">
-                            <?php foreach ($languages as $lang): ?>
-                                <button type="button"
-                                        @click="activeFieldLang = '<?= esc($lang['code']) ?>'"
-                                        :class="activeFieldLang === '<?= esc($lang['code']) ?>' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                                        class="border-b-2 px-3 py-2 text-xs font-semibold transition">
-                                    <?= esc(strtoupper($lang['code'])) ?>
-                                </button>
-                            <?php endforeach; ?>
+                        <div class="mb-4 flex items-center justify-between gap-2 border-b border-gray-200">
+                            <div class="flex flex-wrap gap-1">
+                                <?php foreach ($languages as $lang): ?>
+                                    <button type="button"
+                                            @click="activeFieldLang = '<?= esc($lang['code']) ?>'"
+                                            :class="activeFieldLang === '<?= esc($lang['code']) ?>' ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="border-b-2 px-3 py-2 text-xs font-semibold transition">
+                                        <?= esc(strtoupper($lang['code'])) ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php if (count($languages) > 1): ?>
+                            <button type="button"
+                                @click="translateFieldAll()"
+                                :disabled="translatingFieldAll"
+                                class="mb-1 inline-flex shrink-0 items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-2.5 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
+                                <span x-show="!translatingFieldAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('Forms.btn_translate_field')) ?></span>
+                                <span x-show="translatingFieldAll" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?></span>
+                            </button>
+                            <?php endif; ?>
                         </div>
                         <?php foreach ($languages as $lang): ?>
                             <div x-show="activeFieldLang === '<?= esc($lang['code']) ?>'" class="space-y-4">

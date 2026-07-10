@@ -94,9 +94,13 @@ $extraFields = array_diff_key($formData, array_flip($knownFields));
             <div class="mt-5 pt-4 border-t border-gray-100">
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                     <?php foreach ($extraFields as $key => $val): ?>
+                        <?php
+                        // Checkbox-group fields submit as an array of selected option values.
+                        $valText = is_array($val) ? implode(', ', array_map('strval', $val)) : (string) $val;
+                        ?>
                         <div>
                             <dt class="text-gray-500"><?= esc(ucfirst(str_replace('_', ' ', $key))) ?></dt>
-                            <dd class="mt-1 text-gray-900"><?= esc((string) $val) ?></dd>
+                            <dd class="mt-1 text-gray-900"><?= esc($valText) ?></dd>
                         </div>
                     <?php endforeach; ?>
                 </dl>

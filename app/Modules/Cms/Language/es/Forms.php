@@ -74,6 +74,25 @@ return [
     'field_type_email'    => 'Email',
     'field_type_phone'    => 'Teléfono',
     'field_type_textarea' => 'Área de Texto',
+    'field_type_select'   => 'Desplegable (select)',
+    'field_type_radio'    => 'Opción única (radio)',
+    'field_type_checkbox' => 'Opción múltiple (checkbox)',
+    'field_type_date'     => 'Fecha',
+    'field_type_number'   => 'Número',
+    'field_type_url'      => 'URL',
+
+    // Field options editor (select / radio / checkbox)
+    'field_options'          => 'Opciones',
+    'field_options_hint'     => 'Se muestran al visitante en el orden listado. El valor se genera a partir de la etiqueta y es lo que se guarda — edítalo directamente si necesitas uno distinto.',
+    'option_value'           => 'Valor',
+    'option_label'           => 'Etiqueta',
+    'btn_add_option'         => 'Agregar opción',
+    'btn_remove_option'      => 'Quitar',
+    'btn_regenerate_option_value' => 'Regenerar valor desde la etiqueta',
+    'options_required'       => 'Agrega al menos una opción para este tipo de campo.',
+
+    // Field-level auto-translate
+    'btn_translate_field' => 'Traducir automáticamente este campo',
 
     // Buttons
     'btn_create' => 'Nuevo Formulario',

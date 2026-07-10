@@ -74,6 +74,25 @@ return [
     'field_type_email'    => 'Email',
     'field_type_phone'    => 'Phone',
     'field_type_textarea' => 'Textarea',
+    'field_type_select'   => 'Dropdown (select)',
+    'field_type_radio'    => 'Radio buttons (single choice)',
+    'field_type_checkbox' => 'Checkboxes (multiple choice)',
+    'field_type_date'     => 'Date',
+    'field_type_number'   => 'Number',
+    'field_type_url'      => 'URL',
+
+    // Field options editor (select / radio / checkbox)
+    'field_options'          => 'Options',
+    'field_options_hint'     => 'Shown to visitors in the order listed. The value is generated from the label and is what gets stored — edit it directly if you need a different one.',
+    'option_value'           => 'Value',
+    'option_label'           => 'Label',
+    'btn_add_option'         => 'Add option',
+    'btn_remove_option'      => 'Remove',
+    'btn_regenerate_option_value' => 'Regenerate value from label',
+    'options_required'       => 'Add at least one option for this field type.',
+
+    // Field-level auto-translate
+    'btn_translate_field' => 'Auto-translate this field',
 
     // Buttons
     'btn_create' => 'New Form',
