@@ -19,6 +19,7 @@ import { langTabs } from './components/langTabs.js';
 import { jsonEditor } from './components/jsonEditor.js';
 import { blockPreview } from './components/blockPreview.js';
 import { blockTypeDesigner } from './components/blockTypeDesigner.js';
+import { blockInstanceConfig } from './components/blockInstanceConfig.js';
 import { schemaEditor } from './components/schemaEditor.js';
 import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
@@ -46,6 +47,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('jsonEditor', jsonEditor);
     Alpine.data('blockPreview', blockPreview);
     Alpine.data('blockTypeDesigner', blockTypeDesigner);
+    Alpine.data('blockInstanceConfig', blockInstanceConfig);
     Alpine.data('schemaEditor', schemaEditor);
     Alpine.data('blockSorter', blockSorter);
 
@@ -61,6 +63,7 @@ document.addEventListener('alpine:init', () => {
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
     window.copyLangTabsFileFieldToTargets = copyLangTabsFileFieldToTargets;
     window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
+    window.blockInstanceConfigFactory = blockInstanceConfig;
 });
 
 // Must be on window before the Google GSI script fires
