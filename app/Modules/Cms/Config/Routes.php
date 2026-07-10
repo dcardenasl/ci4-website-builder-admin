@@ -137,6 +137,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
 
     // Block Preview (AJAX — must be before block-types to avoid segment collision)
     $routes->post('blocks/preview', '\App\Modules\Cms\Controllers\BlockPreviewController::preview', ['as' => 'admin.cms.blocks.preview', 'filter' => 'permission:cms.pages.read']);
+    $routes->get('blocks/entries', '\App\Modules\Cms\Controllers\BlockInstanceController::entryOptions', ['as' => 'admin.cms.blocks.entries', 'filter' => 'permission:cms.entries.read']);
 
     // BlockType
     $routes->get('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::index', ['as' => 'admin.cms.block_types', 'filter' => 'permission:cms.blocks.read']);

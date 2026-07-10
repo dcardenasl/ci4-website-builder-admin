@@ -70,6 +70,7 @@ class BlockTypeController extends BaseWebController
         return $this->render('cms/block_types/create', [
             'title'      => lang('BlockTypes.block_types_create'),
             'templates'  => $templates,
+            'sourceKinds' => $this->sourceKinds(),
             'blockTypes' => $blockTypes,
         ]);
     }
@@ -109,6 +110,7 @@ class BlockTypeController extends BaseWebController
             'title'      => lang('BlockTypes.block_types_edit'),
             'item'       => $this->extractData($response),
             'templates'  => $templates,
+            'sourceKinds' => $this->sourceKinds(),
             'blockTypes' => $blockTypes,
         ]);
     }
@@ -149,6 +151,20 @@ class BlockTypeController extends BaseWebController
     private function invalidateBlockCatalogCache(): void
     {
         cache()->delete('cms_block_types_active_catalog');
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string, description: string}>
+     */
+    private function sourceKinds(): array
+    {
+        return [
+            ['key' => 'manual', 'label' => lang('BlockTypes.source_manual'), 'description' => lang('BlockTypes.source_manual_desc')],
+            ['key' => 'page', 'label' => lang('BlockTypes.source_page'), 'description' => lang('BlockTypes.source_page_desc')],
+            ['key' => 'collection', 'label' => lang('BlockTypes.source_collection'), 'description' => lang('BlockTypes.source_collection_desc')],
+            ['key' => 'entry', 'label' => lang('BlockTypes.source_entry'), 'description' => lang('BlockTypes.source_entry_desc')],
+            ['key' => 'container', 'label' => lang('BlockTypes.source_container'), 'description' => lang('BlockTypes.source_container_desc')],
+        ];
     }
 
 

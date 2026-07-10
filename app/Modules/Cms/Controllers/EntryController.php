@@ -52,19 +52,35 @@ class EntryController extends BaseWebController
             return $this->render('cms/entries/show', [
                 'title' => lang('Entries.entries_details'),
                 'entry' => [],
+                'collection' => [],
+                'languages' => [],
                 'error' => $this->firstMessage($response, lang('Entries.entries_not_found')),
                 'collections' => $this->collectionsOptions(),
                 'blocks' => [],
                 'blockTypes' => [],
+                'publicSiteUrl' => '',
             ]);
+        }
+
+        $entryData = $this->extractData($response);
+        $collectionId = $entryData['collection_id'] ?? '';
+        $collection = [];
+        if ($collectionId !== '') {
+            $colResponse = $this->safeApiCall(fn () => $this->collectionService->get((string) $collectionId));
+            if ($colResponse['ok']) {
+                $collection = $this->extractData($colResponse);
+            }
         }
 
         return $this->render('cms/entries/show', [
             'title' => lang('Entries.entries_details'),
-            'entry' => $this->extractData($response),
+            'entry' => $entryData,
+            'collection' => $collection,
+            'languages' => $this->getLanguages(),
             'collections' => $this->collectionsOptions(),
             'blocks' => $this->entryBlocks($id),
             'blockTypes' => $this->fetchBlockTypesIndexed(),
+            'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
         ]);
     }
 
