@@ -50,6 +50,7 @@ $defaultLangCode = strtoupper((string) ($defaultLangCode ?? 'EN'));
 $blockKey    = $blockType['block_key'] ?? '';
 $previewUrl  = route_to('admin.cms.blocks.preview');
 $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
 <meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
 
@@ -107,7 +108,8 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
 
             <!-- Schema-driven config fields -->
             <?php if (! empty($configFields)): ?>
-            <div class="border-t border-gray-100 pt-5">
+            <div class="border-t border-gray-100 pt-5"
+                 x-data="blockInstanceConfig(<?= esc($entryOptionsUrlJs, 'attr') ?>, <?= esc($configJs, 'attr') ?>)">
                 <h4 class="text-sm font-semibold text-gray-800 mb-1"><?= esc(lang('Pages.block_config_section')) ?></h4>
                 <p class="text-xs text-gray-500 mb-4"><?= esc(lang('Pages.block_config_desc')) ?></p>
                 <div class="space-y-4">
@@ -132,6 +134,37 @@ $configJs    = json_encode($blockConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED
                                        class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                 <span class="text-sm text-gray-600"><?= esc($cfLabel) ?></span>
                             </label>
+                        <?php elseif ($cfType === 'select' && $cfKey === 'collection_id'): ?>
+                            <select name="<?= esc($cfFieldName, 'attr') ?>"
+                                    x-model="collectionId"
+                                    @change="onCollectionChange($event.target.value)"
+                                    class="<?= esc(input_class($cfFieldName)) ?>"
+                                    <?= $cfReq ? 'required' : '' ?>>
+                                <option value="">— Seleccionar —</option>
+                                <?php foreach ($cfOptions as $opt):
+                                    $val = is_array($opt) ? $opt['value'] : $opt;
+                                    $lbl = is_array($opt) ? $opt['label'] : $opt;
+                                    ?>
+                                    <option value="<?= esc((string) $val) ?>">
+                                        <?= esc((string) $lbl) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php elseif ($cfType === 'select' && $cfKey === 'entry_id'): ?>
+                            <div class="space-y-1">
+                                <select name="<?= esc($cfFieldName, 'attr') ?>"
+                                        x-model="entryId"
+                                        :disabled="!collectionId || entryOptionsLoading"
+                                        class="<?= esc(input_class($cfFieldName)) ?> disabled:bg-gray-100"
+                                        <?= $cfReq ? 'required' : '' ?>>
+                                    <option value="" x-text="entryOptionsLoading ? 'Cargando entradas...' : '— Seleccionar —'"></option>
+                                    <template x-for="opt in entryOptions" :key="opt.value">
+                                        <option :value="opt.value" x-text="opt.label"></option>
+                                    </template>
+                                </select>
+                                <p x-show="!collectionId" class="text-[11px] text-gray-400">Selecciona primero una colección.</p>
+                                <p x-show="entryOptionsError" class="text-[11px] text-red-500" x-text="entryOptionsError"></p>
+                            </div>
                         <?php elseif ($cfType === 'select' && ! empty($cfOptions)): ?>
                             <?php
                             $flatOptionValues = array_map(function ($opt) {

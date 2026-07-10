@@ -1,4 +1,20 @@
-<?php $entry = $entry ?? []; ?>
+<?php
+
+use App\Modules\Cms\Support\BlockOwnerRouting;
+
+$entry         = $entry ?? [];
+$collection    = $collection ?? [];
+$languages     = $languages ?? [];
+$publicSiteUrl = $publicSiteUrl ?? '';
+
+// Build language code map: id → uppercase code (e.g. 3 → 'ES')
+$langCodeMap = [];
+foreach ($languages as $l) {
+    if (is_array($l) && isset($l['id'], $l['code'])) {
+        $langCodeMap[(int) $l['id']] = strtoupper((string) $l['code']);
+    }
+}
+?>
 
 <?php if (! empty($error)): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
@@ -6,7 +22,7 @@
     </div>
 <?php elseif (! empty($entry)): ?>
     <?php
-        $itemId = (string) ($entry['id'] ?? '');
+    $itemId = (string) ($entry['id'] ?? '');
     $entryTitle = (string) (($entry['translations'][0]['title'] ?? null) ?: ($entry['title'] ?? $entry['slug'] ?? $itemId));
     ?>
 
@@ -24,11 +40,37 @@
 
         <?php if (! empty($entry['translations']) && is_array($entry['translations'])): ?>
             <div class="mt-4 space-y-4">
-                <?php foreach ($entry['translations'] as $t): ?>
+                <?php foreach ($entry['translations'] as $t):
+                    $tLangId  = (int) ($t['language_id'] ?? 0);
+                    $tLangCode = strtolower($langCodeMap[$tLangId] ?? (string) $tLangId);
+                    $tSlug    = trim((string) ($t['slug'] ?? ''));
+
+                    $collectionSlugs = $collection['localized_slugs'] ?? [];
+                    if (isset($collection['index_page']['localized_slugs'])) {
+                        $collectionSlugs = $collection['index_page']['localized_slugs'];
+                    }
+                    $colSlug = trim((string) ($collectionSlugs[$tLangCode] ?? $collection['slug'] ?? $collection['collection_key'] ?? ''), '/');
+                    if ($colSlug !== '') {
+                        $colSlug = '/' . $colSlug;
+                    }
+
+                    $tPreview = $publicSiteUrl !== '' && $tSlug !== ''
+                        ? $publicSiteUrl . '/' . $tLangCode . $colSlug . '/' . ltrim($tSlug, '/') . '?preview=1'
+                        : '';
+                    ?>
                     <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
-                        <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between">
-                            <span><?= esc(lang('Entries.translation_language_label')) ?>: <?= esc($t['language_id']) ?></span>
-                            <span class="text-gray-500 font-mono">/<?= esc($t['slug']) ?></span>
+                        <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between items-center">
+                            <span><?= esc(lang('Entries.translation_language_label')) ?>: <?= esc($langCodeMap[$tLangId] ?? $tLangId) ?></span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-gray-500 font-mono text-xs">/<?= esc($tSlug) ?></span>
+                                <?php if ($tPreview !== ''): ?>
+                                <a href="<?= esc($tPreview) ?>" target="_blank" rel="noopener noreferrer"
+                                   class="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                                    <?= ui_icon('external-link', 'h-3 w-3') ?>
+                                    <?= esc(lang('Pages.block_preview_button')) ?>
+                                </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <dl class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                             <div>
@@ -112,6 +154,15 @@
     <?php endif; ?>
 
     <?php ob_start(); ?>
+    <?php
+    $previewUrl = BlockOwnerRouting::previewUrl('entry', $entry, $languages);
+    ?>
+    <?php if ($previewUrl !== ''): ?>
+        <a href="<?= esc($previewUrl) ?>" target="_blank" rel="noopener noreferrer" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('external-link', 'h-3.5 w-3.5') ?>
+            <span><?= esc(lang('Pages.block_preview_button')) ?></span>
+        </a>
+    <?php endif; ?>
     <?php if (has_permission('cms.entries.write')): ?>
         <a href="<?= route_to('admin.cms.entries.edit', $itemId) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center">
             <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>

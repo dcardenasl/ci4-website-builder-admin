@@ -1,8 +1,10 @@
 <?php
 $item       = $item ?? [];
 $templates  = $templates ?? [];
+$sourceKinds = $sourceKinds ?? [];
 $schema     = is_array($item['schema_definition'] ?? []) ? ($item['schema_definition'] ?? []) : json_decode((string)($item['schema_definition'] ?? '{}'), true);
 $schemaJs   = json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$sourceKindsJs = json_encode($sourceKinds, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $isSystem   = in_array($item['block_key'] ?? '', ['rich_text', 'image', 'cta', 'hero_banner', 'container'], true);
 $previewUrl = route_to('admin.cms.blocks.preview');
 $currentKey = $item['block_key'] ?? '';
@@ -25,7 +27,7 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
     <?= csrf_field() ?>
 </form>
 
-<div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>, <?= ($item['is_container'] ?? false) ? 'true' : 'false' ?>)" class="space-y-6">
+<div x-data="schemaEditor(<?= esc($schemaJs, 'attr') ?>, <?= ($item['is_container'] ?? false) ? 'true' : 'false' ?>, <?= esc($sourceKindsJs, 'attr') ?>)" class="space-y-6">
     <?php ob_start(); ?>
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
 
@@ -53,6 +55,35 @@ $configSampleJs = json_encode($configSample, JSON_UNESCAPED_UNICODE | JSON_UNESC
             <?= csrf_field() ?>
 
             <div class="space-y-6 lg:col-span-2">
+            <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div class="mb-4">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700"><?= esc(lang('BlockTypes.source_title')) ?></p>
+                    <h4 class="mt-1 text-base font-semibold text-gray-900"><?= esc(lang('BlockTypes.source_desc')) ?></h4>
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('BlockTypes.source_filter_hint')) ?></p>
+                </div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                    <template x-for="source in sourceKinds" :key="source.key">
+                        <button type="button"
+                            @click="selectSource(source)"
+                            :class="isSourceSelected(source)
+                                ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-400'
+                                : 'border-gray-200 bg-white hover:border-brand-400 hover:bg-brand-50/30'"
+                            class="flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all">
+                            <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-600"
+                                  :class="isSourceSelected(source) ? 'bg-brand-100 text-brand-700' : ''">
+                                <svg x-show="source.key === 'manual'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h10"/></svg>
+                                <svg x-show="source.key === 'page'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h10l4 4v14H3V3h4z"/></svg>
+                                <svg x-show="source.key === 'collection'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                                <svg x-show="source.key === 'entry'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10v16H7zM9 8h6M9 12h6M9 16h4"/></svg>
+                                <svg x-show="source.key === 'container'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v14H4zM8 9h8M8 13h8"/></svg>
+                            </span>
+                            <span class="text-sm font-semibold text-gray-900" x-text="source.label"></span>
+                            <span class="text-xs text-gray-500" x-text="source.description"></span>
+                        </button>
+                    </template>
+                </div>
+            </section>
+
             <!-- block_key: readonly si es sistema, editable si es custom -->
             <?= view('components/form/text', [
                 'name'        => 'block_key',

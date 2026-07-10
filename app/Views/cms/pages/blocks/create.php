@@ -30,6 +30,7 @@ if ($parentInstanceId !== null) {
 
 $blockTypesJs  = json_encode(array_values($blockTypes), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $languagesJs   = json_encode(array_values($languages), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $previewUrl    = route_to('admin.cms.blocks.preview');
 $parentIdJs    = json_encode($parentInstanceId);
 ?>
@@ -47,7 +48,7 @@ $parentIdJs    = json_encode($parentInstanceId);
     <?php endif; ?>
 </div>
 
-<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>)" class="space-y-6">
+<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>, <?= esc($entryOptionsUrlJs, 'attr') ?>)" class="space-y-6">
     <?php ob_start(); ?>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <template x-for="bt in blockTypes" :key="bt.id">
@@ -125,13 +126,43 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 <span x-text="field.label || key"></span>
                             </label>
 
-                                <template x-if="field.type === 'select'">
-                                <select :name="`block_config[${key}]`"
-                                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                    <template x-for="opt in (field.options || [])" :key="typeof opt === 'object' ? opt.value : opt">
-                                        <option :value="typeof opt === 'object' ? opt.value : opt" :selected="(typeof opt === 'object' ? opt.value : opt) == (field.default || '')" x-text="typeof opt === 'object' ? opt.label : opt"></option>
+                            <template x-if="field.type === 'select'">
+                                <div>
+                                    <template x-if="key === 'collection_id'">
+                                        <select :name="`block_config[${key}]`"
+                                                x-model="collectionId"
+                                                @change="onCollectionChange($event.target.value)"
+                                                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                            <option value="">— Seleccionar —</option>
+                                            <template x-for="opt in (field.options || [])" :key="typeof opt === 'object' ? opt.value : opt">
+                                                <option :value="typeof opt === 'object' ? opt.value : opt" x-text="typeof opt === 'object' ? opt.label : opt"></option>
+                                            </template>
+                                        </select>
                                     </template>
-                                </select>
+                                    <template x-if="key === 'entry_id'">
+                                        <div class="space-y-1">
+                                            <select :name="`block_config[${key}]`"
+                                                    x-model="entryId"
+                                                    :disabled="!collectionId || entryOptionsLoading"
+                                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-gray-100">
+                                                <option value="" x-text="entryOptionsLoading ? 'Cargando entradas...' : '— Seleccionar —'"></option>
+                                                <template x-for="opt in entryOptions" :key="opt.value">
+                                                    <option :value="opt.value" x-text="opt.label"></option>
+                                                </template>
+                                            </select>
+                                            <p x-show="!collectionId" class="text-[11px] text-gray-400">Selecciona primero una colección.</p>
+                                            <p x-show="entryOptionsError" class="text-[11px] text-red-500" x-text="entryOptionsError"></p>
+                                        </div>
+                                    </template>
+                                    <template x-if="key !== 'collection_id' && key !== 'entry_id'">
+                                        <select :name="`block_config[${key}]`"
+                                                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                            <template x-for="opt in (field.options || [])" :key="typeof opt === 'object' ? opt.value : opt">
+                                                <option :value="typeof opt === 'object' ? opt.value : opt" :selected="(typeof opt === 'object' ? opt.value : opt) == (field.default || '')" x-text="typeof opt === 'object' ? opt.label : opt"></option>
+                                            </template>
+                                        </select>
+                                    </template>
+                                </div>
                             </template>
                             <template x-if="field.type === 'color'">
                                 <div x-data="{ 
@@ -523,10 +554,16 @@ $parentIdJs    = json_encode($parentInstanceId);
 const pickerSelectLabels = { image: 'Seleccionar imagen', video: 'Seleccionar video', document: 'Seleccionar documento', any: 'Seleccionar archivo' };
 const pickerChangeLabels = { image: 'Cambiar imagen',    video: 'Cambiar video',     document: 'Cambiar documento',     any: 'Cambiar archivo'   };
 
-function blockInstanceBuilder(blockTypes, languages) {
+function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '') {
+    const configFactory = typeof window.blockInstanceConfigFactory === 'function'
+        ? window.blockInstanceConfigFactory(entryOptionsUrl, {})
+        : {};
+
     return {
+        ...configFactory,
         blockTypes,
         languages,
+        entryOptionsUrl,
         selectedBlockType: null,
         activeLangId: null,
         contentFields: {},
@@ -543,6 +580,9 @@ function blockInstanceBuilder(blockTypes, languages) {
         init() {
             const def = this.languages.find(l => l.is_default == 1);
             this.activeLangId = def ? def.id : (this.languages[0]?.id || null);
+            if (typeof configFactory.init === 'function') {
+                configFactory.init.call(this);
+            }
         },
 
         selectBlockType(bt) {
@@ -552,6 +592,9 @@ function blockInstanceBuilder(blockTypes, languages) {
             this.configFields  = schema.config_fields || {};
             this.repeaterItems = {};
             this.pickedFilesMap = {};
+            if (typeof this.setDefaultsFromFields === 'function') {
+                this.setDefaultsFromFields(this.configFields || {});
+            }
             if (typeof lucide !== 'undefined') { setTimeout(() => lucide.createIcons(), 50); }
         },
 
@@ -630,6 +673,14 @@ function blockInstanceBuilder(blockTypes, languages) {
             if (!this.selectedBlockType) return;
             const config = {};
             Object.entries(this.configFields || {}).forEach(([key, field]) => {
+                if (key === 'collection_id') {
+                    config[key] = this.collectionId || '';
+                    return;
+                }
+                if (key === 'entry_id') {
+                    config[key] = this.entryId || '';
+                    return;
+                }
                 config[key] = field.default || '';
             });
             window.dispatchEvent(new CustomEvent('block-preview-open', {
