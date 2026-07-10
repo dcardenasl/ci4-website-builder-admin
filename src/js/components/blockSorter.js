@@ -33,15 +33,10 @@ export const blockSorter = (reorderUrl = '') => ({
 
     _registerMutationObserver() {
         if (typeof MutationObserver === 'undefined') return;
-        const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                for (const node of mutation.removedNodes) {
-                    if (node === this.$el || this.$el.contains?.(node)) {
-                        this.destroy();
-                        observer.disconnect();
-                        return;
-                    }
-                }
+        const observer = new MutationObserver(() => {
+            if (!document.contains(this.$el)) {
+                this.destroy();
+                observer.disconnect();
             }
         });
         observer.observe(this.$el.parentNode || document.body, { childList: true, subtree: true });

@@ -129,6 +129,7 @@ return [
     'blocks_view_page'            => 'Ver Página',
     'blocks_delete_confirm'       => '¿Seguro que deseas eliminar este bloque?',
     'blocks_reorder_success'      => 'Orden de bloques actualizado.',
+    'blocks_reorder_error'        => 'No se pudo guardar el nuevo orden de bloques. Intenta de nuevo.',
 
     // Crear / Editar un bloque
     'block_add_title'             => 'Añadir Bloque',
@@ -172,6 +173,7 @@ return [
     'child_updated_success'       => '{0} actualizada con éxito.',
     'child_deleted_success'       => '{0} eliminada con éxito.',
     'child_reorder_success'       => 'Orden actualizado.',
+    'child_reorder_error'         => 'No se pudo guardar el nuevo orden. Intenta de nuevo.',
     'owner_not_found_entry'       => 'Entrada no encontrada.',
 
     // Alert en edit.php

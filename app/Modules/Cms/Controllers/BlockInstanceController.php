@@ -514,27 +514,40 @@ class BlockInstanceController extends BaseWebController
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
         $ownerType = $this->ownerTypeFromRequest();
+        $failed    = [];
 
         foreach ($orders as $id => $order) {
             $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
-            if ($blockResponse['ok']) {
-                $block = $this->extractData($blockResponse);
-                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
-                    'block_id'     => (int) $block['block_id'],
-                    'owner_type'   => $ownerType,
-                    'owner_id'     => (int) $ownerId,
-                    'sort_order'   => (int) $order,
-                    'is_active'    => (bool) ($block['is_active'] ?? true),
-                    'block_config' => $block['block_config'] ?? [],
-                    'translations' => $block['translations'] ?? []
-                ]));
+            if (!$blockResponse['ok']) {
+                $failed[] = $id;
+                continue;
+            }
+
+            $block          = $this->extractData($blockResponse);
+            $updateResponse = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
+                'block_id'     => (int) $block['block_id'],
+                'owner_type'   => $ownerType,
+                'owner_id'     => (int) $ownerId,
+                'sort_order'   => (int) $order,
+                'is_active'    => (bool) ($block['is_active'] ?? true),
+                'block_config' => $block['block_config'] ?? [],
+                'translations' => $block['translations'] ?? []
+            ]));
+
+            if (!$updateResponse['ok']) {
+                $failed[] = $id;
             }
         }
 
         if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
             return $this->response
+                ->setStatusCode($failed === [] ? 200 : 422)
                 ->setContentType('application/json')
-                ->setBody(json_encode(['ok' => true]) ?: '{}');
+                ->setBody(json_encode(['ok' => $failed === [], 'failed' => $failed]) ?: '{}');
+        }
+
+        if ($failed !== []) {
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('error', lang('Pages.blocks_reorder_error'));
         }
 
         return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.blocks_reorder_success'));
@@ -551,28 +564,41 @@ class BlockInstanceController extends BaseWebController
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
         $ownerType = $this->ownerTypeFromRequest();
+        $failed    = [];
 
         foreach ($orders as $id => $order) {
             $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
-            if ($blockResponse['ok']) {
-                $block = $this->extractData($blockResponse);
-                $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
-                    'block_id'           => (int) $block['block_id'],
-                    'owner_type'         => $ownerType,
-                    'owner_id'           => (int) $ownerId,
-                    'parent_instance_id' => (int) $instanceId,
-                    'sort_order'         => (int) $order,
-                    'is_active'          => (bool) ($block['is_active'] ?? true),
-                    'block_config'       => $block['block_config'] ?? [],
-                    'translations'       => $block['translations'] ?? [],
-                ]));
+            if (!$blockResponse['ok']) {
+                $failed[] = $id;
+                continue;
+            }
+
+            $block          = $this->extractData($blockResponse);
+            $updateResponse = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
+                'block_id'           => (int) $block['block_id'],
+                'owner_type'         => $ownerType,
+                'owner_id'           => (int) $ownerId,
+                'parent_instance_id' => (int) $instanceId,
+                'sort_order'         => (int) $order,
+                'is_active'          => (bool) ($block['is_active'] ?? true),
+                'block_config'       => $block['block_config'] ?? [],
+                'translations'       => $block['translations'] ?? [],
+            ]));
+
+            if (!$updateResponse['ok']) {
+                $failed[] = $id;
             }
         }
 
         if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
             return $this->response
+                ->setStatusCode($failed === [] ? 200 : 422)
                 ->setContentType('application/json')
-                ->setBody(json_encode(['ok' => true]) ?: '{}');
+                ->setBody(json_encode(['ok' => $failed === [], 'failed' => $failed]) ?: '{}');
+        }
+
+        if ($failed !== []) {
+            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, $instanceId))->with('error', lang('Pages.child_reorder_error'));
         }
 
         return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, $instanceId))->with('success', lang('Pages.child_reorder_success'));

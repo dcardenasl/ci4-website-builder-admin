@@ -129,6 +129,7 @@ return [
     'blocks_view_page'            => 'View Page',
     'blocks_delete_confirm'       => 'Are you sure you want to delete this block?',
     'blocks_reorder_success'      => 'Block order updated.',
+    'blocks_reorder_error'        => 'Could not save the new block order. Please try again.',
 
     // Crear / Editar un bloque
     'block_add_title'             => 'Add Block',
@@ -172,6 +173,7 @@ return [
     'child_updated_success'       => '{0} updated successfully.',
     'child_deleted_success'       => '{0} deleted successfully.',
     'child_reorder_success'       => 'Order updated.',
+    'child_reorder_error'         => 'Could not save the new order. Please try again.',
     'owner_not_found_entry'       => 'Entry not found.',
 
     // Alert en edit.php
