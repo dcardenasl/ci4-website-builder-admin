@@ -74,102 +74,102 @@ $tiptapLocal   = file_exists(FCPATH . 'assets/vendor/tiptap.bundle.js');
       ]
   ]);
 
-  $statusLabelsJson = json_encode([
-      'es' => [
-          'active' => lang('App.status.active'),
-          'pending' => lang('App.status.pending'),
-          'pending_approval' => lang('App.status.pending_approval'),
-          'suspended' => lang('App.status.suspended'),
-          'approved' => lang('App.status.approved'),
-          'rejected' => lang('App.status.rejected'),
-          'processing' => lang('App.status.processing'),
-          'success' => lang('App.status.success'),
-          'failed' => lang('App.status.failed'),
-      ],
-      'en' => [
-          'active' => lang('App.status.active'),
-          'pending' => lang('App.status.pending'),
-          'pending_approval' => lang('App.status.pending_approval'),
-          'suspended' => lang('App.status.suspended'),
-          'approved' => lang('App.status.approved'),
-          'rejected' => lang('App.status.rejected'),
-          'processing' => lang('App.status.processing'),
-          'success' => lang('App.status.success'),
-          'failed' => lang('App.status.failed'),
-      ]
-  ]);
+$statusLabelsJson = json_encode([
+    'es' => [
+        'active' => lang('App.status.active'),
+        'pending' => lang('App.status.pending'),
+        'pending_approval' => lang('App.status.pending_approval'),
+        'suspended' => lang('App.status.suspended'),
+        'approved' => lang('App.status.approved'),
+        'rejected' => lang('App.status.rejected'),
+        'processing' => lang('App.status.processing'),
+        'success' => lang('App.status.success'),
+        'failed' => lang('App.status.failed'),
+    ],
+    'en' => [
+        'active' => lang('App.status.active'),
+        'pending' => lang('App.status.pending'),
+        'pending_approval' => lang('App.status.pending_approval'),
+        'suspended' => lang('App.status.suspended'),
+        'approved' => lang('App.status.approved'),
+        'rejected' => lang('App.status.rejected'),
+        'processing' => lang('App.status.processing'),
+        'success' => lang('App.status.success'),
+        'failed' => lang('App.status.failed'),
+    ]
+]);
 
-  $auditActionLabelsJson = json_encode([
-      'es' => [
-          'create' => lang('App.audit.action.create'),
-          'update' => lang('App.audit.action.update'),
-          'delete' => lang('App.audit.action.delete'),
-          'login' => lang('App.audit.action.login'),
-          'login_success' => lang('App.audit.action.login_success'),
-          'login_failure' => lang('App.audit.action.login_failure'),
-          'logout' => lang('App.audit.action.logout'),
-          'approve' => lang('App.audit.action.approve'),
-      ],
-      'en' => [
-          'create' => lang('App.audit.action.create'),
-          'update' => lang('App.audit.action.update'),
-          'delete' => lang('App.audit.action.delete'),
-          'login' => lang('App.audit.action.login'),
-          'login_success' => lang('App.audit.action.login_success'),
-          'login_failure' => lang('App.audit.action.login_failure'),
-          'logout' => lang('App.audit.action.logout'),
-          'approve' => lang('App.audit.action.approve'),
-      ]
-  ]);
+$auditActionLabelsJson = json_encode([
+    'es' => [
+        'create' => lang('App.audit.action.create'),
+        'update' => lang('App.audit.action.update'),
+        'delete' => lang('App.audit.action.delete'),
+        'login' => lang('App.audit.action.login'),
+        'login_success' => lang('App.audit.action.login_success'),
+        'login_failure' => lang('App.audit.action.login_failure'),
+        'logout' => lang('App.audit.action.logout'),
+        'approve' => lang('App.audit.action.approve'),
+    ],
+    'en' => [
+        'create' => lang('App.audit.action.create'),
+        'update' => lang('App.audit.action.update'),
+        'delete' => lang('App.audit.action.delete'),
+        'login' => lang('App.audit.action.login'),
+        'login_success' => lang('App.audit.action.login_success'),
+        'login_failure' => lang('App.audit.action.login_failure'),
+        'logout' => lang('App.audit.action.logout'),
+        'approve' => lang('App.audit.action.approve'),
+    ]
+]);
 
-  $auditResultLabelsJson = json_encode([
-      'es' => [
-          'success' => lang('App.audit.result.success'),
-          'failure' => lang('App.audit.result.failure'),
-          'denied' => lang('App.audit.result.denied'),
-      ],
-      'en' => [
-          'success' => lang('App.audit.result.success'),
-          'failure' => lang('App.audit.result.failure'),
-          'denied' => lang('App.audit.result.denied'),
-      ]
-  ]);
+$auditResultLabelsJson = json_encode([
+    'es' => [
+        'success' => lang('App.audit.result.success'),
+        'failure' => lang('App.audit.result.failure'),
+        'denied' => lang('App.audit.result.denied'),
+    ],
+    'en' => [
+        'success' => lang('App.audit.result.success'),
+        'failure' => lang('App.audit.result.failure'),
+        'denied' => lang('App.audit.result.denied'),
+    ]
+]);
 
-  $auditSeverityLabelsJson = json_encode([
-      'es' => [
-          'info' => lang('App.audit.severity.info'),
-          'warning' => lang('App.audit.severity.warning'),
-          'critical' => lang('App.audit.severity.critical'),
-      ],
-      'en' => [
-          'info' => lang('App.audit.severity.info'),
-          'warning' => lang('App.audit.severity.warning'),
-          'critical' => lang('App.audit.severity.critical'),
-      ]
-  ]);
+$auditSeverityLabelsJson = json_encode([
+    'es' => [
+        'info' => lang('App.audit.severity.info'),
+        'warning' => lang('App.audit.severity.warning'),
+        'critical' => lang('App.audit.severity.critical'),
+    ],
+    'en' => [
+        'info' => lang('App.audit.severity.info'),
+        'warning' => lang('App.audit.severity.warning'),
+        'critical' => lang('App.audit.severity.critical'),
+    ]
+]);
 
-  $paginationLabelsJson = json_encode([
-      'es' => [
-          'visibleResults' => lang('App.pagination.visibleResults'),
-          'showing' => lang('App.pagination.showing'),
-          'of' => lang('App.pagination.of'),
-      ],
-      'en' => [
-          'visibleResults' => lang('App.pagination.visibleResults'),
-          'showing' => lang('App.pagination.showing'),
-          'of' => lang('App.pagination.of'),
-      ]
-  ]);
+$paginationLabelsJson = json_encode([
+    'es' => [
+        'visibleResults' => lang('App.pagination.visibleResults'),
+        'showing' => lang('App.pagination.showing'),
+        'of' => lang('App.pagination.of'),
+    ],
+    'en' => [
+        'visibleResults' => lang('App.pagination.visibleResults'),
+        'showing' => lang('App.pagination.showing'),
+        'of' => lang('App.pagination.of'),
+    ]
+]);
 
-  $componentConfigJson = json_encode([
-      'sessionExpiringMessage' => lang('Labels.session_expiring_soon'),
-      'richTextLinkUrlPrompt' => lang('Labels.link_url_prompt'),
-      'richTextPlaceholder' => lang('Labels.rich_text_placeholder'),
-      'jsonPastePrompt' => lang('Labels.json_paste_prompt'),
-      'jsonInvalidFormat' => lang('Labels.json_invalid_format'),
-      'jsonSyntaxError' => lang('Labels.json_syntax_error'),
-  ], JSON_THROW_ON_ERROR);
-  ?>
+$componentConfigJson = json_encode([
+    'sessionExpiringMessage' => lang('Labels.session_expiring_soon'),
+    'richTextLinkUrlPrompt' => lang('Labels.link_url_prompt'),
+    'richTextPlaceholder' => lang('Labels.rich_text_placeholder'),
+    'jsonPastePrompt' => lang('Labels.json_paste_prompt'),
+    'jsonInvalidFormat' => lang('Labels.json_invalid_format'),
+    'jsonSyntaxError' => lang('Labels.json_syntax_error'),
+], JSON_THROW_ON_ERROR);
+?>
   window.uiLabels = <?= $uiLabelsJson ?>;
   window.statusLabels = <?= $statusLabelsJson ?>;
   window.auditActionLabels = <?= $auditActionLabelsJson ?>;

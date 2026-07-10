@@ -156,7 +156,7 @@ foreach ($languages as $l) {
     <?php ob_start(); ?>
     <?php
     $previewUrl = BlockOwnerRouting::previewUrl('entry', $entry, $languages);
-    ?>
+?>
     <?php if ($previewUrl !== ''): ?>
         <a href="<?= esc($previewUrl) ?>" target="_blank" rel="noopener noreferrer" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
             <?= ui_icon('external-link', 'h-3.5 w-3.5') ?>
@@ -204,13 +204,13 @@ foreach ($languages as $l) {
     <?php $dangerContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_actions_panel', [
-        'content' => $actionsContent,
-        'dangerContent' => $dangerContent,
-    ]) ?>
+    'content' => $actionsContent,
+    'dangerContent' => $dangerContent,
+]) ?>
     <?php $asideContent = ob_get_clean(); ?>
 
     <?= view('components/display/admin_resource_layout', [
-        'main' => $mainContent,
-        'aside' => $asideContent,
-    ]) ?>
+    'main' => $mainContent,
+    'aside' => $asideContent,
+]) ?>
 <?php endif; ?>
