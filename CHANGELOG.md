@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Lucide icon rendering in dynamic form options** — when adding or removing field options in the form builder, icons on dynamically created rows would remain unrendered (raw `<i data-lucide>` markup) until the field was saved. Now properly re-scans DOM for new Lucide markup via `$nextTick()` after option add/remove/edit operations, ensuring icons render immediately. Also improved visual feedback for missing option labels in languages other than the default (displays in amber instead of gray).
+
 ### Added
 - **Multilingual form field option labels** — enhanced form field builder UI to support per-language option labels for select, checkbox, and radio fields; `formFieldBuilder.js` now resolves option display labels from translation per-language `option_labels` map; improved language key structure for expanded form field options
 - **Expanded form field builder UI** — enhanced `formFieldBuilder.js` component with support for new form field types; improved field validation and configuration UI; updated language strings in English and Spanish for new field type labels and help text; form submission detail view now displays expanded field type information
