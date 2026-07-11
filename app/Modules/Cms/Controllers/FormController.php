@@ -312,11 +312,12 @@ class FormController extends BaseWebController
         }
 
         $result = [];
-        foreach ($raw as $languageId => $trans) {
+        foreach ($raw as $key => $trans) {
             if (! is_array($trans)) {
                 continue;
             }
-            $result[] = array_merge(['language_id' => (int) $languageId], $trans);
+            $langId = isset($trans['language_id']) ? (int) $trans['language_id'] : (int) $key;
+            $result[] = array_merge(['language_id' => $langId], $trans);
         }
 
         return $result;

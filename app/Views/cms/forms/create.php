@@ -19,8 +19,8 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_key') ?> <span class="text-red-500">*</span></label>
                 <input type="text" name="form_key" required
                        placeholder="contact"
-                       pattern="[a-zA-Z0-9_-]+"
-                       class="form-input w-full"
+                       pattern="[a-zA-Z0-9_\-]+"
+                       class="<?= input_class('form_key') ?> w-full"
                        value="<?= esc(old('form_key', '')) ?>">
                 <p class="mt-1 text-xs text-gray-400"><?= lang('Forms.field_key_hint') ?></p>
             </div>
@@ -44,7 +44,7 @@
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_notify_email') ?></label>
-                <input type="email" name="notify_email" class="form-input w-full" placeholder="admin@example.com" value="<?= esc(old('notify_email', '')) ?>">
+                <input type="email" name="notify_email" class="<?= input_class('notify_email') ?> w-full" placeholder="admin@example.com" value="<?= esc(old('notify_email', '')) ?>">
                 <p class="mt-1 text-xs text-gray-400"><?= lang('Forms.field_notify_email_hint') ?></p>
             </div>
             <div class="space-y-3">
@@ -55,7 +55,7 @@
                 </label>
                 <div>
                     <label class="mb-1.5 block text-xs font-medium text-gray-600"><?= lang('Forms.field_autoreply_email_field') ?></label>
-                    <input type="text" name="autoreply_email_field" class="form-input w-full text-sm" placeholder="email" value="<?= esc(old('autoreply_email_field', '')) ?>">
+                    <input type="text" name="autoreply_email_field" class="<?= input_class('autoreply_email_field') ?> w-full text-sm" placeholder="email" value="<?= esc(old('autoreply_email_field', '')) ?>">
                     <p class="mt-1 text-xs text-gray-400"><?= lang('Forms.field_autoreply_email_field_hint') ?></p>
                 </div>
             </div>
@@ -101,30 +101,31 @@
                 <p x-show="translateError !== ''" x-text="translateError" x-cloak class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
 
                 <?php foreach ($languages as $idx => $language): ?>
+                    <?php $isDefault = ((int) $language['id'] === $defaultLangId || !empty($language['is_default'])); ?>
                     <div x-show="isActive(<?= (int) $language['id'] ?>)" class="space-y-4">
-                        <input type="hidden" name="translations[<?= (int) $language['id'] ?>][language_id]" value="<?= (int) $language['id'] ?>">
+                        <input type="hidden" name="translations[<?= $idx ?>][language_id]" value="<?= (int) $language['id'] ?>">
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_name') ?> <span class="text-red-500">*</span></label>
-                                <input type="text" name="translations[<?= (int) $language['id'] ?>][name]" class="form-input w-full" required>
+                                <input type="text" name="translations[<?= $idx ?>][name]" class="<?= input_class('translations.' . $idx . '.name') ?> w-full" <?= $isDefault ? 'required' : '' ?>>
                             </div>
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_submit_label') ?></label>
-                                <input type="text" name="translations[<?= (int) $language['id'] ?>][submit_label]" class="form-input w-full" value="Enviar">
+                                <input type="text" name="translations[<?= $idx ?>][submit_label]" class="<?= input_class('translations.' . $idx . '.submit_label') ?> w-full" value="Enviar">
                             </div>
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_description') ?></label>
-                            <textarea name="translations[<?= (int) $language['id'] ?>][description]" rows="2" class="form-input block w-full resize-none"></textarea>
+                            <textarea name="translations[<?= $idx ?>][description]" rows="2" class="<?= input_class('translations.' . $idx . '.description') ?> block w-full resize-none"></textarea>
                         </div>
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_success_message') ?></label>
-                                <textarea name="translations[<?= (int) $language['id'] ?>][success_message]" rows="2" class="form-input block w-full resize-none"></textarea>
+                                <textarea name="translations[<?= $idx ?>][success_message]" rows="2" class="<?= input_class('translations.' . $idx . '.success_message') ?> block w-full resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700"><?= lang('Forms.field_error_message') ?></label>
-                                <textarea name="translations[<?= (int) $language['id'] ?>][error_message]" rows="2" class="form-input block w-full resize-none"></textarea>
+                                <textarea name="translations[<?= $idx ?>][error_message]" rows="2" class="<?= input_class('translations.' . $idx . '.error_message') ?> block w-full resize-none"></textarea>
                             </div>
                         </div>
                     </div>
