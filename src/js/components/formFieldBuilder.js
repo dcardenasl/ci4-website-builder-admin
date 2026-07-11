@@ -107,10 +107,20 @@ export const formFieldBuilderFactory = (config = {}) => {
 
         addOption() {
             this.fieldForm.options.push({ value: '', manualValue: false, labels: emptyOptionLabels() });
+            // New row renders raw <i data-lucide> markup — nothing converts it to an
+            // SVG until Lucide re-scans the DOM. saveField() does that on success,
+            // but that's too late for a field still being edited: the regenerate/
+            // remove icons on rows added this session would stay invisible (present
+            // and clickable, just not visibly rendered) until the next save.
+            this.$nextTick(() => bootLucideIcons());
         },
 
         removeOption(index) {
             this.fieldForm.options.splice(index, 1);
+            // Alpine's x-for is keyed by index, so removing a row re-keys every
+            // option after it — the DOM nodes for those rows get rebuilt from raw
+            // markup and need their icons re-processed too.
+            this.$nextTick(() => bootLucideIcons());
         },
 
         // Only the default language's label drives the auto-generated value —
@@ -158,6 +168,9 @@ export const formFieldBuilderFactory = (config = {}) => {
             };
             this.activeFieldLang = String(languages[0]?.code || 'es');
             this.showModal = true;
+            // Existing options render immediately with raw <i data-lucide> markup —
+            // see the comment in addOption() for why this needs its own re-scan.
+            this.$nextTick(() => bootLucideIcons());
         },
 
         closeModal() { this.showModal = false; this.editingField = null; },

@@ -260,7 +260,8 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
                             <div class="space-y-2">
                                 <template x-for="(option, index) in fieldForm.options" :key="index">
                                     <div class="flex items-center gap-2">
-                                        <span class="min-w-0 flex-1 truncate text-sm text-gray-700"
+                                        <span class="min-w-0 flex-1 truncate text-sm"
+                                              :class="option.labels[<?= $defaultLangIdInt ?>] ? 'text-gray-700' : 'text-amber-600'"
                                               x-text="option.labels[<?= $defaultLangIdInt ?>] || '<?= esc(lang('Forms.option_untitled')) ?>'"></span>
                                         <input type="text" x-model="option.value" @input="onOptionValueInput(option)"
                                                class="form-input w-28 shrink-0 text-xs font-mono text-gray-500" placeholder="<?= esc(lang('Forms.option_value')) ?>">

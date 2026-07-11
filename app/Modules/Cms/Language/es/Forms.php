@@ -90,7 +90,7 @@ return [
     'field_option_labels'            => 'Etiquetas de opciones',
     'field_option_labels_hint'       => 'El texto que ve el visitante para cada opción, en este idioma. El valor que se guarda al enviar el formulario es el mismo en todos los idiomas.',
     'option_value'                   => 'Valor',
-    'option_untitled'                => 'Opción sin etiqueta',
+    'option_untitled'                => 'Falta la etiqueta — completala en las pestañas de idioma →',
     'btn_add_option'                 => 'Agregar opción',
     'btn_remove_option'              => 'Quitar',
     'btn_regenerate_option_value'    => 'Regenerar valor desde la etiqueta',

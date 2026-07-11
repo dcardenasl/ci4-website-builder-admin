@@ -90,7 +90,7 @@ return [
     'field_option_labels'            => 'Option labels',
     'field_option_labels_hint'       => 'The text visitors see for each option, in this language. The value stored on submission stays the same across all languages.',
     'option_value'                   => 'Value',
-    'option_untitled'                => 'Untitled option',
+    'option_untitled'                => 'Missing label — fill it in on the language tabs →',
     'btn_add_option'                 => 'Add option',
     'btn_remove_option'              => 'Remove',
     'btn_regenerate_option_value'    => 'Regenerate value from label',
