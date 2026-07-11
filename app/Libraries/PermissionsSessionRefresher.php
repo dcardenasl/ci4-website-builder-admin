@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
-use App\Modules\Auth\Services\AuthApiServiceInterface;
+use App\Modules\Auth\Services\AuthApiService;
 use App\Support\SessionKeys;
 
 final class PermissionsSessionRefresher
 {
     private const SESSION_REFRESHED_AT = 'permissions_refreshed_at';
 
-    public function __construct(private readonly AuthApiServiceInterface $authService)
+    public function __construct(private readonly AuthApiService $authService)
     {
     }
 

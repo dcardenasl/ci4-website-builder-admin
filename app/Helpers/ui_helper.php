@@ -40,6 +40,21 @@ if (! function_exists('format_date')) {
 // Authentication helpers are in app/Helpers/auth_helper.php
 // See: is_email_verified(), has_permission()
 
+if (! function_exists('safe_lang')) {
+    /**
+     * Resolve a language key, falling back to a default string when the
+     * key has no translation (CI4's lang() echoes the key itself in that
+     * case). Consolidated here from 6 duplicate inline declarations across
+     * view partials (audit finding H-014, 2026-07-10).
+     */
+    function safe_lang(string $key, string $fallback): string
+    {
+        $value = lang($key);
+
+        return $value === $key ? $fallback : (string) $value;
+    }
+}
+
 if (! function_exists('filter_label_class')) {
     function filter_label_class(): string
     {
