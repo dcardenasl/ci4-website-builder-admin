@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Exception handling for unavailable services** — `PermissionsSessionRefresher` and `BlockCatalogService` now gracefully handle timeouts and connection errors when Hub or Domain APIs are unavailable; permission refresh and block catalog loading log warnings and continue gracefully instead of crashing, improving admin resilience during infrastructure incidents.
 
 ### Fixed
+- **Form translation field indexing** — form submission now uses sequential array indices (`translations[0]`, `translations[1]`, …) instead of language IDs (`translations[language_id]`) to ensure proper form data serialization and backend processing; `FormController` now intelligently resolves `language_id` from either the field name or the nested data, ensuring backward compatibility and correct translation grouping regardless of input structure.
+- **Form field validation styling** — all form inputs in create and edit forms now use `input_class()` helper to apply dynamic validation error styling (red border on failed validation), improving visual feedback for users when form submission errors occur; applied to form key, notification email, and all multilingual translation fields.
 - **Lucide icon rendering in dynamic form options** — when adding or removing field options in the form builder, icons on dynamically created rows would remain unrendered (raw `<i data-lucide>` markup) until the field was saved. Now properly re-scans DOM for new Lucide markup via `$nextTick()` after option add/remove/edit operations, ensuring icons render immediately. Also improved visual feedback for missing option labels in languages other than the default (displays in amber instead of gray).
 
 ### Added
