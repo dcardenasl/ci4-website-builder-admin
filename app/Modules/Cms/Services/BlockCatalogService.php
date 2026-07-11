@@ -23,7 +23,16 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
             return $cachedItems;
         }
 
-        $response = $this->blockTypeService->list(['limit' => 100, 'is_active' => true]);
+        try {
+            $response = $this->blockTypeService->list(['limit' => 100, 'is_active' => true]);
+        } catch (\Throwable $exception) {
+            log_message('warning', 'Block catalog unavailable: {message}', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return [];
+        }
+
         if (! ($response['ok'] ?? false)) {
             return [];
         }

@@ -27,7 +27,16 @@ final class PermissionsSessionRefresher
 
     public function forceRefresh(): void
     {
-        $response = $this->authService->me();
+        try {
+            $response = $this->authService->me();
+        } catch (\Throwable $exception) {
+            log_message('warning', 'Permission refresh skipped because Hub is unavailable: {message}', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return;
+        }
+
         if (! ($response['ok'] ?? false)) {
             return;
         }
