@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Libraries;
 
 use App\Libraries\PermissionsSessionRefresher;
-use App\Modules\Auth\Services\AuthApiServiceInterface;
+use App\Modules\Auth\Services\AuthApiService;
 use App\Support\SessionKeys;
 use CodeIgniter\Test\CIUnitTestCase;
 
@@ -24,7 +24,7 @@ final class PermissionsSessionRefresherTest extends CIUnitTestCase
     public function testRefreshIfStaleSkipsFreshSession(): void
     {
         session()->set('permissions_refreshed_at', time());
-        $auth = $this->createMock(AuthApiServiceInterface::class);
+        $auth = $this->createMock(AuthApiService::class);
         $auth->expects($this->never())->method('me');
 
         (new PermissionsSessionRefresher($auth))->refreshIfStale(60);
@@ -32,7 +32,7 @@ final class PermissionsSessionRefresherTest extends CIUnitTestCase
 
     public function testForceRefreshUpdatesSessionUserFromAuthMe(): void
     {
-        $auth = $this->createMock(AuthApiServiceInterface::class);
+        $auth = $this->createMock(AuthApiService::class);
         $auth->expects($this->once())
             ->method('me')
             ->willReturn([
@@ -52,7 +52,7 @@ final class PermissionsSessionRefresherTest extends CIUnitTestCase
             'permissions' => ['cms.pages.read'],
         ]);
 
-        $auth = $this->createMock(AuthApiServiceInterface::class);
+        $auth = $this->createMock(AuthApiService::class);
         $auth->method('me')->willThrowException(new \RuntimeException('Hub unavailable'));
 
         (new PermissionsSessionRefresher($auth))->forceRefresh();

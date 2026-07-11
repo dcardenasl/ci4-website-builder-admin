@@ -6,7 +6,7 @@ namespace Tests\Feature;
 
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\LanguageApiService;
-use App\Modules\Cms\Services\MenuApiServiceInterface;
+use App\Modules\Cms\Services\MenuApiService;
 use App\Modules\Cms\Services\PageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
@@ -27,7 +27,7 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testCreateRendersEntryAndCollectionSelectors(): void
     {
-        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('get')
             ->with('1')
             ->willReturn([
@@ -85,7 +85,7 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testUpdateAcceptsCollectionListingTarget(): void
     {
-        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->expects($this->once())
             ->method('updateItem')
             ->with('2', $this->callback(static function (array $payload): bool {
@@ -129,7 +129,7 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testReorderItemsRendersComponent(): void
     {
-        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('get')
             ->with('1')
             ->willReturn([
@@ -158,7 +158,7 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testSaveItemsOrderUpdatesAndReturnsOk(): void
     {
-        $menuMock = $this->createMock(MenuApiServiceInterface::class);
+        $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('listItems')
             ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
             ->willReturn([

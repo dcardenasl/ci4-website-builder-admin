@@ -217,7 +217,7 @@ final class WizardFlowTest extends CIUnitTestCase
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
 
-        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
             ->method('create')
             ->with($this->callback(static function (array $payload): bool {
@@ -466,7 +466,7 @@ final class WizardFlowTest extends CIUnitTestCase
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
 
-        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
             ->method('create')
             ->willReturn([
@@ -504,7 +504,7 @@ final class WizardFlowTest extends CIUnitTestCase
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
 
-        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
             ->method('create')
             ->willReturn([

@@ -489,7 +489,7 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
             ]);
         Services::injectMock('languageApiService', $langMock);
 
-        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->method('list')
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => [
@@ -558,7 +558,7 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
             ]);
         Services::injectMock('blockTypeApiService', $typeMock);
 
-        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiServiceInterface::class);
+        $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->method('list')
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => [

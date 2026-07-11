@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Modules\Dashboard\Services\HealthApiServiceInterface;
+use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Files\Services\FileApiService;
 use App\Modules\Metrics\Services\MetricsApiService;
 use App\Modules\Users\Services\UserApiService;
@@ -151,7 +151,7 @@ final class DashboardFlowTest extends CIUnitTestCase
 
     public function testWidgetHealthReturnsHealthCard(): void
     {
-        $healthService = $this->createMock(HealthApiServiceInterface::class);
+        $healthService = $this->createMock(HealthApiService::class);
         $healthService->expects($this->once())
             ->method('check')
             ->willReturn([
