@@ -44,4 +44,20 @@ final class PermissionsSessionRefresherTest extends CIUnitTestCase
 
         $this->assertSame(['cms.pages.read'], session('user.permissions'));
     }
+
+    public function testForceRefreshKeepsExistingSessionWhenHubIsUnavailable(): void
+    {
+        session()->set(SessionKeys::USER->value, [
+            'id'          => 5,
+            'permissions' => ['cms.pages.read'],
+        ]);
+
+        $auth = $this->createMock(AuthApiServiceInterface::class);
+        $auth->method('me')->willThrowException(new \RuntimeException('Hub unavailable'));
+
+        (new PermissionsSessionRefresher($auth))->forceRefresh();
+
+        $this->assertSame(['cms.pages.read'], session('user.permissions'));
+        $this->assertNull(session('permissions_refreshed_at'));
+    }
 }

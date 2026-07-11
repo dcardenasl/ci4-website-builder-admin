@@ -23,7 +23,11 @@
     </coverage>
     <testsuites>
         <testsuite name="App">
-            <directory>./tests</directory>
+            <directory>./tests/unit</directory>
+            <directory>./tests/feature</directory>
+        </testsuite>
+        <testsuite name="Contract">
+            <directory>./tests/contract</directory>
         </testsuite>
     </testsuites>
     <logging>
