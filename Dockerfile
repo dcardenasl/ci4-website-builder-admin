@@ -22,7 +22,7 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 # ---------- Stage 2: Frontend assets (Tailwind + vendored Alpine/Lucide) ----------
-FROM node:20-alpine AS asset-build
+FROM node:22-alpine AS asset-build
 
 WORKDIR /app
 
@@ -34,11 +34,10 @@ RUN npm ci --no-audit --no-fund
 #   - src/css/app.css        (entry stylesheet)
 #   - app/Views/**/*.php     (content scan)
 #   - public/assets/js/**.js (content scan + the vendor target dir)
-#   - tailwind.config.js     (config)
 COPY src ./src
+COPY scripts ./scripts
 COPY app ./app
 COPY public ./public
-COPY tailwind.config.js ./
 
 RUN npm run build:all
 
