@@ -334,6 +334,18 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 
 ## ✅ Completadas
 
+### [DEEP-ADM-01..04, DEEP-ADM-05..07] Hardening arquitectónico de Ola 4/5 (2026-07-11)
+
+Ejecutado tras la auditoría de robustez del 2026-07-10 (`../docs/audits/2026-07-10-auditoria-profunda-robustez.md`, `../docs/plans/2026-07-10-plan-maestro-robustez-mantenibilidad.md`).
+
+- **H-012 (código fantasma):** eliminados `BaseCrudController.php` (222 líneas, 0 subclases) y los aliases JS `catalogMetadataField`/`catalogItemMedia` (0 consumidores), reverificados con grep antes de borrar.
+- **H-014 (duplicación):** `safe_lang()` consolidado de 6 declaraciones inline a un único helper en `app/Helpers/ui_helper.php`.
+- **DEEP-ADM-05/06/07 (deletion test):** las 28 interfaces `*ApiServiceInterface.php` bajo `app/Modules/*/Services/` tenían exactamente 1 implementación cada una — eliminadas todas, tipos de retorno de `Config/Services.php` y de cada Controller apuntando ahora a la clase concreta. `composer analyse`/`format:check`/tests: verde (572/572).
+- **DEEP-ADM-01/02 (BlockInstanceController):** el controller tenía 998 líneas mezclando HTTP con composición de schemas dinámicos y llamadas remotas (fetchBlockTypes/injectDynamicFormOptions/collectionsMap/pagesForIds/entriesForIds/entriesForCollection, ~300 líneas). Extraído a `app/Modules/Cms/Services/BlockTypeOptionsResolver.php` (inyectado vía `Config/Services.php::blockTypeOptionsResolver()`), controller quedó en 681 líneas. Verificado con la suite completa (41 tests de BlockInstanceFlow/WizardFlow) y manualmente en el navegador contra la app corriendo: los selects dinámicos de `form_key` (form_embed) y `collection_key` (collection_grid) funcionan correctamente.
+- **`BlockOwnerRouting`** ya estaba correctamente extraído de una sesión previa (DEEP-ADM-03 esencialmente ya cerrado) — no requirió cambios.
+- **Bug real encontrado:** `image.php` (preview fallback de block types) leía `data['url']` en vez de `data['image_url']`, mismo bug de convención de campo `file` que el catálogo de Domain (nunca mostraba la imagen real, siempre caía al placeholder). Corregido con 2 tests nuevos.
+- **Pendiente, fuera de este alcance:** DEEP-WIZ-01..05 (wizard, `Views/cms/wizard/index.php`, 1748 líneas de JS inline). No hay test runner JS configurado en este repo (sin vitest/jest) — extraerlo con seguridad requiere primero decidir e instalar un framework de test JS. Big-bang rewrite está explícitamente prohibido por el plan; debe hacerse incremental, en su propia sesión.
+
 ### [ADM-010] CSV export/import scaffold opcional para módulos admin (2026-06-10)
 
 - `bin/make-module.sh` now supports `--csv` so generated admin modules can include export/import hooks without hand-writing the boilerplate each time.
