@@ -13,7 +13,7 @@
     cacheDirectory="build/.phpunit.cache">
     <coverage
         includeUncoveredFiles="true"
-        pathCoverage="true"
+        pathCoverage="false"
         ignoreDeprecatedCodeUnits="true"
         disableCodeCoverageIgnore="true">
         <report>

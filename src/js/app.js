@@ -51,10 +51,6 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('schemaEditor', schemaEditor);
     Alpine.data('blockSorter', blockSorter);
 
-    // Backward compatibility aliases for older templates
-    Alpine.data('catalogMetadataField', (config = {}) => Alpine.data('adminMetadataField')(config));
-    Alpine.data('catalogItemMedia', (config = {}) => Alpine.data('adminMediaGallery')(config));
-
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
     window.formFieldBuilder = formFieldBuilderFactory;

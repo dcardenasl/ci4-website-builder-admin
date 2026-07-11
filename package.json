@@ -1,6 +1,7 @@
 {
     "name": "ci4-admin-starter",
     "private": true,
+    "packageManager": "npm@10.9.4",
     "engines": {
         "node": "^22.22.1 || >=24"
     },
@@ -37,8 +38,5 @@
         "src/js/**/*.js": [
             "eslint --fix"
         ]
-    },
-    "pnpm": {
-        "onlyBuiltDependencies": ["esbuild", "@parcel/watcher"]
     }
 }
