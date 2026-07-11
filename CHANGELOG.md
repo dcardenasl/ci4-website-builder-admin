@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Exception handling for unavailable services** — `PermissionsSessionRefresher` and `BlockCatalogService` now gracefully handle timeouts and connection errors when Hub or Domain APIs are unavailable; permission refresh and block catalog loading log warnings and continue gracefully instead of crashing, improving admin resilience during infrastructure incidents.
+
 ### Fixed
 - **Lucide icon rendering in dynamic form options** — when adding or removing field options in the form builder, icons on dynamically created rows would remain unrendered (raw `<i data-lucide>` markup) until the field was saved. Now properly re-scans DOM for new Lucide markup via `$nextTick()` after option add/remove/edit operations, ensuring icons render immediately. Also improved visual feedback for missing option labels in languages other than the default (displays in amber instead of gray).
 
