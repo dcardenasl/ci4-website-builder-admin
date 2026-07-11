@@ -81,15 +81,20 @@ return [
     'field_type_number'   => 'Number',
     'field_type_url'      => 'URL',
 
-    // Field options editor (select / radio / checkbox)
-    'field_options'          => 'Options',
-    'field_options_hint'     => 'Shown to visitors in the order listed. The value is generated from the label and is what gets stored — edit it directly if you need a different one.',
-    'option_value'           => 'Value',
-    'option_label'           => 'Label',
-    'btn_add_option'         => 'Add option',
-    'btn_remove_option'      => 'Remove',
-    'btn_regenerate_option_value' => 'Regenerate value from label',
-    'options_required'       => 'Add at least one option for this field type.',
+    // Field options editor (select / radio / checkbox) — the option list
+    // itself (add/remove/value) is structural and language-independent; each
+    // option's display label is translatable and lives in the per-language
+    // tab below, next to label/placeholder/help_text.
+    'field_options'                  => 'Options',
+    'field_options_structure_hint'   => 'Shown to visitors in the order listed. Add or remove options here — enter each one\'s translated label in the language tabs to the right.',
+    'field_option_labels'            => 'Option labels',
+    'field_option_labels_hint'       => 'The text visitors see for each option, in this language. The value stored on submission stays the same across all languages.',
+    'option_value'                   => 'Value',
+    'option_untitled'                => 'Untitled option',
+    'btn_add_option'                 => 'Add option',
+    'btn_remove_option'              => 'Remove',
+    'btn_regenerate_option_value'    => 'Regenerate value from label',
+    'options_required'               => 'Add at least one option for this field type.',
 
     // Field-level auto-translate
     'btn_translate_field' => 'Auto-translate this field',

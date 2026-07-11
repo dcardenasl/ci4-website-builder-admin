@@ -253,14 +253,15 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
                             </select>
                         </div>
 
+                        <?php $defaultLangIdInt = (int) ($defaultLangId ?? 0); ?>
                         <div x-show="isChoiceType()" x-cloak class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                             <label class="mb-1 block text-xs font-medium text-gray-700"><?= lang('Forms.field_options') ?></label>
-                            <p class="mb-3 text-xs text-gray-500"><?= lang('Forms.field_options_hint') ?></p>
+                            <p class="mb-3 text-xs text-gray-500"><?= lang('Forms.field_options_structure_hint') ?></p>
                             <div class="space-y-2">
                                 <template x-for="(option, index) in fieldForm.options" :key="index">
                                     <div class="flex items-center gap-2">
-                                        <input type="text" x-model="option.label" @input="onOptionLabelInput(option)"
-                                               class="form-input w-full text-sm" placeholder="<?= esc(lang('Forms.option_label')) ?>">
+                                        <span class="min-w-0 flex-1 truncate text-sm text-gray-700"
+                                              x-text="option.labels[<?= $defaultLangIdInt ?>] || '<?= esc(lang('Forms.option_untitled')) ?>'"></span>
                                         <input type="text" x-model="option.value" @input="onOptionValueInput(option)"
                                                class="form-input w-28 shrink-0 text-xs font-mono text-gray-500" placeholder="<?= esc(lang('Forms.option_value')) ?>">
                                         <button type="button" @click="regenerateOptionValue(option)" class="shrink-0 text-gray-400 hover:text-brand-600" title="<?= esc(lang('Forms.btn_regenerate_option_value')) ?>" aria-label="<?= esc(lang('Forms.btn_regenerate_option_value')) ?>">
@@ -328,6 +329,20 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
                                     <div>
                                         <label class="mb-1.5 block text-xs font-medium text-gray-700"><?= lang('Forms.field_help_text') ?></label>
                                         <input type="text" x-model="fieldForm.translations[<?= (int) $lang['id'] ?>].help_text" class="form-input w-full text-sm">
+                                    </div>
+                                </div>
+
+                                <div x-show="isChoiceType() && fieldForm.options.length > 0" x-cloak>
+                                    <label class="mb-1.5 block text-xs font-medium text-gray-700"><?= lang('Forms.field_option_labels') ?></label>
+                                    <p class="mb-2 text-xs text-gray-500"><?= lang('Forms.field_option_labels_hint') ?></p>
+                                    <div class="space-y-2">
+                                        <template x-for="(option, index) in fieldForm.options" :key="index">
+                                            <input type="text"
+                                                   x-model="option.labels[<?= (int) $lang['id'] ?>]"
+                                                   @input="onOptionLabelInput(option, <?= (int) $lang['id'] ?>)"
+                                                   class="form-input w-full text-sm"
+                                                   :placeholder="option.value || '<?= esc(lang('Forms.option_value')) ?>'">
+                                        </template>
                                     </div>
                                 </div>
                             </div>

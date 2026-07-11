@@ -81,15 +81,20 @@ return [
     'field_type_number'   => 'Número',
     'field_type_url'      => 'URL',
 
-    // Field options editor (select / radio / checkbox)
-    'field_options'          => 'Opciones',
-    'field_options_hint'     => 'Se muestran al visitante en el orden listado. El valor se genera a partir de la etiqueta y es lo que se guarda — edítalo directamente si necesitas uno distinto.',
-    'option_value'           => 'Valor',
-    'option_label'           => 'Etiqueta',
-    'btn_add_option'         => 'Agregar opción',
-    'btn_remove_option'      => 'Quitar',
-    'btn_regenerate_option_value' => 'Regenerar valor desde la etiqueta',
-    'options_required'       => 'Agrega al menos una opción para este tipo de campo.',
+    // Field options editor (select / radio / checkbox) — la lista de opciones
+    // (agregar/quitar/valor) es estructural e independiente del idioma; la
+    // etiqueta visible de cada opción es traducible y vive en la pestaña de
+    // idioma de la derecha, junto a label/placeholder/help_text.
+    'field_options'                  => 'Opciones',
+    'field_options_structure_hint'   => 'Se muestran al visitante en el orden listado. Agrega o quita opciones aquí — escribe la etiqueta traducida de cada una en las pestañas de idioma de la derecha.',
+    'field_option_labels'            => 'Etiquetas de opciones',
+    'field_option_labels_hint'       => 'El texto que ve el visitante para cada opción, en este idioma. El valor que se guarda al enviar el formulario es el mismo en todos los idiomas.',
+    'option_value'                   => 'Valor',
+    'option_untitled'                => 'Opción sin etiqueta',
+    'btn_add_option'                 => 'Agregar opción',
+    'btn_remove_option'              => 'Quitar',
+    'btn_regenerate_option_value'    => 'Regenerar valor desde la etiqueta',
+    'options_required'               => 'Agrega al menos una opción para este tipo de campo.',
 
     // Field-level auto-translate
     'btn_translate_field' => 'Traducir automáticamente este campo',

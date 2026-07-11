@@ -28,14 +28,39 @@ export const formFieldBuilderFactory = (config = {}) => {
         is_active: toBoolean(field?.is_active),
     });
 
-    // manualValue: true once the user has typed into Value directly, so label
-    // edits stop overwriting it — same "manual override" behavior as the
-    // page/entry slug field's data-slug-source auto-sync (src/js/utils/slug.js).
-    // Existing saved options are always treated as manual: their value must
-    // never be silently regenerated just because the modal reopened.
-    const normalizeOptions = (options) => (Array.isArray(options)
-        ? options.map((opt) => ({ value: String(opt?.value ?? ''), label: String(opt?.label ?? ''), manualValue: true }))
-        : []);
+    const emptyOptionLabels = () => {
+        const labels = {};
+        languages.forEach((lang) => { labels[lang.id] = ''; });
+        return labels;
+    };
+
+    // Options are stable, language-independent values (field.options: string[]);
+    // their display labels live per-language inside each translation's
+    // option_labels map (field.translations[n].option_labels: {value: label}).
+    // Rebuild the {value, labels: {langId: label}} shape the modal edits from
+    // those two separate sources.
+    //
+    // manualValue: true once the user has typed into Value directly, so
+    // further default-language label edits stop overwriting it — same
+    // "manual override" behavior as the page/entry slug field's
+    // data-slug-source auto-sync (src/js/utils/slug.js). Existing saved
+    // options are always treated as manual: their value must never be
+    // silently regenerated just because the modal reopened.
+    const normalizeOptions = (optionValues, translations) => {
+        const values = Array.isArray(optionValues) ? optionValues : [];
+        const translationList = Array.isArray(translations) ? translations : [];
+
+        return values.map((value) => {
+            const stringValue = String(value);
+            const labels = emptyOptionLabels();
+            languages.forEach((lang) => {
+                const trans = translationList.find((item) => item.language_id == lang.id);
+                const optionLabels = trans && typeof trans.option_labels === 'object' && trans.option_labels !== null ? trans.option_labels : {};
+                labels[lang.id] = String(optionLabels[stringValue] ?? '');
+            });
+            return { value: stringValue, manualValue: true, labels };
+        });
+    };
 
     const defaultTranslations = () => {
         const translations = {};
@@ -81,28 +106,32 @@ export const formFieldBuilderFactory = (config = {}) => {
         },
 
         addOption() {
-            this.fieldForm.options.push({ value: '', label: '', manualValue: false });
+            this.fieldForm.options.push({ value: '', manualValue: false, labels: emptyOptionLabels() });
         },
 
         removeOption(index) {
             this.fieldForm.options.splice(index, 1);
         },
 
-        onOptionLabelInput(option) {
+        // Only the default language's label drives the auto-generated value —
+        // typing a translation into another language tab must never touch it.
+        onOptionLabelInput(option, langId) {
+            if (langId != config.defaultLangId) return;
             if (!option.manualValue) {
-                option.value = slugify(option.label);
+                option.value = slugify(option.labels[langId]);
             }
         },
 
         onOptionValueInput(option) {
+            const defaultLabel = option.labels[config.defaultLangId] || '';
             const normalized = slugify(option.value);
-            option.manualValue = normalized !== '' && normalized !== slugify(option.label);
+            option.manualValue = normalized !== '' && normalized !== slugify(defaultLabel);
             option.value = normalized;
         },
 
         regenerateOptionValue(option) {
             option.manualValue = false;
-            option.value = slugify(option.label);
+            option.value = slugify(option.labels[config.defaultLangId] || '');
         },
 
         openCreate() {
@@ -124,7 +153,7 @@ export const formFieldBuilderFactory = (config = {}) => {
                 field_type: field.field_type,
                 is_required: toBoolean(field.is_required),
                 is_active: toBoolean(field.is_active),
-                options: normalizeOptions(field.options),
+                options: normalizeOptions(field.options, field.translations),
                 translations,
             };
             this.activeFieldLang = String(languages[0]?.code || 'es');
@@ -134,42 +163,60 @@ export const formFieldBuilderFactory = (config = {}) => {
         closeModal() { this.showModal = false; this.editingField = null; },
 
         buildTranslationsArray() {
-            return Object.entries(this.fieldForm.translations).map(([languageId, translation]) => ({
-                language_id: parseInt(languageId, 10), ...translation,
-            }));
+            return Object.entries(this.fieldForm.translations).map(([languageId, translation]) => {
+                const optionLabels = {};
+                this.fieldForm.options.forEach((option) => {
+                    const value = String(option.value || '').trim();
+                    const label = String(option.labels[languageId] || '').trim();
+                    if (value !== '' && label !== '') optionLabels[value] = label;
+                });
+                return { language_id: parseInt(languageId, 10), ...translation, option_labels: optionLabels };
+            });
         },
 
         // ── Field-level auto-translate ───────────────────────────────────────
-        // Translates label/placeholder/help_text from the default language into
-        // one target language. Unlike langTabs()'s _translatePairs, this reads
-        // and writes straight from fieldForm.translations (Alpine state, not
-        // named DOM inputs) since this modal's fields have no `name` attributes
-        // — the field is saved via a JSON fetch(), not a native form submit.
+        // Translates label/placeholder/help_text — and each option's label —
+        // from the default language into one target language. Unlike
+        // langTabs()'s _translatePairs, this reads and writes straight from
+        // fieldForm.translations/options (Alpine state, not named DOM inputs)
+        // since this modal's fields have no `name` attributes — the field is
+        // saved via a JSON fetch(), not a native form submit.
         async translateFieldToLang(targetLangId) {
             const sourceLangId = config.defaultLangId;
             // Loose comparisons: id may arrive as a number (JS config literal) or
             // string (JSON-decoded), matching openEdit()'s `item.language_id == lang.id`.
             if (!config.translateUrl || !sourceLangId || targetLangId == sourceLangId) return;
 
-            const source = this.fieldForm.translations[sourceLangId] || {};
-            const target = this.fieldForm.translations[targetLangId] || (this.fieldForm.translations[targetLangId] = { label: '', placeholder: '', help_text: '' });
             const targetLang = languages.find((lang) => lang.id == targetLangId);
             if (!targetLang) return;
 
-            for (const key of ['label', 'placeholder', 'help_text']) {
-                const text = String(source[key] || '').trim();
-                if (text === '') continue;
+            const translateText = async (text) => {
                 const url = new URL(config.translateUrl, window.location.origin);
                 url.searchParams.set('text', text);
                 url.searchParams.set('source_lang', String(config.defaultLangCode || '').toUpperCase());
                 url.searchParams.set('target_lang', String(targetLang.code || '').toUpperCase());
                 const res = await fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
                 const json = await res.json();
-                if (json && typeof json.translated === 'string') {
-                    target[key] = json.translated;
-                } else if (json && json.error) {
-                    throw new Error(json.error);
-                }
+                if (json && typeof json.translated === 'string') return json.translated;
+                if (json && json.error) throw new Error(json.error);
+                return null;
+            };
+
+            const source = this.fieldForm.translations[sourceLangId] || {};
+            const target = this.fieldForm.translations[targetLangId] || (this.fieldForm.translations[targetLangId] = { label: '', placeholder: '', help_text: '' });
+
+            for (const key of ['label', 'placeholder', 'help_text']) {
+                const text = String(source[key] || '').trim();
+                if (text === '') continue;
+                const translated = await translateText(text);
+                if (translated !== null) target[key] = translated;
+            }
+
+            for (const option of this.fieldForm.options) {
+                const sourceLabel = String(option.labels[sourceLangId] || '').trim();
+                if (sourceLabel === '') continue;
+                const translated = await translateText(sourceLabel);
+                if (translated !== null) option.labels[targetLangId] = translated;
             }
         },
 
@@ -196,9 +243,7 @@ export const formFieldBuilderFactory = (config = {}) => {
 
             const isChoice = this.isChoiceType();
             const options = isChoice
-                ? this.fieldForm.options
-                    .map((opt) => ({ value: String(opt.value || '').trim(), label: String(opt.label || '').trim() }))
-                    .filter((opt) => opt.value !== '')
+                ? [...new Set(this.fieldForm.options.map((opt) => String(opt.value || '').trim()).filter((value) => value !== ''))]
                 : null;
 
             if (isChoice && options.length === 0) {
