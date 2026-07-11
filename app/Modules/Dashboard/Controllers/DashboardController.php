@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Dashboard\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Dashboard\Services\HealthApiServiceInterface;
-use App\Modules\Files\Services\FileApiServiceInterface;
-use App\Modules\Metrics\Services\MetricsApiServiceInterface;
-use App\Modules\Users\Services\UserApiServiceInterface;
+use App\Modules\Dashboard\Services\HealthApiService;
+use App\Modules\Files\Services\FileApiService;
+use App\Modules\Metrics\Services\MetricsApiService;
+use App\Modules\Users\Services\UserApiService;
 use CodeIgniter\Cache\CacheInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -16,10 +16,10 @@ use Psr\Log\LoggerInterface;
 
 class DashboardController extends BaseWebController
 {
-    protected FileApiServiceInterface $fileService;
-    protected HealthApiServiceInterface $healthService;
-    protected MetricsApiServiceInterface $metricsService;
-    protected UserApiServiceInterface $userService;
+    protected FileApiService $fileService;
+    protected HealthApiService $healthService;
+    protected MetricsApiService $metricsService;
+    protected UserApiService $userService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -177,7 +177,7 @@ class DashboardController extends BaseWebController
     /**
      * @return array<string, mixed>
      */
-    private function fetchCachedHealth(string $cacheKey, HealthApiServiceInterface $service, CacheInterface $cache): array
+    private function fetchCachedHealth(string $cacheKey, HealthApiService $service, CacheInterface $cache): array
     {
         $cached = $cache->get($cacheKey);
         if (is_array($cached)) {

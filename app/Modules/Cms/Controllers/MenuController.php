@@ -9,8 +9,8 @@ use App\Modules\Cms\Requests\MenuItemStoreRequest;
 use App\Modules\Cms\Requests\MenuItemUpdateRequest;
 use App\Modules\Cms\Requests\MenuStoreRequest;
 use App\Modules\Cms\Requests\MenuUpdateRequest;
-use App\Modules\Cms\Services\EntryApiServiceInterface;
-use App\Modules\Cms\Services\MenuApiServiceInterface;
+use App\Modules\Cms\Services\EntryApiService;
+use App\Modules\Cms\Services\MenuApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -18,8 +18,8 @@ use Psr\Log\LoggerInterface;
 
 class MenuController extends BaseWebController
 {
-    protected MenuApiServiceInterface $menuService;
-    protected EntryApiServiceInterface $entryService;
+    protected MenuApiService $menuService;
+    protected EntryApiService $entryService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

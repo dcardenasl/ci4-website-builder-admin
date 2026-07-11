@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Iam\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Iam\Services\RoleApiServiceInterface;
-use App\Modules\Iam\Services\RoleMatrixApiServiceInterface;
+use App\Modules\Iam\Services\RoleApiService;
+use App\Modules\Iam\Services\RoleMatrixApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -14,8 +14,8 @@ use Psr\Log\LoggerInterface;
 
 class RolePermissionsController extends BaseWebController
 {
-    private RoleMatrixApiServiceInterface $matrixService;
-    private RoleApiServiceInterface $roleService;
+    private RoleMatrixApiService $matrixService;
+    private RoleApiService $roleService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

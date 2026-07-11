@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Support;
 
 use App\Modules\Cms\Services\BlockCatalogServiceInterface;
-use App\Modules\Cms\Services\BlockInstanceApiServiceInterface;
-use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\BlockInstanceApiService;
+use App\Modules\Cms\Services\LanguageApiService;
 
 final class PagePresetApplier
 {
     public function __construct(
         private readonly BlockCatalogServiceInterface $blockCatalogService,
-        private readonly BlockInstanceApiServiceInterface $blockInstanceService,
-        private readonly LanguageApiServiceInterface $languageService
+        private readonly BlockInstanceApiService $blockInstanceService,
+        private readonly LanguageApiService $languageService
     ) {
     }
 

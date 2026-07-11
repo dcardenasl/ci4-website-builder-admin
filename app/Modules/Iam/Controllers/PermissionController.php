@@ -7,7 +7,7 @@ namespace App\Modules\Iam\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Iam\Requests\PermissionStoreRequest;
 use App\Modules\Iam\Requests\PermissionUpdateRequest;
-use App\Modules\Iam\Services\PermissionApiServiceInterface;
+use App\Modules\Iam\Services\PermissionApiService;
 use App\Modules\Iam\Support\IamLookups;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class PermissionController extends BaseWebController
 {
-    protected PermissionApiServiceInterface $permissionService;
+    protected PermissionApiService $permissionService;
     protected IamLookups $lookups;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void

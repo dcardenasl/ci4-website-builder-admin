@@ -6,7 +6,10 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class BlockTypeApiService extends ResourceApiService implements BlockTypeApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class BlockTypeApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
@@ -31,6 +34,7 @@ class BlockTypeApiService extends ResourceApiService implements BlockTypeApiServ
         return is_array($payload) ? array_values($payload) : [];
     }
 
+    /** @return ApiResponse */
     public function usages(int|string $id): array
     {
         return $this->apiClient->get('/cms/block-types/' . $id . '/usages');

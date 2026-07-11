@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\RedirectStoreRequest;
 use App\Modules\Cms\Requests\RedirectUpdateRequest;
-use App\Modules\Cms\Services\RedirectApiServiceInterface;
+use App\Modules\Cms\Services\RedirectApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class RedirectController extends BaseWebController
 {
-    protected RedirectApiServiceInterface $redirectService;
+    protected RedirectApiService $redirectService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

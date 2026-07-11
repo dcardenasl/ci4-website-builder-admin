@@ -7,13 +7,20 @@ namespace App\Modules\Users\Services;
 use App\Modules\Iam\Support\IamLookups;
 use App\Services\ResourceApiService;
 
-class UserApiService extends ResourceApiService implements UserApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class UserApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
         return '/users';
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @return ApiResponse
+     */
     public function create(array $payload): array
     {
         $response = parent::create($payload);
@@ -22,6 +29,10 @@ class UserApiService extends ResourceApiService implements UserApiServiceInterfa
         return $response;
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @return ApiResponse
+     */
     public function update(int|string $id, array $payload): array
     {
         $response = parent::update($id, $payload);
@@ -30,6 +41,7 @@ class UserApiService extends ResourceApiService implements UserApiServiceInterfa
         return $response;
     }
 
+    /** @return ApiResponse */
     public function delete(int|string $id): array
     {
         $response = parent::delete($id);
@@ -38,6 +50,7 @@ class UserApiService extends ResourceApiService implements UserApiServiceInterfa
         return $response;
     }
 
+    /** @return ApiResponse */
     public function approve(int|string $id, ?string $locale = null): array
     {
         $payload = [];
@@ -51,6 +64,7 @@ class UserApiService extends ResourceApiService implements UserApiServiceInterfa
         return $response;
     }
 
+    /** @return ApiResponse */
     public function assignableRoles(): array
     {
         return $this->apiClient->get('/users/assignable-roles');

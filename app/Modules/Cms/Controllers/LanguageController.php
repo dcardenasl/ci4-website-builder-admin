@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\LanguageStoreRequest;
 use App\Modules\Cms\Requests\LanguageUpdateRequest;
-use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class LanguageController extends BaseWebController
 {
-    protected LanguageApiServiceInterface $languageService;
+    protected LanguageApiService $languageService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

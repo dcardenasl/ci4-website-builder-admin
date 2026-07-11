@@ -9,7 +9,7 @@ use App\Services\ResourceApiService;
 /**
  * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
  */
-class CategoryApiService extends ResourceApiService implements CategoryApiServiceInterface
+class CategoryApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
@@ -22,6 +22,7 @@ class CategoryApiService extends ResourceApiService implements CategoryApiServic
     /**
      * @param array<string, mixed> $filters
      * @return ApiResponse
+     * @param array<string, mixed> $filters
      */
     public function collections(array $filters = []): array
     {
@@ -31,12 +32,14 @@ class CategoryApiService extends ResourceApiService implements CategoryApiServic
     /**
      * @param array<string, mixed> $filters
      * @return ApiResponse
+     * @param array<string, mixed> $filters
      */
     public function categories(array $filters = []): array
     {
         return $this->apiClient->get('/cms/categories', $filters);
     }
 
+    /** @return ApiResponse */
     public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
     {
         $params = ['slug' => $slug, 'language_id' => $languageId];

@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\PageStoreRequest;
 use App\Modules\Cms\Requests\PageUpdateRequest;
-use App\Modules\Cms\Services\PageApiServiceInterface;
+use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Support\CmsPresetCatalog;
 use App\Modules\Cms\Support\PagePresetApplier;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -17,8 +17,8 @@ use Psr\Log\LoggerInterface;
 
 class PageController extends BaseWebController
 {
-    protected PageApiServiceInterface $pageService;
-    protected \App\Modules\Cms\Services\CollectionApiServiceInterface $collectionService;
+    protected PageApiService $pageService;
+    protected \App\Modules\Cms\Services\CollectionApiService $collectionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

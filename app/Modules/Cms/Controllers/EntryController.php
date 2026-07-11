@@ -7,8 +7,8 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\EntryStoreRequest;
 use App\Modules\Cms\Requests\EntryUpdateRequest;
-use App\Modules\Cms\Services\CollectionApiServiceInterface;
-use App\Modules\Cms\Services\EntryApiServiceInterface;
+use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\EntryApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -16,8 +16,8 @@ use Psr\Log\LoggerInterface;
 
 class EntryController extends BaseWebController
 {
-    protected EntryApiServiceInterface $entryService;
-    protected CollectionApiServiceInterface $collectionService;
+    protected EntryApiService $entryService;
+    protected CollectionApiService $collectionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

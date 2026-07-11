@@ -6,7 +6,7 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class FormSubmissionApiService extends ResourceApiService implements FormSubmissionApiServiceInterface
+class FormSubmissionApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {

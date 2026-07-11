@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\BlockTypeStoreRequest;
 use App\Modules\Cms\Requests\BlockTypeUpdateRequest;
-use App\Modules\Cms\Services\BlockTypeApiServiceInterface;
+use App\Modules\Cms\Services\BlockTypeApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class BlockTypeController extends BaseWebController
 {
-    protected BlockTypeApiServiceInterface $blockTypeService;
+    protected BlockTypeApiService $blockTypeService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

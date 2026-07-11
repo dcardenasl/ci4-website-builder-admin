@@ -7,7 +7,7 @@ namespace App\Modules\Users\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Users\Requests\UserStoreRequest;
 use App\Modules\Users\Requests\UserUpdateRequest;
-use App\Modules\Users\Services\UserApiServiceInterface;
+use App\Modules\Users\Services\UserApiService;
 use App\Support\CatalogOptions;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class UserController extends BaseWebController
 {
-    protected UserApiServiceInterface $userService;
+    protected UserApiService $userService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

@@ -7,7 +7,10 @@ namespace App\Modules\Dashboard\Services;
 use App\Libraries\ApiClientInterface;
 use App\Services\BaseApiService;
 
-class HealthApiService extends BaseApiService implements HealthApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class HealthApiService extends BaseApiService
 {
     /**
      * @param list<string>|null $healthPaths

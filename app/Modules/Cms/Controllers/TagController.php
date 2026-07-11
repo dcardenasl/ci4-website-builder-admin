@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\TagStoreRequest;
 use App\Modules\Cms\Requests\TagUpdateRequest;
-use App\Modules\Cms\Services\TagApiServiceInterface;
+use App\Modules\Cms\Services\TagApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class TagController extends BaseWebController
 {
-    protected TagApiServiceInterface $tagService;
+    protected TagApiService $tagService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

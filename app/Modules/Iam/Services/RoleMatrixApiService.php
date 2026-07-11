@@ -6,7 +6,7 @@ namespace App\Modules\Iam\Services;
 
 use App\Services\BaseApiService;
 
-class RoleMatrixApiService extends BaseApiService implements RoleMatrixApiServiceInterface
+class RoleMatrixApiService extends BaseApiService
 {
     /**
      * @return array<string, mixed>

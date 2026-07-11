@@ -9,7 +9,7 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
     private const CACHE_KEY = 'cms_block_types_active_catalog';
 
     public function __construct(
-        private readonly BlockTypeApiServiceInterface $blockTypeService
+        private readonly BlockTypeApiService $blockTypeService
     ) {
     }
 

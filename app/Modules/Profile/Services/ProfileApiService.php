@@ -11,11 +11,14 @@ use App\Services\BaseApiService;
  *
  * Wraps API endpoints for user profile operations.
  * Consolidates authentication and user data endpoints used by ProfileController.
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
  */
-class ProfileApiService extends BaseApiService implements ProfileApiServiceInterface
+class ProfileApiService extends BaseApiService
 {
     /**
      * Get authenticated user profile
+     *
+     * @return ApiResponse
      */
     public function me(): array
     {
@@ -30,6 +33,9 @@ class ProfileApiService extends BaseApiService implements ProfileApiServiceInter
      * keep the admin endpoint blocked for self-edit. The $userId argument is
      * accepted for existing callers but is intentionally not used — the API
      * derives the subject from the JWT.
+     *
+     * @param array<string, mixed> $payload
+     * @return ApiResponse
      */
     public function update(string $userId, array $payload): array
     {
@@ -38,6 +44,8 @@ class ProfileApiService extends BaseApiService implements ProfileApiServiceInter
 
     /**
      * Request password reset email
+     *
+     * @return ApiResponse
      */
     public function forgotPassword(string $email, string $clientBaseUrl, ?string $locale = null): array
     {
@@ -50,6 +58,9 @@ class ProfileApiService extends BaseApiService implements ProfileApiServiceInter
 
     /**
      * Resend email verification
+     *
+     * @param array<string, mixed> $payload
+     * @return ApiResponse
      */
     public function resendVerification(array $payload = []): array
     {

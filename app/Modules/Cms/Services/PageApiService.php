@@ -9,7 +9,7 @@ use App\Services\ResourceApiService;
 /**
  * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
  */
-class PageApiService extends ResourceApiService implements PageApiServiceInterface
+class PageApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
@@ -17,11 +17,13 @@ class PageApiService extends ResourceApiService implements PageApiServiceInterfa
     }
 
 
+    /** @return ApiResponse */
     public function publish(int|string $id): array
     {
         return $this->apiClient->put($this->resourcePath() . '/' . $id, ['status' => 'published']);
     }
 
+    /** @return ApiResponse */
     public function archive(int|string $id): array
     {
         return $this->apiClient->put($this->resourcePath() . '/' . $id, ['status' => 'archived']);
@@ -32,12 +34,14 @@ class PageApiService extends ResourceApiService implements PageApiServiceInterfa
     /**
      * @param array<string, mixed> $filters
      * @return ApiResponse
+     * @param array<string, mixed> $filters
      */
     public function pages(array $filters = []): array
     {
         return $this->apiClient->get('/cms/pages', $filters);
     }
 
+    /** @return ApiResponse */
     public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
     {
         $params = ['slug' => $slug, 'language_id' => $languageId];

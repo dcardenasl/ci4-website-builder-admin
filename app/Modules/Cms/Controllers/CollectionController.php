@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\CollectionStoreRequest;
 use App\Modules\Cms\Requests\CollectionUpdateRequest;
-use App\Modules\Cms\Services\CollectionApiServiceInterface;
+use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Support\CmsPresetCatalog;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class CollectionController extends BaseWebController
 {
-    protected CollectionApiServiceInterface $collectionService;
+    protected CollectionApiService $collectionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\CollectionApiServiceInterface;
-use App\Modules\Cms\Services\MenuApiServiceInterface;
-use App\Modules\Cms\Services\PageApiServiceInterface;
+use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\MenuApiService;
+use App\Modules\Cms\Services\PageApiService;
 use App\Modules\Cms\Support\CmsPresetCatalog;
 use App\Modules\Cms\Support\PagePresetApplier;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,9 +16,9 @@ use Psr\Log\LoggerInterface;
 
 class StructureWizardController extends BaseWebController
 {
-    protected CollectionApiServiceInterface $collectionService;
-    protected PageApiServiceInterface $pageService;
-    protected MenuApiServiceInterface $menuService;
+    protected CollectionApiService $collectionService;
+    protected PageApiService $pageService;
+    protected MenuApiService $menuService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

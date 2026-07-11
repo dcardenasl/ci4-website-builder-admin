@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\FormSubmissionApiServiceInterface;
+use App\Modules\Cms\Services\FormSubmissionApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class FormSubmissionController extends BaseWebController
 {
-    protected FormSubmissionApiServiceInterface $submissionService;
+    protected FormSubmissionApiService $submissionService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Analytics\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Analytics\Services\AnalyticsApiServiceInterface;
+use App\Modules\Analytics\Services\AnalyticsApiService;
 use App\Support\CatalogOptions;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class AnalyticsController extends BaseWebController
 {
-    protected AnalyticsApiServiceInterface $analyticsService;
+    protected AnalyticsApiService $analyticsService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

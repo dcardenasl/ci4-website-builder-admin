@@ -6,7 +6,10 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class RedirectApiService extends ResourceApiService implements RedirectApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class RedirectApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
@@ -15,11 +18,19 @@ class RedirectApiService extends ResourceApiService implements RedirectApiServic
 
 
 
+    /**
+     * @param array<string, mixed> $filters
+     * @return ApiResponse
+     */
     public function exportCsv(array $filters = []): array
     {
         return $this->list($filters);
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return ApiResponse
+     */
     public function importCsv(array $rows): array
     {
         $created = [];

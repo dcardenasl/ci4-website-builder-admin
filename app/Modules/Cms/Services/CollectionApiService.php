@@ -6,13 +6,17 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class CollectionApiService extends ResourceApiService implements CollectionApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class CollectionApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
         return '/cms/collections';
     }
 
+    /** @return ApiResponse */
     public function checkSlug(string $slug, int $languageId, string $currentId = ''): array
     {
         $params = ['slug' => $slug, 'language_id' => $languageId];

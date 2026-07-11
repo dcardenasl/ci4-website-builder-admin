@@ -6,7 +6,7 @@ namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\SiteIdentityUpdateRequest;
-use App\Modules\Cms\Services\SettingApiServiceInterface;
+use App\Modules\Cms\Services\SettingApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 class SiteIdentityController extends BaseWebController
 {
-    protected SettingApiServiceInterface $settingService;
+    protected SettingApiService $settingService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\FileTranslationApiServiceInterface;
-use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\FileTranslationApiService;
+use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -14,8 +14,8 @@ use Psr\Log\LoggerInterface;
 
 class FileTranslationController extends BaseWebController
 {
-    protected FileTranslationApiServiceInterface $fileTranslationService;
-    protected LanguageApiServiceInterface $languageService;
+    protected FileTranslationApiService $fileTranslationService;
+    protected LanguageApiService $languageService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

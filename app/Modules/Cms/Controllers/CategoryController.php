@@ -7,7 +7,7 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\CategoryStoreRequest;
 use App\Modules\Cms\Requests\CategoryUpdateRequest;
-use App\Modules\Cms\Services\CategoryApiServiceInterface;
+use App\Modules\Cms\Services\CategoryApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 
 class CategoryController extends BaseWebController
 {
-    protected CategoryApiServiceInterface $categoryService;
+    protected CategoryApiService $categoryService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

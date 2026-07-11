@@ -6,8 +6,15 @@ namespace App\Modules\Metrics\Services;
 
 use App\Services\BaseApiService;
 
-class MetricsApiService extends BaseApiService implements MetricsApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class MetricsApiService extends BaseApiService
 {
+    /**
+     * @param array<string, mixed> $filters
+     * @return ApiResponse
+     */
     public function summary(array $filters = []): array
     {
         return $this->apiClient->get('/metrics', $filters);
@@ -15,6 +22,7 @@ class MetricsApiService extends BaseApiService implements MetricsApiServiceInter
 
     /**
      * @return array{ok: bool, status: int, data: array<string, mixed>|list<array<string, mixed>>, raw: string, headers: array<string, string>, messages: list<string>, fieldErrors: array<string, string>}
+     * @param array<string, mixed> $filters
      */
     public function timeseries(array $filters = []): array
     {

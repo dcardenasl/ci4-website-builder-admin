@@ -6,7 +6,7 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class FormApiService extends ResourceApiService implements FormApiServiceInterface
+class FormApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
@@ -24,6 +24,7 @@ class FormApiService extends ResourceApiService implements FormApiServiceInterfa
     /**
      * @param array<string, mixed> $data
      * @return array<string, mixed>
+     * @param array<string, mixed> $data
      */
     public function createField(int|string $formId, array $data): array
     {
@@ -33,6 +34,7 @@ class FormApiService extends ResourceApiService implements FormApiServiceInterfa
     /**
      * @param array<string, mixed> $data
      * @return array<string, mixed>
+     * @param array<string, mixed> $data
      */
     public function updateField(int|string $formId, int|string $fieldId, array $data): array
     {

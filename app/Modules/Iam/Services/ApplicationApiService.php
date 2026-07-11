@@ -6,7 +6,7 @@ namespace App\Modules\Iam\Services;
 
 use App\Services\ResourceApiService;
 
-class ApplicationApiService extends ResourceApiService implements ApplicationApiServiceInterface
+class ApplicationApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {

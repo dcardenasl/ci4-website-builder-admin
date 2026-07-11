@@ -7,8 +7,8 @@ namespace App\Modules\Iam\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Iam\Requests\RoleStoreRequest;
 use App\Modules\Iam\Requests\RoleUpdateRequest;
-use App\Modules\Iam\Services\PermissionApiServiceInterface;
-use App\Modules\Iam\Services\RoleApiServiceInterface;
+use App\Modules\Iam\Services\PermissionApiService;
+use App\Modules\Iam\Services\RoleApiService;
 use App\Modules\Iam\Support\IamLookups;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -17,8 +17,8 @@ use Psr\Log\LoggerInterface;
 
 class RoleController extends BaseWebController
 {
-    protected RoleApiServiceInterface $roleService;
-    protected PermissionApiServiceInterface $permissionService;
+    protected RoleApiService $roleService;
+    protected PermissionApiService $permissionService;
     protected IamLookups $lookups;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void

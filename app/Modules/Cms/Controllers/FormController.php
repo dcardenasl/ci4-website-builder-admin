@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\FormApiServiceInterface;
-use App\Modules\Cms\Services\LanguageApiServiceInterface;
+use App\Modules\Cms\Services\FormApiService;
+use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -14,8 +14,8 @@ use Psr\Log\LoggerInterface;
 
 class FormController extends BaseWebController
 {
-    protected FormApiServiceInterface $formService;
-    protected LanguageApiServiceInterface $languageService;
+    protected FormApiService $formService;
+    protected LanguageApiService $languageService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

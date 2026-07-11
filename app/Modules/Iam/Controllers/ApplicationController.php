@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Iam\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Iam\Services\ApplicationApiServiceInterface;
+use App\Modules\Iam\Services\ApplicationApiService;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
  */
 class ApplicationController extends BaseWebController
 {
-    protected ApplicationApiServiceInterface $applicationService;
+    protected ApplicationApiService $applicationService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

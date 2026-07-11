@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\BlockInstanceApiServiceInterface;
+use App\Modules\Cms\Services\BlockInstanceApiService;
+use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Support\BlockOwnerRouting;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -14,28 +15,17 @@ use Psr\Log\LoggerInterface;
 
 class BlockInstanceController extends BaseWebController
 {
-    protected BlockInstanceApiServiceInterface $blockInstanceService;
+    protected BlockInstanceApiService $blockInstanceService;
+    protected BlockTypeOptionsResolver $blockTypeOptions;
 
     private const OWNER_PAGE = 'page';
     private const OWNER_ENTRY = 'entry';
-
-    /**
-     * Per-request memoization for pagesForIds()/entriesForIds() — fetchBlockTypes()
-     * calls injectDynamicFormOptions() once per block type, and several types can
-     * declare the same page_id/entry_id config field. Without this, each one would
-     * re-fetch the full (uncached) list.
-     *
-     * @var array<int, array{value: string, label: string}>|null
-     */
-    private ?array $pagesForIdsCache = null;
-
-    /** @var array<int, array{value: string, label: string}>|null */
-    private ?array $entriesForIdsCache = null;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->blockInstanceService = service('blockInstanceApiService');
+        $this->blockTypeOptions = service('blockTypeOptionsResolver');
     }
 
     private function requireWrite(): ?RedirectResponse
@@ -131,7 +121,7 @@ class BlockInstanceController extends BaseWebController
         // Only show top-level blocks in the page editor (children managed via their parent's UI)
         $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
 
-        $typesIndexed = $this->fetchBlockTypes();
+        $typesIndexed = $this->blockTypeOptions->resolve();
         $routes = BlockOwnerRouting::routes($ownerType);
         $previewUrl = BlockOwnerRouting::previewUrl($ownerType, $page, $this->activeLanguages());
 
@@ -140,7 +130,7 @@ class BlockInstanceController extends BaseWebController
             'page'              => $page,
             'blocks'            => $blocks,
             'blockTypes'        => $typesIndexed,
-            'collectionsMap'    => $this->collectionsMap(),
+            'collectionsMap'    => $this->blockTypeOptions->collectionsMap(),
             'publicSiteUrl'     => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
             'ownerType'         => $ownerType,
             'ownerLabel'        => BlockOwnerRouting::label($ownerType),
@@ -172,7 +162,7 @@ class BlockInstanceController extends BaseWebController
             return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
-        $typesIndexed = $this->fetchBlockTypes();
+        $typesIndexed = $this->blockTypeOptions->resolve();
         $types = array_values($typesIndexed);
 
         $languages = $this->activeLanguages();
@@ -354,7 +344,7 @@ class BlockInstanceController extends BaseWebController
                 cache()->save($typeCacheKey, $blockType, 3600);
             }
         }
-        $this->injectDynamicFormOptions($blockType);
+        $this->blockTypeOptions->augment($blockType);
 
         // Fetch active languages (cached)
         $languages = cache()->get('cms_active_languages');
@@ -641,7 +631,7 @@ class BlockInstanceController extends BaseWebController
             ->setContentType('application/json')
             ->setBody(json_encode([
                 'ok' => true,
-                'options' => $this->entriesForCollection($collectionId),
+                'options' => $this->blockTypeOptions->entriesForCollection($collectionId),
             ]) ?: '{}');
     }
 
@@ -664,7 +654,7 @@ class BlockInstanceController extends BaseWebController
         $allBlocks      = $blocksResponse['ok'] ? $this->extractItems($blocksResponse) : [];
         $children       = array_values(array_filter($allBlocks, static fn (array $b) => (int) ($b['parent_instance_id'] ?? 0) === (int) $instanceId));
 
-        $typesIndexed = $this->fetchBlockTypes();
+        $typesIndexed = $this->blockTypeOptions->resolve();
 
         $parentType = $typesIndexed[$parentBlock['block_id']] ?? [];
 
@@ -675,7 +665,7 @@ class BlockInstanceController extends BaseWebController
             'parentType'           => $parentType,
             'children'             => $children,
             'blockTypes'           => $typesIndexed,
-            'collectionsMap'       => $this->collectionsMap(),
+            'collectionsMap'       => $this->blockTypeOptions->collectionsMap(),
             'ownerType'            => $ownerType,
             'ownerLabel'           => BlockOwnerRouting::label($ownerType),
             'ownerBlocksRoute'     => BlockOwnerRouting::routes($ownerType)['index'],
@@ -687,312 +677,5 @@ class BlockInstanceController extends BaseWebController
             'ownerChildrenReorderRoute' => BlockOwnerRouting::routes($ownerType)['childrenReorder'],
             'childLabel'           => BlockOwnerRouting::childLabel($ownerType),
         ]);
-    }
-
-    /** @return array<int, array<string, mixed>> keyed by block type id */
-    private function fetchBlockTypes(): array
-    {
-        $types = service('blockCatalogService')->indexed();
-
-        $indexed = [];
-        foreach ((array) $types as $t) {
-            if (! is_array($t) || ! isset($t['id'])) {
-                continue;
-            }
-
-            $this->injectDynamicFormOptions($t);
-            $indexed[(int) $t['id']] = $t;
-        }
-        return $indexed;
-    }
-
-    /**
-     * Dynamically inject active form keys as select options for form_embed blocks.
-     *
-     * @param array<string, mixed> $blockType
-     */
-    private function injectDynamicFormOptions(array &$blockType): void
-    {
-        $schema = is_array($blockType['schema_definition'] ?? [])
-            ? ($blockType['schema_definition'] ?? [])
-            : json_decode((string) ($blockType['schema_definition'] ?? '{}'), true);
-
-        $hasFormEmbed     = ($blockType['block_key'] ?? '') === 'form_embed';
-        $hasCollectionKey = isset($schema['config_fields']['collection_key']) || isset($blockType['config_fields']['collection_key']);
-        $hasCollectionId  = isset($schema['config_fields']['collection_id'])  || isset($blockType['config_fields']['collection_id']);
-        $hasPageId        = isset($schema['config_fields']['page_id']) || isset($blockType['config_fields']['page_id']);
-        $hasEntryId       = isset($schema['config_fields']['entry_id']) || isset($blockType['config_fields']['entry_id']);
-
-        if (! $hasFormEmbed && ! $hasCollectionKey && ! $hasCollectionId && ! $hasPageId && ! $hasEntryId) {
-            return;
-        }
-
-        if ($hasFormEmbed) {
-            $forms = [];
-            try {
-                $formsResponse = $this->safeApiCall(
-                    fn () => service('formApiService')->list(['limit' => 100, 'is_active' => true])
-                );
-                if ($formsResponse['ok']) {
-                    $items = $this->extractItems($formsResponse);
-                    foreach ($items as $f) {
-                        if (! empty($f['form_key'])) {
-                            $forms[] = (string) $f['form_key'];
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                log_message('error', '[BlockInstanceController] Failed to fetch forms for options: ' . $e->getMessage());
-            }
-
-            if ($forms === []) {
-                $forms = ['contact'];
-            }
-
-            if (isset($schema['config_fields']['form_key'])) {
-                $schema['config_fields']['form_key']['type']    = 'select';
-                $schema['config_fields']['form_key']['options'] = $forms;
-            }
-
-            if (isset($blockType['config_fields']['form_key'])) {
-                $blockType['config_fields']['form_key']['type']    = 'select';
-                $blockType['config_fields']['form_key']['options'] = $forms;
-            }
-        }
-
-        if ($hasCollectionKey || $hasCollectionId) {
-            $collectionsForKeys = [];
-            $collectionsForIds  = [];
-            try {
-                $collectionsResponse = $this->safeApiCall(
-                    fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true])
-                );
-                if ($collectionsResponse['ok']) {
-                    $items = $this->extractItems($collectionsResponse);
-                    foreach ($items as $c) {
-                        if (! empty($c['collection_key'])) {
-                            $collectionsForKeys[] = (string) $c['collection_key'];
-                        }
-                        if (isset($c['id'])) {
-                            $label = $c['name'] ?? $c['collection_key'] ?? $c['title'] ?? $c['label'] ?? $c['id'];
-                            $collectionsForIds[] = [
-                                'value' => (int) $c['id'],
-                                'label' => (string) $label,
-                            ];
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                log_message('error', '[BlockInstanceController] Failed to fetch collections for options: ' . $e->getMessage());
-            }
-
-            if ($hasCollectionKey) {
-                if (isset($schema['config_fields']['collection_key'])) {
-                    $schema['config_fields']['collection_key']['type']    = 'select';
-                    $schema['config_fields']['collection_key']['options'] = $collectionsForKeys;
-                }
-                if (isset($blockType['config_fields']['collection_key'])) {
-                    $blockType['config_fields']['collection_key']['type']    = 'select';
-                    $blockType['config_fields']['collection_key']['options'] = $collectionsForKeys;
-                }
-            }
-
-            if ($hasCollectionId) {
-                if (isset($schema['config_fields']['collection_id'])) {
-                    $schema['config_fields']['collection_id']['type']    = 'select';
-                    $schema['config_fields']['collection_id']['options'] = $collectionsForIds;
-                }
-                if (isset($blockType['config_fields']['collection_id'])) {
-                    $blockType['config_fields']['collection_id']['type']    = 'select';
-                    $blockType['config_fields']['collection_id']['options'] = $collectionsForIds;
-                }
-            }
-        }
-
-        if ($hasPageId) {
-            $pagesForIds = $this->pagesForIds();
-            if (isset($schema['config_fields']['page_id'])) {
-                $schema['config_fields']['page_id']['type']    = 'select';
-                $schema['config_fields']['page_id']['options'] = $pagesForIds;
-            }
-            if (isset($blockType['config_fields']['page_id'])) {
-                $blockType['config_fields']['page_id']['type']    = 'select';
-                $blockType['config_fields']['page_id']['options'] = $pagesForIds;
-            }
-        }
-
-        if ($hasEntryId) {
-            $entriesForIds = $this->entriesForIds();
-            if (isset($schema['config_fields']['entry_id'])) {
-                $schema['config_fields']['entry_id']['type']    = 'select';
-                $schema['config_fields']['entry_id']['options'] = $entriesForIds;
-            }
-            if (isset($blockType['config_fields']['entry_id'])) {
-                $blockType['config_fields']['entry_id']['type']    = 'select';
-                $blockType['config_fields']['entry_id']['options'] = $entriesForIds;
-            }
-        }
-
-        $blockType['schema_definition'] = $schema;
-    }
-
-    /**
-     * Build translation targets for Alpine autoTranslateAll() method.
-     * Generates field pairs for each language to translate from the default language.
-     *
-     * @param array $languages
-     * @param array $fields
-     * @param int $defaultLangId
-     * @return array
-     */
-    /**
-     * @return array<string, int> Map of collection_key => collection_id
-     */
-    private function collectionsMap(): array
-    {
-        $collectionsMap = [];
-        try {
-            $collectionsResponse = $this->safeApiCall(
-                fn () => service('collectionApiService')->list(['limit' => 100, 'is_active' => true])
-            );
-            if ($collectionsResponse['ok']) {
-                $items = $this->extractItems($collectionsResponse);
-                foreach ($items as $c) {
-                    if (! empty($c['collection_key']) && isset($c['id'])) {
-                        $collectionsMap[(string) $c['collection_key']] = (int) $c['id'];
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[BlockInstanceController] Failed to fetch collections for map: ' . $e->getMessage());
-        }
-        return $collectionsMap;
-    }
-
-    /**
-     * @return array<int, array{value: string, label: string}>
-     */
-    private function pagesForIds(): array
-    {
-        if ($this->pagesForIdsCache !== null) {
-            return $this->pagesForIdsCache;
-        }
-
-        $pages = [];
-        try {
-            $response = $this->safeApiCall(fn () => service('pageApiService')->pages(['limit' => 250]));
-            if ($response['ok']) {
-                foreach ($this->extractItems($response) as $item) {
-                    if (! is_array($item) || ! isset($item['id'])) {
-                        continue;
-                    }
-
-                    $label = null;
-                    if (! empty($item['translations']) && is_array($item['translations'])) {
-                        foreach ($item['translations'] as $translation) {
-                            if (is_array($translation) && ! empty($translation['title'])) {
-                                $label = (string) $translation['title'];
-                                break;
-                            }
-                        }
-                    }
-
-                    $pages[] = [
-                        'value' => (string) $item['id'],
-                        'label' => (string) ($label ?? $item['name'] ?? $item['title'] ?? $item['label'] ?? $item['id']),
-                    ];
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[BlockInstanceController] Failed to fetch pages for options: ' . $e->getMessage());
-        }
-
-        return $this->pagesForIdsCache = $pages;
-    }
-
-    /**
-     * @return array<int, array{value: string, label: string}>
-     */
-    private function entriesForIds(): array
-    {
-        if ($this->entriesForIdsCache !== null) {
-            return $this->entriesForIdsCache;
-        }
-
-        $entries = [];
-        try {
-            $response = $this->safeApiCall(fn () => service('entryApiService')->list(['limit' => 250]));
-            if ($response['ok']) {
-                foreach ($this->extractItems($response) as $item) {
-                    if (! is_array($item) || ! isset($item['id'])) {
-                        continue;
-                    }
-
-                    $label = null;
-                    if (! empty($item['translations']) && is_array($item['translations'])) {
-                        foreach ($item['translations'] as $translation) {
-                            if (is_array($translation) && ! empty($translation['title'])) {
-                                $label = (string) $translation['title'];
-                                break;
-                            }
-                        }
-                    }
-
-                    $entries[] = [
-                        'value' => (string) $item['id'],
-                        'label' => (string) ($label ?? $item['title'] ?? $item['name'] ?? $item['slug'] ?? $item['id']),
-                    ];
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[BlockInstanceController] Failed to fetch entries for options: ' . $e->getMessage());
-        }
-
-        return $this->entriesForIdsCache = $entries;
-    }
-
-    /**
-     * @return array<int, array{value: string, label: string}>
-     */
-    private function entriesForCollection(int $collectionId): array
-    {
-        if ($collectionId <= 0) {
-            return [];
-        }
-
-        $options = [];
-        try {
-            $response = $this->safeApiCall(fn () => service('entryApiService')->list([
-                'limit' => 250,
-                'collection_id' => $collectionId,
-            ]));
-
-            if ($response['ok']) {
-                foreach ($this->extractItems($response) as $item) {
-                    if (! is_array($item) || ! isset($item['id'])) {
-                        continue;
-                    }
-
-                    $label = null;
-                    if (! empty($item['translations']) && is_array($item['translations'])) {
-                        foreach ($item['translations'] as $translation) {
-                            if (is_array($translation) && ! empty($translation['title'])) {
-                                $label = (string) $translation['title'];
-                                break;
-                            }
-                        }
-                    }
-
-                    $options[] = [
-                        'value' => (string) $item['id'],
-                        'label' => (string) ($label ?? $item['title'] ?? $item['name'] ?? $item['slug'] ?? $item['id']),
-                    ];
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', '[BlockInstanceController] Failed to fetch entries for collection options: ' . $e->getMessage());
-        }
-
-        return $options;
     }
 }

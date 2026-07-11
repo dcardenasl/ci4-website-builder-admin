@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Cms\Services\LanguageApiServiceInterface;
-use App\Modules\Cms\Services\TranslationAuditApiServiceInterface;
+use App\Modules\Cms\Services\LanguageApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -14,8 +14,8 @@ use Psr\Log\LoggerInterface;
 
 class TranslationAuditController extends BaseWebController
 {
-    protected TranslationAuditApiServiceInterface $auditService;
-    protected LanguageApiServiceInterface $languageService;
+    protected TranslationAuditApiService $auditService;
+    protected LanguageApiService $languageService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {

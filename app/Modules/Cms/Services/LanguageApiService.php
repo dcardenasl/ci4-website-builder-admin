@@ -6,7 +6,7 @@ namespace App\Modules\Cms\Services;
 
 use App\Services\ResourceApiService;
 
-class LanguageApiService extends ResourceApiService implements LanguageApiServiceInterface
+class LanguageApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
