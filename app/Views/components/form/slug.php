@@ -26,15 +26,6 @@ $help      = $help ?? '';
 $attrs     = $attrs ?? '';
 $invalidMessage = $invalidMessage ?? '';
 $languageSelector = $languageSelector ?? '';
-
-// Self-contained localization helper with fallback
-if (!function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $val = lang($key);
-        return ($val === $key) ? $fallback : $val;
-    }
-}
 ?>
 
 <div data-slug-field>

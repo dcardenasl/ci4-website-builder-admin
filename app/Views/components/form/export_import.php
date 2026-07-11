@@ -13,15 +13,6 @@ $importLabel = $importLabel ?? '';
 $previewView = $previewView ?? 'components/form/import_preview';
 $previewRows = is_array($previewRows ?? null) ? $previewRows : [];
 
-if (! function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $value = lang($key);
-
-        return $value === $key ? $fallback : (string) $value;
-    }
-}
-
 $importText = $importLabel !== '' ? lang($importLabel) : safe_lang('App.import', 'Import');
 ?>
 <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

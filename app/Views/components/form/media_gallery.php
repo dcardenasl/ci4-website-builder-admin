@@ -14,15 +14,6 @@ $name  = $name ?? 'media';
 $label = $label ?? '';
 $help  = $help ?? '';
 
-// Self-contained localization helper with fallback
-if (!function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $val = lang($key);
-        return ($val === $key) ? $fallback : $val;
-    }
-}
-
 $label = $label !== '' ? lang($label) : safe_lang('Catalog.field_media', 'Galería Multimedia');
 $help  = $help  !== '' ? lang($help) : safe_lang('Catalog.help_item_media', 'Administra las imágenes y videos de este recurso.');
 

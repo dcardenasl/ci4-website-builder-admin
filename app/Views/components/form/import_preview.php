@@ -4,15 +4,6 @@
  */
 
 $rows = is_array($rows ?? null) ? $rows : [];
-
-if (! function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $value = lang($key);
-
-        return $value === $key ? $fallback : (string) $value;
-    }
-}
 ?>
 <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
     <div class="flex items-center justify-between">

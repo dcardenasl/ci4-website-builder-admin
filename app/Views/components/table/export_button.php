@@ -10,15 +10,6 @@ $exportUrl = $exportUrl ?? '';
 $label = $label ?? '';
 $title = $title ?? '';
 
-if (! function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $value = lang($key);
-
-        return $value === $key ? $fallback : (string) $value;
-    }
-}
-
 $buttonLabel = $label !== '' ? lang($label) : safe_lang('App.export', 'Export');
 $buttonTitle = $title !== '' ? lang($title) : safe_lang('App.export', 'Export');
 ?>
