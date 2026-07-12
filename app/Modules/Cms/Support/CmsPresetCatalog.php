@@ -23,6 +23,28 @@ final class CmsPresetCatalog
     }
 
     /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    public static function collectionTypeOptions(): array
+    {
+        return array_map(
+            static fn (string $type): array => ['key' => $type, 'label' => lang('Collections.collection_type_' . $type)],
+            self::collectionTypes()
+        );
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string}>
+     */
+    public static function pageTypeOptions(): array
+    {
+        return array_map(
+            static fn (string $type): array => ['key' => $type, 'label' => lang('Pages.page_type_' . $type)],
+            self::pageTypes()
+        );
+    }
+
+    /**
      * @return array<int, array{type_key: string, label: string, version: string, block_template: array<string, mixed>, wizard_config: array<string, mixed>|null}>
      */
     public static function collectionPresets(): array

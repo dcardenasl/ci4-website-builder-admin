@@ -59,9 +59,9 @@ class StructureWizardController extends BaseWebController
             'ok' => true,
             'data' => [
                 'languages' => $languages,
-                'collection_types' => $this->collectionTypeOptions(),
+                'collection_types' => CmsPresetCatalog::collectionTypeOptions(),
                 'collection_presets' => array_column($collectionPresets, null, 'type_key'),
-                'page_types' => $this->pageTypeOptions(),
+                'page_types' => CmsPresetCatalog::pageTypeOptions(),
                 'page_presets' => array_column($pagePresets, null, 'type_key'),
                 'setup_state' => [
                     'has_languages' => $languages !== [],
@@ -79,13 +79,9 @@ class StructureWizardController extends BaseWebController
             return $this->response->setStatusCode(403)->setJSON(['ok' => false, 'message' => lang('App.access_denied')]);
         }
 
-        $raw = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest ? ($this->request->getJSON(true) ?? []) : [];
-        $payload = is_array($raw) ? $raw : [];
+        $payload = $this->jsonRequestPayload();
         $result = $this->safeApiCall(fn () => $this->pageService->create($payload));
-        $statusCode = (int) ($result['status'] ?? 502);
-        if ($statusCode < 100 || $statusCode > 599) {
-            $statusCode = 502;
-        }
+        $statusCode = $this->normalizeUpstreamStatus($result);
         if ($statusCode >= 200 && $statusCode < 300) {
             $data = $this->extractData($result);
             $pageId = (int) ($data['id'] ?? 0);
@@ -105,13 +101,9 @@ class StructureWizardController extends BaseWebController
             return $this->response->setStatusCode(403)->setJSON(['ok' => false, 'message' => lang('App.access_denied')]);
         }
 
-        $raw = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest ? ($this->request->getJSON(true) ?? []) : [];
-        $payload = is_array($raw) ? $raw : [];
+        $payload = $this->jsonRequestPayload();
         $result = $this->safeApiCall(fn () => $this->menuService->create($payload));
-        $statusCode = (int) ($result['status'] ?? 502);
-        if ($statusCode < 100 || $statusCode > 599) {
-            $statusCode = 502;
-        }
+        $statusCode = $this->normalizeUpstreamStatus($result);
         return $this->response->setStatusCode($statusCode)->setJSON([
             'ok' => $statusCode >= 200 && $statusCode < 300,
             'data' => $statusCode >= 200 && $statusCode < 300 ? $this->extractData($result) : ($result['data'] ?? []),
@@ -124,10 +116,7 @@ class StructureWizardController extends BaseWebController
             return $this->response->setStatusCode(403)->setJSON(['ok' => false, 'message' => lang('App.access_denied')]);
         }
 
-        $raw = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
-            ? ($this->request->getJSON(true) ?? [])
-            : [];
-        $payload = is_array($raw) ? $raw : [];
+        $payload = $this->jsonRequestPayload();
 
         $validationError = $this->validateCollectionWizardPayload($payload);
         if ($validationError !== null) {
@@ -135,10 +124,7 @@ class StructureWizardController extends BaseWebController
         }
 
         $result = $this->safeApiCall(fn () => $this->collectionService->create($payload));
-        $statusCode = (int) ($result['status'] ?? 502);
-        if ($statusCode < 100 || $statusCode > 599) {
-            $statusCode = 502;
-        }
+        $statusCode = $this->normalizeUpstreamStatus($result);
 
         $ok = $statusCode >= 200 && $statusCode < 300;
         $data = $ok ? $this->extractData($result) : ($result['data'] ?? []);
@@ -242,37 +228,5 @@ class StructureWizardController extends BaseWebController
         }
 
         return $rows;
-    }
-
-    /**
-     * @return array<int, array{key: string, label: string}>
-     */
-    private function collectionTypeOptions(): array
-    {
-        return array_map(
-            function (string $type): array {
-                return [
-                    'key' => $type,
-                    'label' => lang('Collections.collection_type_' . $type),
-                ];
-            },
-            CmsPresetCatalog::collectionTypes()
-        );
-    }
-
-    /**
-     * @return array<int, array{key: string, label: string}>
-     */
-    private function pageTypeOptions(): array
-    {
-        return array_map(
-            function (string $type): array {
-                return [
-                    'key' => $type,
-                    'label' => lang('Pages.page_type_' . $type),
-                ];
-            },
-            CmsPresetCatalog::pageTypes()
-        );
     }
 }

@@ -329,6 +329,33 @@ abstract class BaseWebController extends BaseController
     }
 
     /**
+     * Normalize an upstream API response's status code to a valid HTTP range,
+     * falling back to 502 (Bad Gateway) when missing or out of bounds.
+     *
+     * @param array<string, mixed> $result
+     */
+    protected function normalizeUpstreamStatus(array $result): int
+    {
+        $status = (int) ($result['status'] ?? 502);
+
+        return ($status < 100 || $status > 599) ? 502 : $status;
+    }
+
+    /**
+     * Extract the raw JSON body of the current request as an array.
+     *
+     * @return array<string, mixed>
+     */
+    protected function jsonRequestPayload(): array
+    {
+        $raw = $this->request instanceof \CodeIgniter\HTTP\IncomingRequest
+            ? ($this->request->getJSON(true) ?? [])
+            : [];
+
+        return is_array($raw) ? $raw : [];
+    }
+
+    /**
      * Wrap an API call in a try/catch, returning a graceful error response on failure.
      *
      * @param callable $callback A closure that performs the API call and returns its result.
