@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Automatic translation for block instances** — block creation now supports automatic translation of block content across all active languages via "Translate All" button and per-file copy-to-languages feature; language context (default language code and ID) passed to the UI for seamless multilingual block management.
 - **Exception handling for unavailable services** — `PermissionsSessionRefresher` and `BlockCatalogService` now gracefully handle timeouts and connection errors when Hub or Domain APIs are unavailable; permission refresh and block catalog loading log warnings and continue gracefully instead of crashing, improving admin resilience during infrastructure incidents.
 
 ### Fixed
