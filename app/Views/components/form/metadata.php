@@ -55,11 +55,11 @@ if ($metadataRows === []) {
             <?= esc(lang($label)) ?>
         </label>
         <div class="flex gap-2">
-            <button type="button" class="<?= esc(action_button_class()) ?> px-3.5 py-2 text-xs font-semibold" @click="importJson()">
+            <button type="button" class="<?= esc(action_button_class()) ?> px-3 py-2 text-xs font-semibold" @click="importJson()">
                 <?= ui_icon('upload', 'h-3.5 w-3.5') ?>
                 <?= esc(safe_lang('Catalog.button_import_json', 'Importar JSON')) ?>
             </button>
-            <button type="button" class="<?= esc(action_button_class('primary')) ?> px-3.5 py-2 text-xs font-semibold" @click="addRow()">
+            <button type="button" class="<?= esc(action_button_class('primary')) ?> px-3 py-2 text-xs font-semibold" @click="addRow()">
                 <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
                 <?= esc(safe_lang('Catalog.button_add_attribute', 'Añadir Fila')) ?>
             </button>
