@@ -28,6 +28,7 @@ module.exports = [
                 clearTimeout: 'readonly',
                 document: 'readonly',
                 fetch: 'readonly',
+                localStorage: 'readonly',
                 navigator: 'readonly',
                 parseInt: 'readonly',
                 requestAnimationFrame: 'readonly',

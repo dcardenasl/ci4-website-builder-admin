@@ -29,6 +29,8 @@ import {
     copyLangTabsFileFieldToAll,
     copyLangTabsFileFieldToTargets,
 } from './components/langTabs.js';
+import { wizard } from './components/wizard/index.js';
+import { structureWizard } from './components/wizard/structureIndex.js';
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
@@ -50,6 +52,8 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('blockInstanceConfig', blockInstanceConfig);
     Alpine.data('schemaEditor', schemaEditor);
     Alpine.data('blockSorter', blockSorter);
+    Alpine.data('wizard', wizard);
+    Alpine.data('structureWizard', structureWizard);
 
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
