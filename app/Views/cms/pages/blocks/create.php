@@ -9,6 +9,8 @@ $ownerLabel       = $ownerLabel       ?? 'Página';
 $ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
 $ownerStoreRoute  = $ownerStoreRoute  ?? 'admin.cms.pages.blocks.store';
 $ownerChildLabel  = $ownerChildLabel  ?? 'Diapositiva';
+$translateUrl     = $translateUrl     ?? '';
+$defaultLangCode   = $defaultLangCode   ?? 'ES';
 
 // When creating a child block, filter dynamically using parent block's allowed_children schema definition
 if ($parentInstanceId !== null) {
@@ -48,7 +50,7 @@ $parentIdJs    = json_encode($parentInstanceId);
     <?php endif; ?>
 </div>
 
-<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>, <?= esc($entryOptionsUrlJs, 'attr') ?>)" class="space-y-6">
+<div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>, <?= esc($entryOptionsUrlJs, 'attr') ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')" class="space-y-6">
     <?php ob_start(); ?>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <template x-for="bt in blockTypes" :key="bt.id">
@@ -256,19 +258,39 @@ $parentIdJs    = json_encode($parentInstanceId);
             <div x-show="contentFields && Object.keys(contentFields).length > 0" x-cloak>
                 <h4 class="text-sm font-semibold text-gray-800 mb-3">Contenido por Idioma</h4>
 
-                <div class="flex border-b border-gray-200 mb-4" role="tablist">
-                    <template x-for="(lang, index) in languages" :key="lang.id">
+                <div class="flex items-center justify-between border-b border-gray-200 mb-4">
+                    <div class="flex" role="tablist">
+                        <template x-for="(lang, index) in languages" :key="lang.id">
+                            <button type="button"
+                                    role="tab"
+                                    @click="activeLangId = lang.id"
+                                    :aria-selected="activeLangId == lang.id"
+                                    :class="activeLangId == lang.id ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
+                                <span x-text="lang.code.toUpperCase()"></span>
+                                <span x-show="lang.is_default == 1" class="ml-1 text-brand-400">★</span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Translate All button -->
+                    <template x-if="getTranslateTargets().length > 0">
                         <button type="button"
-                                role="tab"
-                                @click="activeLangId = lang.id"
-                                :aria-selected="activeLangId == lang.id"
-                                :class="activeLangId == lang.id ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
-                            <span x-text="lang.code.toUpperCase()"></span>
-                            <span x-show="lang.is_default == 1" class="ml-1 text-brand-400">★</span>
+                                @click="autoTranslateAll()"
+                                :disabled="translatingAll"
+                                class="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 shadow-sm hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621c0-.012 0-.024 0-.036V3.75a2.25 2.25 0 0 1 2.25-2.25h15a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 20.25 21H3.75A2.25 2.25 0 0 1 1.5 18.75Zm12.621-4.72l-6.89 7.72m0 0l-6.89-7.72m6.89 7.72l6.89-7.72m-6.89 7.72l-6.89 7.72"/>
+                            </svg>
+                            <span x-text="translatingAll ? 'Traduciendo...' : 'Traducir automáticamente'"></span>
                         </button>
                     </template>
                 </div>
+
+                <p x-show="translateError !== ''"
+                   x-text="translateError"
+                   x-cloak
+                   class="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
 
                 <template x-for="(lang, langIndex) in languages" :key="lang.id">
                     <div x-show="activeLangId == lang.id" class="space-y-4">
@@ -357,6 +379,15 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                             </svg>
                                             <span>Quitar archivo</span>
+                                        </button>
+                                        <button type="button"
+                                                x-show="getPickedFileUrl(lang.id, fieldKey)"
+                                                @click="copyFileToAllLanguages(lang.id, fieldKey)"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-100 transition-colors">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
+                                            </svg>
+                                            <span>Copiar a otros idiomas</span>
                                         </button>
                                     </div>
                                 </template>
@@ -554,7 +585,27 @@ $parentIdJs    = json_encode($parentInstanceId);
 const pickerSelectLabels = { image: 'Seleccionar imagen', video: 'Seleccionar video', document: 'Seleccionar documento', any: 'Seleccionar archivo' };
 const pickerChangeLabels = { image: 'Cambiar imagen',    video: 'Cambiar video',     document: 'Cambiar documento',     any: 'Cambiar archivo'   };
 
-function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '') {
+const findRichTextEditorComponent = (input) => {
+    const container = input instanceof HTMLElement ? input.closest('[x-data*="richTextEditor"]') : null;
+    const component = container?._x_dataStack?.[0];
+    return component && typeof component.applyContent === 'function' ? component : null;
+};
+
+const applyTranslatedText = (targetInput, translatedValue) => {
+    if (!(targetInput instanceof HTMLInputElement || targetInput instanceof HTMLTextAreaElement)) {
+        return;
+    }
+
+    targetInput.value = translatedValue;
+    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const richTextComponent = findRichTextEditorComponent(targetInput);
+    if (richTextComponent) {
+        richTextComponent.applyContent(translatedValue);
+    }
+};
+
+function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', translateUrl = '', defaultLangCode = 'ES') {
     const configFactory = typeof window.blockInstanceConfigFactory === 'function'
         ? window.blockInstanceConfigFactory(entryOptionsUrl, {})
         : {};
@@ -564,10 +615,17 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '') {
         blockTypes,
         languages,
         entryOptionsUrl,
+        translateUrl,
+        defaultLangCode,
         selectedBlockType: null,
         activeLangId: null,
         contentFields: {},
         configFields: {},
+
+        translating: false,
+        translatingAll: false,
+        translateError: '',
+        translateAllProgress: '',
 
         // Repeater state: keyed by `${langId}_${fieldKey}`
         repeaterItems: {},
@@ -667,6 +725,107 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '') {
 
         clearPickedFile(langId, fieldKey) {
             this.pickedFilesMap[`${langId}_${fieldKey}`] = { id: '', url: '', preview_url: '' };
+        },
+
+        copyFileToAllLanguages(sourceLangId, fieldKey) {
+            const sourceFile = this.pickedFilesMap[`${sourceLangId}_${fieldKey}`];
+            if (!sourceFile || !sourceFile.id) return;
+
+            const updatedMap = { ...this.pickedFilesMap };
+            this.languages.forEach(lang => {
+                if (Number(lang.id) !== Number(sourceLangId)) {
+                    updatedMap[`${lang.id}_${fieldKey}`] = {
+                        id: sourceFile.id,
+                        url: sourceFile.url,
+                        preview_url: sourceFile.preview_url
+                    };
+                }
+            });
+            this.pickedFilesMap = updatedMap;
+        },
+
+        getTranslateTargets() {
+            if (!this.selectedBlockType) return [];
+
+            const defLang = this.languages.find(l => l.is_default == 1);
+            if (!defLang) return [];
+
+            const defLangIndex = this.languages.findIndex(l => l.is_default == 1);
+
+            const translatableFieldKeys = [];
+            Object.entries(this.contentFields).forEach(([fieldKey, field]) => {
+                const fieldType = field.type || 'string';
+                if (!['file', 'repeater', 'boolean', 'integer', 'select'].includes(fieldType)) {
+                    translatableFieldKeys.push(fieldKey);
+                }
+            });
+
+            if (translatableFieldKeys.length === 0) return [];
+
+            const targets = [];
+            this.languages.forEach((lang, idx) => {
+                if (idx === defLangIndex) return;
+
+                const fieldPairs = [];
+                translatableFieldKeys.forEach(fieldKey => {
+                    fieldPairs.push({
+                        from: `[name="translations[${defLangIndex}][block_data][${fieldKey}]"]`,
+                        to: `[name="translations[${idx}][block_data][${fieldKey}]"]`
+                    });
+                });
+
+                targets.push({
+                    langCode: lang.code.toUpperCase(),
+                    fieldPairs: fieldPairs
+                });
+            });
+
+            return targets;
+        },
+
+        async _translatePairs(targetLangCode, fieldPairs) {
+            for (const pair of fieldPairs) {
+                const sourceEl = document.querySelector(pair.from);
+                const targetEl = document.querySelector(pair.to);
+                if (!(sourceEl instanceof HTMLInputElement || sourceEl instanceof HTMLTextAreaElement)) continue;
+                if (!(targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement)) continue;
+                const sourceText = sourceEl.value.trim();
+                if (sourceText === '') continue;
+
+                const url = new URL(this.translateUrl, window.location.origin);
+                url.searchParams.set('text', sourceText);
+                url.searchParams.set('source_lang', this.defaultLangCode.toUpperCase());
+                url.searchParams.set('target_lang', targetLangCode.toUpperCase());
+
+                const res = await fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+                const json = await res.json();
+                if (json && typeof json.translated === 'string') {
+                    applyTranslatedText(targetEl, json.translated);
+                } else if (json && json.error) {
+                    throw new Error(json.error);
+                }
+            }
+        },
+
+        async autoTranslateAll() {
+            const targets = this.getTranslateTargets();
+            if (this.translateUrl === '' || this.translating || this.translatingAll || targets.length === 0) return;
+
+            this.translatingAll = true;
+            this.translateError = '';
+            try {
+                for (let i = 0; i < targets.length; i++) {
+                    const { langCode, fieldPairs } = targets[i];
+                    this.translateAllProgress = langCode + ' (' + (i + 1) + '/' + targets.length + ')';
+                    await this._translatePairs(langCode, fieldPairs);
+                }
+                this.translateAllProgress = '';
+            } catch (e) {
+                this.translateError = e instanceof Error ? e.message : String(e);
+                this.translateAllProgress = '';
+            } finally {
+                this.translatingAll = false;
+            }
         },
 
         openPreview() {

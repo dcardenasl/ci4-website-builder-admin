@@ -166,6 +166,7 @@ class BlockInstanceController extends BaseWebController
         $types = array_values($typesIndexed);
 
         $languages = $this->activeLanguages();
+        $languageContext = $this->resolveLanguageContext($languages);
 
         $parentIdRaw      = $this->request->getGet('parent_instance_id');
         $parentInstanceId = ($parentIdRaw !== null && is_scalar($parentIdRaw) && (int) $parentIdRaw > 0)
@@ -194,6 +195,9 @@ class BlockInstanceController extends BaseWebController
             'blockTypes'        => $types,
             'languages'         => $languages,
             'entryOptionsUrl'   => route_to('admin.cms.blocks.entries'),
+            'translateUrl'      => route_to('admin.cms.translate'),
+            'defaultLangCode'   => $languageContext['defaultLangCode'],
+            'defaultLangId'     => $languageContext['defaultLangId'],
             'parentInstanceId'  => $parentInstanceId,
             'parentBlockType'   => $parentBlockType,
             'ownerType'         => $ownerType,
