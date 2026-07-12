@@ -21,15 +21,15 @@ return [
     'add_content_desc_empty' => 'No hay colecciones configuradas aún',
     'edit_page'              => 'Editar una página',
     'edit_page_desc'         => 'Modifica el contenido de las páginas del sitio',
-    'edit_menu'              => 'Cambiar el menú',
-    'edit_menu_desc'         => 'Agregar, quitar o reordenar ítems',
+    'edit_menu'              => 'Editar enlaces del menú',
+    'edit_menu_desc'         => 'Agrega, quita o reordena los enlaces de un menú existente',
     'structure_heading'      => '¿Qué quieres construir hoy?',
     'structure_intro'        => 'Crea la base del sitio con flujos guiados. El wizard puede usar presets disponibles, pero también funciona sin bloques starter.',
     'create_page'            => 'Crear página',
     'create_page_desc'       => 'Inicio, Nosotros, Contacto y páginas anidadas',
     'create_collection'      => 'Crear colección',
     'create_collection_desc' => 'Blog, portafolio, noticias, servicios y más',
-    'create_menu'            => 'Crear menú',
+    'create_menu'            => 'Crear menú nuevo',
     'create_menu_desc'       => 'Navegación principal, footer o menús secundarios',
     'create_redirect'        => 'Crear redirección',
     'create_redirect_desc'   => 'Reglas 301/302 y cambios de URL',
@@ -249,7 +249,7 @@ return [
     'btn_view_blocks'        => 'Ver otros bloques',
 
     // Edit menu — menu select
-    'menu_select_heading'    => '¿Qué menú quieres editar?',
+    'menu_select_heading'    => '¿En qué menú quieres editar los enlaces?',
     'no_menus'               => 'No hay menús disponibles.',
     'menu_fallback'          => 'Menú',
 

@@ -390,10 +390,11 @@ export const entryPublish = {
 
     async buildBlockTranslations(blockKey, draft, defaultLangId, defaultLangCode, otherLanguages) {
         const schemaFields = this.config?.block_types?.[blockKey]?.fields ?? {};
-        // Mirror BlockInstanceController.php's translatable-field exclusion list.
-        const NON_TRANSLATABLE_TYPES = ['file', 'image', 'repeater', 'boolean', 'integer', 'select', 'number'];
+        const nonTranslatableTypes = Array.isArray(this.config?.non_translatable_types)
+            ? this.config.non_translatable_types
+            : ['file', 'image', 'repeater', 'boolean', 'integer', 'select', 'number'];
         const translatableKeys = Object.entries(schemaFields)
-            .filter(([, def]) => !NON_TRANSLATABLE_TYPES.includes(def?.primitive ?? def?.type ?? 'string'))
+            .filter(([, def]) => !nonTranslatableTypes.includes(def?.primitive ?? def?.type ?? 'string'))
             .map(([key]) => key);
 
         const baseData = normalizeBlockPayload(draft);

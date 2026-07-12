@@ -28,7 +28,9 @@
         <template x-for="bt in availableBlockTypes()" :key="bt.key">
             <button @click="selectBlockType(bt)"
                     class="flex min-h-[120px] flex-col items-start justify-between gap-2 rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
-                <span class="text-2xl" x-text="blockIcon(bt.key)"></span>
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                    <i :data-lucide="blockIcon(bt.key)" class="h-5 w-5"></i>
+                </div>
                 <span class="font-semibold text-sm text-gray-800 mt-1" x-text="bt.name || humanizeKey(bt.key)"></span>
                 <span class="text-xs text-gray-400 line-clamp-2" x-text="bt.description || ''"></span>
                 <span x-show="bt.is_container"

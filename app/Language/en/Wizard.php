@@ -21,15 +21,15 @@ return [
     'add_content_desc_empty' => 'No collections configured yet',
     'edit_page'              => 'Edit a page',
     'edit_page_desc'         => 'Modify the content of site pages',
-    'edit_menu'              => 'Change the menu',
-    'edit_menu_desc'         => 'Add, remove or reorder items',
+    'edit_menu'              => 'Edit menu links',
+    'edit_menu_desc'         => 'Add, remove or reorder links in an existing menu',
     'structure_heading'      => 'What do you want to build today?',
     'structure_intro'        => 'Create the site foundation with guided flows. The wizard can use available presets, but it also works without starter block data.',
     'create_page'            => 'Create page',
     'create_page_desc'       => 'Home, About, Contact and nested pages',
     'create_collection'      => 'Create collection',
     'create_collection_desc' => 'Blog, portfolio, news, services and more',
-    'create_menu'            => 'Create menu',
+    'create_menu'            => 'Create new menu',
     'create_menu_desc'       => 'Main nav, footer or secondary menus',
     'create_redirect'        => 'Create redirect',
     'create_redirect_desc'   => '301/302 rules and URL changes',
@@ -249,7 +249,7 @@ return [
     'btn_view_blocks'        => 'View other blocks',
 
     // Edit menu — menu select
-    'menu_select_heading'    => 'Which menu do you want to edit?',
+    'menu_select_heading'    => 'Which menu do you want to edit links for?',
     'no_menus'               => 'No menus available.',
     'menu_fallback'          => 'Menu',
 

@@ -1,32 +1,3 @@
-// Block type → display emoji. Not locale-dependent, so it stays a plain JS
-// constant instead of coming from the server-injected boot config.
-export const BLOCK_ICONS = {
-    hero_slider:          '🎠',
-    hero_banner:          '🖼️',
-    slide_banner:         '🖼️',
-    rich_text:            '📝',
-    image:                '🖼️',
-    collection_grid:      '▦',
-    cta:                  '📢',
-    form_embed:           '▣',
-    video_player:         '🎬',
-    accordion:            '▤',
-    accordion_item:       '▤',
-    cards_grid:           '▦',
-    card_item:            '▢',
-    metrics_grid:         '📊',
-    metric_item:          '🔢',
-    cards_slider:         '↔',
-    slide_card:           '▢',
-    asset_showcase:       '◇',
-    asset_item:           '◇',
-    contact_info:         '📍',
-    map_embed:            '🗺️',
-    social_links:         '🔗',
-    container:            '📦',
-    page_header:          '📄',
-};
-
 export function defaultSteps(strings) {
     return [
         {

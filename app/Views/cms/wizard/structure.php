@@ -75,7 +75,7 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                 </span>
             </button>
             <button type="button" @click="start('menu')" class="flex min-h-[140px] flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500">
-                <span class="text-3xl">🔗</span>
+                <span class="text-3xl">🧭</span>
                 <span class="space-y-1">
                     <span class="block text-sm font-semibold text-gray-900"><?= esc(lang('Wizard.create_menu')) ?></span>
                     <span class="block text-xs text-gray-500"><?= esc(lang('Wizard.create_menu_desc')) ?></span>

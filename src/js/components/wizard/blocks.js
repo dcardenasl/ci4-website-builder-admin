@@ -3,13 +3,21 @@ import { humanizeKey } from '../../utils/wizard/humanizeKey.js';
 import { schemaTypeToUiType } from '../../utils/wizard/schemaTypeToUiType.js';
 import { buildBlockTree } from '../../utils/wizard/buildBlockTree.js';
 import { normalizeBlockPayload } from '../../utils/wizard/normalizeBlockPayload.js';
-import { BLOCK_ICONS } from './bootStrings.js';
+import { bootLucideIcons } from '../../utils/lucide.js';
+
+// Fallback for block types with no icon configured — matches the domain's own
+// default for newly created block types (see block_types/create.php).
+const DEFAULT_BLOCK_ICON = 'layout-template';
 
 // ── Owner (page/entry) block-tree editing — screens B ────────────────────
 export const blocks = {
     // ── Block type helpers ────────────────────────────────────────────
+    // Icons are a Lucide icon name, sourced from the block type's own `icon`
+    // field (set in the canonical "Tipos de Bloque" admin module) — never
+    // hardcoded here, so newly created block types get a working icon
+    // automatically without touching this file.
     blockIcon(blockKey) {
-        return BLOCK_ICONS[blockKey] ?? '📦';
+        return this.blockTypeInfo(blockKey)?.icon || DEFAULT_BLOCK_ICON;
     },
 
     blockTypeInfo(blockKey) {
@@ -272,6 +280,7 @@ export const blocks = {
             if (!res.ok) throw new Error(data?.message ?? this.strings.error_blocks_load);
             const items = data?.items ?? data?.data ?? (Array.isArray(data) ? data : []);
             this.pageBlocks = buildBlockTree(items);
+            this.$nextTick(() => { bootLucideIcons(); });
         } catch (e) {
             this.pageBlocksError = e.message ?? this.strings.error_blocks_load;
         } finally {
@@ -306,6 +315,7 @@ export const blocks = {
         }
 
         this.screen = 'block-catalog';
+        this.$nextTick(() => { bootLucideIcons(); });
     },
 
     selectBlockType(blockType) {

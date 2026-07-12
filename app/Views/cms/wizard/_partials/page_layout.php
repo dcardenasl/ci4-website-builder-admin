@@ -60,7 +60,7 @@
                              :src="blockThumbUrl(block)"
                              class="w-full h-full object-cover"
                              alt="">
-                        <span x-show="!blockThumbUrl(block)" class="text-xl" x-text="blockIcon(block.block_config?.block_key)"></span>
+                        <i x-show="!blockThumbUrl(block)" :data-lucide="blockIcon(block.block_config?.block_key)" class="h-5 w-5 text-gray-500"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="font-medium text-sm text-gray-800" x-text="blockLabel(block, idx)"></p>
@@ -106,7 +106,7 @@
                                          :src="blockThumbUrl(child)"
                                          class="w-full h-full object-cover"
                                          alt="">
-                                    <span x-show="!blockThumbUrl(child)" class="text-base" x-text="blockIcon(child.block_config?.block_key)"></span>
+                                    <i x-show="!blockThumbUrl(child)" :data-lucide="blockIcon(child.block_config?.block_key)" class="h-4 w-4 text-gray-500"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm text-gray-700 font-medium truncate" x-text="blockLabel(child, cidx)"></p>

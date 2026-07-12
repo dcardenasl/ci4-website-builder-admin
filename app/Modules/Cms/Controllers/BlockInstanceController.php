@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Libraries\Cms\CmsEnums;
 use App\Modules\Cms\Services\BlockInstanceApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Support\BlockOwnerRouting;
@@ -363,12 +364,12 @@ class BlockInstanceController extends BaseWebController
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
 
-        // Extract translatable fields (exclude file, repeater, boolean, integer, select)
+        // Extract translatable fields (exclude non-translatable types)
         $allFields = is_array($blockType['fields'] ?? null) ? $blockType['fields'] : [];
         $translatableFieldNames = [];
         foreach ($allFields as $fieldKey => $field) {
             $fieldType = $field['type'] ?? 'string';
-            if (!in_array($fieldType, ['file', 'repeater', 'boolean', 'integer', 'select'], true)) {
+            if (!in_array($fieldType, CmsEnums::NON_TRANSLATABLE_TYPES, true)) {
                 $translatableFieldNames[] = "block_data][{$fieldKey}";
             }
         }
