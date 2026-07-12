@@ -4,7 +4,7 @@
 > Historial de completadas: ver `TASKS_ARCHIVE.md`.
 > Cross-repo: ver `../TASKS.md`.
 > Plan detallado CMS admin: ver [`../docs/cms_integration_plan.md`](../docs/cms_integration_plan.md).
-> Última actualización: 2026-06-29 (auditoría exhaustiva de filtros y buscador documentada)
+> Última actualización: 2026-07-12 (refactor profundo del Wizard CMS completado — ver DEEP-WIZ-01..05 en Completadas)
 
 ---
 
@@ -334,6 +334,26 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 
 ## ✅ Completadas
 
+### [DEEP-WIZ-01..05] Refactor profundo del Wizard CMS — contenido + estructura (2026-07-12)
+
+Continuación del pendiente dejado en `[DEEP-ADM-01..04, DEEP-ADM-05..07]` (2026-07-11). Refactor de preservación de contrato: mismas rutas, mismos payloads, mismo comportamiento visible.
+
+- **Backend:** `WizardController` (525→~300 líneas) dejó de duplicar 6 métodos page/entry y de reimplementar servicios ya existentes — ahora inyecta y usa `blockInstanceApiService`, `menuApiService`, `entryApiService`, `fileApiService` (todos ya registrados, usados por otros controllers). `proxyBlockRequest()` eliminado. `StructureWizardController` y `WizardController` dejaron de duplicar `collectionTypeOptions()`/`pageTypeOptions()` — movidos a `CmsPresetCatalog`. `BaseWebController` ganó `normalizeUpstreamStatus()`/`jsonRequestPayload()` (colapsan ~14 repeticiones verbatim).
+- **Frontend:** `index.php` (1748 líneas, ~96% JS inline) y `structure.php` (875 líneas) extraídos a `src/js/components/wizard/` (10 módulos) + `src/js/utils/wizard/` (8 funciones puras), siguiendo la convención `Alpine.data()` + esbuild ya usada por el resto del admin. Config servidor→JS vía `window.__wizardBoot`/`window.__structureWizardBoot` (mismo patrón que `window.__componentConfig` en `head.php`). Triplicación de `uploadImage`/`uploadBlockImage`/`uploadBlockContentImage` colapsada a un `_uploadFile()` interno. `slugify`/`adminFetch` unificados entre ambos wizards (antes divergían).
+- **`applyIntentDefaults()` eliminado** — código muerto confirmado (nunca invocado, referenciaba `this.form`/`this.translation` inexistentes).
+- **Vitest añadido** (no existía ningún test JS en el repo): 49 tests sobre las 8 utilidades puras extraídas.
+- **Bug real encontrado y corregido durante la extracción:** el spread `{...navigation}` en la composición del factory `wizard()` evaluaba los getters (`get steps()`, etc.) inmediatamente con `this` incorrecto, lanzando una excepción que abortaba `wizard()` en silencio. Corregido con `Object.defineProperties(instance, Object.getOwnPropertyDescriptors(navigation))`, que preserva los descriptores de accessor sin invocarlos.
+- **Verificación inicial:** 573/573 PHPUnit (1 ajuste en `WizardFlowTest.php` — una aserción que grepeaba `index.php` ahora grepea `entryPublish.js`, donde vive el código real), PHPStan y CS-Fixer limpios, 49/49 Vitest, ESLint limpio, `npm run build:all` sin errores.
+- **Hallazgo preexistente documentado, no corregido (fuera de alcance):** `Wizard.strings.error_collection_required` usa `lang('Entries.collection_not_exists')`, una clave que no existe en ningún archivo de idioma — bug preexistente ya presente en el código original (CI4 hace fallback a la clave cruda). Preservado tal cual para no cambiar comportamiento visible.
+
+**Prueba exhaustiva post-refactor (misma sesión, 2026-07-12)** — se probó manualmente en navegador CADA flujo con opción en el wizard, no solo "crear página":
+- Wizard de contenido: **Agregar contenido** (selección de colección "Noticias", pasos dinámicos con rich text, paso de contenido de bloque, traducción automática ES/EN, publicación real — `POST /wizard/publish` 200); **Editar página** (árbol de bloques con hijos anidados reales, crear bloque nuevo, mover/reordenar con swap de `sort_order`, eliminar bloque); **Cambiar menú** (agregar ítem, editar con guardado automático al perder foco, reordenar, guardar orden, eliminar ítem).
+- Wizard de estructura: **Crear colección** (2 pasos, slug check en vivo, traducción automática, preset de bloques, creación real) y **Crear menú** (con slug derivado del nombre).
+- **2 bugs reales encontrados, confirmados preexistentes (idénticos en el HEAD previo al refactor, no introducidos por él) y corregidos con aprobación explícita del usuario para cada uno:**
+  1. **Crear bloque nuevo daba 400** "block_type_key is required": el JS siempre envió `block_id` (nunca `block_type_key`), pero `WizardController::handleCreateBlock()` validaba el campo equivocado — "+ Agregar bloque" nunca funcionó, ni antes ni después del refactor. Corregido: la validación ahora exige `block_id` numérico. Tests `testCreateBlock(Entry)?RejectsMissingBlockId`/`ForwardsValidPayloadToDomain` actualizados para reflejar el payload real.
+  2. **Editar ítem de menú (guardado automático) daba 400** "No se proporcionaron campos válidos para actualizar": `patchItem()` solo enviaba `{ translations: [...] }`, y el dominio vacía ese campo al extraerlo, dejando el payload sin campos de nivel superior — mismo patrón de `BaseCrudService::noFieldsToUpdate` que `_updateBlock()` ya evita agregando `is_active: true`. Corregido aplicando el mismo patrón en `menu.js::patchItem()`.
+- **Verificación final tras los 2 fixes:** 573/573 PHPUnit, PHPStan y CS-Fixer limpios, 49/49 Vitest, ESLint limpio. Todos los flujos re-verificados en navegador tras cada fix con `POST` 200 confirmado por request.
+
 ### [DEEP-ADM-01..04, DEEP-ADM-05..07] Hardening arquitectónico de Ola 4/5 (2026-07-11)
 
 Ejecutado tras la auditoría de robustez del 2026-07-10 (`../docs/audits/2026-07-10-auditoria-profunda-robustez.md`, `../docs/plans/2026-07-10-plan-maestro-robustez-mantenibilidad.md`).
@@ -344,7 +364,7 @@ Ejecutado tras la auditoría de robustez del 2026-07-10 (`../docs/audits/2026-07
 - **DEEP-ADM-01/02 (BlockInstanceController):** el controller tenía 998 líneas mezclando HTTP con composición de schemas dinámicos y llamadas remotas (fetchBlockTypes/injectDynamicFormOptions/collectionsMap/pagesForIds/entriesForIds/entriesForCollection, ~300 líneas). Extraído a `app/Modules/Cms/Services/BlockTypeOptionsResolver.php` (inyectado vía `Config/Services.php::blockTypeOptionsResolver()`), controller quedó en 681 líneas. Verificado con la suite completa (41 tests de BlockInstanceFlow/WizardFlow) y manualmente en el navegador contra la app corriendo: los selects dinámicos de `form_key` (form_embed) y `collection_key` (collection_grid) funcionan correctamente.
 - **`BlockOwnerRouting`** ya estaba correctamente extraído de una sesión previa (DEEP-ADM-03 esencialmente ya cerrado) — no requirió cambios.
 - **Bug real encontrado:** `image.php` (preview fallback de block types) leía `data['url']` en vez de `data['image_url']`, mismo bug de convención de campo `file` que el catálogo de Domain (nunca mostraba la imagen real, siempre caía al placeholder). Corregido con 2 tests nuevos.
-- **Pendiente, fuera de este alcance:** DEEP-WIZ-01..05 (wizard, `Views/cms/wizard/index.php`, 1748 líneas de JS inline). No hay test runner JS configurado en este repo (sin vitest/jest) — extraerlo con seguridad requiere primero decidir e instalar un framework de test JS. Big-bang rewrite está explícitamente prohibido por el plan; debe hacerse incremental, en su propia sesión.
+- **Pendiente, fuera de este alcance:** DEEP-WIZ-01..05 (wizard, `Views/cms/wizard/index.php`, 1748 líneas de JS inline). No hay test runner JS configurado en este repo (sin vitest/jest) — extraerlo con seguridad requiere primero decidir e instalar un framework de test JS. Big-bang rewrite está explícitamente prohibido por el plan; debe hacerse incremental, en su propia sesión. **Completado 2026-07-12, ver `[DEEP-WIZ-01..05]` arriba.**
 
 ### [ADM-010] CSV export/import scaffold opcional para módulos admin (2026-06-10)
 

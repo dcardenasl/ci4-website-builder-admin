@@ -89,10 +89,10 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('data-wizard-content-richtext-field', $view);
         $this->assertStringContainsString('syncBlockContentRichTextDraft(blockContentStepIndex, field.key, $event.target.value)', $view);
 
-        $wizard = file_get_contents(APPPATH . 'Views/cms/wizard/index.php');
-        $this->assertIsString($wizard);
-        $this->assertStringContainsString('syncBlockContentRichTextDraft(stepIdx, key, value)', $wizard);
-        $this->assertStringContainsString("field.uiType === 'richtext'", $wizard);
+        $wizardModule = file_get_contents(ROOTPATH . 'src/js/components/wizard/entryPublish.js');
+        $this->assertIsString($wizardModule);
+        $this->assertStringContainsString('syncBlockContentRichTextDraft(stepIdx, key, value)', $wizardModule);
+        $this->assertStringContainsString("field.uiType === 'richtext'", $wizardModule);
 
         $asset = file_get_contents(FCPATH . 'assets/js/app.js');
         $this->assertIsString($asset);
@@ -614,7 +614,7 @@ final class WizardFlowTest extends CIUnitTestCase
 
     // ── createBlock() / createEntryBlock() validation ────────────────────────
 
-    public function testCreateBlockRejectsMissingBlockTypeKey(): void
+    public function testCreateBlockRejectsMissingBlockId(): void
     {
         $this->injectJsonBody(['block_data' => ['text' => 'hello']]);
 
@@ -624,12 +624,12 @@ final class WizardFlowTest extends CIUnitTestCase
 
         $this->assertSame(400, $result->getStatusCode());
         $body = json_decode((string) $result->getBody(), true);
-        $this->assertStringContainsString('block_type_key', $body['message']);
+        $this->assertStringContainsString('block_id', $body['message']);
     }
 
     public function testCreateBlockForwardsValidPayloadToDomain(): void
     {
-        $payload = ['block_type_key' => 'rich_text', 'block_data' => ['text' => 'hello']];
+        $payload = ['block_id' => 7, 'block_data' => ['text' => 'hello']];
         $this->injectJsonBody($payload);
 
         $mock = $this->createMock(DomainApiClientInterface::class);
@@ -650,7 +650,7 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertSame(201, $result->getStatusCode());
     }
 
-    public function testCreateEntryBlockRejectsMissingBlockTypeKey(): void
+    public function testCreateEntryBlockRejectsMissingBlockId(): void
     {
         $this->injectJsonBody(['block_data' => []]);
 
@@ -660,12 +660,12 @@ final class WizardFlowTest extends CIUnitTestCase
 
         $this->assertSame(400, $result->getStatusCode());
         $body = json_decode((string) $result->getBody(), true);
-        $this->assertStringContainsString('block_type_key', $body['message']);
+        $this->assertStringContainsString('block_id', $body['message']);
     }
 
     public function testCreateEntryBlockForwardsValidPayloadToDomain(): void
     {
-        $payload = ['block_type_key' => 'hero', 'block_data' => ['title' => 'Hi']];
+        $payload = ['block_id' => 12, 'block_data' => ['title' => 'Hi']];
         $this->injectJsonBody($payload);
 
         $mock = $this->createMock(DomainApiClientInterface::class);
