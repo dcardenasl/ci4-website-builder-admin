@@ -28,6 +28,40 @@ if ($parentInstanceId !== null) {
         // Fallback for backward compatibility
         $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => $bt['block_key'] === 'slide_banner'));
     }
+} else {
+    // When creating a top-level block, exclude child-only block types dynamically.
+    // A block type is child-only if it is allowed as a child of some container,
+    // but is NOT allowed in the generic layout 'container' block.
+    $containerAllowedChildren = [];
+    foreach ($blockTypes as $bt) {
+        if (($bt['block_key'] ?? '') === 'container') {
+            $schema = is_array($bt['schema_definition'] ?? [])
+                ? ($bt['schema_definition'] ?? [])
+                : json_decode((string) ($bt['schema_definition'] ?? '{}'), true);
+            $containerAllowedChildren = $schema['allowed_children'] ?? [];
+            break;
+        }
+    }
+
+    if (! empty($containerAllowedChildren)) {
+        $allChildrenKeys = [];
+        foreach ($blockTypes as $bt) {
+            $schema = is_array($bt['schema_definition'] ?? [])
+                ? ($bt['schema_definition'] ?? [])
+                : json_decode((string) ($bt['schema_definition'] ?? '{}'), true);
+            $allowed = $schema['allowed_children'] ?? [];
+            foreach ($allowed as $childKey) {
+                $allChildrenKeys[] = $childKey;
+            }
+        }
+        $allChildrenKeys = array_unique($allChildrenKeys);
+        $childOnlyKeys   = array_diff($allChildrenKeys, $containerAllowedChildren);
+
+        $blockTypes = array_values(array_filter(
+            $blockTypes,
+            static fn (array $bt) => ! in_array($bt['block_key'], $childOnlyKeys, true)
+        ));
+    }
 }
 
 $blockTypesJs  = json_encode(array_values($blockTypes), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
