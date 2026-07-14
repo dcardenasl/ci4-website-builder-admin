@@ -483,4 +483,75 @@ class MenuController extends BaseWebController
             'message' => lang('Files.gallery_save_success') ?? 'Order saved successfully.',
         ]);
     }
+
+    public function getCategoryUrlOptions(): ResponseInterface
+    {
+        /** @var \App\Modules\Cms\Services\CategoryApiService $categoryService */
+        $categoryService = service('categoryApiService');
+
+        $collectionsResponse = $this->safeApiCall(fn () => $this->entryService->collections(['limit' => 100, 'is_active' => true]));
+        $collections = $this->extractItems($collectionsResponse);
+
+        $result = [];
+
+        foreach ($collections as $collection) {
+            if (! is_array($collection) || ! isset($collection['id'])) {
+                continue;
+            }
+
+            $collectionId = (int) $collection['id'];
+            $collectionKey = (string) ($collection['collection_key'] ?? '');
+
+            // Fetch categories for this collection
+            $categoriesResponse = $this->safeApiCall(fn () => $categoryService->list(['collection_id' => $collectionId, 'limit' => 500]));
+            $categories = $this->extractItems($categoriesResponse);
+
+            $categoryOptions = [];
+            foreach ($categories as $cat) {
+                if (! is_array($cat) || ! isset($cat['id'])) {
+                    continue;
+                }
+
+                $catTranslations = [];
+                if (! empty($cat['translations']) && is_array($cat['translations'])) {
+                    foreach ($cat['translations'] as $trans) {
+                        $langId = (int) ($trans['language_id'] ?? 0);
+                        $catTranslations[$langId] = [
+                            'slug' => (string) ($trans['slug'] ?? ''),
+                            'name' => (string) ($trans['name'] ?? ''),
+                        ];
+                    }
+                }
+
+                $categoryOptions[] = [
+                    'id' => $cat['id'],
+                    'translations' => $catTranslations,
+                ];
+            }
+
+            $collectionTranslations = [];
+            if (! empty($collection['translations']) && is_array($collection['translations'])) {
+                foreach ($collection['translations'] as $trans) {
+                    $langId = (int) ($trans['language_id'] ?? 0);
+                    $collectionTranslations[$langId] = [
+                        'slug' => (string) ($trans['slug'] ?? ''),
+                        'name' => (string) ($trans['name'] ?? ''),
+                    ];
+                }
+            }
+
+            $result[] = [
+                'id' => $collectionId,
+                'key' => $collectionKey,
+                'name' => (string) ($collection['name'] ?? $collectionKey),
+                'translations' => $collectionTranslations,
+                'categories' => $categoryOptions,
+            ];
+        }
+
+        return $this->response->setJSON([
+            'ok' => true,
+            'data' => $result,
+        ]);
+    }
 }
