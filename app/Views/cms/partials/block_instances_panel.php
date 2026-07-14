@@ -117,10 +117,10 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                     <!-- Quick actions -->
                     <div class="flex items-center gap-1 flex-shrink-0">
                         <?php if ($canWrite): ?>
-                            <?php if (! empty($blockTypeData['supports_children'])): ?>
+                            <?php if (! empty($blockTypeData['is_container'])): ?>
                             <a href="<?= route_to($routes['children'], $itemId, $blockId) ?>"
                                class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
-                                <?= ui_icon('layers', 'h-3 w-3') ?>
+                                <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
                                 <?= esc(lang('Pages.blocks_action_slides')) ?>
                             </a>
                             <?php endif; ?>
