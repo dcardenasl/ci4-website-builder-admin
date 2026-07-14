@@ -29,6 +29,47 @@ class EntryApiService extends ResourceApiService
         return $this->apiClient->post($this->resourcePath() . '/' . $id . '/archive');
     }
 
+    /**
+     * Replace the categories assigned to an entry.
+     *
+     * @param list<int> $categoryIds
+     * @return ApiResponse
+     */
+    public function syncCategories(int|string $id, array $categoryIds): array
+    {
+        return $this->apiClient->post($this->resourcePath() . '/' . $id . '/categories', [
+            'category_ids' => $categoryIds,
+        ]);
+    }
+
+    /**
+     * Replace the tags assigned to an entry.
+     *
+     * @param list<int> $tagIds
+     * @return ApiResponse
+     */
+    public function syncTags(int|string $id, array $tagIds): array
+    {
+        return $this->apiClient->post($this->resourcePath() . '/' . $id . '/tags', [
+            'tag_ids' => $tagIds,
+        ]);
+    }
+
+    /**
+     * Replace all taxonomy relations in a single atomic request.
+     *
+     * @param list<int> $categoryIds
+     * @param list<int> $tagIds
+     * @return ApiResponse
+     */
+    public function syncTaxonomy(int|string $id, array $categoryIds, array $tagIds): array
+    {
+        return $this->apiClient->post($this->resourcePath() . '/' . $id . '/taxonomy', [
+            'category_ids' => $categoryIds,
+            'tag_ids' => $tagIds,
+        ]);
+    }
+
 
 
     /**

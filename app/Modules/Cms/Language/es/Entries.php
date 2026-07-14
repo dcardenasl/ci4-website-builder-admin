@@ -109,6 +109,12 @@ return [
 
     'categories_title'              => 'Categorías',
     'tags_title'                    => 'Etiquetas',
+    'taxonomy_title'                => 'Categorías y etiquetas',
+    'taxonomy_help'                 => 'Selecciona los términos vinculados a esta entrada.',
+    'categories_help'               => 'Solo se muestran categorías de la colección de esta entrada.',
+    'tags_help'                     => 'Las etiquetas están disponibles para todas las colecciones.',
+    'taxonomy_empty'                => 'No hay opciones disponibles.',
+    'entries_taxonomy_update_failed' => 'La entrada se actualizó, pero no se pudieron guardar sus categorías o etiquetas.',
     'blocks_title'                  => 'Instancias de bloque',
 
     // Frequency options for changefreq

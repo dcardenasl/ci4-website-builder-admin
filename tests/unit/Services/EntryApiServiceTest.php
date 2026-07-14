@@ -69,4 +69,49 @@ final class EntryApiServiceTest extends CIUnitTestCase
         $service = new EntryApiService($mock);
         $this->assertSame($expected, $service->delete('uuid-3'));
     }
+
+    public function testSyncCategoriesCallsCorrectEndpoint(): void
+    {
+        $mock     = $this->createMock(ApiClientInterface::class);
+        $expected = ['ok' => true, 'status' => 200, 'data' => []];
+
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/entries/7/categories', ['category_ids' => [2, 5]])
+            ->willReturn($expected);
+
+        $service = new EntryApiService($mock);
+        $this->assertSame($expected, $service->syncCategories(7, [2, 5]));
+    }
+
+    public function testSyncTagsCallsCorrectEndpoint(): void
+    {
+        $mock     = $this->createMock(ApiClientInterface::class);
+        $expected = ['ok' => true, 'status' => 200, 'data' => []];
+
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/entries/7/tags', ['tag_ids' => [3, 8]])
+            ->willReturn($expected);
+
+        $service = new EntryApiService($mock);
+        $this->assertSame($expected, $service->syncTags(7, [3, 8]));
+    }
+
+    public function testSyncTaxonomyCallsAtomicEndpoint(): void
+    {
+        $mock     = $this->createMock(ApiClientInterface::class);
+        $expected = ['ok' => true, 'status' => 200, 'data' => []];
+
+        $mock->expects($this->once())
+            ->method('post')
+            ->with('/cms/entries/7/taxonomy', [
+                'category_ids' => [2, 5],
+                'tag_ids' => [],
+            ])
+            ->willReturn($expected);
+
+        $service = new EntryApiService($mock);
+        $this->assertSame($expected, $service->syncTaxonomy(7, [2, 5], []));
+    }
 }

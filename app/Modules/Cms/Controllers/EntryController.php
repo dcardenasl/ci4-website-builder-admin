@@ -7,8 +7,10 @@ namespace App\Modules\Cms\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\EntryStoreRequest;
 use App\Modules\Cms\Requests\EntryUpdateRequest;
+use App\Modules\Cms\Services\CategoryApiService;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\EntryApiService;
+use App\Modules\Cms\Services\TagApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -18,12 +20,16 @@ class EntryController extends BaseWebController
 {
     protected EntryApiService $entryService;
     protected CollectionApiService $collectionService;
+    protected CategoryApiService $categoryService;
+    protected TagApiService $tagService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->entryService      = service('entryApiService');
         $this->collectionService = service('collectionApiService');
+        $this->categoryService   = service('categoryApiService');
+        $this->tagService        = service('tagApiService');
     }
 
     public function index(): string
@@ -189,6 +195,7 @@ class EntryController extends BaseWebController
             'defaultLangIndex'  => $languageContext['defaultLangIndex'],
             'blockTemplate'    => $blockTemplate,
             'translateTargets' => $translateTargets,
+            ...$this->taxonomyOptions($item),
         ]);
     }
 
@@ -235,7 +242,125 @@ class EntryController extends BaseWebController
             return $this->failApi($response, lang('Entries.entries_update_failed'));
         }
 
+        $taxonomyResponse = $this->syncTaxonomy($id);
+        if (! $taxonomyResponse['ok']) {
+            return $this->failApi($taxonomyResponse, lang('Entries.entries_taxonomy_update_failed'));
+        }
+
         return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Entries.entries_update_success'));
+    }
+
+    /**
+     * @param array<string, mixed> $entry
+     * @return array{categoryOptions: array<string, string>, tagOptions: array<string, string>, selectedCategoryIds: list<int>, selectedTagIds: list<int>}
+     */
+    private function taxonomyOptions(array $entry): array
+    {
+        $selectedCategoryIds = $this->taxonomyIds($entry['categories'] ?? []);
+        $selectedTagIds = $this->taxonomyIds($entry['tags'] ?? []);
+
+        /** @var array<string, string> $categoryOptions */
+        $categoryOptions = $this->taxonomyLabels($entry['categories'] ?? []);
+        /** @var array<string, string> $tagOptions */
+        $tagOptions = $this->taxonomyLabels($entry['tags'] ?? []);
+
+        $collectionId = isset($entry['collection_id']) ? (int) $entry['collection_id'] : 0;
+        $categories = $this->safeApiCall(fn () => $this->categoryService->list(['per_page' => 1000]));
+        foreach ($this->extractItems($categories) as $category) {
+            if (! is_array($category) || ! isset($category['id'])) {
+                continue;
+            }
+            if ($collectionId > 0 && (int) ($category['collection_id'] ?? 0) !== $collectionId) {
+                continue;
+            }
+            $categoryOptions[(string) $category['id']] = $this->taxonomyLabel($category);
+        }
+
+        $tags = $this->safeApiCall(fn () => $this->tagService->list(['per_page' => 1000]));
+        foreach ($this->extractItems($tags) as $tag) {
+            if (! is_array($tag) || ! isset($tag['id'])) {
+                continue;
+            }
+            $tagOptions[(string) $tag['id']] = $this->taxonomyLabel($tag);
+        }
+
+        return compact('categoryOptions', 'tagOptions', 'selectedCategoryIds', 'selectedTagIds');
+    }
+
+    /**
+     * @param mixed $items
+     * @return list<int>
+     */
+    private function taxonomyIds(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        /** @var list<int> $ids */
+        $ids = [];
+        foreach ($items as $item) {
+            $id = is_array($item) ? ($item['id'] ?? null) : $item;
+            if (is_numeric($id) && (int) $id > 0) {
+                $ids[] = (int) $id;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * @param mixed $items
+     * @return array<string, string>
+     */
+    private function taxonomyLabels(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        /** @var array<string, string> $labels */
+        $labels = [];
+        foreach ($items as $item) {
+            if (! is_array($item) || ! isset($item['id'])) {
+                continue;
+            }
+            $labels[(string) $item['id']] = $this->taxonomyLabel($item);
+        }
+
+        return $labels;
+    }
+
+    /** @param array<string, mixed> $item */
+    private function taxonomyLabel(array $item): string
+    {
+        return (string) ($item['name'] ?? $item['title'] ?? $item['slug'] ?? $item['id'] ?? '');
+    }
+
+    /** @return array<string, mixed> */
+    private function syncTaxonomy(string $id): array
+    {
+        $categoryIds = $this->postedTaxonomyIds('category_ids');
+        $tagIds = $this->postedTaxonomyIds('tag_ids');
+        return $this->safeApiCall(fn () => $this->entryService->syncTaxonomy($id, $categoryIds, $tagIds));
+    }
+
+    /** @return list<int> */
+    private function postedTaxonomyIds(string $field): array
+    {
+        $raw = $this->request->getPost($field);
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($raw as $id) {
+            if (is_scalar($id) && ctype_digit((string) $id) && (int) $id > 0) {
+                $ids[] = (int) $id;
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     public function delete(string $id): RedirectResponse

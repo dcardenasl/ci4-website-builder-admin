@@ -109,6 +109,12 @@ return [
 
     'categories_title'              => 'Categories',
     'tags_title'                    => 'Tags',
+    'taxonomy_title'                => 'Categories and tags',
+    'taxonomy_help'                 => 'Select the terms linked to this entry.',
+    'categories_help'               => 'Only categories from this entry\'s collection are shown.',
+    'tags_help'                     => 'Tags are available to every collection.',
+    'taxonomy_empty'                => 'No options are available.',
+    'entries_taxonomy_update_failed' => 'The entry was updated, but its categories or tags could not be saved.',
     'blocks_title'                  => 'Block instances',
 
     // Frequency options for changefreq

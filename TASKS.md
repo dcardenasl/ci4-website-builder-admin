@@ -233,7 +233,7 @@ bash bin/make-module.sh Entry Cms /cms/entries \
 - **Relation loader `collection_id`**: `GET /cms/collections?is_active=true`, mostrar `collection_key` como label.
 - **Traducciones**: fieldset por idioma con `slug`, `title`, `excerpt`, `meta_title`, `meta_description`.
 - **Block instances en show**: lista read-only (tipo + id). Edición de blocks → TODO v2.
-- **Taxonomy en show**: tags y categorías asignados como badges read-only. Edición → tras CMS-017/018.
+- **Taxonomy**: tags y categorías asignados como badges en show y editables desde el formulario de entrada tras CMS-017/018.
 - **Status badge**: reutilizar `cms_status_badge()` de CMS-012.
 
 **Criterio de done:**

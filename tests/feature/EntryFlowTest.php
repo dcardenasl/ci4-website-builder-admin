@@ -93,4 +93,46 @@ final class EntryFlowTest extends CIUnitTestCase
 
         $result->assertRedirectTo(site_url('admin/cms/entries'));
     }
+
+    public function testUpdateSynchronizesCategoriesAndTags(): void
+    {
+        $entryMock = $this->createMock(EntryApiService::class);
+        $entryMock->expects($this->once())
+            ->method('update')
+            ->with('7', $this->isType('array'))
+            ->willReturn($this->okResponse());
+        $entryMock->expects($this->once())
+            ->method('syncTaxonomy')
+            ->with('7', [2, 5], [3])
+            ->willReturn($this->okResponse());
+        Services::injectMock('entryApiService', $entryMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user' => ['permissions' => ['cms.entries.write', 'cms.entries.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/entries/7', [
+            csrf_token() => csrf_hash(),
+            'collection_id' => '1',
+            'status' => 'draft',
+            'category_ids' => ['2', '5'],
+            'tag_ids' => ['3'],
+        ]);
+
+        $result->assertRedirectTo(site_url('admin/cms/entries'));
+    }
+
+    /** @return array<string, mixed> */
+    private function okResponse(): array
+    {
+        return [
+            'ok' => true,
+            'status' => 200,
+            'data' => [],
+            'raw' => '',
+            'headers' => [],
+            'messages' => [],
+            'fieldErrors' => [],
+        ];
+    }
 }

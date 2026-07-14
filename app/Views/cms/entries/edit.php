@@ -66,6 +66,65 @@
             ]) ?>
         </div>
 
+        <?php
+            $taxonomySelection = static function (mixed $value): array {
+                if (! is_array($value)) {
+                    return [];
+                }
+
+                $values = array_filter($value, static fn ($item): bool => is_scalar($item) && (string) $item !== '');
+
+                return array_values(array_map('strval', $values));
+            };
+
+            $selectedCategoryValues = $taxonomySelection(old('category_ids', $selectedCategoryIds ?? []));
+            $selectedTagValues = $taxonomySelection(old('tag_ids', $selectedTagIds ?? []));
+            $taxonomyShouldOpen = $selectedCategoryValues !== [] || $selectedTagValues !== [];
+            $taxonomySummaryParts = [];
+            if ($selectedCategoryValues !== []) {
+                $taxonomySummaryParts[] = count($selectedCategoryValues) . ' ' . lang('Entries.categories_title');
+            }
+            if ($selectedTagValues !== []) {
+                $taxonomySummaryParts[] = count($selectedTagValues) . ' ' . lang('Entries.tags_title');
+            }
+        ?>
+        <details class="group rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-6" <?= $taxonomyShouldOpen ? 'open' : '' ?>>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Entries.taxonomy_title')) ?></h4>
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Entries.taxonomy_help')) ?></p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <?php if ($taxonomySummaryParts !== []): ?>
+                        <div class="hidden flex-wrap justify-end gap-2 sm:flex">
+                            <?php foreach ($taxonomySummaryParts as $part): ?>
+                                <span class="inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600"><?= esc($part) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                    </svg>
+                </div>
+            </summary>
+            <div class="mt-6 space-y-6">
+                <?= view('components/form/taxonomy_checklist', [
+                    'name' => 'category_ids',
+                    'label' => 'Entries.categories_title',
+                    'help' => 'Entries.categories_help',
+                    'options' => $categoryOptions ?? [],
+                    'selected' => $selectedCategoryValues,
+                ]) ?>
+                <?= view('components/form/taxonomy_checklist', [
+                    'name' => 'tag_ids',
+                    'label' => 'Entries.tags_title',
+                    'help' => 'Entries.tags_help',
+                    'options' => $tagOptions ?? [],
+                    'selected' => $selectedTagValues,
+                ]) ?>
+            </div>
+        </details>
+
 
 
 
