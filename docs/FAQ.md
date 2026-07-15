@@ -545,10 +545,16 @@ The file manager is in `app/Views/files/`. You can:
    ```
 
 2. **Change allowed file types:**
-   Edit `app/Requests/File/UploadRequest.php`:
+   Edit the `ALLOWED_EXTENSION_MIMES` map in `app/Modules/Files/Requests/FileUploadRequest.php`:
    ```php
-   'file' => 'uploaded[file]|max_size[file,20971520]|mime_in[file,image/jpeg,application/pdf]'
+   private const ALLOWED_EXTENSION_MIMES = [
+       'png'  => ['image/png'],
+       'pdf'  => ['application/pdf'],
+       // ...
+   ];
    ```
+   Both the extension and the real MIME type (verified server-side via `fileinfo`, not the
+   client-reported `Content-Type`) must be present for an upload to pass.
 
 3. **Customize UI:**
    Edit `app/Views/files/index.php` and `app/Views/files/partials/list_section.php`

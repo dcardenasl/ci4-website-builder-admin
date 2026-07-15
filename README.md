@@ -28,7 +28,7 @@ Tokens live **only** in the server-side PHP session — never in cookies, `local
 2. **Server-Rendered Views:** Uses PHP views with Tailwind CSS and Alpine.js for interactivity. No frontend build pipeline required for production.
 3. **Centralized API Communication:** All HTTP requests go through `app/Libraries/ApiClient.php`, which handles token refresh, error handling, and response normalization.
 4. **Service Layer Pattern:** Controllers call Services, which use the ApiClient. Keeps code organized and testable.
-5. **FormRequest Validation:** Form validation is centralized in `app/Requests/` classes, keeping controllers thin.
+5. **FormRequest Validation:** Form validation is centralized in `app/Modules/{ModuleName}/Requests/` classes, keeping controllers thin.
 
 ## ⚡ Quick Start
 
@@ -117,7 +117,7 @@ The `ApiClient` normalizes all API responses to this structure:
 
 ## ✅ Form Validation & Request Layer
 
-All form validation is handled through `app/Requests/*Request.php` classes:
+All form validation is handled through `app/Modules/{ModuleName}/Requests/*Request.php` classes (e.g. `app/Modules/Auth/Requests/RegisterRequest.php`):
 
 - **rules():** UI-level validation rules (`required`, `valid_email`, `max_length`)
 - **payload():** Normalization to API-expected format

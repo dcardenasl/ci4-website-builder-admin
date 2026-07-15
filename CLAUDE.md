@@ -92,6 +92,11 @@ Application will be available at: `http://localhost:8182`
 - Production builds use `npm run build:css` to generate minified CSS (see DEPLOYMENT.md)
 
 ### Testing
+
+Prefer `composer test*` (passes `--no-coverage`). Bare `vendor/bin/phpunit` triggers a harmless
+`XDEBUG_MODE=coverage` warning (`phpunit.xml.dist` declares a `<coverage>` block but xdebug isn't
+active by default) and returns a non-zero exit code on an otherwise-passing run.
+
 ```bash
 # Run all tests
 vendor/bin/phpunit

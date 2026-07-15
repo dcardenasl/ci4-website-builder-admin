@@ -16,7 +16,7 @@ Sigue este orden para mantener consistencia:
 1. Crear el servicio del modulo y su interfaz.
 2. Registrar el binding en `app/Config/Services.php` si corresponde.
 3. Crear o ajustar controller del modulo usando la interfaz, no la clase concreta.
-4. Crear requests de validacion en `app/Requests` cuando haya formularios.
+4. Crear requests de validacion en `app/Modules/{Modulo}/Requests` cuando haya formularios.
 5. Crear views del modulo siguiendo los layouts y helpers existentes.
 6. Registrar rutas en `app/Config/Routes.php` o en la config del modulo.
 7. Añadir archivos de idioma en `app/Language/en` y `app/Language/es`.
