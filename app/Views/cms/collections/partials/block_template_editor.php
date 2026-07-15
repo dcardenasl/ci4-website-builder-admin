@@ -188,9 +188,9 @@ if (is_array($rawWizardConfig)) {
     <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_catalog_title')) ?></h5>
+                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_title')) ?></h5>
                 <p class="mt-1 text-xs text-gray-500">
-                    <?= esc(lang('Collections.block_template_builder_catalog_help')) ?>
+                    <?= esc(lang('Collections.block_template_builder_overview_help')) ?>
                 </p>
             </div>
             <div class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700">
@@ -199,201 +199,229 @@ if (is_array($rawWizardConfig)) {
             </div>
         </div>
 
-        <div x-show="collectionPresets.length > 0" class="mt-4 rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-            <h6 class="text-xs font-semibold text-gray-900 mb-1"><?= esc(lang('Collections.block_template_preset_title')) ?></h6>
-            <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_preset_help')) ?></p>
-            <div class="flex flex-wrap gap-2">
-                <template x-for="preset in collectionPresets" :key="preset.type_key">
-                    <button type="button"
-                        @click="loadPreset(preset.type_key)"
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:border-brand-400">
-                        <i :data-lucide="preset.type_key === 'blog' ? 'book-open' : (preset.type_key === 'news' ? 'newspaper' : (preset.type_key === 'portfolio' ? 'briefcase' : (preset.type_key === 'services' ? 'cog' : 'layout')))" class="h-3.5 w-3.5 text-gray-500"></i>
-                        <span x-text="preset.label || preset.type_key"></span>
-                    </button>
-                </template>
-            </div>
-        </div>
-
-        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            <template x-for="bt in blockTypes" :key="bt.id">
-                <button type="button"
-                    @click="addBlock(bt.block_key)"
-                    class="group relative flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-center transition-all hover:border-brand-400 hover:bg-brand-50/40">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-brand-100 group-hover:text-brand-600">
-                        <i :data-lucide="bt.icon || 'layout-template'" class="h-5 w-5"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-800" x-text="bt.name"></span>
-                    <code class="text-[10px] font-mono text-gray-400" x-text="bt.block_key"></code>
-                    <span class="text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100">
-                        <?= esc(lang('Collections.block_template_builder_add_block')) ?>
-                    </span>
-                </button>
-            </template>
-        </div>
-
-        <div x-show="blockTypes.length === 0" x-cloak class="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
-            <?= esc(lang('Collections.block_template_builder_no_blocks')) ?>
-        </div>
-    </section>
-
-    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" x-ref="templateList">
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title')) ?></h5>
-                <p class="mt-1 text-xs text-gray-500">
-                    <?= esc(lang('Collections.block_template_builder_template_help')) ?>
-                </p>
-            </div>
+        <div class="mt-4 flex gap-2">
             <button type="button"
-                @click="sync()"
-                class="<?= esc(action_button_class()) ?> px-3 py-1.5 text-xs font-medium">
-                <?= esc(lang('App.save')) ?>
+                @click="setActivePanel('catalog')"
+                :class="activePanel === 'catalog' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-700 border-gray-300 hover:border-brand-400'"
+                class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors">
+                <?= esc(lang('Collections.block_template_builder_catalog_tab')) ?>
+            </button>
+            <button type="button"
+                @click="setActivePanel('structure')"
+                :class="activePanel === 'structure' ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-700 border-gray-300 hover:border-brand-400'"
+                class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors">
+                <?= esc(lang('Collections.block_template_builder_structure_tab')) ?>
             </button>
         </div>
 
-        <div class="mt-4 space-y-4">
-            <template x-for="(row, index) in rows" :key="`${row.block_key}-${index}-${row.sort_order}`">
-                <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-4">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-100 px-2 text-xs font-semibold text-brand-700" x-text="row.sort_order"></span>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900" x-text="blockTypeLabel(row.block_key)"></p>
-                                <code class="text-[10px] font-mono text-gray-500" x-text="row.block_key"></code>
+        <div x-show="activePanel === 'catalog'" x-cloak class="mt-4 space-y-4">
+            <div x-show="collectionPresets.length > 0" class="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+                <h6 class="text-xs font-semibold text-gray-900 mb-1"><?= esc(lang('Collections.block_template_preset_title')) ?></h6>
+                <p class="text-xs text-gray-500 mb-3"><?= esc(lang('Collections.block_template_preset_help')) ?></p>
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="preset in collectionPresets" :key="preset.type_key">
+                        <button type="button"
+                            @click="loadPreset(preset.type_key)"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:border-brand-400">
+                            <i :data-lucide="preset.type_key === 'blog' ? 'book-open' : (preset.type_key === 'news' ? 'newspaper' : (preset.type_key === 'portfolio' ? 'briefcase' : (preset.type_key === 'services' ? 'cog' : 'layout')))" class="h-3.5 w-3.5 text-gray-500"></i>
+                            <span x-text="preset.label || preset.type_key"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="grid max-h-80 grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
+                <template x-for="bt in blockTypes" :key="bt.id">
+                    <button type="button"
+                        @click="addBlock(bt.block_key)"
+                        class="group relative flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3 text-center transition-all hover:border-brand-400 hover:bg-brand-50/40">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500 transition-colors group-hover:bg-brand-100 group-hover:text-brand-600">
+                            <i :data-lucide="bt.icon || 'layout-template'" class="h-4.5 w-4.5"></i>
+                        </div>
+                        <span class="text-[11px] font-semibold leading-tight text-gray-800" x-text="bt.name"></span>
+                        <code class="text-[10px] font-mono text-gray-400" x-text="bt.block_key"></code>
+                        <span class="text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100">
+                            <?= esc(lang('Collections.block_template_builder_add_block')) ?>
+                        </span>
+                    </button>
+                </template>
+            </div>
+
+            <div x-show="blockTypes.length === 0" x-cloak class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+                <?= esc(lang('Collections.block_template_builder_no_blocks')) ?>
+            </div>
+        </div>
+
+        <div x-show="activePanel === 'structure'" x-cloak class="mt-4 space-y-4" x-ref="templateList">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h5 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title')) ?></h5>
+                    <p class="mt-1 text-xs text-gray-500">
+                        <?= esc(lang('Collections.block_template_builder_template_help')) ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <template x-for="(row, index) in rows" :key="`${row.block_key}-${index}-${row.sort_order}`">
+                    <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-100 px-2 text-xs font-semibold text-brand-700" x-text="row.sort_order"></span>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900" x-text="blockTypeLabel(row.block_key)"></p>
+                                    <code class="text-[10px] font-mono text-gray-500" x-text="row.block_key"></code>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button type="button"
+                                    @click="row.advancedOpen = !row.advancedOpen"
+                                    class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-[11px] font-medium text-gray-600 transition-colors hover:border-brand-300 hover:text-brand-700"
+                                    :aria-expanded="row.advancedOpen ? 'true' : 'false'">
+                                    <span x-text="row.advancedOpen ? '<?= esc(lang('App.hide'), 'js') ?>' : '<?= esc(lang('App.show_more'), 'js') ?>'"></span>
+                                </button>
+                                <button type="button"
+                                    @click="moveBlock(index, -1)"
+                                    :disabled="index === 0"
+                                    class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                    :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_up'), 'js') ?>' : ''">
+                                    ↑
+                                </button>
+                                <button type="button"
+                                    @click="moveBlock(index, 1)"
+                                    :disabled="index === rows.length - 1"
+                                    class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                    :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_down'), 'js') ?>' : ''">
+                                    ↓
+                                </button>
+                                <button type="button"
+                                    @click="removeBlock(index)"
+                                    class="rounded-lg border border-red-200 bg-white px-2 py-1 text-xs text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
+                                    <?= esc(lang('App.remove')) ?>
+                                </button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button type="button"
-                                @click="moveBlock(index, -1)"
-                                :disabled="index === 0"
-                                class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_up'), 'js') ?>' : ''">
-                                ↑
-                            </button>
-                            <button type="button"
-                                @click="moveBlock(index, 1)"
-                                :disabled="index === rows.length - 1"
-                                class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                :title="row.block_key ? '<?= esc(lang('Collections.block_template_builder_move_down'), 'js') ?>' : ''">
-                                ↓
-                            </button>
-                            <button type="button"
-                                @click="removeBlock(index)"
-                                class="rounded-lg border border-red-200 bg-white px-2 py-1 text-xs text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
-                                <?= esc(lang('App.remove')) ?>
-                            </button>
-                        </div>
-                    </div>
 
-                    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_label')) ?></label>
-                            <input type="text"
-                                x-model="row.label"
-                                @input="sync()"
-                                class="<?= esc(input_class('block_template')) ?>"
-                                placeholder="<?= esc(lang('Collections.block_template_builder_block_label_placeholder')) ?>">
+                        <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_label')) ?></label>
+                                <input type="text"
+                                    x-model="row.label"
+                                    @input="sync()"
+                                    class="<?= esc(input_class('block_template')) ?>"
+                                    placeholder="<?= esc(lang('Collections.block_template_builder_block_label_placeholder')) ?>">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_key')) ?></label>
+                                <select
+                                    x-effect="$el.value = row.block_key || ''"
+                                    @change="row.block_key = $event.target.value; onBlockKeyChanged(index)"
+                                    class="<?= esc(input_class('block_template')) ?>">
+                                    <option value=""><?= esc(lang('App.select')) ?></option>
+                                    <template x-for="bt in blockTypes" :key="bt.block_key">
+                                        <option
+                                            :value="bt.block_key"
+                                            :selected="row.block_key === bt.block_key"
+                                            x-text="`${bt.name} (${bt.block_key})`"></option>
+                                    </template>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_help')) ?></label>
-                            <input type="text"
-                                x-model="row.help_text"
-                                @input="sync()"
-                                class="<?= esc(input_class('block_template')) ?>"
-                                placeholder="<?= esc(lang('Collections.block_template_builder_block_help_placeholder')) ?>">
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_key')) ?></label>
-                            <select x-model="row.block_key" @change="onBlockKeyChanged(index)" class="<?= esc(input_class('block_template')) ?>">
-                                <option value=""><?= esc(lang('App.select')) ?></option>
-                                <template x-for="bt in blockTypes" :key="bt.block_key">
-                                    <option :value="bt.block_key" x-text="`${bt.name} (${bt.block_key})`"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
+                        <div class="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5">
+                            <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-700">
                                 <input type="checkbox" x-model="row.required" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                 <?= esc(lang('Collections.block_template_builder_required')) ?>
                             </label>
-                            <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700">
+                            <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-700">
                                 <input type="checkbox" x-model="row.locked" @change="sync()" class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
                                 <?= esc(lang('Collections.block_template_builder_locked')) ?>
                             </label>
+                            <span class="text-[11px] text-gray-400" x-show="row.defaults.length > 0" x-text="`${row.defaults.length} <?= esc(lang('Collections.block_template_builder_defaults_title'), 'js') ?>`"></span>
                         </div>
-                    </div>
 
-                    <div class="mt-4 rounded-lg border border-gray-200 bg-white p-3">
-                        <div class="flex items-center justify-between gap-2">
-                            <div>
-                                <h6 class="text-xs font-semibold text-gray-700"><?= esc(lang('Collections.block_template_builder_defaults_title')) ?></h6>
-                                <p class="mt-0.5 text-[11px] text-gray-500"><?= esc(lang('Collections.block_template_builder_defaults_help')) ?></p>
+                        <div x-show="row.advancedOpen" x-cloak class="mt-3 rounded-lg border border-gray-200 bg-white p-3">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-gray-700"><?= esc(lang('Collections.block_template_builder_block_help')) ?></label>
+                                <input type="text"
+                                    x-model="row.help_text"
+                                    @input="sync()"
+                                    class="<?= esc(input_class('block_template')) ?>"
+                                    placeholder="<?= esc(lang('Collections.block_template_builder_block_help_placeholder')) ?>">
                             </div>
-                            <button type="button" @click="addDefault(index)" class="rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-700 transition-colors hover:bg-brand-100">
-                                <?= esc(lang('Collections.block_template_builder_add_default')) ?>
-                            </button>
-                        </div>
 
-                        <div class="mt-3 space-y-2">
-                            <template x-for="(defaultRow, defaultIndex) in row.defaults" :key="defaultIndex">
-                                <div class="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_10rem_minmax(0,1fr)_auto]">
-                                    <input type="text"
-                                        x-model="defaultRow.key"
-                                        @input="sync()"
-                                        class="<?= esc(input_class('block_template')) ?>"
-                                        placeholder="<?= esc(lang('Collections.block_template_builder_default_key_placeholder')) ?>">
-
-                                    <select x-model="defaultRow.type" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
-                                        <option value="string"><?= esc(lang('Collections.block_template_builder_type_string')) ?></option>
-                                        <option value="number"><?= esc(lang('Collections.block_template_builder_type_number')) ?></option>
-                                        <option value="boolean"><?= esc(lang('Collections.block_template_builder_type_boolean')) ?></option>
-                                    </select>
-
-                                    <template x-if="defaultRow.type === 'boolean'">
-                                        <select x-model="defaultRow.value" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
-                                            <option value="1"><?= esc(lang('App.yes')) ?></option>
-                                            <option value="0"><?= esc(lang('App.no')) ?></option>
-                                        </select>
-                                    </template>
-
-                                    <template x-if="defaultRow.type === 'number'">
-                                        <input type="number"
-                                            x-model="defaultRow.value"
-                                            @input="sync()"
-                                            class="<?= esc(input_class('block_template')) ?>"
-                                            placeholder="0">
-                                    </template>
-
-                                    <template x-if="defaultRow.type === 'string'">
-                                        <input type="text"
-                                            x-model="defaultRow.value"
-                                            @input="sync()"
-                                            class="<?= esc(input_class('block_template')) ?>"
-                                            placeholder="<?= esc(lang('Collections.block_template_builder_default_value_placeholder')) ?>">
-                                    </template>
-
-                                    <button type="button"
-                                        @click="removeDefault(index, defaultIndex)"
-                                        class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
-                                        <?= esc(lang('App.remove')) ?>
+                            <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50/70 p-3">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div>
+                                        <h6 class="text-xs font-semibold text-gray-700"><?= esc(lang('Collections.block_template_builder_defaults_title')) ?></h6>
+                                        <p class="mt-0.5 text-[11px] text-gray-500"><?= esc(lang('Collections.block_template_builder_defaults_help')) ?></p>
+                                    </div>
+                                    <button type="button" @click="addDefault(index)" class="rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-medium text-brand-700 transition-colors hover:bg-brand-100">
+                                        <?= esc(lang('Collections.block_template_builder_add_default')) ?>
                                     </button>
                                 </div>
-                            </template>
 
-                            <p x-show="row.defaults.length === 0" x-cloak class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-400">
-                                <?= esc(lang('Collections.block_template_builder_defaults_empty')) ?>
-                            </p>
+                                <div class="mt-3 space-y-2">
+                                    <template x-for="(defaultRow, defaultIndex) in row.defaults" :key="defaultIndex">
+                                        <div class="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_10rem_minmax(0,1fr)_auto]">
+                                            <input type="text"
+                                                x-model="defaultRow.key"
+                                                @input="sync()"
+                                                class="<?= esc(input_class('block_template')) ?>"
+                                                placeholder="<?= esc(lang('Collections.block_template_builder_default_key_placeholder')) ?>">
+
+                                            <select x-model="defaultRow.type" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
+                                                <option value="string"><?= esc(lang('Collections.block_template_builder_type_string')) ?></option>
+                                                <option value="number"><?= esc(lang('Collections.block_template_builder_type_number')) ?></option>
+                                                <option value="boolean"><?= esc(lang('Collections.block_template_builder_type_boolean')) ?></option>
+                                            </select>
+
+                                            <template x-if="defaultRow.type === 'boolean'">
+                                                <select x-model="defaultRow.value" @change="sync()" class="<?= esc(input_class('block_template')) ?>">
+                                                    <option value="1"><?= esc(lang('App.yes')) ?></option>
+                                                    <option value="0"><?= esc(lang('App.no')) ?></option>
+                                                </select>
+                                            </template>
+
+                                            <template x-if="defaultRow.type === 'number'">
+                                                <input type="number"
+                                                    x-model="defaultRow.value"
+                                                    @input="sync()"
+                                                    class="<?= esc(input_class('block_template')) ?>"
+                                                    placeholder="0">
+                                            </template>
+
+                                            <template x-if="defaultRow.type === 'string'">
+                                                <input type="text"
+                                                    x-model="defaultRow.value"
+                                                    @input="sync()"
+                                                    class="<?= esc(input_class('block_template')) ?>"
+                                                    placeholder="<?= esc(lang('Collections.block_template_builder_default_value_placeholder')) ?>">
+                                            </template>
+
+                                            <button type="button"
+                                                @click="removeDefault(index, defaultIndex)"
+                                                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50">
+                                                <?= esc(lang('App.remove')) ?>
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <p x-show="row.defaults.length === 0" x-cloak class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-3 text-xs text-gray-400">
+                                        <?= esc(lang('Collections.block_template_builder_defaults_empty')) ?>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </template>
+                </template>
 
-            <p x-show="rows.length === 0" x-cloak class="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-sm text-gray-500">
-                <?= esc(lang('Collections.block_template_builder_empty')) ?>
-            </p>
+                <p x-show="rows.length === 0" x-cloak class="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-sm text-gray-500">
+                    <?= esc(lang('Collections.block_template_builder_empty')) ?>
+                </p>
+            </div>
         </div>
     </section>
 
@@ -416,6 +444,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
         collectionPresets: Array.isArray(collectionPresets) ? collectionPresets : [],
         wizardConfig: initialWizardConfig || null,
         wizardConfigJson: '',
+        activePanel: 'catalog',
         rows: [],
         json: '',
         valid: false,
@@ -454,6 +483,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
 
         init() {
             this.rows = this.normalizeRowsFromTemplate(this.initialTemplate);
+            this.activePanel = this.rows.length > 0 ? 'structure' : 'catalog';
             this.sync();
         },
 
@@ -474,6 +504,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
                 sort_order: this.rows.length + 1,
                 required: true,
                 locked: false,
+                advancedOpen: false,
                 defaults: [],
             };
         },
@@ -507,6 +538,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
                         sort_order: Number.isInteger(block.sort_order) ? block.sort_order : this.toInteger(block.sort_order, index + 1),
                         required: this.toBoolean(block.required, true),
                         locked: this.toBoolean(block.locked, false),
+                        advancedOpen: this.toBoolean(block.advancedOpen, false),
                         defaults,
                     };
                 })
@@ -518,6 +550,7 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
                 ...row,
                 sort_order: index + 1,
                 defaults: Array.isArray(row.defaults) ? row.defaults : [],
+                advancedOpen: this.toBoolean(row.advancedOpen, false),
             }));
         },
 
@@ -533,7 +566,15 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
 
             this.rows = this.normalizeRowsFromTemplate(preset.block_template);
             this.wizardConfig = preset.wizard_config || null;
+            this.activePanel = 'structure';
             this.sync();
+        },
+
+        setActivePanel(panel) {
+            this.activePanel = panel === 'structure' ? 'structure' : 'catalog';
+            if (this.activePanel === 'structure' && this.rows.length === 0) {
+                this.activePanel = 'catalog';
+            }
         },
 
         addBlock(blockKey) {
@@ -543,12 +584,16 @@ function collectionBlockTemplateBuilder(blockTypes, initialTemplate, collectionP
             }
 
             this.rows.push(this.createRowFromBlockType(blockType));
+            this.activePanel = 'structure';
             this.sync();
             this.scrollToTemplate();
         },
 
         removeBlock(index) {
             this.rows.splice(index, 1);
+            if (this.rows.length === 0) {
+                this.activePanel = 'catalog';
+            }
             this.sync();
         },
 

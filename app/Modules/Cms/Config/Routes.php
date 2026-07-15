@@ -158,7 +158,9 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('collections', '\App\Modules\Cms\Controllers\CollectionController::store', ['as' => 'admin.cms.collections.store', 'filter' => 'permission:cms.collections.write']);
     $routes->get('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::show/$1', ['as' => 'admin.cms.collections.show', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/(:segment)/edit', '\App\Modules\Cms\Controllers\CollectionController::edit/$1', ['as' => 'admin.cms.collections.edit', 'filter' => 'permission:cms.collections.write']);
+    $routes->get('collections/(:segment)/structure', '\App\Modules\Cms\Controllers\CollectionController::structure/$1', ['as' => 'admin.cms.collections.structure', 'filter' => 'permission:cms.collections.write']);
     $routes->post('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::update/$1', ['as' => 'admin.cms.collections.update', 'filter' => 'permission:cms.collections.write']);
+    $routes->post('collections/(:segment)/structure', '\App\Modules\Cms\Controllers\CollectionController::updateStructure/$1', ['as' => 'admin.cms.collections.update_structure', 'filter' => 'permission:cms.collections.write']);
     $routes->post('collections/(:segment)/delete', '\App\Modules\Cms\Controllers\CollectionController::delete/$1', ['as' => 'admin.cms.collections.delete', 'filter' => 'permission:cms.collections.write']);
 
     // Entry

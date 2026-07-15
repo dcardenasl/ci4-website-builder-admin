@@ -15,4 +15,24 @@ interface BlockCatalogServiceInterface
      * @return array<int, array<string, mixed>>
      */
     public function indexed(): array;
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function templates(): array;
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableForEntries(): array;
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableTopLevel(): array;
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableForPages(): array;
 }

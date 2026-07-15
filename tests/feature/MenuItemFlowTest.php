@@ -66,7 +66,7 @@ final class MenuItemFlowTest extends CIUnitTestCase
         $langMock = $this->createMock(LanguageApiService::class);
         $langMock->method('list')
             ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['items' => [['id' => 1, 'name' => 'ES']]],
+                'ok' => true, 'status' => 200, 'data' => [['id' => 1, 'code' => 'es', 'name' => 'ES', 'is_default' => 1]],
                 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
             ]);
         Services::injectMock('languageApiService', $langMock);

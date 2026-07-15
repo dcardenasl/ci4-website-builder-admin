@@ -7,79 +7,19 @@
  * and the correct input_type — no code change required here.
  *
  * Layout:
- *   - Left (2/3): all text/bool/select/etc. settings stacked in one card
+ *   - Left (2/3): core identity settings + unified translations panel
  *   - Right (1/3): image/file pickers (brand assets)
  *
- * @var array<string, array<string, mixed>> $settingsMap   keyed by setting_key
- * @var array<int, array<string, mixed>>    $languages
- * @var int|null                            $baseLanguageId
+ * @var array<int, array<string, mixed>> $contentSettings
+ * @var array<int, array<string, mixed>> $assetSettings
+ * @var array<string, mixed> $translationPanel
  */
-$settingsMap    = $settingsMap ?? [];
-$languages      = $languages ?? [];
-$baseLanguageId = isset($baseLanguageId) && is_numeric($baseLanguageId) ? (int) $baseLanguageId : null;
 
-$translationLanguages = [];
-$initialLangId        = 0;
-foreach ($languages as $language) {
-    $langId = (int) ($language['id'] ?? 0);
-    if ($langId <= 0 || $langId === $baseLanguageId) {
-        continue;
-    }
-    if ($initialLangId === 0) {
-        $initialLangId = $langId;
-    }
-    $translationLanguages[] = $language;
-}
+helper('cms_settings');
 
-$sortedSettings = array_values($settingsMap);
-usort($sortedSettings, fn ($a, $b) => ($a['sort_order'] ?? 0) <=> ($b['sort_order'] ?? 0));
-
-$assetSettings   = array_values(array_filter($sortedSettings, fn ($s) => in_array($s['input_type'] ?? 'text', ['image', 'file'], true)));
-$contentSettings = array_values(array_filter($sortedSettings, fn ($s) => !in_array($s['input_type'] ?? 'text', ['image', 'file'], true)));
-
-/** @param array<string, mixed> $setting */
-function identity_resolve_label(array $setting): string
-{
-    foreach ($setting['translations'] ?? [] as $t) {
-        if (!empty($t['label'])) {
-            return (string) $t['label'];
-        }
-    }
-    return (string) ($setting['description'] ?? $setting['setting_key'] ?? '');
-}
-
-/** @param array<string, mixed> $setting */
-function identity_resolve_placeholder(array $setting): string
-{
-    foreach ($setting['translations'] ?? [] as $t) {
-        if (!empty($t['placeholder'])) {
-            return (string) $t['placeholder'];
-        }
-    }
-    return '';
-}
-
-/** @param array<string, mixed> $setting */
-function identity_resolve_help(array $setting): string
-{
-    foreach ($setting['translations'] ?? [] as $t) {
-        if (!empty($t['help_text'])) {
-            return (string) $t['help_text'];
-        }
-    }
-    return '';
-}
-
-/** @param array<string, mixed> $setting */
-function identity_get_translation(array $setting, int $langId, string $field = 'setting_value'): string
-{
-    foreach ($setting['translations'] ?? [] as $t) {
-        if ((int) ($t['language_id'] ?? 0) === $langId && isset($t[$field])) {
-            return (string) $t[$field];
-        }
-    }
-    return '';
-}
+$contentSettings = $contentSettings ?? [];
+$assetSettings = $assetSettings ?? [];
+$translationPanel = is_array($translationPanel ?? null) ? $translationPanel : [];
 ?>
 
 <div class="space-y-5">
@@ -89,7 +29,7 @@ function identity_get_translation(array $setting, int $langId, string $field = '
         <p class="mt-1 text-sm text-gray-500"><?= lang('SiteIdentity.section_intro') ?></p>
     </div>
 
-    <?php if (empty($sortedSettings)): ?>
+    <?php if (empty($contentSettings) && empty($assetSettings)): ?>
 
         <div class="rounded-lg border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
             <?= lang('SiteIdentity.no_settings') ?>
@@ -104,8 +44,7 @@ function identity_get_translation(array $setting, int $langId, string $field = '
         <span><?= lang('SiteIdentity.cache_note') ?></span>
     </div>
 
-    <form method="post" action="<?= route_to('admin.cms.site_identity.update') ?>"
-          x-data="{ activeLangId: <?= $initialLangId ?> }" class="space-y-6">
+    <form method="post" action="<?= route_to('admin.cms.site_identity.update') ?>" class="space-y-6">
         <?= csrf_field() ?>
 
         <?php
@@ -115,32 +54,48 @@ function identity_get_translation(array $setting, int $langId, string $field = '
         ?>
         <div class="<?= esc($colClass) ?>">
 
-            <?php if ($hasContent): ?>
+                <?php if ($hasContent): ?>
             <div class="<?= $hasAssets ? 'lg:col-span-2' : '' ?> space-y-6">
 
                 <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
-                    <div class="border-b border-gray-100 px-5 py-4">
-                        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700"><?= lang('SiteIdentity.core_section') ?></h3>
+                    <div class="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700"><?= lang('SiteIdentity.core_section') ?></h3>
+                            <p class="mt-1 text-xs text-gray-500"><?= lang('SiteIdentity.base_section_intro') ?></p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600">
+                            <?= esc(lang('SiteIdentity.base_badge')) ?>
+                        </span>
                     </div>
                     <div class="divide-y divide-gray-100">
 
                     <?php foreach ($contentSettings as $idx => $setting):
+                        if (cms_setting_is_translatable($setting)) {
+                            continue;
+                        }
                         $key         = (string) ($setting['setting_key'] ?? '');
                         $inputType   = (string) ($setting['input_type'] ?? 'text');
                         $currentVal  = (string) ($setting['setting_value'] ?? '');
-                        $isTrans     = !empty($setting['is_translatable']);
+                        $isTrans     = cms_setting_is_translatable($setting);
                         $isReadonly  = !empty($setting['is_readonly']);
-                        $label       = identity_resolve_label($setting);
-                        $placeholder = identity_resolve_placeholder($setting);
-                        $helpText    = identity_resolve_help($setting);
+                        $label       = cms_setting_resolve_label($setting);
+                        $placeholder = cms_setting_resolve_placeholder($setting);
+                        $helpText    = cms_setting_resolve_help($setting);
                         ?>
                     <div class="px-5 py-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                            <?= esc($label) ?>
-                            <?php if (!empty($setting['is_required'])): ?>
-                                <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <?= esc($label) ?>
+                                <?php if (!empty($setting['is_required'])): ?>
+                                    <span class="text-red-400 ml-0.5" aria-hidden="true">*</span>
+                                <?php endif; ?>
+                            </label>
+                            <?php if ($isTrans && !empty($translationPanel['translationLanguages'])): ?>
+                                    <span class="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-700">
+                                        <?= esc(lang('SiteIdentity.translatable_badge')) ?>
+                                    </span>
                             <?php endif; ?>
-                        </label>
+                        </div>
 
                         <?php if ($inputType === 'boolean'): ?>
                             <?= view('components/form/boolean', [
@@ -206,40 +161,30 @@ function identity_get_translation(array $setting, int $langId, string $field = '
                         <?php if ($helpText !== ''): ?>
                             <p class="mt-1 text-xs text-gray-400"><?= esc($helpText) ?></p>
                         <?php endif; ?>
-
-                        <?php if ($isTrans && !empty($translationLanguages)): ?>
-                            <div class="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 pt-2 pb-3">
-                                <div class="mb-2 flex gap-3 border-b border-gray-200">
-                                    <?php foreach ($translationLanguages as $tLang): ?>
-                                        <?php $tId = (int) $tLang['id']; ?>
-                                        <button type="button"
-                                                @click="activeLangId = <?= $tId ?>"
-                                                :class="activeLangId === <?= $tId ?> ? 'border-brand-500 text-brand-600 font-semibold' : 'border-transparent text-gray-400 hover:text-gray-600'"
-                                                class="whitespace-nowrap border-b-2 pb-1.5 px-0.5 text-xs transition-colors">
-                                            <?= esc(strtoupper((string) ($tLang['code'] ?? ''))) ?>
-                                        </button>
-                                    <?php endforeach; ?>
-                                </div>
-                                <?php foreach ($translationLanguages as $tLang):
-                                    $tId  = (int) $tLang['id'];
-                                    $tVal = identity_get_translation($setting, $tId, 'setting_value');
-                                    ?>
-                                    <div x-show="activeLangId === <?= $tId ?>" x-cloak>
-                                        <input type="text"
-                                               name="<?= esc($key) ?>_translations[<?= $tId ?>]"
-                                               value="<?= esc($tVal) ?>"
-                                               class="form-input text-sm"
-                                               placeholder="<?= esc($label) ?> (<?= esc(strtolower((string) ($tLang['native_name'] ?? $tLang['name'] ?? ''))) ?>)"
-                                               <?= $isReadonly ? 'readonly' : '' ?>>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
 
                     </div>
                 </section>
+
+                <?php if (!empty($translationPanel['translationLanguages'])): ?>
+                    <?= view('components/form/translatable_settings_panel', [
+                        'title' => lang('SiteIdentity.translations_section'),
+                        'description' => lang('SiteIdentity.translations_intro'),
+                        'badge' => (string) ($translationPanel['translatableFieldCount'] ?? 0) . ' ' . lang('SiteIdentity.translations_ready_suffix'),
+                        'languageHelp' => lang('SiteIdentity.translation_language_help'),
+                        'translateAllLabel' => lang('App.translate_all'),
+                        'translateFromDefaultLabel' => lang('App.translate_from_default'),
+                        'translatingLabel' => lang('App.translating'),
+                        'translateUrl' => route_to('admin.cms.translate'),
+                        'activeLanguageId' => (int) ($translationPanel['activeLanguageId'] ?? 0),
+                        'defaultLanguageCode' => (string) ($translationPanel['defaultLanguageCode'] ?? ''),
+                        'translationLanguages' => $translationPanel['translationLanguages'] ?? [],
+                        'rowsByLanguage' => $translationPanel['rowsByLanguage'] ?? [],
+                        'translateTargets' => $translationPanel['translateTargets'] ?? [],
+                        'translateTargetsByLanguageId' => $translationPanel['translateTargetsByLanguageId'] ?? [],
+                    ]) ?>
+                <?php endif; ?>
 
             </div>
             <?php endif; ?>
@@ -256,8 +201,8 @@ function identity_get_translation(array $setting, int $langId, string $field = '
                         $key        = (string) ($setting['setting_key'] ?? '');
                         $inputType  = (string) ($setting['input_type'] ?? 'image');
                         $isReadonly = !empty($setting['is_readonly']);
-                        $label      = identity_resolve_label($setting);
-                        $helpText   = identity_resolve_help($setting);
+                        $label      = cms_setting_resolve_label($setting);
+                        $helpText   = cms_setting_resolve_help($setting);
                         $fileId     = (string) ($setting['setting_value'] ?? '');
                         $fpAccept   = ($inputType === 'image') ? 'image/*' : '';
                         $fpFilter   = ($inputType === 'image') ? 'image' : '';

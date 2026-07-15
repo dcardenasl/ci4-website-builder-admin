@@ -179,6 +179,14 @@ final class CmsPresetCatalog
                 ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
                 ['block_key' => 'rich_text', 'label' => 'Mensaje', 'help_text' => 'Aviso temporal', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
             ]),
+            self::pagePreset('404', [
+                ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
+                ['block_key' => 'rich_text', 'label' => 'Mensaje', 'help_text' => 'Mensaje de error', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
+            ]),
+            self::pagePreset('500', [
+                ['block_key' => 'page_header', 'label' => 'Encabezado', 'help_text' => 'Título de la página', 'required' => true, 'locked' => false, 'block_config_defaults' => (object) ['bg_color' => 'bg-gray-100', 'css_class' => '']],
+                ['block_key' => 'rich_text', 'label' => 'Mensaje', 'help_text' => 'Mensaje de error', 'required' => false, 'locked' => false, 'block_config_defaults' => (object) ['css_class' => '']],
+            ]),
         ];
     }
 

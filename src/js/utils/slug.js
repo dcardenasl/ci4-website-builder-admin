@@ -10,6 +10,8 @@ export const slugify = (value) => String(value || '')
     .replace(/-{2,}/g, '-')
     .slice(0, 255);
 
+const normalizeSlugValue = (value, maxLength = 255) => slugify(value).slice(0, maxLength);
+
 export const bootSlugFields = () => {
     document.querySelectorAll('input[data-slug-source]').forEach((slugInput) => {
         if (!(slugInput instanceof HTMLInputElement)) return;
@@ -135,5 +137,40 @@ export const bootSlugFields = () => {
 
         syncFromSource();
         checkAvailability();
+    });
+
+    document.querySelectorAll('input[data-auto-slug-source]').forEach((slugInput) => {
+        if (!(slugInput instanceof HTMLInputElement)) return;
+
+        const sourceSelector = slugInput.dataset.autoSlugSource || '';
+        const sourceInput = sourceSelector === '' ? null : document.querySelector(sourceSelector);
+
+        if (!(sourceInput instanceof HTMLInputElement)) return;
+
+        const parsedMaxLength = Number.parseInt(slugInput.dataset.autoSlugMaxlength || '', 10);
+        const maxLength = Number.isFinite(parsedMaxLength) && parsedMaxLength > 0 ? parsedMaxLength : 255;
+
+        let manual = slugInput.value.trim() !== '' && slugInput.value.trim() !== normalizeSlugValue(sourceInput.value, maxLength);
+
+        const syncFromSource = () => {
+            if (manual) return;
+            slugInput.value = normalizeSlugValue(sourceInput.value, maxLength);
+        };
+
+        sourceInput.addEventListener('input', syncFromSource);
+        slugInput.addEventListener('input', () => {
+            const normalized = normalizeSlugValue(slugInput.value, maxLength);
+            manual = normalized !== '' && normalized !== normalizeSlugValue(sourceInput.value, maxLength);
+            slugInput.value = normalized;
+        });
+
+        slugInput.addEventListener('blur', () => {
+            if (slugInput.value.trim() === '') {
+                manual = false;
+                syncFromSource();
+            }
+        });
+
+        syncFromSource();
     });
 };

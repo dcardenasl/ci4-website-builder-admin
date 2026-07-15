@@ -14,7 +14,7 @@ $showButton = $showButton ?? ! empty($translateTargets);
 
 <?php if ($showButton && ! empty($translateTargets)): ?>
 <button type="button"
-        @click="autoTranslateAll(<?= esc(json_encode($translateTargets), 'attr') ?>)"
+        x-on:click="autoTranslateAll(<?= esc(json_encode($translateTargets), 'attr') ?>)"
         :disabled="translatingAll"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 shadow-sm hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">

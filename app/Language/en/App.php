@@ -33,6 +33,8 @@ return [
     'update'          => 'Update',
     'delete'          => 'Delete',
     'edit'            => 'Edit',
+    'show_more'       => 'More',
+    'hide'            => 'Hide',
     'search'          => 'Search',
     'filters'         => 'Filters',
     'clear_filters'   => 'Clear filters',

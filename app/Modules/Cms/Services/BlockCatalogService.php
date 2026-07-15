@@ -7,6 +7,7 @@ namespace App\Modules\Cms\Services;
 final class BlockCatalogService implements BlockCatalogServiceInterface
 {
     private const CACHE_KEY = 'cms_block_types_active_catalog';
+    private const TEMPLATE_CACHE_KEY = 'cms_block_types_template_catalog';
 
     public function __construct(
         private readonly BlockTypeApiService $blockTypeService
@@ -76,6 +77,66 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function templates(): array
+    {
+        $cachedItems = cache()->get(self::TEMPLATE_CACHE_KEY);
+        if (is_array($cachedItems)) {
+            return $cachedItems;
+        }
+
+        try {
+            $items = $this->blockTypeService->templates();
+        } catch (\Throwable $exception) {
+            log_message('warning', 'Block template catalog unavailable: {message}', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return [];
+        }
+
+        cache()->save(self::TEMPLATE_CACHE_KEY, $items, 3600);
+
+        return $items;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableForEntries(): array
+    {
+        return $this->filterSelectable($this->all(), static function (array $item): bool {
+            return self::supportsEntries($item) && ! self::isChildOnly($item);
+        });
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableTopLevel(): array
+    {
+        $items = $this->all();
+        $childOnlyKeys = $this->childOnlyKeys($items);
+
+        return $this->filterSelectable($items, static function (array $item) use ($childOnlyKeys): bool {
+            $blockKey = (string) ($item['block_key'] ?? '');
+
+            return ! self::isChildOnly($item) && ! in_array($blockKey, $childOnlyKeys, true);
+        });
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function selectableForPages(): array
+    {
+        return $this->filterSelectable($this->all(), static function (array $item): bool {
+            return self::supportsPages($item) && ! self::isChildOnly($item);
+        });
+    }
+
+    /**
      * @param array<string, mixed> $response
      * @return array<int, array<string, mixed>>
      */
@@ -95,6 +156,106 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
     private static function isActive(array $item): bool
     {
         $value = $item['is_active'] ?? false;
+
+        return $value === true || $value === 1 || $value === '1';
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @param \Closure(array<string, mixed>): bool $filter
+     * @return array<int, array<string, mixed>>
+     */
+    private function filterSelectable(array $items, \Closure $filter): array
+    {
+        return array_values(array_filter($items, $filter));
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return array<int, string>
+     */
+    private function childOnlyKeys(array $items): array
+    {
+        $containerAllowedChildren = [];
+        foreach ($items as $item) {
+            if ((string) ($item['block_key'] ?? '') !== 'container') {
+                continue;
+            }
+
+            $schema = $this->schemaDefinition($item);
+            $containerAllowedChildren = array_values(array_filter(
+                $schema['allowed_children'] ?? [],
+                static fn ($childKey): bool => is_string($childKey) && $childKey !== ''
+            ));
+            break;
+        }
+
+        if ($containerAllowedChildren === []) {
+            return [];
+        }
+
+        $allChildrenKeys = [];
+        foreach ($items as $item) {
+            $schema = $this->schemaDefinition($item);
+            $allowed = $schema['allowed_children'] ?? [];
+            foreach ($allowed as $childKey) {
+                if (is_string($childKey) && $childKey !== '') {
+                    $allChildrenKeys[] = $childKey;
+                }
+            }
+        }
+
+        $allChildrenKeys = array_values(array_unique($allChildrenKeys));
+
+        return array_values(array_diff($allChildrenKeys, $containerAllowedChildren));
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     * @return array<string, mixed>
+     */
+    private function schemaDefinition(array $item): array
+    {
+        $schema = $item['schema_definition'] ?? [];
+        if (is_array($schema)) {
+            return $schema;
+        }
+
+        if (! is_string($schema) || trim($schema) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($schema, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private static function supportsEntries(array $item): bool
+    {
+        $value = $item['supports_entries'] ?? true;
+
+        return $value !== false && $value !== 0 && $value !== '0';
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private static function supportsPages(array $item): bool
+    {
+        $value = $item['supports_pages'] ?? true;
+
+        return $value !== false && $value !== 0 && $value !== '0';
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private static function isChildOnly(array $item): bool
+    {
+        $value = $item['is_child_only'] ?? false;
 
         return $value === true || $value === 1 || $value === '1';
     }

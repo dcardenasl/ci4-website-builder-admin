@@ -110,6 +110,10 @@
             <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
             <?= lang('App.edit') ?>
         </a>
+        <a href="<?= route_to('admin.cms.collections.structure', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
+            <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
+            <?= esc(lang('Collections.collections_manage_structure')) ?>
+        </a>
     <?php endif; ?>
     <a href="<?= site_url('admin/cms/entries?collection_id=' . $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center">
         <?= ui_icon('cms-entry', 'h-4 w-4') ?>

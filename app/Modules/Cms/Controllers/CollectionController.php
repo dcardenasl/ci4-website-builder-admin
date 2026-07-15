@@ -75,21 +75,19 @@ class CollectionController extends BaseWebController
     {
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
-
-        $blockTypes = service('blockCatalogService')->all();
-        $activeBlockKeys = array_values(array_unique(array_filter(array_map(
-            static fn ($bt) => (string) ($bt['block_key'] ?? ''),
-            $blockTypes
-        ))));
-        $collectionPresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $activeBlockKeys);
+        $defaultLangId = $languageContext['defaultLangId'];
+        $fieldMap = ['name', 'slug', 'description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
 
         return $this->render('cms/collections/create', [
             'title' => lang('Collections.collections_create'),
             'languages' => $languages,
             'defaultLangId' => $languageContext['defaultLangId'],
-            'collectionTypes' => $this->collectionTypeOptions(),
-            'blockTypes' => $blockTypes,
-            'collectionPresets' => $collectionPresets,
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -120,22 +118,37 @@ class CollectionController extends BaseWebController
 
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
-
-        $blockTypes = service('blockCatalogService')->all();
-        $activeBlockKeys = array_values(array_unique(array_filter(array_map(
-            static fn ($bt) => (string) ($bt['block_key'] ?? ''),
-            $blockTypes
-        ))));
-        $collectionPresets = CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $activeBlockKeys);
+        $defaultLangId = $languageContext['defaultLangId'];
+        $fieldMap = ['name', 'slug', 'description'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
+            : [];
 
         return $this->render('cms/collections/edit', [
             'title' => lang('Collections.collections_edit'),
             'item' => $this->extractData($response),
             'languages' => $languages,
             'defaultLangId' => $languageContext['defaultLangId'],
-            'collectionTypes' => $this->collectionTypeOptions(),
-            'blockTypes' => $blockTypes,
-            'collectionPresets' => $collectionPresets,
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
+            'translateTargets' => $translateTargets,
+        ]);
+    }
+
+    public function structure(string $id): string|RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->collectionService->get($id));
+        if (! $response['ok']) {
+            return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
+        }
+
+        $structureContext = $this->loadStructureContext();
+
+        return $this->render('cms/collections/structure', [
+            'title' => lang('Collections.collections_structure'),
+            'item' => $this->extractData($response),
+            'blockTypes' => $structureContext['blockTypes'],
+            'collectionPresets' => $structureContext['collectionPresets'],
         ]);
     }
 
@@ -148,13 +161,68 @@ class CollectionController extends BaseWebController
             return $invalid;
         }
 
-        $response = $this->safeApiCall(fn () => $this->collectionService->update($id, $request->payload()));
+        $currentResponse = $this->safeApiCall(fn () => $this->collectionService->get($id));
+        if (! $currentResponse['ok']) {
+            return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
+        }
+
+        $payload = $request->payload();
+        $current = $this->extractData($currentResponse);
+        $payload['collection_type'] = (string) ($current['collection_type'] ?? $payload['collection_type'] ?? 'other');
+        $payload['block_template'] = $current['block_template'] ?? null;
+        $payload['wizard_config'] = $current['wizard_config'] ?? null;
+
+        $response = $this->safeApiCall(fn () => $this->collectionService->update($id, $payload));
 
         if (! $response['ok']) {
             return $this->failApi($response, lang('Collections.collections_update_failed'));
         }
 
         return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_update_success'));
+    }
+
+    public function updateStructure(string $id): RedirectResponse
+    {
+        $currentResponse = $this->safeApiCall(fn () => $this->collectionService->get($id));
+        if (! $currentResponse['ok']) {
+            return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
+        }
+
+        $current = $this->extractData($currentResponse);
+        $blockTemplate = $this->request->getPost('block_template');
+        $wizardConfigRaw = $this->request->getPost('wizard_config');
+        $wizardConfig = null;
+
+        if (is_string($wizardConfigRaw) && trim($wizardConfigRaw) !== '') {
+            $decoded = json_decode($wizardConfigRaw, true);
+            $wizardConfig = is_array($decoded) ? $decoded : null;
+        } elseif (is_array($wizardConfigRaw)) {
+            $wizardConfig = $wizardConfigRaw;
+        }
+
+        $payload = $current;
+        $payload['block_template'] = is_string($blockTemplate) ? $blockTemplate : $current['block_template'] ?? null;
+        $payload['wizard_config'] = $wizardConfig ?? ($current['wizard_config'] ?? null);
+
+        if (is_array($wizardConfig) && ! empty($wizardConfig['type']) && is_string($wizardConfig['type'])) {
+            $payload['collection_type'] = $wizardConfig['type'];
+        } elseif (! isset($payload['collection_type'])) {
+            $payload['collection_type'] = $current['collection_type'] ?? 'other';
+        }
+
+        $response = $this->safeApiCall(fn () => $this->collectionService->update($id, $payload));
+
+        if (! $response['ok']) {
+            return $this->failApi(
+                $response,
+                lang('Collections.collections_structure_update_failed'),
+                route_to('admin.cms.collections.structure', $id),
+            );
+        }
+
+        return redirect()
+            ->to(route_to('admin.cms.collections.structure', $id))
+            ->with('success', lang('Collections.collections_structure_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -190,18 +258,20 @@ class CollectionController extends BaseWebController
     }
 
     /**
-     * @return array<int, array{key: string, label: string}>
+     * @return array{blockTypes: array<int, array<string, mixed>>, collectionPresets: array<int, array<string, mixed>>}
      */
-    private function collectionTypeOptions(): array
+    private function loadStructureContext(): array
     {
-        return array_map(
-            function (string $type): array {
-                return [
-                    'key' => $type,
-                    'label' => lang('Collections.collection_type_' . $type),
-                ];
-            },
-            CmsPresetCatalog::collectionTypes()
-        );
+        $blockCatalog = service('blockCatalogService');
+        $blockTypes = $blockCatalog->selectableTopLevel();
+        $selectableBlockKeys = array_values(array_unique(array_filter(array_map(
+            static fn ($bt) => (string) ($bt['block_key'] ?? ''),
+            $blockTypes
+        ))));
+
+        return [
+            'blockTypes' => $blockTypes,
+            'collectionPresets' => CmsPresetCatalog::filterAvailablePresets(CmsPresetCatalog::collectionPresets(), $selectableBlockKeys),
+        ];
     }
 }

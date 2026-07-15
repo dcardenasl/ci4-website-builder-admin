@@ -18,10 +18,102 @@
         <?php $checkSlugBase = route_to('admin.cms.collections.check_slug'); ?>
         <?php $currentCollectionId = (string) ($item['id'] ?? ''); ?>
 
+        <?php if (!empty($languages)): ?>
+            <?php
+            $defaultLangId = (int) ($defaultLangId ?? 0);
+            $defaultLangCode = (string) ($defaultLangCode ?? '');
+            $translateUrl = route_to('admin.cms.translate');
+            $translateTargets = is_array($translateTargets ?? null) ? $translateTargets : [];
+            $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
+            ?>
+            <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.translation_title')) ?></h4>
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.translations_help')) ?></p>
+                </div>
+
+                <input type="hidden" name="default_language_id" value="<?= esc((string) $defaultLangId) ?>">
+
+                <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                    <div class="flex items-center justify-between gap-3 border-b border-gray-200 mb-4">
+                        <div class="flex gap-0.5" role="tablist">
+                            <?php foreach ($languages as $lang): ?>
+                                <button type="button"
+                                    role="tab"
+                                    @click="setTab(<?= (int) $lang['id'] ?>)"
+                                    :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
+                                    :class="isActive(<?= (int) $lang['id'] ?>) ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                    class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
+                                    <?= esc(strtoupper($lang['code'])) ?>
+                                    <?php if (!empty($lang['is_default'])): ?>
+                                        <span class="ml-1 text-brand-400">★</span>
+                                    <?php endif; ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if ($translateTargets !== []): ?>
+                            <?= view('layouts/partials/translate_button', [
+                                'translateTargets' => $translateTargets,
+                            ]) ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <p x-show="translateError !== ''" x-text="translateError" x-cloak class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600"></p>
+
+                    <?php foreach ($languages as $index => $lang): ?>
+                        <?php $transValue = [];
+                        foreach ($translations as $translation) {
+                            if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
+                                $transValue = $translation;
+                                break;
+                            }
+                        } ?>
+                        <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
+                            <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
+
+                            <?= view('components/form/text', [
+                                'name' => "translations[{$index}][name]",
+                                'label' => 'Collections.translation_name_label',
+                                'required' => !empty($lang['is_default']),
+                                'placeholder' => 'Collections.translation_name_placeholder',
+                                'help' => 'Collections.translation_name_help',
+                                'value' => old("translations.{$index}.name", $transValue['name'] ?? ''),
+                                'maxlength' => 150,
+                                'errors' => $errors ?? []
+                            ]) ?>
+
+                            <?= view('components/form/slug', [
+                                'name' => "translations[{$index}][slug]",
+                                'label' => 'Collections.translation_slug_label',
+                                'required' => !empty($lang['is_default']),
+                                'sourceId' => sprintf('[name="translations[%d][name]"]', $index),
+                                'checkUrl' => $checkSlugBase . '?language_id=' . (int) $lang['id'],
+                                'currentId' => $currentCollectionId,
+                                'placeholder' => 'Collections.translation_slug_placeholder',
+                                'help' => 'Collections.translation_slug_help',
+                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
+                                'errors' => $errors ?? []
+                            ]) ?>
+
+                            <?= view('components/form/textarea', [
+                                'name' => "translations[{$index}][description]",
+                                'label' => 'Collections.translation_description_label',
+                                'required' => false,
+                                'placeholder' => 'Collections.translation_description_placeholder',
+                                'help' => 'Collections.translation_description_help',
+                                'value' => old("translations.{$index}.description", $transValue['description'] ?? ''),
+                                'errors' => $errors ?? []
+                            ]) ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
             <div>
-                <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('App.form_core')) ?></h4>
-                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_key_help')) ?></p>
+                <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.section_identity')) ?></h4>
+                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.field_collection_key_edit_help')) ?></p>
             </div>
 
             <?= view('components/form/text', [
@@ -31,16 +123,6 @@
                 'value' => $item['collection_key'] ?? '',
                 'placeholder' => 'Collections.field_collection_key_placeholder',
                 'help' => 'Collections.field_collection_key_help',
-                'errors' => $errors ?? []
-            ]) ?>
-
-            <?= view('components/form/select', [
-                'name' => 'collection_type',
-                'label' => 'Collections.field_collection_type',
-                'placeholder' => 'Collections.field_collection_type_placeholder',
-                'help' => 'Collections.field_collection_type_help',
-                'options' => array_column($collectionTypes ?? [], 'label', 'key'),
-                'value' => $item['collection_type'] ?? '',
                 'errors' => $errors ?? []
             ]) ?>
 
@@ -139,99 +221,41 @@
             </div>
         </details>
 
+        <?php
+        $templateData = [];
+if (is_array($item['block_template'] ?? null)) {
+    $templateData = $item['block_template'];
+} elseif (is_string($item['block_template'] ?? null)) {
+    $decodedTemplate = json_decode((string) $item['block_template'], true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decodedTemplate)) {
+        $templateData = $decodedTemplate;
+    }
+}
+$templateBlocks = is_array($templateData['blocks'] ?? null) ? $templateData['blocks'] : [];
+$templateCount = count($templateBlocks);
+?>
         <div class="rounded-xl border border-gray-200 bg-white p-4">
-            <div class="mb-4">
-                <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.block_template_builder_template_title')) ?></h4>
-                <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.block_template_builder_template_help')) ?></p>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.collections_structure')) ?></h4>
+                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.collections_structure_help')) ?></p>
+                </div>
+                <a href="<?= route_to('admin.cms.collections.structure', (string) ($item['id'] ?? '')) ?>" class="<?= esc(action_button_class('primary')) ?> px-3 py-1.5 text-xs font-medium">
+                    <?= esc(lang('Collections.collections_manage_structure')) ?>
+                </a>
             </div>
-            <?= view('cms/collections/partials/block_template_editor', [
-                'value' => $item['block_template'] ?? null,
-                'blockTypes' => $blockTypes ?? [],
-                'collectionPresets' => $collectionPresets ?? [],
-                'wizardConfig' => $item['wizard_config'] ?? null,
-                'errors' => $errors ?? [],
-            ]) ?>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500"><?= esc(lang('Collections.block_template_builder_count')) ?></p>
+                    <p class="mt-1 text-2xl font-semibold text-gray-900"><?= esc((string) $templateCount) ?></p>
+                </div>
+                <div class="rounded-lg border border-dashed border-gray-200 bg-gray-50/40 px-4 py-3 text-sm text-gray-600">
+                    <?= $templateCount > 0
+                ? esc(lang('Collections.collections_structure_has_template'))
+                : esc(lang('Collections.collections_structure_empty')) ?>
+                </div>
+            </div>
         </div>
-
-        <?php if (!empty($languages)): ?>
-            <?php
-            $defaultLangId = (int) ($defaultLangId ?? 0);
-            ?>
-            <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold text-gray-900"><?= esc(lang('Collections.translation_title')) ?></h4>
-                    <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Collections.translations_help')) ?></p>
-                </div>
-
-                <div x-data="langTabs(<?= $defaultLangId ?>)">
-                    <div class="flex gap-0.5 border-b border-gray-200 mb-4" role="tablist">
-                        <?php foreach ($languages as $lang): ?>
-                            <button type="button"
-                                role="tab"
-                                @click="setTab(<?= (int) $lang['id'] ?>)"
-                                :aria-selected="isActive(<?= (int) $lang['id'] ?>)"
-                                :class="isActive(<?= (int) $lang['id'] ?>) ? 'border-brand-600 text-brand-700 bg-brand-50/40' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
-                                <?= esc(strtoupper($lang['code'])) ?>
-                                <?php if (!empty($lang['is_default'])): ?>
-                                    <span class="ml-1 text-brand-400">★</span>
-                                <?php endif; ?>
-                            </button>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <?php foreach ($languages as $index => $lang): ?>
-                        <?php
-                        $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
-                        $transValue = [];
-                        foreach ($translations as $translation) {
-                            if (is_array($translation) && (int) ($translation['language_id'] ?? 0) === (int) $lang['id']) {
-                                $transValue = $translation;
-                                break;
-                            }
-                        }
-                        ?>
-                        <div x-show="isActive(<?= (int) $lang['id'] ?>)" class="space-y-4">
-                            <input type="hidden" name="translations[<?= $index ?>][language_id]" value="<?= esc($lang['id']) ?>">
-
-                            <?= view('components/form/text', [
-                                'name' => "translations[{$index}][name]",
-                                'label' => 'Collections.translation_name_label',
-                                'required' => !empty($lang['is_default']),
-                                'placeholder' => 'Collections.translation_name_placeholder',
-                                'help' => 'Collections.translation_name_help',
-                                'value' => old("translations.{$index}.name", $transValue['name'] ?? ''),
-                                'maxlength' => 150,
-                                'errors' => $errors ?? []
-                            ]) ?>
-
-                            <?= view('components/form/slug', [
-                                'name' => "translations[{$index}][slug]",
-                                'label' => 'Collections.translation_slug_label',
-                                'required' => !empty($lang['is_default']),
-                                'sourceId' => sprintf('[name="translations[%d][name]"]', $index),
-                                'checkUrl' => $checkSlugBase . '?language_id=' . (int) $lang['id'],
-                                'currentId' => $currentCollectionId,
-                                'placeholder' => 'Collections.translation_slug_placeholder',
-                                'help' => 'Collections.translation_slug_help',
-                                'value' => old("translations.{$index}.slug", $transValue['slug'] ?? ''),
-                                'errors' => $errors ?? []
-                            ]) ?>
-
-                            <?= view('components/form/textarea', [
-                                'name' => "translations[{$index}][description]",
-                                'label' => 'Collections.translation_description_label',
-                                'required' => false,
-                                'placeholder' => 'Collections.translation_description_placeholder',
-                                'help' => 'Collections.translation_description_help',
-                                'value' => old("translations.{$index}.description", $transValue['description'] ?? ''),
-                                'errors' => $errors ?? []
-                            ]) ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endif; ?>
     </div>
     <aside class="space-y-6">
         <?php ob_start(); ?>

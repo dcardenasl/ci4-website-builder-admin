@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Modules\Cms\Services\BlockCatalogServiceInterface;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -51,7 +52,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
     }
 
-    public function testEditRendersSlugComponent(): void
+    public function testEditRendersIdentityWithoutStructureEditor(): void
     {
         $collectionMock = $this->createMock(CollectionApiService::class);
         $collectionMock->method('get')
@@ -65,6 +66,12 @@ final class CollectionFlowTest extends CIUnitTestCase
                             'language_id' => 1,
                             'slug' => 'news',
                             'name' => 'News',
+                            'description' => null,
+                        ],
+                        [
+                            'language_id' => 2,
+                            'slug' => 'news-en',
+                            'name' => 'News EN',
                             'description' => null,
                         ],
                     ],
@@ -83,6 +90,7 @@ final class CollectionFlowTest extends CIUnitTestCase
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => [
                     ['id' => 1, 'code' => 'es', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'is_default' => false],
                 ],
                 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
             ]);
@@ -96,26 +104,38 @@ final class CollectionFlowTest extends CIUnitTestCase
 
         $body = (string) $result->getBody();
         $result->assertStatus(200);
+        $translationPos = strpos($body, 'name="translations[0][name]"');
+        $collectionKeyPos = strpos($body, 'name="collection_key"');
         $namePos = strpos($body, 'name="translations[0][name]"');
         $slugPos = strpos($body, 'name="translations[0][slug]"');
         $this->assertNotFalse($namePos);
         $this->assertNotFalse($slugPos);
+        $this->assertNotFalse($translationPos);
+        $this->assertNotFalse($collectionKeyPos);
         $this->assertLessThan($slugPos, $namePos);
+        $this->assertLessThan($collectionKeyPos, $translationPos);
         $this->assertStringContainsString('data-slug-check-url="', $body);
         $this->assertStringContainsString('data-slug-current-id="10"', $body);
         $this->assertStringContainsString('name="current_id" value="10"', $body);
-        $this->assertStringContainsString('name="block_template"', $body);
-        $this->assertStringContainsString('collectionBlockTemplateBuilder(', $body);
+        $this->assertStringContainsString('name="default_language_id"', $body);
+        $this->assertStringContainsString("langTabs(1, '/admin/cms/translate', 'es')", $body);
+        $this->assertStringContainsString('autoTranslateAll([', $body);
+        $this->assertStringNotContainsString('name="collection_type"', $body);
+        $this->assertStringNotContainsString('name="block_template"', $body);
+        $this->assertStringNotContainsString('collectionBlockTemplateBuilder(', $body);
+        $this->assertStringContainsString('/structure', $body);
+        $this->assertStringContainsString('Estructura de bloques', $body);
         $this->assertStringNotContainsString('name="url_prefix"', $body);
     }
 
-    public function testCreateRendersCollectionTypeAndTemplateEditor(): void
+    public function testCreateRendersIdentityWithoutStructureEditor(): void
     {
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => [
                     ['id' => 1, 'code' => 'es', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'is_default' => false],
                 ],
                 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
             ]);
@@ -129,10 +149,109 @@ final class CollectionFlowTest extends CIUnitTestCase
 
         $body = (string) $result->getBody();
         $result->assertStatus(200);
-        $this->assertStringContainsString('name="collection_type"', $body);
+        $translationPos = strpos($body, 'name="translations[0][name]"');
+        $collectionKeyPos = strpos($body, 'name="collection_key"');
+        $this->assertStringNotContainsString('name="collection_type"', $body);
         $this->assertStringContainsString('name="collection_key"', $body);
-        $this->assertStringContainsString('name="block_template"', $body);
+        $this->assertStringContainsString('name="default_language_id"', $body);
+        $this->assertStringContainsString("langTabs(1, '/admin/cms/translate', 'es')", $body);
+        $this->assertStringContainsString('autoTranslateAll([', $body);
+        $this->assertStringContainsString('data-auto-slug-source=', $body);
+        $this->assertStringContainsString('translations[0][name]', $body);
+        $this->assertStringNotContainsString('name="block_template"', $body);
+        $this->assertStringNotContainsString('collectionBlockTemplateBuilder(', $body);
+        $this->assertStringContainsString('La estructura de bloques es opcional', $body);
+        $this->assertNotFalse($translationPos);
+        $this->assertNotFalse($collectionKeyPos);
+        $this->assertLessThan($collectionKeyPos, $translationPos);
+    }
+
+    public function testStructurePageRendersDedicatedTemplateEditor(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'news',
+                    'collection_type' => 'news',
+                    'block_template' => [
+                        'version' => '1.0',
+                        'blocks' => [
+                            [
+                                'block_key' => 'rich_text',
+                                'label' => 'Contenido',
+                                'help_text' => 'Texto principal',
+                                'required' => true,
+                                'locked' => false,
+                                'block_config_defaults' => [],
+                            ],
+                        ],
+                    ],
+                    'wizard_config' => [
+                        'type' => 'news',
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $collectionMock->method('update')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $blockCatalogMock = $this->createMock(BlockCatalogServiceInterface::class);
+        $blockCatalogMock->expects($this->once())
+            ->method('selectableTopLevel')
+            ->willReturn([
+                [
+                    'id' => 1,
+                    'block_key' => 'rich_text',
+                    'name' => 'Rich text',
+                    'description' => 'Editorial block',
+                    'icon' => 'layout-template',
+                    'supports_entries' => true,
+                    'is_child_only' => false,
+                ],
+                [
+                    'id' => 2,
+                    'block_key' => 'collection_grid',
+                    'name' => 'Collection grid',
+                    'description' => 'Collection listing block',
+                    'icon' => 'layout-grid',
+                    'supports_entries' => false,
+                    'is_child_only' => false,
+                ],
+            ]);
+        Services::injectMock('blockCatalogService', $blockCatalogMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->get('/admin/cms/collections/10/structure');
+
+        $body = (string) $result->getBody();
+        $result->assertStatus(200);
         $this->assertStringContainsString('collectionBlockTemplateBuilder(', $body);
+        $this->assertStringContainsString('name="block_template"', $body);
+        $this->assertStringContainsString('row.advancedOpen', $body);
+        $this->assertStringContainsString('/admin/cms/collections/10/structure', $body);
+        $this->assertStringContainsString('Administrar estructura', $body);
+        $this->assertStringContainsString('"block_key":"rich_text"', $body);
+        $this->assertStringContainsString('"block_key":"collection_grid"', $body);
     }
 
     public function testStructureWizardShowsCollectionTypeAndHidesLegacyLanguageFields(): void
@@ -218,13 +337,82 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertRedirect();
     }
 
-    public function testUpdateAllowsKeepingTheSameCollectionKey(): void
+    public function testStoreDerivesCollectionKeyFromDefaultLanguageNameWhenMissing(): void
     {
         $collectionMock = $this->createMock(CollectionApiService::class);
         $collectionMock->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function (array $payload): bool {
+                return ($payload['collection_key'] ?? null) === 'case-studies'
+                    && ($payload['translations'][0]['name'] ?? null) === 'Case Studies'
+                    && ($payload['translations'][0]['language_id'] ?? null) === 1;
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 201,
+                'data' => ['id' => 45],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections', [
+            csrf_token() => csrf_hash(),
+            'default_language_id' => '1',
+            'collection_type' => 'case-studies',
+            'collection_key' => '',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'Case Studies',
+                    'slug' => 'should-not-be-used',
+                    'description' => '',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+    }
+
+    public function testUpdateAllowsKeepingTheSameCollectionKey(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'news',
+                    'collection_type' => 'news',
+                    'block_template' => [
+                        'version' => '1.0',
+                        'blocks' => [],
+                    ],
+                    'wizard_config' => [
+                        'type' => 'news',
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $collectionMock->expects($this->once())
             ->method('update')
             ->with('10', $this->callback(static function (array $payload): bool {
-                return ($payload['collection_key'] ?? null) === 'news';
+                return ($payload['collection_key'] ?? null) === 'news'
+                    && ($payload['collection_type'] ?? null) === 'news'
+                    && isset($payload['block_template'])
+                    && isset($payload['wizard_config']);
             }))
             ->willReturn([
                 'ok' => true,

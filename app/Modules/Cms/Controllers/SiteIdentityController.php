@@ -36,27 +36,24 @@ class SiteIdentityController extends BaseWebController
         if ($deny !== null) {
             return $deny;
         }
+        helper('cms_settings');
 
         $response = $this->settingService->getByGroup('identity');
         $items    = $this->extractItems($response);
 
-        /** @var array<string, array<string, mixed>> $settingsMap */
-        $settingsMap = [];
-        foreach ($items as $item) {
-            if (is_array($item) && isset($item['setting_key']) && is_string($item['setting_key'])) {
-                $settingsMap[$item['setting_key']] = $item;
-            }
-        }
-
         $langsRes       = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages      = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages      = array_values($langsRes['ok'] ? $this->extractItems($langsRes) : []);
         $languageContext = $this->resolveLanguageContext($languages);
+        $settingsMap    = $this->indexSettingsByKey($items);
+        $sortedSettings = $this->sortSettingsByOrder($settingsMap);
+        [$contentSettings, $assetSettings] = $this->splitSettingsByInputType($sortedSettings);
+        $translationPanel = cms_settings_build_translation_panel($contentSettings, $languages, $languageContext['defaultLangId']);
 
         return $this->render('cms/site-identity/show', [
-            'title'          => lang('SiteIdentity.page_title'),
-            'settingsMap'    => $settingsMap,
-            'languages'      => $languages,
-            'baseLanguageId' => $languageContext['defaultLangId'],
+            'title'            => lang('SiteIdentity.page_title'),
+            'contentSettings'  => $contentSettings,
+            'assetSettings'    => $assetSettings,
+            'translationPanel' => $translationPanel,
         ]);
     }
 
@@ -71,7 +68,7 @@ class SiteIdentityController extends BaseWebController
         $items            = $this->extractItems($identityResponse);
 
         $langsRes       = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages      = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages      = array_values($langsRes['ok'] ? $this->extractItems($langsRes) : []);
         $languageContext = $this->resolveLanguageContext($languages);
 
         /** @var SiteIdentityUpdateRequest $formRequest */
@@ -113,5 +110,58 @@ class SiteIdentityController extends BaseWebController
         }
 
         return redirect()->to(route_to('admin.cms.site_identity'))->with('success', lang('SiteIdentity.update_success'));
+    }
+
+    /**
+     * @param array<int|string, mixed> $items
+     * @return array<string, array<string, mixed>>
+     */
+    private function indexSettingsByKey(array $items): array
+    {
+        $settingsMap = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item) || ! isset($item['setting_key']) || ! is_string($item['setting_key'])) {
+                continue;
+            }
+
+            $settingsMap[$item['setting_key']] = $item;
+        }
+
+        return $settingsMap;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $settingsMap
+     * @return array<int, array<string, mixed>>
+     */
+    private function sortSettingsByOrder(array $settingsMap): array
+    {
+        $sortedSettings = array_values($settingsMap);
+        usort($sortedSettings, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
+
+        return $sortedSettings;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $sortedSettings
+     * @return array{0: array<int, array<string, mixed>>, 1: array<int, array<string, mixed>>}
+     */
+    private function splitSettingsByInputType(array $sortedSettings): array
+    {
+        $assetSettings = [];
+        $contentSettings = [];
+
+        foreach ($sortedSettings as $setting) {
+            $inputType = (string) ($setting['input_type'] ?? 'text');
+            if (in_array($inputType, ['image', 'file'], true)) {
+                $assetSettings[] = $setting;
+                continue;
+            }
+
+            $contentSettings[] = $setting;
+        }
+
+        return [$contentSettings, $assetSettings];
     }
 }

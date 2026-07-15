@@ -77,17 +77,17 @@
                 return array_values(array_map('strval', $values));
             };
 
-            $selectedCategoryValues = $taxonomySelection(old('category_ids', $selectedCategoryIds ?? []));
-            $selectedTagValues = $taxonomySelection(old('tag_ids', $selectedTagIds ?? []));
-            $taxonomyShouldOpen = $selectedCategoryValues !== [] || $selectedTagValues !== [];
-            $taxonomySummaryParts = [];
-            if ($selectedCategoryValues !== []) {
-                $taxonomySummaryParts[] = count($selectedCategoryValues) . ' ' . lang('Entries.categories_title');
-            }
-            if ($selectedTagValues !== []) {
-                $taxonomySummaryParts[] = count($selectedTagValues) . ' ' . lang('Entries.tags_title');
-            }
-        ?>
+$selectedCategoryValues = $taxonomySelection(old('category_ids', $selectedCategoryIds ?? []));
+$selectedTagValues = $taxonomySelection(old('tag_ids', $selectedTagIds ?? []));
+$taxonomyShouldOpen = $selectedCategoryValues !== [] || $selectedTagValues !== [];
+$taxonomySummaryParts = [];
+if ($selectedCategoryValues !== []) {
+    $taxonomySummaryParts[] = count($selectedCategoryValues) . ' ' . lang('Entries.categories_title');
+}
+if ($selectedTagValues !== []) {
+    $taxonomySummaryParts[] = count($selectedTagValues) . ' ' . lang('Entries.tags_title');
+}
+?>
         <details class="group rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-6" <?= $taxonomyShouldOpen ? 'open' : '' ?>>
             <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
                 <div>
@@ -109,19 +109,19 @@
             </summary>
             <div class="mt-6 space-y-6">
                 <?= view('components/form/taxonomy_checklist', [
-                    'name' => 'category_ids',
-                    'label' => 'Entries.categories_title',
-                    'help' => 'Entries.categories_help',
-                    'options' => $categoryOptions ?? [],
-                    'selected' => $selectedCategoryValues,
-                ]) ?>
+            'name' => 'category_ids',
+            'label' => 'Entries.categories_title',
+            'help' => 'Entries.categories_help',
+            'options' => $categoryOptions ?? [],
+            'selected' => $selectedCategoryValues,
+        ]) ?>
                 <?= view('components/form/taxonomy_checklist', [
-                    'name' => 'tag_ids',
-                    'label' => 'Entries.tags_title',
-                    'help' => 'Entries.tags_help',
-                    'options' => $tagOptions ?? [],
-                    'selected' => $selectedTagValues,
-                ]) ?>
+            'name' => 'tag_ids',
+            'label' => 'Entries.tags_title',
+            'help' => 'Entries.tags_help',
+            'options' => $tagOptions ?? [],
+            'selected' => $selectedTagValues,
+        ]) ?>
             </div>
         </details>
 
@@ -153,7 +153,7 @@
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = (int) ($defaultLangId ?? 0);
+        $defaultLangId = (int) ($defaultLangId ?? 0);
             $defaultLangCode = (string) ($defaultLangCode ?? '');
             $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
             $translateUrl = route_to('admin.cms.translate');

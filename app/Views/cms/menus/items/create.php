@@ -160,7 +160,7 @@ $suggestedSortOrder = count($items);
                             $translation = $resolveItemTranslation($lang);
                             $labelVal = old("translations.{$langId}.label", $translation['label'] ?? '');
                             $urlVal = old("translations.{$langId}.custom_url", $translation['custom_url'] ?? '');
-                            
+
                             $fields = [
                                 [
                                     'from' => 'input[name="translations[' . $defaultLangId . '][label]"]',

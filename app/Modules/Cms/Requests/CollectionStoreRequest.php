@@ -13,6 +13,7 @@ class CollectionStoreRequest extends BaseFormRequest
         return [
             'collection_type',
             'collection_key',
+            'default_language_id',
             'default_sitemap_priority',
             'default_changefreq',
             'sort_order',
@@ -37,7 +38,8 @@ class CollectionStoreRequest extends BaseFormRequest
     {
         return [
             'collection_type' => 'permit_empty|string|max_length[50]|regex_match[/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/]',
-            'collection_key' => 'required|min_length[2]|max_length[255]',
+            'collection_key' => 'permit_empty|string|max_length[50]',
+            'default_language_id' => 'permit_empty|integer',
             'default_sitemap_priority' => 'permit_empty|decimal',
             'default_changefreq' => 'permit_empty|in_list[always,hourly,daily,weekly,monthly,yearly,never]',
             'sort_order' => 'permit_empty|integer',
@@ -101,10 +103,16 @@ class CollectionStoreRequest extends BaseFormRequest
 
         $passedType = $this->postString('collection_type');
         $collectionType = ($passedType && $passedType !== 'other') ? $passedType : $resolvedType;
+        $translations = $this->normalizeTranslations();
+        $collectionKey = trim($this->postString('collection_key'));
+
+        if ($collectionKey === '') {
+            $collectionKey = $this->resolveCollectionKey($translations, $this->postInt('default_language_id', 0));
+        }
 
         $payload = [
             'collection_type' => $collectionType,
-            'collection_key' => $this->postString('collection_key'),
+            'collection_key' => $collectionKey,
             'default_sitemap_priority' => $this->postString('default_sitemap_priority') ?: '0.5',
             'default_changefreq' => $this->postString('default_changefreq') ?: 'weekly',
             'sort_order' => $this->postInt('sort_order', 0),
@@ -114,9 +122,57 @@ class CollectionStoreRequest extends BaseFormRequest
             'enables_tags' => $this->postBool('enables_tags') ? '1' : '0',
             'block_template' => $this->postString('block_template'),
             'wizard_config' => $this->postString('wizard_config'),
-            'translations' => $this->normalizeTranslations(),
+            'translations' => $translations,
         ];
 
         return $payload;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $translations
+     */
+    private function resolveCollectionKey(array $translations, int $defaultLanguageId): string
+    {
+        if ($defaultLanguageId > 0) {
+            foreach ($translations as $translation) {
+                if ((int) ($translation['language_id'] ?? 0) !== $defaultLanguageId) {
+                    continue;
+                }
+
+                $name = trim((string) ($translation['name'] ?? ''));
+                if ($name !== '') {
+                    return $this->normalizeCollectionKeyValue($name);
+                }
+
+                $slug = trim((string) ($translation['slug'] ?? ''));
+                if ($slug !== '') {
+                    return $this->normalizeCollectionKeyValue($slug);
+                }
+            }
+        }
+
+        foreach ($translations as $translation) {
+            $name = trim((string) ($translation['name'] ?? ''));
+            if ($name !== '') {
+                return $this->normalizeCollectionKeyValue($name);
+            }
+
+            $slug = trim((string) ($translation['slug'] ?? ''));
+            if ($slug !== '') {
+                return $this->normalizeCollectionKeyValue($slug);
+            }
+        }
+
+        return '';
+    }
+
+    private function normalizeCollectionKeyValue(string $value): string
+    {
+        $normalized = strtolower(trim($value));
+        $normalized = preg_replace('/[^a-z0-9]+/', '-', $normalized) ?? $normalized;
+        $normalized = preg_replace('/-{2,}/', '-', $normalized) ?? $normalized;
+        $normalized = trim($normalized, '-');
+
+        return substr($normalized, 0, 50);
     }
 }
