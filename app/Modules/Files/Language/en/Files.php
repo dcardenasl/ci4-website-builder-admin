@@ -81,6 +81,12 @@ return [
 
     'file_not_found'           => 'File not found.',
 
+    'replace'                  => 'Replace file',
+    'replace_button'           => 'Upload replacement',
+    'replace_help'             => 'Choose a new file. The URL stays the same so existing references keep working.',
+    'replace_success'          => 'File replaced.',
+    'replace_failed'           => 'Could not replace the file.',
+
     'regenerate'               => 'Regenerate variants',
     'regenerate_help'          => 'Re-runs image processing and metadata probing for this file.',
     'regenerate_success'       => 'Variants regenerated.',

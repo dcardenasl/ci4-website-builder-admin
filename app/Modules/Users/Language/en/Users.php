@@ -18,6 +18,7 @@ return [
     'actions'          => 'Actions',
     'view'             => 'View',
     'approve'          => 'Approve',
+    'approving'        => 'Approving user...',
     'loading'          => 'Loading users...',
     'all_statuses'     => 'All statuses',
     'active'           => 'Active',

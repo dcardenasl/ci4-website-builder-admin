@@ -81,6 +81,12 @@ return [
 
     'file_not_found'           => 'Archivo no encontrado.',
 
+    'replace'                  => 'Reemplazar archivo',
+    'replace_button'           => 'Subir reemplazo',
+    'replace_help'             => 'Elige un archivo nuevo. La URL queda igual para no romper referencias existentes.',
+    'replace_success'          => 'Archivo reemplazado.',
+    'replace_failed'           => 'No se pudo reemplazar el archivo.',
+
     'regenerate'               => 'Regenerar variantes',
     'regenerate_help'          => 'Re-ejecuta procesamiento de imagen y lectura de metadata para este archivo.',
     'regenerate_success'       => 'Variantes regeneradas.',
