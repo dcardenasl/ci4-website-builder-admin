@@ -36,8 +36,11 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'is_published' => '1',
                         'block_data' => [
                             'title' => 'Submitted Title',
-                            'cover_file_id' => '42',
-                            'cover_url' => '/files/42/view',
+                            'cover' => [
+                                'source_kind' => 'hub_file',
+                                'file_id' => '42',
+                                'url' => '/files/42/view',
+                            ],
                         ],
                     ],
                 ],
@@ -61,8 +64,11 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'language_id' => 1,
                         'block_data' => [
                             'title' => 'Existing Title',
-                            'cover_file_id' => '42',
-                            'cover_url' => '/files/42/view',
+                            'cover' => [
+                                'source_kind' => 'hub_file',
+                                'file_id' => '42',
+                                'url' => '/files/42/view',
+                            ],
                         ],
                     ],
                 ],
@@ -76,7 +82,7 @@ final class BlockEditViewTest extends CIUnitTestCase
                         'required' => true,
                     ],
                     'cover' => [
-                        'type' => 'file',
+                        'type' => 'media_reference',
                         'label' => 'Cover',
                         'accept' => 'image',
                         'required' => false,
@@ -106,8 +112,109 @@ final class BlockEditViewTest extends CIUnitTestCase
         $this->assertStringContainsString('Title is required', $html);
         $this->assertStringContainsString('id="block-edit-form"', $html);
         $this->assertStringContainsString('data-language-id="1"', $html);
-        $this->assertStringContainsString('translatableFileField(', $html);
+        $this->assertStringContainsString('mediaReferenceField(', $html);
+        $this->assertStringContainsString('translations&#x5B;0&#x5D;&#x5B;block_data&#x5D;&#x5B;cover&#x5D;&#x5B;source_kind&#x5D;', $html);
         $this->assertStringContainsString('window.openBlockEditPreview', $html);
+    }
+
+    public function testEditViewRendersMediaReferenceRepeaters(): void
+    {
+        $html = view('cms/pages/blocks/edit', [
+            'page' => ['id' => 21, 'title' => 'Page 21'],
+            'block' => [
+                'id' => 12,
+                'block_id' => 5,
+                'sort_order' => 1,
+                'is_active' => true,
+                'block_config' => [],
+                'translations' => [],
+            ],
+            'blockType' => [
+                'block_key' => 'gallery_gallery',
+                'fields' => [
+                    'gallery' => [
+                        'type' => 'repeater',
+                        'label' => 'Gallery',
+                        'item_fields' => [
+                            'poster' => [
+                                'type' => 'media_reference',
+                                'label' => 'Poster',
+                                'accept' => 'image',
+                            ],
+                            'caption' => [
+                                'type' => 'string',
+                                'label' => 'Caption',
+                            ],
+                        ],
+                    ],
+                ],
+                'config_fields' => [],
+            ],
+            'languages' => [
+                [
+                    'id' => 1,
+                    'is_default' => true,
+                    'code' => 'en',
+                ],
+            ],
+            'ownerBlocksRoute' => 'admin.cms.pages.blocks',
+            'ownerUpdateRoute' => 'admin.cms.pages.blocks.update',
+        ]);
+
+        $this->assertStringContainsString('mediaReferenceField(', $html);
+    }
+
+    public function testEditViewRendersLegacyImageFilesAsMediaReferenceFields(): void
+    {
+        $html = view('cms/pages/blocks/edit', [
+            'page' => ['id' => 21, 'title' => 'Page 21'],
+            'block' => [
+                'id' => 12,
+                'block_id' => 5,
+                'sort_order' => 1,
+                'is_active' => true,
+                'block_config' => [],
+                'translations' => [
+                    [
+                        'language_id' => 1,
+                        'block_data' => [
+                            'cover_file_id' => '42',
+                            'cover_url' => '/files/42/view',
+                        ],
+                    ],
+                ],
+            ],
+            'blockType' => [
+                'block_key' => 'hero',
+                'fields' => [
+                    'cover' => [
+                        'type' => 'file',
+                        'label' => 'Cover',
+                        'accept' => 'image',
+                    ],
+                ],
+                'config_fields' => [],
+            ],
+            'languages' => [
+                [
+                    'id' => 1,
+                    'is_default' => true,
+                    'code' => 'en',
+                ],
+                [
+                    'id' => 2,
+                    'is_default' => false,
+                    'code' => 'es',
+                ],
+            ],
+            'ownerBlocksRoute' => 'admin.cms.pages.blocks',
+            'ownerUpdateRoute' => 'admin.cms.pages.blocks.update',
+        ]);
+
+        $this->assertStringContainsString('mediaReferenceField(', $html);
+        $this->assertStringContainsString('translations&#x5B;0&#x5D;&#x5B;block_data&#x5D;&#x5B;cover&#x5D;&#x5B;source_kind&#x5D;', $html);
+        $this->assertStringNotContainsString('cover_file_id" x-model="fileId">', $html);
+        $this->assertStringContainsString('Copiar a otros idiomas', $html);
     }
 
     public function testEditViewUsesDefaultLanguageCodeForAutoTranslate(): void

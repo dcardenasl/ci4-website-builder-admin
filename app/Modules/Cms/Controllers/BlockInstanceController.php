@@ -346,7 +346,8 @@ class BlockInstanceController extends BaseWebController
             $typeResponse = $this->safeApiCall(fn () => service('blockTypeApiService')->get($block['block_id']));
             $blockType = $typeResponse['ok'] ? $this->extractData($typeResponse) : [];
             if (! empty($blockType)) {
-                cache()->save($typeCacheKey, $blockType, 3600);
+                // Short TTL on purpose — see BlockCatalogService::CACHE_TTL for why.
+                cache()->save($typeCacheKey, $blockType, 120);
             }
         }
         $this->blockTypeOptions->augment($blockType);

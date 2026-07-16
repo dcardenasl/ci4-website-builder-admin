@@ -34,8 +34,8 @@ $sectionKey = $isConfig ? 'config' : 'content';
                 <option value="boolean">boolean</option>
                 <option value="select">select</option>
                 <option value="color">color</option>
+                <option value="media_reference">media_reference</option>
                 <?php if (!$isConfig): ?>
-                    <option value="file">file</option>
                     <option value="repeater">repeater</option>
                 <?php endif; ?>
             </select>
@@ -59,6 +59,20 @@ $sectionKey = $isConfig ? 'config' : 'content';
                    @input="rebuildJson()"
                    placeholder="opción1, opción2"
                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+        </div>
+
+        <!-- Tipo de archivo aceptado (solo media_reference) -->
+        <div class="w-28 shrink-0" x-show="field.type === 'media_reference'" x-cloak>
+            <label class="block text-[10px] font-medium text-gray-500 mb-1">Acepta</label>
+            <select x-model="field.accept"
+                    @change="rebuildJson()"
+                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                <option value="image">image</option>
+                <option value="document">document</option>
+                <option value="video">video</option>
+                <option value="audio">audio</option>
+                <option value="any">any</option>
+            </select>
         </div>
 
         <!-- Requerido -->
@@ -102,7 +116,18 @@ $sectionKey = $isConfig ? 'config' : 'content';
                             <option value="string">string</option>
                             <option value="text">text</option>
                             <option value="url">url</option>
-                            <option value="file">file</option>
+                            <option value="media_reference">media_reference</option>
+                        </select>
+                    </div>
+                    <!-- Acepta (solo media_reference) -->
+                    <div class="w-20 shrink-0" x-show="subField.type === 'media_reference'" x-cloak>
+                        <label class="block text-[9px] font-medium text-gray-400 mb-0.5">Acepta</label>
+                        <select x-model="subField.accept" @change="rebuildJson()" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-[11px] text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                            <option value="image">image</option>
+                            <option value="document">document</option>
+                            <option value="video">video</option>
+                            <option value="audio">audio</option>
+                            <option value="any">any</option>
                         </select>
                     </div>
                     <!-- Label -->

@@ -178,3 +178,44 @@ if (! function_exists('render_extra_attrs')) {
         return implode(' ', $rendered);
     }
 }
+
+if (! function_exists('normalize_media_reference_value')) {
+    /**
+     * Normalize legacy flat file/url values into the canonical media_reference
+     * shape used by the reusable selector.
+     *
+     * @param mixed $value
+     * @param mixed $legacyFileId
+     * @param mixed $legacyUrl
+     * @return array{source_kind: string, file_id: string, url: string}
+     */
+    function normalize_media_reference_value(mixed $value = null, mixed $legacyFileId = null, mixed $legacyUrl = null): array
+    {
+        $raw = is_array($value) ? $value : [];
+
+        $sourceKindValue = $raw['source_kind'] ?? '';
+        $sourceKind = is_string($sourceKindValue) ? strtolower(trim($sourceKindValue)) : '';
+        $fileId     = $raw['file_id'] ?? $legacyFileId ?? '';
+        $url        = $raw['url'] ?? $legacyUrl ?? '';
+
+        if ($sourceKind === '') {
+            if (is_numeric($fileId) && (int) $fileId > 0) {
+                $sourceKind = 'hub_file';
+            } elseif (is_string($url) && trim($url) !== '') {
+                $sourceKind = 'external_url';
+            } else {
+                $sourceKind = 'hub_file';
+            }
+        }
+
+        if ($sourceKind === 'external_url') {
+            $fileId = '';
+        }
+
+        return [
+            'source_kind' => $sourceKind,
+            'file_id'     => is_scalar($fileId) ? (string) $fileId : '',
+            'url'         => is_scalar($url) ? (string) $url : '',
+        ];
+    }
+}

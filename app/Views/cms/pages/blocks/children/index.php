@@ -103,8 +103,8 @@ $reorderUrl = route_to($ownerChildrenReorderRoute, $pageId, $instanceId);
                 $previewImg = '';
                 foreach ($child['translations'] ?? [] as $t) {
                     $bd = is_array($t['block_data'] ?? null) ? $t['block_data'] : [];
-                    if (!empty($bd['image_url'])) {
-                        $previewImg = $bd['image_url'];
+                    if (is_array($bd['image'] ?? null) && ! empty($bd['image']['url'])) {
+                        $previewImg = (string) $bd['image']['url'];
                         break;
                     }
                 }

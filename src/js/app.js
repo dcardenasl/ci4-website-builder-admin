@@ -1,6 +1,7 @@
 import { bootLucideIcons } from './utils/lucide.js';
 import { bootSlugFields } from './utils/slug.js';
 import { bestFilePreviewUrl, resolveTranslatableFilePreviewUrl } from './utils/fileUrl.js';
+import { formValuesToObject } from './utils/formSerialization.js';
 import { buildConfirmDeleteMessage } from './utils/labels.js';
 
 import { confirmStore } from './stores/confirm.store.js';
@@ -12,6 +13,7 @@ import { remoteTableFactory } from './components/remoteTable.js';
 import { formFieldBuilderFactory } from './components/formFieldBuilder.js';
 import { filePickerField } from './components/filePickerField.js';
 import { translatableFileField } from './components/translatableFileField.js';
+import { mediaReferenceField } from './components/mediaReferenceField.js';
 import { blockRepeaterField } from './components/blockRepeaterField.js';
 import { adminMetadataField } from './components/adminMetadataField.js';
 import { adminMediaGallery } from './components/adminMediaGallery.js';
@@ -28,6 +30,7 @@ import { richTextEditor } from './components/richTextEditor.js';
 import {
     copyLangTabsFileFieldToAll,
     copyLangTabsFileFieldToTargets,
+    copyLangTabsMediaReferenceFieldToAll,
 } from './components/langTabs.js';
 import { wizard } from './components/wizard/index.js';
 import { structureWizard } from './components/wizard/structureIndex.js';
@@ -42,6 +45,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('formFieldBuilder', formFieldBuilderFactory);
     Alpine.data('filePickerField', filePickerField);
     Alpine.data('translatableFileField', translatableFileField);
+    Alpine.data('mediaReferenceField', mediaReferenceField);
     Alpine.data('blockRepeaterField', blockRepeaterField);
     Alpine.data('adminMetadataField', adminMetadataField);
     Alpine.data('adminMediaGallery', adminMediaGallery);
@@ -61,8 +65,10 @@ document.addEventListener('alpine:init', () => {
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
     window.bestFilePreviewUrl = bestFilePreviewUrl;
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
+    window.formValuesToObject = formValuesToObject;
     window.copyLangTabsFileFieldToTargets = copyLangTabsFileFieldToTargets;
     window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
+    window.copyLangTabsMediaReferenceFieldToAll = copyLangTabsMediaReferenceFieldToAll;
     window.blockInstanceConfigFactory = blockInstanceConfig;
 });
 

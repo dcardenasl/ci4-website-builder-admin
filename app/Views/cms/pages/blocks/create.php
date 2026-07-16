@@ -69,6 +69,13 @@ $languagesJs   = json_encode(array_values($languages), JSON_UNESCAPED_UNICODE | 
 $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $previewUrl    = route_to('admin.cms.blocks.preview');
 $parentIdJs    = json_encode($parentInstanceId);
+$isImageAccept = static function (string $accept): bool {
+    $normalized = strtolower(trim($accept));
+
+    return $normalized === 'image'
+        || $normalized === 'image/*'
+        || str_starts_with($normalized, 'image/');
+};
 ?>
 <meta name="block-preview-url" content="<?= esc($previewUrl) ?>">
 
@@ -86,8 +93,20 @@ $parentIdJs    = json_encode($parentInstanceId);
 
 <div x-data="blockInstanceBuilder(<?= esc($blockTypesJs, 'attr') ?>, <?= esc($languagesJs, 'attr') ?>, <?= esc($entryOptionsUrlJs, 'attr') ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')" class="space-y-6">
     <?php ob_start(); ?>
+    <div class="relative mb-4">
+        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+        <input type="text"
+               x-model="blockTypeSearch"
+               placeholder="<?= esc(lang('Pages.block_type_search_placeholder')) ?>"
+               class="block w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+    </div>
+    <p x-show="blockTypeSearch.trim() !== '' && filteredBlockTypes().length === 0" x-cloak class="text-sm text-gray-400 py-6 text-center">
+        <?= esc(lang('Pages.block_type_search_empty')) ?>
+    </p>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        <template x-for="bt in blockTypes" :key="bt.id">
+        <template x-for="bt in filteredBlockTypes()" :key="bt.id">
             <button type="button"
                 @click="selectBlockType(bt)"
                 :class="selectedBlockType?.id === bt.id
@@ -158,9 +177,11 @@ $parentIdJs    = json_encode($parentInstanceId);
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                     <template x-for="(field, key) in configFields" :key="key">
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">
-                                <span x-text="field.label || key"></span>
-                            </label>
+                            <template x-if="field.type !== 'media_reference'">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    <span x-text="field.label || key"></span>
+                                </label>
+                            </template>
 
                             <template x-if="field.type === 'select'">
                                 <div>
@@ -276,7 +297,70 @@ $parentIdJs    = json_encode($parentInstanceId);
                                 </div>
                             </template>
 
-                            <template x-if="field.type !== 'select' && field.type !== 'boolean' && field.type !== 'color'">
+                            <template x-if="field.type === 'media_reference'">
+                                <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-2">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <label class="block text-xs font-medium text-gray-700">
+                                            <span x-text="field.label || key"></span>
+                                            <span x-show="field.required" class="text-red-500 ml-0.5">*</span>
+                                        </label>
+                                        <select x-model="sourceKind"
+                                                @change="setSourceKind($event.target.value)"
+                                                class="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                            <option value="hub_file">Archivo del sistema</option>
+                                            <option value="external_url">URL externa</option>
+                                        </select>
+                                    </div>
+                                    <input type="hidden" :name="`block_config[${key}][source_kind]`" x-model="sourceKind">
+                                    <input type="hidden" :name="`block_config[${key}][file_id]`" x-model="fileId">
+                                    <input :type="isExternalSource() ? 'url' : 'hidden'"
+                                           :name="`block_config[${key}][url]`"
+                                           x-model="url"
+                                           @input="syncExternalUrl()"
+                                           placeholder="https://..."
+                                           inputmode="url"
+                                           spellcheck="false"
+                                           class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                    <div x-show="previewUrl" x-cloak>
+                                        <template x-if="accept === 'video'">
+                                            <video :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover" controls muted></video>
+                                        </template>
+                                        <template x-if="accept === 'image' || accept === 'any'">
+                                            <img :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover">
+                                        </template>
+                                        <template x-if="accept === 'document' || accept === 'audio'">
+                                            <a :href="previewUrl" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 hover:bg-gray-100">
+                                                <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                                </svg>
+                                                <span class="truncate" x-text="previewUrl"></span>
+                                            </a>
+                                        </template>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button"
+                                                @click="openPicker()"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                            </svg>
+                                            <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                        </button>
+                                        <button type="button"
+                                                @click="clearReference()"
+                                                x-show="fileId || url"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                            </svg>
+                                            <span>Quitar</span>
+                                        </button>
+                                    </div>
+                                    <p class="text-[11px] text-gray-500">Puedes subir un archivo del sistema o enlazar una URL externa sin perder trazabilidad.</p>
+                                </div>
+                            </template>
+
+                            <template x-if="field.type !== 'select' && field.type !== 'boolean' && field.type !== 'color' && field.type !== 'file' && field.type !== 'media_reference' && field.type !== 'repeater'">
                                 <input type="text" :name="`block_config[${key}]`"
                                        :value="field.default || ''"
                                        :placeholder="field.default || ''"
@@ -378,51 +462,69 @@ $parentIdJs    = json_encode($parentInstanceId);
                                         </template>
                                     </select>
                                 </template>
-                                <template x-if="field.type === 'file'">
-                                    <div class="space-y-2">
-                                        <input type="hidden"
-                                               :name="`translations[${langIndex}][block_data][${fieldKey}_file_id]`"
-                                               :value="getPickedFileId(lang.id, fieldKey)">
-                                        <input type="hidden"
-                                               :name="`translations[${langIndex}][block_data][${fieldKey}_url]`"
-                                               :value="getPickedFileUrl(lang.id, fieldKey)">
-                                        <div x-show="getPickedFileUrl(lang.id, fieldKey)"
-                                             class="relative inline-block">
-                                            <template x-if="(field.accept || 'image') === 'video'">
-                                                <video :src="getPickedFileUrl(lang.id, fieldKey)"
-                                                       class="h-24 w-auto rounded border border-gray-200" controls muted></video>
+                                <template x-if="field.type === 'media_reference'">
+                                    <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-2">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <label class="block text-xs font-medium text-gray-700">
+                                                <span x-text="field.label || fieldKey"></span>
+                                                <span x-show="field.required && lang.is_default == 1" class="text-red-500 ml-0.5">*</span>
+                                            </label>
+                                            <select x-model="sourceKind"
+                                                    @change="setSourceKind($event.target.value)"
+                                                    class="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                                <option value="hub_file">Archivo del sistema</option>
+                                                <option value="external_url">URL externa</option>
+                                            </select>
+                                        </div>
+                                        <input type="hidden" :name="`translations[${langIndex}][block_data][${fieldKey}][source_kind]`" x-model="sourceKind">
+                                        <input type="hidden" :name="`translations[${langIndex}][block_data][${fieldKey}][file_id]`" x-model="fileId">
+                                        <input :type="isExternalSource() ? 'url' : 'hidden'"
+                                               :name="`translations[${langIndex}][block_data][${fieldKey}][url]`"
+                                               x-model="url"
+                                               @input="syncExternalUrl()"
+                                               placeholder="https://..."
+                                               inputmode="url"
+                                               spellcheck="false"
+                                               class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                        <div x-show="previewUrl" x-cloak>
+                                            <template x-if="accept === 'video'">
+                                                <video :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover" controls muted></video>
                                             </template>
-                                            <template x-if="(field.accept || 'image') !== 'video'">
-                                                <img :src="getPickedFileUrl(lang.id, fieldKey)"
-                                                     class="h-24 w-auto rounded border border-gray-200 object-cover">
+                                            <template x-if="accept !== 'video'">
+                                                <img :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover">
                                             </template>
                                         </div>
-                                        <button type="button"
-                                                @click="openFilePicker((file) => pickFile(lang.id, fieldKey, null, null, file), field.accept || 'image')"
-                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
-                                            </svg>
-                                            <span x-text="getPickedFileId(lang.id, fieldKey) ? (pickerChangeLabels[field.accept || 'image'] || 'Cambiar archivo') : (pickerSelectLabels[field.accept || 'image'] || 'Seleccionar archivo')"></span>
-                                        </button>
-                                        <button type="button"
-                                                x-show="getPickedFileUrl(lang.id, fieldKey)"
-                                                @click="clearPickedFile(lang.id, fieldKey)"
-                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
-                                            </svg>
-                                            <span>Quitar archivo</span>
-                                        </button>
-                                        <button type="button"
-                                                x-show="getPickedFileUrl(lang.id, fieldKey)"
-                                                @click="copyFileToAllLanguages(lang.id, fieldKey)"
-                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-100 transition-colors">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
-                                            </svg>
-                                            <span>Copiar a otros idiomas</span>
-                                        </button>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button type="button"
+                                                    @click="openPicker()"
+                                                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                                </svg>
+                                                <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                            </button>
+                                            <button type="button"
+                                                    @click="clearReference()"
+                                                    x-show="fileId || url"
+                                                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                                </svg>
+                                                <span>Quitar</span>
+                                            </button>
+                                            <?php if (count($languages) > 1): ?>
+                                                <button type="button"
+                                                        @click="copyToAllLanguages()"
+                                                        x-show="fileId || url"
+                                                        class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 shadow-sm hover:bg-brand-100 transition-colors">
+                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
+                                                    </svg>
+                                                    <span>Copiar a otros idiomas</span>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                        <p class="text-[11px] text-gray-500">Puedes subir un archivo del sistema o enlazar una URL externa sin perder trazabilidad.</p>
                                     </div>
                                 </template>
                                 <template x-if="field.type === 'repeater'">
@@ -436,11 +538,124 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                             class="text-xs text-red-500 hover:text-red-700">
                                                         Eliminar
                                                     </button>
-                                                </div>
-                                                <template x-for="(subField, subKey) in (field.item_fields || {})" :key="subKey">
-                                                    <div class="space-y-1">
-                                                        <label class="block text-xs font-medium text-gray-600" x-text="subField.label || subKey"></label>
-                                                        <template x-if="subField.type === 'file'">
+                                        </div>
+                                        <template x-for="(subField, subKey) in (field.item_fields || {})" :key="subKey">
+                                            <div class="space-y-1">
+                                                <template x-if="subField.type !== 'media_reference'">
+                                                    <label class="block text-xs font-medium text-gray-600" x-text="subField.label || subKey"></label>
+                                                </template>
+                                                <template x-if="subField.type === 'media_reference'">
+                                                    <div x-data="{ outerFieldKey: fieldKey }">
+                                                    <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image', `${outerFieldKey}][${itemIdx}][${subKey}`)" class="space-y-2">
+                                                        <input type="hidden"
+                                                               :name="`translations[${langIndex}][block_data][${outerFieldKey}][${itemIdx}][${subKey}][source_kind]`"
+                                                               x-model="sourceKind">
+                                                        <input type="hidden"
+                                                               :name="`translations[${langIndex}][block_data][${outerFieldKey}][${itemIdx}][${subKey}][file_id]`"
+                                                               x-model="fileId">
+                                                        <input :type="isExternalSource() ? 'url' : 'hidden'"
+                                                               :name="`translations[${langIndex}][block_data][${outerFieldKey}][${itemIdx}][${subKey}][url]`"
+                                                               x-model="url"
+                                                               @input="syncExternalUrl()"
+                                                               placeholder="https://..."
+                                                               inputmode="url"
+                                                               spellcheck="false"
+                                                               class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                                        <div x-show="previewUrl" x-cloak>
+                                                            <template x-if="accept === 'video'">
+                                                                <video :src="previewUrl" class="h-20 w-auto rounded border border-gray-200 object-cover" controls muted></video>
+                                                            </template>
+                                                            <template x-if="accept === 'image' || accept === 'any'">
+                                                                <img :src="previewUrl" class="h-20 w-auto rounded border border-gray-200 object-cover">
+                                                            </template>
+                                                            <template x-if="accept === 'document' || accept === 'audio'">
+                                                                <a :href="previewUrl" target="_blank" rel="noopener" class="flex items-center gap-2 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-600 hover:bg-gray-100">
+                                                                    <svg class="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                                                    </svg>
+                                                                    <span class="truncate" x-text="previewUrl"></span>
+                                                                </a>
+                                                            </template>
+                                                        </div>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            <button type="button"
+                                                                    @click="openPicker()"
+                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
+                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                                                </svg>
+                                                                <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
+                                                            </button>
+                                                            <button type="button"
+                                                                    @click="clearReference()"
+                                                                    x-show="fileId || url"
+                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
+                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                                                </svg>
+                                                                <span>Quitar</span>
+                                                            </button>
+                                                            <button type="button"
+                                                                    @click="copyToAllLanguages()"
+                                                                    x-show="fileId || url"
+                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100 transition-colors">
+                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
+                                                                </svg>
+                                                                <span>Copiar a otros idiomas</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </template>
+                                                <template x-if="subField.type === 'file'">
+                                                    <div class="space-y-1.5">
+                                                        <template x-if="String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/')">
+                                                            <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image')" class="space-y-2">
+                                                                <input type="hidden"
+                                                                       :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}][source_kind]`"
+                                                                       x-model="sourceKind">
+                                                                <input type="hidden"
+                                                                       :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}][file_id]`"
+                                                                       x-model="fileId">
+                                                                <input :type="isExternalSource() ? 'url' : 'hidden'"
+                                                                       :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}][url]`"
+                                                                       x-model="url"
+                                                                       @input="syncExternalUrl()"
+                                                                       placeholder="https://..."
+                                                                       inputmode="url"
+                                                                       spellcheck="false"
+                                                                       class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                                                <div x-show="previewUrl" x-cloak>
+                                                                    <template x-if="accept === 'video'">
+                                                                        <video :src="previewUrl" class="h-20 w-auto rounded border border-gray-200 object-cover" controls muted></video>
+                                                                    </template>
+                                                                    <template x-if="accept !== 'video'">
+                                                                        <img :src="previewUrl" class="h-20 w-auto rounded border border-gray-200 object-cover">
+                                                                    </template>
+                                                                </div>
+                                                                <div class="flex flex-wrap gap-2">
+                                                                    <button type="button"
+                                                                            @click="openPicker()"
+                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
+                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                                                                        </svg>
+                                                                        <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
+                                                                    </button>
+                                                                    <button type="button"
+                                                                            @click="clearReference()"
+                                                                            x-show="fileId || url"
+                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
+                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
+                                                                        </svg>
+                                                                        <span>Quitar</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!(String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/'))">
                                                             <div class="space-y-1.5">
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}_file_id]`"
@@ -448,13 +663,13 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}_url]`"
                                                                        :value="item[subKey + '_url'] || ''">
-                                                                <div x-show="item[subKey + '_preview_url']">
+                                                                <div x-show="item[subKey + '_url'] || item[subKey + '_preview_url']">
                                                                     <template x-if="(subField.accept || 'image') === 'video'">
-                                                                        <video :src="item[subKey + '_preview_url']"
+                                                                        <video :src="item[subKey + '_preview_url'] || item[subKey + '_url']"
                                                                                class="h-20 w-auto rounded border border-gray-200" controls muted></video>
                                                                     </template>
                                                                     <template x-if="(subField.accept || 'image') !== 'video'">
-                                                                        <img :src="item[subKey + '_preview_url']"
+                                                                        <img :src="item[subKey + '_preview_url'] || item[subKey + '_url']"
                                                                              class="h-20 w-auto rounded border border-gray-200 object-cover">
                                                                     </template>
                                                                 </div>
@@ -468,11 +683,13 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                 </button>
                                                             </div>
                                                         </template>
-                                                        <template x-if="subField.type === 'url'">
-                                                            <input type="text"
-                                                                   :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
-                                                                   x-model="item[subKey]"
-                                                                   placeholder="https:// o /ruta"
+                                                    </div>
+                                                </template>
+                                                <template x-if="subField.type === 'url'">
+                                                    <input type="text"
+                                                           :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
+                                                           x-model="item[subKey]"
+                                                           placeholder="https:// o /ruta"
                                                                    inputmode="url"
                                                                    spellcheck="false"
                                                             class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
@@ -483,11 +700,11 @@ $parentIdJs    = json_encode($parentInstanceId);
                                                                       rows="3"
                                                               class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
                                                         </template>
-                                                        <template x-if="!['file','url','text','textarea'].includes(subField.type)">
-                                                            <input type="text"
-                                                                   :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
-                                                                   x-model="item[subKey]"
-                                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                                <template x-if="!['media_reference','url','text','textarea'].includes(subField.type)">
+                                                    <input type="text"
+                                                           :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}]`"
+                                                           x-model="item[subKey]"
+                                                           class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                                                         </template>
                                                     </div>
                                                 </template>
@@ -655,6 +872,21 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
         activeLangId: null,
         contentFields: {},
         configFields: {},
+        blockTypeSearch: '',
+
+        // Filters the Paso 1 catalog by name/block_key/category — 30+ ungrouped
+        // cards was hard to scan for a specific block type.
+        filteredBlockTypes() {
+            const q = this.blockTypeSearch.trim().toLowerCase();
+            if (q === '') return this.blockTypes;
+            return this.blockTypes.filter(bt => {
+                const haystack = [bt.name, bt.block_key, bt.category, bt.description]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase();
+                return haystack.includes(q);
+            });
+        },
 
         translating: false,
         translatingAll: false,
@@ -697,19 +929,60 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
             return this.repeaterItems[k];
         },
 
+        isImageAccept(accept) {
+            const normalized = String(accept || '').trim().toLowerCase();
+            return normalized === 'image'
+                || normalized === 'image/*'
+                || normalized.startsWith('image/');
+        },
+
+        normalizeMediaReferenceValue(value = {}) {
+            const raw = (value && typeof value === 'object' && !Array.isArray(value)) ? value : {};
+            const fileId = String(raw.file_id ?? raw.fileId ?? '');
+            const url = String(raw.url ?? raw.external_url ?? '');
+            let sourceKind = String(raw.source_kind ?? raw.sourceKind ?? '');
+
+            if (!sourceKind) {
+                sourceKind = fileId !== '' || /\/files\/\d+\/(?:view|download)(?:\?.*)?$/i.test(url)
+                    ? 'hub_file'
+                    : (url !== '' ? 'external_url' : 'hub_file');
+            }
+
+            return {
+                source_kind: sourceKind,
+                file_id: sourceKind === 'external_url' ? '' : fileId,
+                url,
+            };
+        },
+
+        normalizeRepeaterItem(itemFields, item = {}) {
+            const normalized = {};
+            Object.keys(itemFields || {}).forEach(subKey => {
+                const subField = itemFields[subKey] || {};
+                if (subField.type === 'media_reference' || (subField.type === 'file' && this.isImageAccept(subField.accept))) {
+                    normalized[subKey] = this.normalizeMediaReferenceValue(
+                        item[subKey] || {
+                            source_kind: item[subKey + '_source_kind'] || '',
+                            file_id: item[subKey + '_file_id'] || '',
+                            url: item[subKey + '_url'] || '',
+                        }
+                    );
+                } else if (subField.type === 'file') {
+                    normalized[subKey + '_file_id'] = String(item[subKey + '_file_id'] || '');
+                    normalized[subKey + '_preview_url'] = '';
+                    normalized[subKey + '_url'] = String(item[subKey + '_url'] || '');
+                } else {
+                    normalized[subKey] = item[subKey] ?? '';
+                }
+            });
+
+            return normalized;
+        },
+
         addItem(langId, fieldKey, itemFields) {
             const k = `${langId}_${fieldKey}`;
             if (!this.repeaterItems[k]) this.repeaterItems[k] = [];
-            const item = {};
-            Object.keys(itemFields || {}).forEach(subKey => {
-                if ((itemFields[subKey] || {}).type === 'file') {
-                    item[subKey + '_file_id']    = '';
-                    item[subKey + '_url']        = '';
-                    item[subKey + '_preview_url'] = '';
-                } else {
-                    item[subKey] = '';
-                }
-            });
+            const item = this.normalizeRepeaterItem(itemFields, {});
             this.repeaterItems[k].push(item);
         },
 
@@ -789,7 +1062,7 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
             const translatableFieldKeys = [];
             Object.entries(this.contentFields).forEach(([fieldKey, field]) => {
                 const fieldType = field.type || 'string';
-                if (!['file', 'repeater', 'boolean', 'integer', 'select'].includes(fieldType)) {
+                if (!['file', 'media_reference', 'repeater', 'boolean', 'integer', 'select'].includes(fieldType)) {
                     translatableFieldKeys.push(fieldKey);
                 }
             });
@@ -864,18 +1137,11 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
 
         openPreview() {
             if (!this.selectedBlockType) return;
-            const config = {};
-            Object.entries(this.configFields || {}).forEach(([key, field]) => {
-                if (key === 'collection_id') {
-                    config[key] = this.collectionId || '';
-                    return;
-                }
-                if (key === 'entry_id') {
-                    config[key] = this.entryId || '';
-                    return;
-                }
-                config[key] = field.default || '';
-            });
+            const form = this.$root instanceof HTMLElement ? this.$root.querySelector('form') : null;
+            const payload = typeof window.formValuesToObject === 'function'
+                ? window.formValuesToObject(form)
+                : {};
+            const config = payload.block_config || {};
             window.dispatchEvent(new CustomEvent('block-preview-open', {
                 detail: { blockKey: this.selectedBlockType.block_key, blockConfig: config, blockData: {} },
             }));

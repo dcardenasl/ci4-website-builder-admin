@@ -19,6 +19,9 @@ return [
     'block_types_update_failed'      => 'Could not update the block type.',
     'block_types_delete_success'     => 'Block type deleted successfully.',
     'block_types_delete_failed'      => 'Could not delete the block type.',
+    'block_types_cache_refreshed'    => 'Block type cache refreshed. Content forms now reflect the latest changes.',
+    'block_types_refresh_cache'      => 'Refresh cache',
+    'block_types_refresh_cache_help' => 'Use this if you just changed a block schema outside this screen (a migration, a seed) and content forms still show the old version.',
 
     'field_block_key'                      => 'Block key',
     'field_block_key_placeholder'          => 'rich_text',

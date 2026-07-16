@@ -59,6 +59,7 @@ export function wizard(bootConfig = (typeof window !== 'undefined' ? window.__wi
         // Block editing / creating
         selectedBlock: null,
         blockEditData: {},
+        blockEditConfig: {},
         blockSaving: false,
         blockSaveError: '',
         editMode: 'edit',        // 'edit' | 'create'

@@ -164,6 +164,27 @@ export const blocks = {
         }
 
         const schemaFields = bkey ? (this.config?.block_types?.[bkey]?.fields ?? null) : null;
+        const configFields = bkey ? (this.config?.block_types?.[bkey]?.config_fields ?? null) : null;
+
+        // Config fields (block_config) are non-translatable settings — most are
+        // technical (css_class, columns...) and stay out of the simplified Wizard
+        // UI on purpose. media_reference is the one exception: it's a shared
+        // asset the editor still needs to be able to set, so it's surfaced here
+        // alongside content fields, tagged with source: 'config' so saveBlock()
+        // knows to write it into block_config instead of block_data.
+        const mediaConfigFields = configFields
+            ? Object.entries(configFields)
+                .filter(([, def]) => schemaTypeToUiType(def.type ?? '', def.accept ?? '') === 'media_reference')
+                .map(([k, def]) => ({
+                    key:      k,
+                    label:    def.label ?? humanizeKey(k),
+                    required: def.required ?? false,
+                    uiType:   'media_reference',
+                    accept:   def.accept ?? 'image',
+                    options:  [],
+                    source:   'config',
+                }))
+            : [];
 
         if (schemaFields && Object.keys(schemaFields).length > 0) {
             return Object.entries(schemaFields).map(([k, def]) => ({
@@ -172,10 +193,11 @@ export const blocks = {
                 required: def.required ?? false,
                 uiType:   schemaTypeToUiType(def.type ?? '', def.accept ?? '', def.primitive ?? ''),
                 options:  def.options ?? [],
-            }));
+                source:   'data',
+            })).concat(mediaConfigFields);
         }
 
-        if (this.editMode === 'create') return [];
+        if (this.editMode === 'create') return mediaConfigFields;
 
         // Fallback: derive from existing block_data keys
         const visibleKeys = Object.keys(this.blockEditData)
@@ -186,7 +208,8 @@ export const blocks = {
             required: false,
             uiType:   'textarea',
             options:  [],
-        }));
+            source:   'data',
+        })).concat(mediaConfigFields);
     },
 
     syncRichTextFields() {
@@ -297,7 +320,8 @@ export const blocks = {
         this.blockSaveError = '';
         this.uploadError    = '';
         const t = (block.translations ?? [])[0];
-        this.blockEditData = t?.block_data ? { ...t.block_data } : {};
+        this.blockEditData   = t?.block_data ? { ...t.block_data } : {};
+        this.blockEditConfig = block.block_config ? { ...block.block_config } : {};
         this.screen = 'block-edit';
     },
 
@@ -324,6 +348,7 @@ export const blocks = {
         this.editParentBlock = this.catalogContext;
         this.selectedBlock   = null;
         this.blockEditData   = {};
+        this.blockEditConfig = {};
         this.blockSaveError  = '';
         this.uploadError     = '';
         this.screen = 'block-edit';
@@ -349,7 +374,8 @@ export const blocks = {
             // is_active ensures data is never empty after the domain extracts translations,
             // which would otherwise trigger BaseCrudService's noFieldsToUpdate check.
             const payload = {
-                is_active: true,
+                is_active:    true,
+                block_config: this.blockEditConfig ?? {},
                 translations: [{
                     language_id:  t.language_id ?? (this.defaultLangId || this.resolveDefaultLanguageId()),
                     block_data:   blockData,
@@ -387,7 +413,7 @@ export const blocks = {
                 parent_instance_id: this.editParentBlock?.id ?? null,
                 sort_order:         this.nextSortOrder(this.editParentBlock),
                 is_active:          true,
-                block_config:       {},
+                block_config:       this.blockEditConfig ?? {},
                 translations: [{
                     language_id:  this.defaultLangId || this.resolveDefaultLanguageId(),
                     block_data:   blockData,

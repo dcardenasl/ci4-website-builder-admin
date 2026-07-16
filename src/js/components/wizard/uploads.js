@@ -42,6 +42,31 @@ export const uploads = {
         }
     },
 
+    // ── Media reference upload (block editor config fields) ─────────────
+    // Writes into blockEditConfig (block_config), not blockEditData — media
+    // reference fields are shared assets, not per-language content.
+    async uploadBlockMediaReference(field, file) {
+        if (!file) return;
+        this.uploading = true;
+        this.uploadError = '';
+        try {
+            const fileData = await this._uploadFile(file);
+            this.blockEditConfig[field.key] = {
+                source_kind: 'hub_file',
+                file_id:     fileData?.id ?? null,
+                url:         fileData?.url ?? fileData?.variants?.md?.url ?? null,
+            };
+        } catch {
+            this.uploadError = this.strings.error_upload;
+        } finally {
+            this.uploading = false;
+        }
+    },
+
+    clearBlockMediaReference(field) {
+        this.blockEditConfig[field.key] = null;
+    },
+
     // ── Image upload (block content wizard step) ────────────────────────
     async uploadBlockContentImage(stepIdx, field, file) {
         if (!file) return;

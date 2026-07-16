@@ -19,10 +19,18 @@ const toElement = (candidate) => {
     return null;
 };
 
+const escapeRegExp = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const findTranslatableFileFieldComponent = (input) => {
     const container = input instanceof HTMLElement ? input.closest('[x-data*="translatableFileField"]') : null;
     const component = container?._x_dataStack?.[0];
     return component && typeof component.applyFile === 'function' ? component : null;
+};
+
+const findMediaReferenceFieldComponent = (input) => {
+    const container = input instanceof HTMLElement ? input.closest('[x-data*="mediaReferenceField"]') : null;
+    const component = container?._x_dataStack?.[0];
+    return component && typeof component.applyReference === 'function' ? component : null;
 };
 
 const findRichTextEditorComponent = (input) => {
@@ -118,14 +126,79 @@ export const copyLangTabsFileFieldToAll = (
     sourceFileUrlSelector,
     fieldKeyPattern,
 ) => {
-    const allFileIdInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_file_id]"]`);
-    const allFileUrlInputs = document.querySelectorAll(`input[name*="[block_data][${fieldKeyPattern}_url]"]`);
+    const fileIdPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(fieldKeyPattern)}_file_id\\]$`);
+    const fileUrlPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(fieldKeyPattern)}_url\\]$`);
+    const allBlockDataInputs = Array.from(document.querySelectorAll('input[name]'));
+    const allFileIdInputs = allBlockDataInputs.filter((input) => fileIdPattern.test(input.name));
+    const allFileUrlInputs = allBlockDataInputs.filter((input) => fileUrlPattern.test(input.name));
     return copyFileFieldValues(
         sourceFileIdSelector,
         sourceFileUrlSelector,
         allFileIdInputs,
         allFileUrlInputs,
     );
+};
+
+export const copyLangTabsMediaReferenceFieldToAll = (
+    fieldKey,
+    referenceValue,
+) => {
+    const normalizedFieldKey = String(fieldKey || '').trim();
+    if (normalizedFieldKey === '') {
+        return false;
+    }
+
+    const raw = (referenceValue && typeof referenceValue === 'object' && !Array.isArray(referenceValue))
+        ? referenceValue
+        : {};
+    const normalizedReference = {
+        source_kind: String(raw.source_kind ?? raw.sourceKind ?? 'hub_file'),
+        file_id: String(raw.file_id ?? raw.fileId ?? ''),
+        url: String(raw.url ?? raw.external_url ?? ''),
+        preview_url: String(raw.preview_url ?? raw.previewUrl ?? raw.url ?? ''),
+    };
+
+    if (normalizedReference.source_kind === 'external_url') {
+        normalizedReference.file_id = '';
+    }
+
+    const sourceKindPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[source_kind\\]$`);
+    const fileIdPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[file_id\\]$`);
+    const urlPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[url\\]$`);
+    const blockDataInputs = Array.from(document.querySelectorAll('input[name]'));
+    const sourceKindInputs = blockDataInputs.filter((input) => sourceKindPattern.test(input.name));
+    sourceKindInputs.forEach((sourceKindInput) => {
+        const componentData = findMediaReferenceFieldComponent(sourceKindInput);
+        if (componentData) {
+            componentData.applyReference(normalizedReference);
+            return;
+        }
+
+        if (!(sourceKindInput instanceof HTMLInputElement)) {
+            return;
+        }
+
+        sourceKindInput.value = normalizedReference.source_kind;
+        sourceKindInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    const fileIdInputs = blockDataInputs.filter((input) => fileIdPattern.test(input.name));
+    fileIdInputs.forEach((fileIdInput) => {
+        if (fileIdInput instanceof HTMLInputElement) {
+            fileIdInput.value = normalizedReference.file_id;
+            fileIdInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
+    const urlInputs = blockDataInputs.filter((input) => urlPattern.test(input.name));
+    urlInputs.forEach((urlInput) => {
+        if (urlInput instanceof HTMLInputElement) {
+            urlInput.value = normalizedReference.url;
+            urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
+    return sourceKindInputs.length > 0;
 };
 
 export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN') => ({
@@ -201,4 +274,5 @@ export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN'
 
     copyFileFieldToAll: copyLangTabsFileFieldToAll,
     copyFileFieldToTargets: copyLangTabsFileFieldToTargets,
+    copyMediaReferenceFieldToAll: copyLangTabsMediaReferenceFieldToAll,
 });

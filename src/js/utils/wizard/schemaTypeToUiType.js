@@ -6,6 +6,7 @@ export function schemaTypeToUiType(schemaType, accept, primitive = '') {
     const accepts = String(accept || '').trim().toLowerCase();
     if (type === 'file') return accepts === 'image' || accepts === 'image/*' || accepts.startsWith('image/') ? 'image' : 'file';
     if (type === 'image') return 'image';
+    if (type === 'media_reference') return 'media_reference';
     if (type === 'richtext' || type === 'rich_text') return 'richtext';
     if (type === 'string') return 'text';
     if (type === 'text') return 'textarea';

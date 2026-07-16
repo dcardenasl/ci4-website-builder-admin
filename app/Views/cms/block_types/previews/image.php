@@ -1,7 +1,8 @@
 <?php
 /** @var array<string, mixed> $config */
 /** @var array<string, mixed> $data */
-$url         = esc($data['image_url'] ?? 'https://placehold.co/800x450/e2e8f0/94a3b8?text=Imagen');
+$image       = is_array($config['image'] ?? null) ? $config['image'] : [];
+$url         = esc($image['url'] ?? 'https://placehold.co/800x450/e2e8f0/94a3b8?text=Imagen');
 $alt         = esc($data['alt'] ?? '');
 $caption     = esc($data['caption'] ?? '');
 $cssClass    = esc($config['css_class'] ?? '');

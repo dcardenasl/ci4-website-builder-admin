@@ -143,6 +143,7 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     // BlockType
     $routes->get('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::index', ['as' => 'admin.cms.block_types', 'filter' => 'permission:cms.blocks.read']);
     $routes->get('block-types/data', '\App\Modules\Cms\Controllers\BlockTypeController::data', ['as' => 'admin.cms.block_types.data', 'filter' => 'permission:cms.blocks.read']);
+    $routes->post('block-types/refresh-cache', '\App\Modules\Cms\Controllers\BlockTypeController::refreshCache', ['as' => 'admin.cms.block_types.refresh_cache', 'filter' => 'permission:cms.blocks.read']);
     $routes->get('block-types/create', '\App\Modules\Cms\Controllers\BlockTypeController::create', ['as' => 'admin.cms.block_types.create', 'filter' => 'permission:cms.blocks.write']);
     $routes->post('block-types', '\App\Modules\Cms\Controllers\BlockTypeController::store', ['as' => 'admin.cms.block_types.store', 'filter' => 'permission:cms.blocks.write']);
     $routes->get('block-types/(:segment)', '\App\Modules\Cms\Controllers\BlockTypeController::show/$1', ['as' => 'admin.cms.block_types.show', 'filter' => 'permission:cms.blocks.read']);

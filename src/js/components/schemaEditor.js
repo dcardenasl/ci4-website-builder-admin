@@ -41,12 +41,13 @@ export const schemaEditor = (initialSchema = {}, initialIsContainer = false, sou
             required: def.required === true || def.required === 1,
             options:  Array.isArray(def.options) ? def.options.join(', ') : '',
             default:  def.default || '',
+            accept:   def.accept || 'image',
             item_fields: def.item_fields ? this._schemaToRows(def.item_fields) : [],
         }));
     },
 
     addField(section, parentRow = null) {
-        const row = { key: '', type: 'string', label: '', required: false, options: '', default: '', item_fields: [] };
+        const row = { key: '', type: 'string', label: '', required: false, options: '', default: '', accept: 'image', item_fields: [] };
         if (parentRow) { if (!parentRow.item_fields) parentRow.item_fields = []; parentRow.item_fields.push(row); }
         else if (section === 'config') { this.configFields.push(row); }
         else { this.schemaFields.push(row); }
@@ -67,6 +68,7 @@ export const schemaEditor = (initialSchema = {}, initialIsContainer = false, sou
                 if (!row.key) continue;
                 const def = { type: row.type, label: row.label, required: row.required };
                 if (row.type === 'select' && row.options) def.options = row.options.split(',').map((s) => s.trim()).filter(Boolean);
+                if (row.type === 'media_reference') def.accept = row.accept || 'image';
                 if (row.type === 'repeater') def.item_fields = buildObj(row.item_fields || []);
                 if (row.default !== '') def.default = row.default;
                 obj[row.key] = def;

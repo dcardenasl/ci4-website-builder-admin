@@ -152,6 +152,8 @@ return [
     // Wizard crear bloque
     'block_step1_title'           => 'Paso 1 — Elige el bloque',
     'block_step1_desc'            => 'Selecciona el tipo de bloque que quieres añadir.',
+    'block_type_search_placeholder' => 'Buscar por nombre, categoría o clave...',
+    'block_type_search_empty'     => 'Ningún tipo de bloque coincide con la búsqueda.',
     'block_step2_title'           => 'Paso 2 — Define el contenido',
     'block_step2_desc'            => 'Rellena el contenido para cada idioma.',
 

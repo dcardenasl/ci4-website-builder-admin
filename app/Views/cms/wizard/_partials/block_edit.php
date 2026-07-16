@@ -99,6 +99,33 @@
                 </div>
             </template>
 
+            <!-- media reference (shared asset, lives in block_config) -->
+            <template x-if="field.uiType === 'media_reference'">
+                <div>
+                    <template x-if="blockEditConfig[field.key]?.url">
+                        <div class="relative inline-block">
+                            <img :src="blockEditConfig[field.key].url"
+                                 class="rounded-lg max-h-48 object-cover border border-gray-200" />
+                            <button type="button"
+                                    @click="clearBlockMediaReference(field)"
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                        </div>
+                    </template>
+                    <template x-if="!blockEditConfig[field.key]?.url">
+                        <label :class="{'opacity-60': uploading}"
+                               class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                            <span class="text-4xl">📷</span>
+                            <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
+                            <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
+                            <span x-show="uploading" class="text-xs text-brand-600"><?= lang('Wizard.upload_uploading') ?></span>
+                            <input type="file" :accept="(field.accept || 'image') + '/*'" class="hidden"
+                                   @change="uploadBlockMediaReference(field, $event.target.files[0])" />
+                        </label>
+                    </template>
+                    <p x-show="uploadError" class="mt-1 text-xs text-red-600" x-text="uploadError"></p>
+                </div>
+            </template>
+
             <!-- richtext / textarea / url / fallback -->
             <template x-if="field.uiType === 'richtext'">
                 <div :data-wizard-richtext-field="field.key"

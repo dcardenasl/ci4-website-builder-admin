@@ -6,12 +6,12 @@ $title = $data['title'] ?? '';
 $body = $data['body'] ?? '';
 $metaTitle = $data['meta_title'] ?? '';
 $metaDescription = $data['meta_description'] ?? '';
-$image = $data['image_url'] ?? '';
+$image = is_array($data['image'] ?? null) ? $data['image'] : [];
 $rating = (int) ($data['rating'] ?? 0);
 ?>
 <div class="border border-slate-200 bg-white rounded-lg p-3">
     <div class="text-[10px] font-bold text-violet-500 uppercase mb-1">Tarjeta de Slider</div>
-    <?php if ($image !== ''): ?>
+    <?php if (! empty($image['url'])): ?>
         <div class="mb-2 h-12 rounded bg-slate-100 text-[9px] text-slate-400 flex items-center justify-center">Imagen</div>
     <?php endif; ?>
     <?php if ($rating > 0): ?>

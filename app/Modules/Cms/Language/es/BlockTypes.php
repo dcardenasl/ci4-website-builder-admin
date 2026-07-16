@@ -19,6 +19,9 @@ return [
     'block_types_update_failed'      => 'No se pudo actualizar el tipo de bloque.',
     'block_types_delete_success'     => 'Tipo de bloque eliminado exitosamente.',
     'block_types_delete_failed'      => 'No se pudo eliminar el tipo de bloque.',
+    'block_types_cache_refreshed'    => 'Caché de tipos de bloque actualizada. Los formularios de contenido ya reflejan los cambios más recientes.',
+    'block_types_refresh_cache'      => 'Refrescar caché',
+    'block_types_refresh_cache_help' => 'Usa esto si acabas de cambiar el esquema de un bloque fuera de esta pantalla (una migración, un seed) y los formularios de contenido siguen mostrando la versión anterior.',
 
     'field_block_key'                      => 'Clave de bloque',
     'field_block_key_placeholder'          => 'texto_rico',

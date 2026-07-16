@@ -21,6 +21,10 @@ describe('schemaTypeToUiType', () => {
         expect(schemaTypeToUiType('image')).toBe('image');
     });
 
+    it('maps media_reference schema type directly to media_reference', () => {
+        expect(schemaTypeToUiType('media_reference')).toBe('media_reference');
+    });
+
     it('maps richtext variants', () => {
         expect(schemaTypeToUiType('richtext')).toBe('richtext');
         expect(schemaTypeToUiType('rich_text')).toBe('richtext');

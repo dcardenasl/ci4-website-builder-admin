@@ -32,6 +32,18 @@ class BlockTypeController extends BaseWebController
         ]);
     }
 
+    // Manual escape hatch for the block-catalog cache (BlockCatalogService,
+    // 2 min TTL): a schema change made outside this admin's own edit form —
+    // a domain migration or seed, a direct API call — has no way to notify
+    // this cache. Any cms-admin can hit this instead of waiting out the TTL
+    // or asking someone to run `php spark cache:clear` on the server.
+    public function refreshCache(): RedirectResponse
+    {
+        $this->invalidateBlockCatalogCache();
+
+        return redirect()->to(route_to('admin.cms.block_types'))->with('success', lang('BlockTypes.block_types_cache_refreshed'));
+    }
+
     public function data(): ResponseInterface
     {
         return $this->tableDataResponse(

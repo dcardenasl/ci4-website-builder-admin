@@ -9,6 +9,14 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
     private const CACHE_KEY = 'cms_block_types_active_catalog';
     private const TEMPLATE_CACHE_KEY = 'cms_block_types_template_catalog';
 
+    // Kept short on purpose: block type schemas can change from outside the
+    // admin's own edit form (a domain migration or seed, a direct API call),
+    // which this cache has no way to be notified about. A 1h TTL left content
+    // editors staring at stale/wrong block forms for up to an hour with no
+    // visible cause — see BlockTypeController::refreshCache() for the manual
+    // escape hatch and audits/2026-07-16 for the incident that prompted this.
+    private const CACHE_TTL = 120;
+
     public function __construct(
         private readonly BlockTypeApiService $blockTypeService
     ) {
@@ -56,7 +64,7 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
             return (int) ($a['id'] ?? 0) <=> (int) ($b['id'] ?? 0);
         });
 
-        cache()->save(self::CACHE_KEY, $items, 3600);
+        cache()->save(self::CACHE_KEY, $items, self::CACHE_TTL);
 
         return $items;
     }
@@ -96,7 +104,7 @@ final class BlockCatalogService implements BlockCatalogServiceInterface
             return [];
         }
 
-        cache()->save(self::TEMPLATE_CACHE_KEY, $items, 3600);
+        cache()->save(self::TEMPLATE_CACHE_KEY, $items, self::CACHE_TTL);
 
         return $items;
     }
