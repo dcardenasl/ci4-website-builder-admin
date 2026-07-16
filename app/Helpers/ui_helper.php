@@ -351,8 +351,10 @@ if (! function_exists('ui_icon')) {
             'cms-redirect'    => 'corner-up-right',
             'cms-collection'  => 'archive',
             'languages'       => 'languages',
+            'chevron-up'      => 'chevron-up',
             'chevron-down'    => 'chevron-down',
             'chevron-right'   => 'chevron-right',
+            'grip-vertical'   => 'grip-vertical',
             'external-link'   => 'external-link',
             'copy'            => 'copy',
         ];

@@ -114,6 +114,7 @@ return [
     'blocks_empty_desc_page'      => 'Click "Add Block" to start building this page.',
     'blocks_empty_desc_entry'     => 'Click "Add Block" to start building this entry.',
     'blocks_drag_hint'            => 'Drag to reorder, then click Save Order to confirm.',
+    'blocks_reorder_hint_mobile'  => 'Use the "Move up" and "Move down" buttons to reorder, then click Save Order to confirm.',
     'blocks_saving'               => 'Saving…',
     'blocks_saved'                => 'Order saved',
     'blocks_save_order'           => 'Save Order',
@@ -162,6 +163,18 @@ return [
     'owner_label_entry'           => 'Entry',
     'child_label_slide'           => 'Slide',
     'child_label_subblock'        => 'Sub-block',
+    'child_label_slide_plural'    => 'Slides',
+    'child_label_subblock_plural' => 'Sub-blocks',
+
+    // Children view (slides / sub-blocks)
+    'children_back_to_blocks'     => 'Back to {0} Blocks',
+    'children_add_button'         => 'Add {0}',
+    'children_section_title'      => '{0} of {1}',
+    'children_empty_title'        => 'This {0} has no {1} yet.',
+    'children_empty_desc'         => 'Click "Add {0}" to get started.',
+    'children_item_order_label'   => '{0} #{1}',
+    'children_untitled'           => 'Untitled {0}',
+    'blocks_drag_handle_title'    => 'Drag to reorder',
 
     // Mensajes de controlador
     'block_added_success'         => 'Block added successfully.',

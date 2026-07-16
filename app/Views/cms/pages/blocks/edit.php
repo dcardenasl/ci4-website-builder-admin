@@ -465,8 +465,8 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                 <div class="flex gap-2">
                                     <button type="button"
                                             @click="openPicker()"
-                                            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                         </svg>
                                         <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
@@ -523,7 +523,7 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                 </template>
                                                 <template x-if="subField.type === 'media_reference'">
                                                     <div x-data="{ outerFieldKey: fieldKey }">
-                                                    <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image', `${outerFieldKey}][${itemIdx}][${subKey}`)" class="space-y-2">
+                                                    <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image', `${outerFieldKey}][${itemIdx}][${subKey}`)" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                         <label class="block text-xs font-medium text-gray-600" x-text="subField.label || subKey"></label>
                                                         <input type="hidden"
                                                                :name="`translations[${langIdx}][block_data][${outerFieldKey}][${itemIdx}][${subKey}][source_kind]`"
@@ -558,8 +558,8 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                         <div class="flex flex-wrap gap-2">
                                                             <button type="button"
                                                                     @click="openPicker()"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                 </svg>
                                                                 <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
@@ -567,8 +567,8 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                             <button type="button"
                                                                     @click="clearReference()"
                                                                     x-show="fileId || url"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                                                 </svg>
                                                                 <span>Quitar</span>
@@ -576,8 +576,8 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                             <button type="button"
                                                                     @click="copyToAllLanguages()"
                                                                     x-show="fileId || url"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100 transition-colors">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 shadow-sm transition-colors hover:bg-brand-100">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
                                                                 </svg>
                                                                 <span>Copiar a otros idiomas</span>
@@ -589,7 +589,7 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                 <template x-if="subField.type === 'file'">
                                                     <div class="space-y-1.5">
                                                         <template x-if="String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/')">
-                                                            <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image')" class="space-y-2">
+                                                            <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image')" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIdx}][block_data][${fieldKey}][${itemIdx}][${subKey}][source_kind]`"
                                                                        x-model="sourceKind">
@@ -613,19 +613,19 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                                     </template>
                                                                 </div>
                                                                 <div class="flex flex-wrap gap-2">
-                                                                    <button type="button"
-                                                                            @click="openPicker()"
-                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                <button type="button"
+                                                                        @click="openPicker()"
+                                                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                         </svg>
                                                                         <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
                                                                     </button>
-                                                                    <button type="button"
-                                                                            @click="clearReference()"
-                                                                            x-show="fileId || url"
-                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
-                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                <button type="button"
+                                                                        @click="clearReference()"
+                                                                        x-show="fileId || url"
+                                                                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                                                         </svg>
                                                                         <span>Quitar</span>
@@ -634,7 +634,7 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                             </div>
                                                         </template>
                                                         <template x-if="!(String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/'))">
-                                                            <div class="space-y-1.5">
+                                                            <div class="space-y-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIdx}][block_data][${fieldKey}][${itemIdx}][${subKey}_file_id]`"
                                                                        :value="item[subKey + '_file_id'] || ''">
@@ -653,8 +653,8 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                                                 </div>
                                                                 <button type="button"
                                                                         @click="openPickerForItem(itemIdx, subKey, subField.accept || 'image')"
-                                                                        class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                     </svg>
                                                                     <span x-text="item[subKey + '_file_id'] ? 'Cambiar' : 'Seleccionar'"></span>

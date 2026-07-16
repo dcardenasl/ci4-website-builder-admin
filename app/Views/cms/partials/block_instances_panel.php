@@ -25,8 +25,8 @@ $emptyDKey = 'blocks_empty_desc_' . $ownerType;
 $reorderUrl = route_to($routes['reorder'], $itemId);
 ?>
 <div>
-    <div class="flex items-center justify-between mb-4">
-        <div>
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
             <h4 class="text-base font-semibold text-gray-900">
                 <?= esc(lang('Pages.blocks_section_title')) ?>
             </h4>
@@ -34,15 +34,15 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                 <?= esc(lang('Pages.' . $descKey)) ?>
             </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
             <a href="<?= route_to($routes['index'], $itemId) ?>"
-               class="<?= esc(action_button_class('neutral')) ?>">
+               class="<?= esc(action_button_class('neutral')) ?> w-full justify-center sm:w-auto">
                 <?= ui_icon('layout-template', 'h-3.5 w-3.5') ?>
                 <?= esc(lang('Pages.manage_blocks')) ?>
             </a>
             <?php if ($canWrite): ?>
             <a href="<?= route_to($routes['create'], $itemId) ?>"
-               class="<?= esc(action_button_class('primary')) ?>">
+               class="<?= esc(action_button_class('primary')) ?> w-full justify-center sm:w-auto">
                 <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
                 <?= esc(lang('Pages.blocks_add')) ?>
             </a>
@@ -52,17 +52,16 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
 
     <div x-data="blockSorter('<?= esc($reorderUrl) ?>')">
         <!-- Saving indicator -->
-        <div class="flex items-center justify-between mb-3">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span x-show="saving" x-cloak class="text-xs text-gray-400 italic">
                 <?= esc(lang('Pages.blocks_saving')) ?>
             </span>
             <span x-show="saved && !saving" x-cloak class="text-xs text-green-600">
                 <?= esc(lang('Pages.blocks_saved')) ?>
             </span>
-            <span class="flex-1"></span>
             <button x-show="dirty && !saving" x-cloak type="button"
                     @click="saveOrder()"
-                    class="<?= esc(action_button_class('primary')) ?> !text-xs !py-1.5 !px-3">
+                    class="<?= esc(action_button_class('primary')) ?> w-full justify-center !text-xs !py-1.5 !px-3 sm:w-auto">
                 <?= ui_icon('save', 'h-3.5 w-3.5') ?>
                 <?= esc(lang('Pages.blocks_save_order')) ?>
             </button>
@@ -95,9 +94,10 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                     }
                     ?>
                 <li data-id="<?= esc($blockId) ?>"
-                    class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow">
+                    class="flex flex-col gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow xl:flex-row xl:items-center">
                     <!-- Drag handle -->
-                    <span data-drag-handle class="text-gray-300 hover:text-gray-500 flex-shrink-0 cursor-grab">
+                    <span data-drag-handle class="hidden flex-shrink-0 cursor-grab text-gray-300 hover:text-gray-500 xl:flex"
+                          title="<?= esc(lang('Pages.blocks_drag_handle_title'), 'attr') ?>">
                         <?= ui_icon('grip-vertical', 'h-4 w-4') ?>
                     </span>
 
@@ -114,8 +114,23 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                         <?= esc($isActive ? lang('Pages.blocks_status_active') : lang('Pages.blocks_status_inactive')) ?>
                     </span>
 
+                    <div class="grid grid-cols-2 gap-2 xl:hidden w-full">
+                        <button type="button"
+                                @click="moveUp('<?= esc($blockId, 'js') ?>')"
+                                class="<?= esc(action_button_class('neutral')) ?> w-full justify-center">
+                            <?= ui_icon('chevron-up', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('App.move_up')) ?>
+                        </button>
+                        <button type="button"
+                                @click="moveDown('<?= esc($blockId, 'js') ?>')"
+                                class="<?= esc(action_button_class('neutral')) ?> w-full justify-center">
+                            <?= ui_icon('chevron-down', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('App.move_down')) ?>
+                        </button>
+                    </div>
+
                     <!-- Quick actions -->
-                    <div class="flex items-center gap-1 flex-shrink-0">
+                    <div class="flex w-full flex-wrap items-center gap-1 flex-shrink-0 xl:w-auto xl:justify-end">
                         <?php if ($canWrite): ?>
                             <?php if (! empty($blockTypeData['is_container'])): ?>
                             <a href="<?= route_to($routes['children'], $itemId, $blockId) ?>"
@@ -142,10 +157,13 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                 <?php endforeach; ?>
             </ul>
 
-            <!-- Drag hint -->
+            <!-- Reorder hint -->
             <?php if ($canWrite): ?>
-                <p class="mt-3 text-xs text-gray-400 text-center">
+                <p class="hidden xl:block mt-3 text-xs text-gray-400 text-center">
                     <?= esc(lang('Pages.blocks_drag_hint')) ?>
+                </p>
+                <p class="xl:hidden mt-3 text-xs text-gray-400 text-center">
+                    <?= esc(lang('Pages.blocks_reorder_hint_mobile')) ?>
                 </p>
             <?php endif; ?>
         <?php endif; ?>

@@ -67,6 +67,8 @@ return [
     'relation_missing_options_desc' => 'Create the related records first, then return to select one here.',
     'relation_no_options' => 'No options available.',
     'reorder' => 'Reorder',
+    'move_up' => 'Move up',
+    'move_down' => 'Move down',
     'all' => 'All',
     'connection_error' => 'Server connection error.',
     'unknown_error'    => 'An unexpected error occurred.',

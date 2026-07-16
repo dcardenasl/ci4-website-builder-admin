@@ -173,19 +173,19 @@ foreach ($languages as $l) {
                             : '';
                         ?>
                         <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
-                            <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between items-center">
+                            <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($tLangCode) ?></span>
-                                <div class="flex items-center gap-3">
+                                <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                                     <span class="text-gray-500 font-mono text-xs">/<?= esc($tSlug) ?></span>
                                     <?php if ($tPreview !== ''): ?>
                                     <a href="<?= esc($tPreview) ?>" target="_blank" rel="noopener noreferrer"
-                                       class="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                                       class="text-xs text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 whitespace-nowrap">
                                         <?= ui_icon('external-link', 'h-3 w-3') ?>
                                         <?= esc(lang('Pages.blocks_view_page')) ?>
                                     </a>
                                     <?php endif; ?>
                                     <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>?focus_lang=<?= $tLangId ?>"
-                                       class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2">
+                                       class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2 whitespace-nowrap">
                                         <?= ui_icon('pencil', 'h-3 w-3') ?>
                                         <?= esc(lang('Pages.edit_in_language', ['lang' => $tLangCode])) ?>
                                     </a>

@@ -298,19 +298,60 @@ $isImageAccept = static function (string $accept): bool {
                             </template>
 
                             <template x-if="field.type === 'media_reference'">
-                                <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-2">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <label class="block text-xs font-medium text-gray-700">
-                                            <span x-text="field.label || key"></span>
-                                            <span x-show="field.required" class="text-red-500 ml-0.5">*</span>
-                                        </label>
-                                        <select x-model="sourceKind"
-                                                @change="setSourceKind($event.target.value)"
-                                                class="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                            <option value="hub_file">Archivo del sistema</option>
-                                            <option value="external_url">URL externa</option>
-                                        </select>
+                                <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <label class="block text-xs font-semibold text-gray-700">
+                                                <span x-text="field.label || key"></span>
+                                                <span x-show="field.required" class="text-red-500 ml-0.5">*</span>
+                                            </label>
+                                            <p class="mt-1 text-[11px] text-gray-500">Elige una imagen desde la biblioteca o pega una URL externa pública.</p>
+                                        </div>
+                                        <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium" :class="sourceKindBadgeClass()">
+                                            <span class="mr-1.5 h-2 w-2 rounded-full" :class="sourceKind === 'external_url' ? 'bg-brand-500' : 'bg-emerald-500'"></span>
+                                            <span x-text="sourceKindLabel()"></span>
+                                        </span>
                                     </div>
+
+                                    <div class="grid gap-2 sm:grid-cols-2" role="group" :aria-label="field.label || key">
+                                        <button type="button"
+                                                @click="setSourceKind('hub_file')"
+                                                :aria-pressed="isFileSource()"
+                                                class="flex w-full items-start gap-3 rounded-xl border p-3 text-left transition"
+                                                :class="sourceKindButtonClass('hub_file')">
+                                            <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/80 ring-1 ring-inset ring-current/10">
+                                                <svg class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75 6.75 11.25a2.25 2.25 0 0 1 3.182 0l4.5 4.5m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Z" />
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-semibold">Biblioteca</span>
+                                                    <span class="h-2 w-2 rounded-full" :class="sourceKindDotClass('hub_file')"></span>
+                                                </div>
+                                                <p class="mt-0.5 text-xs text-gray-500">Selecciona un archivo existente o sube uno nuevo.</p>
+                                            </div>
+                                        </button>
+                                        <button type="button"
+                                                @click="setSourceKind('external_url')"
+                                                :aria-pressed="isExternalSource()"
+                                                class="flex w-full items-start gap-3 rounded-xl border p-3 text-left transition"
+                                                :class="sourceKindButtonClass('external_url')">
+                                            <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/80 ring-1 ring-inset ring-current/10">
+                                                <svg class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5h3.75a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-3.75m-7.5-10.5H4.5A1.5 1.5 0 0 0 3 9v6a1.5 1.5 0 0 0 1.5 1.5h3.75m0-10.5L12 3.75m0 0 3.75 3.75M12 3.75V16.5" />
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-semibold">URL externa</span>
+                                                    <span class="h-2 w-2 rounded-full" :class="sourceKindDotClass('external_url')"></span>
+                                                </div>
+                                                <p class="mt-0.5 text-xs text-gray-500">Pega un enlace público directo a la imagen.</p>
+                                            </div>
+                                        </button>
+                                    </div>
+
                                     <input type="hidden" :name="`block_config[${key}][source_kind]`" x-model="sourceKind">
                                     <input type="hidden" :name="`block_config[${key}][file_id]`" x-model="fileId">
                                     <input :type="isExternalSource() ? 'url' : 'hidden'"
@@ -321,15 +362,20 @@ $isImageAccept = static function (string $accept): bool {
                                            inputmode="url"
                                            spellcheck="false"
                                            class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                    <div x-show="previewUrl" x-cloak>
+
+                                    <div x-show="previewUrl" x-cloak class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                                        <div class="flex items-center justify-between gap-2 border-b border-gray-200 px-3 py-2">
+                                            <span class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Vista previa</span>
+                                            <span class="text-[11px] text-gray-400" x-text="sourceKindLabel()"></span>
+                                        </div>
                                         <template x-if="accept === 'video'">
-                                            <video :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover" controls muted></video>
+                                            <video :src="previewUrl" class="h-36 w-full rounded-none border-0 object-cover" controls muted></video>
                                         </template>
                                         <template x-if="accept === 'image' || accept === 'any'">
-                                            <img :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover">
+                                            <img :src="previewUrl" class="h-36 w-full rounded-none border-0 object-cover">
                                         </template>
                                         <template x-if="accept === 'document' || accept === 'audio'">
-                                            <a :href="previewUrl" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 hover:bg-gray-100">
+                                            <a :href="previewUrl" target="_blank" rel="noopener" class="flex items-center gap-2 px-3 py-3 text-xs text-gray-600 hover:bg-gray-100">
                                                 <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                                 </svg>
@@ -337,26 +383,27 @@ $isImageAccept = static function (string $accept): bool {
                                             </a>
                                         </template>
                                     </div>
-                                    <div class="flex flex-wrap gap-2">
+
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <button type="button"
                                                 @click="openPicker()"
-                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                             </svg>
-                                            <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                            <span x-text="pickerButtonLabel()"></span>
                                         </button>
                                         <button type="button"
                                                 @click="clearReference()"
                                                 x-show="fileId || url"
-                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
                                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                             </svg>
                                             <span>Quitar</span>
                                         </button>
                                     </div>
-                                    <p class="text-[11px] text-gray-500">Puedes subir un archivo del sistema o enlazar una URL externa sin perder trazabilidad.</p>
+                                    <p class="rounded-xl border border-dashed border-gray-200 bg-gray-50/70 px-3 py-2 text-[11px] text-gray-500" x-text="sourceKindHint()"></p>
                                 </div>
                             </template>
 
@@ -463,19 +510,60 @@ $isImageAccept = static function (string $accept): bool {
                                     </select>
                                 </template>
                                 <template x-if="field.type === 'media_reference'">
-                                    <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-2">
-                                        <div class="flex items-center justify-between gap-3">
-                                            <label class="block text-xs font-medium text-gray-700">
-                                                <span x-text="field.label || fieldKey"></span>
-                                                <span x-show="field.required && lang.is_default == 1" class="text-red-500 ml-0.5">*</span>
-                                            </label>
-                                            <select x-model="sourceKind"
-                                                    @change="setSourceKind($event.target.value)"
-                                                    class="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                                <option value="hub_file">Archivo del sistema</option>
-                                                <option value="external_url">URL externa</option>
-                                            </select>
+                                    <div x-data="mediaReferenceField(field.default || {}, field.accept || 'image', fieldKey)" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <label class="block text-xs font-semibold text-gray-700">
+                                                    <span x-text="field.label || fieldKey"></span>
+                                                    <span x-show="field.required && lang.is_default == 1" class="text-red-500 ml-0.5">*</span>
+                                                </label>
+                                                <p class="mt-1 text-[11px] text-gray-500">Elige una imagen desde la biblioteca o pega una URL externa pública.</p>
+                                            </div>
+                                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium" :class="sourceKindBadgeClass()">
+                                                <span class="mr-1.5 h-2 w-2 rounded-full" :class="sourceKind === 'external_url' ? 'bg-brand-500' : 'bg-emerald-500'"></span>
+                                                <span x-text="sourceKindLabel()"></span>
+                                            </span>
                                         </div>
+
+                                        <div class="grid gap-2 sm:grid-cols-2" role="group" :aria-label="field.label || fieldKey">
+                                            <button type="button"
+                                                    @click="setSourceKind('hub_file')"
+                                                    :aria-pressed="isFileSource()"
+                                                    class="flex w-full items-start gap-3 rounded-xl border p-3 text-left transition"
+                                                    :class="sourceKindButtonClass('hub_file')">
+                                                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/80 ring-1 ring-inset ring-current/10">
+                                                    <svg class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75 6.75 11.25a2.25 2.25 0 0 1 3.182 0l4.5 4.5m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-semibold">Biblioteca</span>
+                                                        <span class="h-2 w-2 rounded-full" :class="sourceKindDotClass('hub_file')"></span>
+                                                    </div>
+                                                    <p class="mt-0.5 text-xs text-gray-500">Selecciona un archivo existente o sube uno nuevo.</p>
+                                                </div>
+                                            </button>
+                                            <button type="button"
+                                                    @click="setSourceKind('external_url')"
+                                                    :aria-pressed="isExternalSource()"
+                                                    class="flex w-full items-start gap-3 rounded-xl border p-3 text-left transition"
+                                                    :class="sourceKindButtonClass('external_url')">
+                                                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/80 ring-1 ring-inset ring-current/10">
+                                                    <svg class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5h3.75a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-3.75m-7.5-10.5H4.5A1.5 1.5 0 0 0 3 9v6a1.5 1.5 0 0 0 1.5 1.5h3.75m0-10.5L12 3.75m0 0 3.75 3.75M12 3.75V16.5" />
+                                                    </svg>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-semibold">URL externa</span>
+                                                        <span class="h-2 w-2 rounded-full" :class="sourceKindDotClass('external_url')"></span>
+                                                    </div>
+                                                    <p class="mt-0.5 text-xs text-gray-500">Pega un enlace público directo a la imagen.</p>
+                                                </div>
+                                            </button>
+                                        </div>
+
                                         <input type="hidden" :name="`translations[${langIndex}][block_data][${fieldKey}][source_kind]`" x-model="sourceKind">
                                         <input type="hidden" :name="`translations[${langIndex}][block_data][${fieldKey}][file_id]`" x-model="fileId">
                                         <input :type="isExternalSource() ? 'url' : 'hidden'"
@@ -486,27 +574,31 @@ $isImageAccept = static function (string $accept): bool {
                                                inputmode="url"
                                                spellcheck="false"
                                                class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
-                                        <div x-show="previewUrl" x-cloak>
+                                        <div x-show="previewUrl" x-cloak class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                                            <div class="flex items-center justify-between gap-2 border-b border-gray-200 px-3 py-2">
+                                                <span class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Vista previa</span>
+                                                <span class="text-[11px] text-gray-400" x-text="sourceKindLabel()"></span>
+                                            </div>
                                             <template x-if="accept === 'video'">
-                                                <video :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover" controls muted></video>
+                                                <video :src="previewUrl" class="h-36 w-full rounded-none border-0 object-cover" controls muted></video>
                                             </template>
                                             <template x-if="accept !== 'video'">
-                                                <img :src="previewUrl" class="h-36 w-full rounded-xl border border-gray-200 object-cover">
+                                                <img :src="previewUrl" class="h-36 w-full rounded-none border-0 object-cover">
                                             </template>
                                         </div>
-                                        <div class="flex flex-wrap gap-2">
-                                            <button type="button"
-                                                    @click="openPicker()"
-                                                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <button type="button"
+                                                @click="openPicker()"
+                                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                 </svg>
-                                                <span x-text="fileId ? pickerLabels[accept]?.change : pickerLabels[accept]?.select"></span>
+                                                <span x-text="pickerButtonLabel()"></span>
                                             </button>
                                             <button type="button"
                                                     @click="clearReference()"
                                                     x-show="fileId || url"
-                                                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100 transition-colors">
+                                                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
                                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                                 </svg>
@@ -516,7 +608,7 @@ $isImageAccept = static function (string $accept): bool {
                                                 <button type="button"
                                                         @click="copyToAllLanguages()"
                                                         x-show="fileId || url"
-                                                        class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 shadow-sm hover:bg-brand-100 transition-colors">
+                                                        class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 shadow-sm transition-colors hover:bg-brand-100">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
                                                     </svg>
@@ -524,7 +616,7 @@ $isImageAccept = static function (string $accept): bool {
                                                 </button>
                                             <?php endif; ?>
                                         </div>
-                                        <p class="text-[11px] text-gray-500">Puedes subir un archivo del sistema o enlazar una URL externa sin perder trazabilidad.</p>
+                                        <p class="rounded-xl border border-dashed border-gray-200 bg-gray-50/70 px-3 py-2 text-[11px] text-gray-500" x-text="sourceKindHint()"></p>
                                     </div>
                                 </template>
                                 <template x-if="field.type === 'repeater'">
@@ -546,7 +638,7 @@ $isImageAccept = static function (string $accept): bool {
                                                 </template>
                                                 <template x-if="subField.type === 'media_reference'">
                                                     <div x-data="{ outerFieldKey: fieldKey }">
-                                                    <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image', `${outerFieldKey}][${itemIdx}][${subKey}`)" class="space-y-2">
+                                                    <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image', `${outerFieldKey}][${itemIdx}][${subKey}`)" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                         <input type="hidden"
                                                                :name="`translations[${langIndex}][block_data][${outerFieldKey}][${itemIdx}][${subKey}][source_kind]`"
                                                                x-model="sourceKind">
@@ -580,8 +672,8 @@ $isImageAccept = static function (string $accept): bool {
                                                         <div class="flex flex-wrap gap-2">
                                                             <button type="button"
                                                                     @click="openPicker()"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                 </svg>
                                                                 <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
@@ -589,8 +681,8 @@ $isImageAccept = static function (string $accept): bool {
                                                             <button type="button"
                                                                     @click="clearReference()"
                                                                     x-show="fileId || url"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                                                 </svg>
                                                                 <span>Quitar</span>
@@ -598,8 +690,8 @@ $isImageAccept = static function (string $accept): bool {
                                                             <button type="button"
                                                                     @click="copyToAllLanguages()"
                                                                     x-show="fileId || url"
-                                                                    class="inline-flex items-center gap-1 rounded border border-gray-300 bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100 transition-colors">
-                                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 shadow-sm transition-colors hover:bg-brand-100">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 19H9m4 0h4m-11-8h.01M9 3h6m4 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-6 0h4"/>
                                                                 </svg>
                                                                 <span>Copiar a otros idiomas</span>
@@ -611,7 +703,7 @@ $isImageAccept = static function (string $accept): bool {
                                                 <template x-if="subField.type === 'file'">
                                                     <div class="space-y-1.5">
                                                         <template x-if="String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/')">
-                                                            <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image')" class="space-y-2">
+                                                            <div x-data="mediaReferenceField(item[subKey] || {}, subField.accept || 'image')" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}][source_kind]`"
                                                                        x-model="sourceKind">
@@ -635,19 +727,19 @@ $isImageAccept = static function (string $accept): bool {
                                                                     </template>
                                                                 </div>
                                                                 <div class="flex flex-wrap gap-2">
-                                                                    <button type="button"
-                                                                            @click="openPicker()"
-                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                <button type="button"
+                                                                        @click="openPicker()"
+                                                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                         </svg>
                                                                         <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
                                                                     </button>
-                                                                    <button type="button"
-                                                                            @click="clearReference()"
-                                                                            x-show="fileId || url"
-                                                                            class="inline-flex items-center gap-1 rounded border border-gray-300 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
-                                                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                <button type="button"
+                                                                        @click="clearReference()"
+                                                                        x-show="fileId || url"
+                                                                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5h12m-10.5 0V6a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 16.5 6v1.5m-9 0 .75 10.5A1.5 1.5 0 0 0 9.75 19.5h4.5a1.5 1.5 0 0 0 1.5-1.5L16.5 7.5m-7.5 3v4.5m3-4.5v4.5"/>
                                                                         </svg>
                                                                         <span>Quitar</span>
@@ -656,7 +748,7 @@ $isImageAccept = static function (string $accept): bool {
                                                             </div>
                                                         </template>
                                                         <template x-if="!(String(subField.accept || 'image').toLowerCase() === 'image' || String(subField.accept || 'image').toLowerCase() === 'image/*' || String(subField.accept || 'image').toLowerCase().startsWith('image/'))">
-                                                            <div class="space-y-1.5">
+                                                            <div class="space-y-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                                                 <input type="hidden"
                                                                        :name="`translations[${langIndex}][block_data][${fieldKey}][${itemIdx}][${subKey}_file_id]`"
                                                                        :value="item[subKey + '_file_id'] || ''">
@@ -675,8 +767,8 @@ $isImageAccept = static function (string $accept): bool {
                                                                 </div>
                                                                 <button type="button"
                                                                         @click="openFilePicker((file) => pickFile(lang.id, fieldKey, itemIdx, subKey, file), subField.accept || 'image')"
-                                                                        class="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">
-                                                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                     </svg>
                                                                     <span x-text="item[subKey + '_file_id'] ? 'Cambiar' : 'Seleccionar'"></span>

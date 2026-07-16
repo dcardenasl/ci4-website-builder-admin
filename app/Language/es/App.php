@@ -67,6 +67,8 @@ return [
     'relation_missing_options_desc' => 'Crea primero los registros relacionados y luego vuelve para seleccionar uno aquí.',
     'relation_no_options' => 'No hay opciones disponibles.',
     'reorder' => 'Reordenar',
+    'move_up' => 'Subir',
+    'move_down' => 'Bajar',
     'all' => 'Todos',
     'connection_error' => 'Error de conexión con el servidor.',
     'unknown_error'    => 'Ha ocurrido un error inesperado.',

@@ -10,6 +10,21 @@ export const blockSorter = (reorderUrl = '') => ({
     _saveTimeoutId: null,
     _abortController: null,
 
+    _getItems() {
+        if (!this._list) return [];
+        return Array.from(this._list.querySelectorAll('[data-block-id], [data-id]'));
+    },
+
+    _getItemId(el) {
+        if (!el) return '';
+        return String(el.getAttribute('data-block-id') || el.getAttribute('data-id') || '');
+    },
+
+    _markDirty() {
+        this.dirty = true;
+        this.saved = false;
+    },
+
     init() {
         if (!reorderUrl || typeof Sortable === 'undefined') {
             devError('[blockSorter] Missing reorderUrl or Sortable library');
@@ -25,7 +40,7 @@ export const blockSorter = (reorderUrl = '') => ({
                 handle: '[data-drag-handle]',
                 animation: 150,
                 ghostClass: 'opacity-40',
-                onEnd: () => { this.dirty = true; this.saved = false; },
+                onEnd: () => { this._markDirty(); },
             });
         } catch (err) { devError('[blockSorter] Failed to create Sortable instance:', err); }
         this._registerMutationObserver();
@@ -59,15 +74,61 @@ export const blockSorter = (reorderUrl = '') => ({
         this.dirty = false;
     },
 
+    moveBlock(blockId, direction) {
+        if (!this._list) {
+            devError('[blockSorter] List reference is null');
+            return false;
+        }
+
+        const delta = Number(direction);
+        if (!Number.isInteger(delta) || delta === 0) {
+            return false;
+        }
+
+        const items = this._getItems();
+        const currentIndex = items.findIndex((el) => this._getItemId(el) === String(blockId));
+        if (currentIndex < 0) {
+            return false;
+        }
+
+        const nextIndex = currentIndex + delta;
+        if (nextIndex < 0 || nextIndex >= items.length) {
+            return false;
+        }
+
+        const current = items[currentIndex];
+        const target = items[nextIndex];
+        if (!current || !target || current === target) {
+            return false;
+        }
+
+        if (delta < 0) {
+            this._list.insertBefore(current, target);
+        } else {
+            this._list.insertBefore(current, target.nextElementSibling);
+        }
+
+        this._markDirty();
+        return true;
+    },
+
+    moveUp(blockId) {
+        return this.moveBlock(blockId, -1);
+    },
+
+    moveDown(blockId) {
+        return this.moveBlock(blockId, 1);
+    },
+
     saveOrder() {
         if (!this._list) { devError('[blockSorter] List reference is null'); return; }
         if (!reorderUrl) { devError('[blockSorter] Reorder URL is not configured'); return; }
-        const items = this._list.querySelectorAll('[data-block-id], [data-id]');
+        const items = this._getItems();
         if (items.length === 0) { devError('[blockSorter] No items found to reorder'); return; }
 
         const orders = {};
         items.forEach((el, index) => {
-            const id = el.getAttribute('data-block-id') || el.getAttribute('data-id');
+            const id = this._getItemId(el);
             if (id) orders[id] = index + 1;
         });
         if (Object.keys(orders).length === 0) { devError('[blockSorter] No valid item IDs found'); return; }

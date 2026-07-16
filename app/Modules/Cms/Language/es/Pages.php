@@ -114,6 +114,7 @@ return [
     'blocks_empty_desc_page'      => 'Haz clic en "Añadir Bloque" para comenzar a poblar la página.',
     'blocks_empty_desc_entry'     => 'Haz clic en "Añadir Bloque" para comenzar a poblar la entrada.',
     'blocks_drag_hint'            => 'Arrastra para reordenar y haz clic en Guardar Orden para confirmar.',
+    'blocks_reorder_hint_mobile'  => 'Usa los botones "Subir" y "Bajar" para reordenar, luego haz clic en Guardar Orden para confirmar.',
     'blocks_saving'               => 'Guardando…',
     'blocks_saved'                => 'Orden guardado',
     'blocks_save_order'           => 'Guardar Orden',
@@ -162,6 +163,18 @@ return [
     'owner_label_entry'           => 'Entrada',
     'child_label_slide'           => 'Diapositiva',
     'child_label_subblock'        => 'Sub-bloque',
+    'child_label_slide_plural'    => 'Diapositivas',
+    'child_label_subblock_plural' => 'Sub-bloques',
+
+    // Vista de hijos (diapositivas / sub-bloques)
+    'children_back_to_blocks'     => 'Volver a Bloques de {0}',
+    'children_add_button'         => 'Agregar {0}',
+    'children_section_title'      => '{0} del {1}',
+    'children_empty_title'        => 'Este {0} aún no tiene {1}.',
+    'children_empty_desc'         => 'Haz clic en "Agregar {0}" para comenzar.',
+    'children_item_order_label'   => '{0} #{1}',
+    'children_untitled'           => '{0} sin título',
+    'blocks_drag_handle_title'    => 'Arrastrar para reordenar',
 
     // Mensajes de controlador
     'block_added_success'         => 'Bloque añadido con éxito.',

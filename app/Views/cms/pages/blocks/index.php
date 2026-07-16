@@ -127,32 +127,50 @@ $blocksEmptyDesc = $ownerType === 'entry'
                  class="border border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors group">
 
                 <!-- Main row -->
-                <div class="flex items-center gap-3 p-4">
+                <div class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
 
-                    <!-- Drag handle -->
-                    <div data-drag-handle
-                         class="cursor-grab active:cursor-grabbing shrink-0 text-gray-300 hover:text-gray-500 transition-colors select-none">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-                        </svg>
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- Drag handle -->
+                        <div data-drag-handle
+                             class="hidden lg:flex cursor-grab active:cursor-grabbing shrink-0 text-gray-300 hover:text-gray-500 transition-colors select-none"
+                             title="<?= esc(lang('Pages.blocks_drag_handle_title'), 'attr') ?>">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Block type icon -->
+                        <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
+                            <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-5 h-5"></i>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="min-w-0">
+                            <h4 class="font-semibold text-gray-900 text-sm truncate"><?= esc($blockType['name'] ?? '') ?></h4>
+                            <p class="text-xs text-gray-500 font-mono mt-0.5"><?= esc($blockType['block_key'] ?? '') ?></p>
+                            <?php if ($previewText !== ''): ?>
+                                <p class="text-xs text-gray-400 mt-0.5 truncate italic"><?= esc($previewText) ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <!-- Block type icon -->
-                    <div class="bg-brand-50 text-brand-700 p-2.5 rounded-lg border border-brand-100 shrink-0">
-                        <i data-lucide="<?= esc($blockType['icon'] ?? 'layout-template') ?>" class="w-5 h-5"></i>
+                    <div class="grid grid-cols-2 gap-2 lg:hidden">
+                        <button type="button"
+                                @click="moveUp('<?= esc($blockId, 'js') ?>')"
+                                class="<?= esc(action_button_class('neutral')) ?> w-full justify-center">
+                            <?= ui_icon('chevron-up', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('App.move_up')) ?>
+                        </button>
+                        <button type="button"
+                                @click="moveDown('<?= esc($blockId, 'js') ?>')"
+                                class="<?= esc(action_button_class('neutral')) ?> w-full justify-center">
+                            <?= ui_icon('chevron-down', 'h-3.5 w-3.5') ?>
+                            <?= esc(lang('App.move_down')) ?>
+                        </button>
                     </div>
 
-                    <!-- Info -->
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold text-gray-900 text-sm truncate"><?= esc($blockType['name'] ?? '') ?></h4>
-                        <p class="text-xs text-gray-500 font-mono mt-0.5"><?= esc($blockType['block_key'] ?? '') ?></p>
-                        <?php if ($previewText !== ''): ?>
-                            <p class="text-xs text-gray-400 mt-0.5 truncate italic"><?= esc($previewText) ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Status badge -->
-                    <div class="shrink-0">
+                    <div class="flex items-center gap-2 flex-wrap lg:ml-auto lg:justify-end">
+                        <!-- Status badge -->
                         <?php if ($isActive): ?>
                             <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                                 <?= esc(lang('Pages.blocks_status_active')) ?>
@@ -162,54 +180,54 @@ $blocksEmptyDesc = $ownerType === 'entry'
                                 <?= esc(lang('Pages.blocks_status_inactive')) ?>
                             </span>
                         <?php endif; ?>
-                    </div>
 
-                    <!-- Actions -->
-                    <div class="flex items-center gap-2 shrink-0">
-                        <?php if (!empty($blockType['is_container'])): ?>
-                        <a href="<?= route_to($ownerChildrenRoute, (string) $page['id'], $blockId) ?>"
-                           class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
-                            <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
-                            <?= esc(lang('Pages.blocks_action_slides')) ?>
-                        </a>
-                        <?php endif; ?>
-                        <?php if (!empty($matchedCollectionId)): ?>
-                        <a href="<?= route_to('admin.cms.entries') . '?collection_id=' . $matchedCollectionId ?>"
-                           class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
-                            <?= ui_icon('list', 'h-3.5 w-3.5') ?>
-                            <?= esc(lang('Pages.blocks_action_collection_entries')) ?>
-                        </a>
-                        <a href="<?= route_to('admin.cms.entries.create') . '?collection_id=' . $matchedCollectionId ?>"
-                           class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
-                            <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
-                            <?= esc(lang('Pages.blocks_action_new_entry')) ?>
-                        </a>
-                        <?php endif; ?>
-                        <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"
-                           class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
-                            <?= esc(lang('Pages.blocks_action_edit')) ?>
-                        </a>
-                        <form method="post"
-                              action="<?= route_to($ownerDeleteRoute, (string) $page['id'], $blockId) ?>"
-                              x-data
-                              @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockType['name'] ?? $blockType['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
-                                <?= esc(lang('Pages.blocks_action_delete')) ?>
+                        <!-- Actions -->
+                        <div class="flex flex-wrap items-center gap-2 lg:ml-auto lg:justify-end">
+                            <?php if (!empty($blockType['is_container'])): ?>
+                            <a href="<?= route_to($ownerChildrenRoute, (string) $page['id'], $blockId) ?>"
+                               class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs">
+                                <?= ui_icon('layers', 'h-3.5 w-3.5') ?>
+                                <?= esc(lang('Pages.blocks_action_slides')) ?>
+                            </a>
+                            <?php endif; ?>
+                            <?php if (!empty($matchedCollectionId)): ?>
+                            <a href="<?= route_to('admin.cms.entries') . '?collection_id=' . $matchedCollectionId ?>"
+                               class="<?= esc(action_button_class('primary')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                                <?= ui_icon('list', 'h-3.5 w-3.5') ?>
+                                <?= esc(lang('Pages.blocks_action_collection_entries')) ?>
+                            </a>
+                            <a href="<?= route_to('admin.cms.entries.create') . '?collection_id=' . $matchedCollectionId ?>"
+                               class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs inline-flex items-center gap-1">
+                                <?= ui_icon('plus', 'h-3.5 w-3.5') ?>
+                                <?= esc(lang('Pages.blocks_action_new_entry')) ?>
+                            </a>
+                            <?php endif; ?>
+                            <a href="<?= route_to($ownerEditRoute, (string) $page['id'], $blockId) ?>"
+                               class="<?= esc(action_button_class('neutral')) ?> py-1 px-2.5 text-xs">
+                                <?= esc(lang('Pages.blocks_action_edit')) ?>
+                            </a>
+                            <form method="post"
+                                  action="<?= route_to($ownerDeleteRoute, (string) $page['id'], $blockId) ?>"
+                                  x-data
+                                  @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($blockType['name'] ?? $blockType['block_key'] ?? $blockId), 'js') ?>', () => $el.submit())">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="<?= esc(action_button_class('danger')) ?> py-1 px-2.5 text-xs">
+                                    <?= esc(lang('Pages.blocks_action_delete')) ?>
+                                </button>
+                            </form>
+                            <?php if ($blockDesc !== '' || $blockCategory !== ''): ?>
+                            <button type="button"
+                                    @click="expanded = !expanded"
+                                    :aria-expanded="expanded"
+                                    class="shrink-0 rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                    :title="expanded ? '<?= esc(lang('Pages.blocks_action_collapse'), 'js') ?>' : '<?= esc(lang('Pages.blocks_action_preview'), 'js') ?>'">
+                                <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''"
+                                     fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
+                                </svg>
                             </button>
-                        </form>
-                        <?php if ($blockDesc !== '' || $blockCategory !== ''): ?>
-                        <button type="button"
-                                @click="expanded = !expanded"
-                                :aria-expanded="expanded"
-                                class="shrink-0 rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                                :title="expanded ? '<?= esc(lang('Pages.blocks_action_collapse'), 'js') ?>' : '<?= esc(lang('Pages.blocks_action_preview'), 'js') ?>'">
-                            <svg class="h-4 w-4 transition-transform" :class="expanded ? 'rotate-180' : ''"
-                                 fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
-                            </svg>
-                        </button>
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
@@ -247,11 +265,15 @@ $blocksEmptyDesc = $ownerType === 'entry'
             <?php endforeach; ?>
         </div>
 
-        <p class="text-xs text-gray-400 mt-4 flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <p class="hidden lg:flex text-xs text-gray-400 mt-4 items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/>
             </svg>
             <?= esc(lang('Pages.blocks_drag_hint')) ?>
+        </p>
+        <p class="lg:hidden text-xs text-gray-400 mt-4 flex items-center gap-1.5">
+            <?= ui_icon('arrow-up-down', 'h-3.5 w-3.5 shrink-0') ?>
+            <?= esc(lang('Pages.blocks_reorder_hint_mobile')) ?>
         </p>
     <?php endif; ?>
 </section>
