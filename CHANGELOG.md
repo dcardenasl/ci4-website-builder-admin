@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Reusable media reference field component** — new `media_reference.php` component and `mediaReferenceField.js` Alpine.js component for unified handling of media selection across blocks; supports both Hub-managed files and external URLs with automatic source detection; includes preview, source toggling, file picker integration, and copy-to-all-languages support; replaces ad-hoc media handling in block forms with standardized, reusable UI
 - **Menu item create/edit views** — full CRUD interface for menu items with create and edit forms supporting link configuration, label, and sorting; integrated with MenuApiService for item creation and update workflows
 - **Automatic translation for block instances** — block creation now supports automatic translation of block content across all active languages via "Translate All" button and per-file copy-to-languages feature; language context (default language code and ID) passed to the UI for seamless multilingual block management.
 - **Exception handling for unavailable services** — `PermissionsSessionRefresher` and `BlockCatalogService` now gracefully handle timeouts and connection errors when Hub or Domain APIs are unavailable; permission refresh and block catalog loading log warnings and continue gracefully instead of crashing, improving admin resilience during infrastructure incidents.
