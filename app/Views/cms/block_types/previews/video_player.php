@@ -2,7 +2,7 @@
 /** @var array<string, mixed> $config */
 /** @var array<string, mixed> $data */
 $videoUrl = $data['video_url'] ?? '';
-$poster = is_array($data['poster'] ?? null) ? $data['poster'] : [];
+$poster = is_array($config['poster'] ?? null) ? $config['poster'] : (is_array($data['poster'] ?? null) ? $data['poster'] : []);
 $posterUrl = $poster['url'] ?? '';
 $heading = $data['heading'] ?? '';
 $aspectRatio = $config['aspect_ratio'] ?? '16/9';

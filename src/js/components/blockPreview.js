@@ -43,16 +43,19 @@ export const blockPreview = () => ({
     },
 
     openWithEvent(event) {
-        const { blockKey, blockConfig, blockData } = event.detail || {};
-        this.open(blockKey || '', blockConfig || {}, blockData || {});
+        const { blockKey, blockConfig, blockData, previewMode } = event.detail || {};
+        this.open(blockKey || '', blockConfig || {}, blockData || {}, previewMode || 'sample');
     },
 
-    open(blockKey, blockConfig, blockData) {
+    open(blockKey, blockConfig, blockData, previewMode = 'sample') {
         this.isOpen  = true;
         this.loading = true;
         this.error   = '';
         this.html    = '';
         this.blockKey = blockKey;
+        const effectivePreviewMode = previewMode === 'sample' || previewMode === 'live'
+            ? previewMode
+            : 'sample';
 
         const previewUrl = document.querySelector('meta[name="block-preview-url"]')?.getAttribute('content') || '/admin/cms/blocks/preview';
         const csrfInput  = document.querySelector('input[name^="ci4_"][name$="_csrf_token"]') || document.querySelector('input[name="csrf_token"]');
@@ -63,6 +66,7 @@ export const blockPreview = () => ({
             block_key:    blockKey,
             block_config: JSON.stringify(blockConfig),
             block_data:   JSON.stringify(blockData),
+            preview_mode: effectivePreviewMode,
             [csrfName]:   csrfToken,
         });
 

@@ -222,7 +222,7 @@ export const blockTypeDesigner = (templates = [], sourceKinds = DEFAULT_SOURCES,
         const sampleConfig = this.selectedTemplate?.config_sample  || {};
         const key = this.selectedTemplate?.key || document.getElementById('block_key')?.value || '';
         window.dispatchEvent(new CustomEvent('block-preview-open', {
-            detail: { blockKey: key, blockConfig: sampleConfig, blockData: sampleData },
+            detail: { blockKey: key, blockConfig: sampleConfig, blockData: sampleData, previewMode: 'sample' },
         }));
     },
 

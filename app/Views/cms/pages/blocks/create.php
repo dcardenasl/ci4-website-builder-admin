@@ -1235,7 +1235,7 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
                 : {};
             const config = payload.block_config || {};
             window.dispatchEvent(new CustomEvent('block-preview-open', {
-                detail: { blockKey: this.selectedBlockType.block_key, blockConfig: config, blockData: {} },
+                detail: { blockKey: this.selectedBlockType.block_key, blockConfig: config, blockData: {}, previewMode: 'live' },
             }));
         },
     };

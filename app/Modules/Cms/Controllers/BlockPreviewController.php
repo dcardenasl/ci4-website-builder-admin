@@ -14,9 +14,11 @@ class BlockPreviewController extends BaseWebController
         $blockKeyRaw = $this->request->getPost('block_key');
         $configRaw   = $this->request->getPost('block_config');
         $dataRaw     = $this->request->getPost('block_data');
+        $previewModeRaw = $this->request->getPost('preview_mode');
         $blockKey    = is_scalar($blockKeyRaw) ? (string) $blockKeyRaw : '';
         $configRaw   = is_scalar($configRaw) ? (string) $configRaw : '';
         $dataRaw     = is_scalar($dataRaw) ? (string) $dataRaw : '';
+        $previewMode = is_scalar($previewModeRaw) ? (string) $previewModeRaw : 'sample';
 
         $config = json_decode($configRaw ?: '{}', true) ?? [];
         $data   = json_decode($dataRaw ?: '{}', true) ?? [];
@@ -33,6 +35,7 @@ class BlockPreviewController extends BaseWebController
                         'block_key'    => $blockKey,
                         'block_config' => $configRaw,
                         'block_data'   => $dataRaw,
+                        'preview_mode' => $previewMode,
                     ],
                     'headers' => [
                         'Accept' => 'application/json',

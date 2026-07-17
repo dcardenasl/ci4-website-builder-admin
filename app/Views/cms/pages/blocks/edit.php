@@ -744,6 +744,7 @@ window.openBlockEditPreview = window.openBlockEditPreview || function openBlockE
             blockKey,
             blockConfig,
             blockData,
+            previewMode: 'live',
         },
     }));
 };

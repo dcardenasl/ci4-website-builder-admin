@@ -193,10 +193,10 @@ if (! function_exists('normalize_media_reference_value')) {
     {
         $raw = is_array($value) ? $value : [];
 
-        $sourceKindValue = $raw['source_kind'] ?? '';
+        $sourceKindValue = $raw['source_kind'] ?? $raw['sourceKind'] ?? $raw['source'] ?? '';
         $sourceKind = is_string($sourceKindValue) ? strtolower(trim($sourceKindValue)) : '';
-        $fileId     = $raw['file_id'] ?? $legacyFileId ?? '';
-        $url        = $raw['url'] ?? $legacyUrl ?? '';
+        $fileId     = $raw['file_id'] ?? $raw['fileId'] ?? $legacyFileId ?? '';
+        $url        = $raw['url'] ?? $raw['external_url'] ?? $raw['externalUrl'] ?? $raw['file_url'] ?? $raw['fileUrl'] ?? $legacyUrl ?? '';
 
         if ($sourceKind === '') {
             if (is_numeric($fileId) && (int) $fileId > 0) {
@@ -208,8 +208,14 @@ if (! function_exists('normalize_media_reference_value')) {
             }
         }
 
+        if ($sourceKind === 'hub_file' && ! is_numeric($fileId) && is_string($url) && preg_match('~/files/(\d+)/(?:view|download)(?:\?.*)?$~', $url, $matches) === 1) {
+            $fileId = (int) $matches[1];
+        }
+
         if ($sourceKind === 'external_url') {
             $fileId = '';
+        } elseif (is_numeric($fileId) && (int) $fileId > 0 && (! is_string($url) || trim($url) === '')) {
+            $url = '/files/' . (int) $fileId . '/view';
         }
 
         return [
