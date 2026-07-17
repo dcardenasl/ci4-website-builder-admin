@@ -28,6 +28,9 @@ class FormSubmissionController extends BaseWebController
 
         // Load count badges for tab navigation
         $countsResponse = $this->safeApiCall(fn () => $this->submissionService->counts());
+        if (! $countsResponse['ok']) {
+            $this->maybeFlashDevError($countsResponse);
+        }
         $counts = $this->extractData($countsResponse) ?: ['new' => 0, 'read' => 0, 'replied' => 0, 'spam' => 0, 'archived' => 0];
 
         return $this->render('cms/form_submissions/index', [
@@ -52,6 +55,8 @@ class FormSubmissionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->submissionService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return $this->withError(
                 lang('FormSubmissions.not_found'),
                 route_to('admin.cms.form_submissions')
@@ -62,7 +67,10 @@ class FormSubmissionController extends BaseWebController
 
         // Auto-mark as read when opened
         if (($submission['status'] ?? '') === 'new') {
-            $this->safeApiCall(fn () => $this->submissionService->updateStatus($id, 'read'));
+            $readResponse = $this->safeApiCall(fn () => $this->submissionService->updateStatus($id, 'read'));
+            if (! $readResponse['ok']) {
+                $this->maybeFlashDevError($readResponse);
+            }
             $submission['status'] = 'read';
         }
 
@@ -85,10 +93,7 @@ class FormSubmissionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->submissionService->updateStatus($id, $status));
 
         if (! $response['ok']) {
-            return $this->withError(
-                $this->firstMessage($response, lang('FormSubmissions.update_failed')),
-                route_to('admin.cms.form_submissions.show', $id)
-            );
+            return $this->failApi($response, lang('FormSubmissions.update_failed'), route_to('admin.cms.form_submissions.show', $id));
         }
 
         return redirect()

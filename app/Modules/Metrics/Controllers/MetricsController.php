@@ -47,6 +47,9 @@ class MetricsController extends BaseWebController
         $summaryResponse = $this->safeApiCall(fn () => $this->metricsService->summary($apiParams));
         $timeseriesResponse = $this->safeApiCall(fn () => $this->metricsService->timeseries($apiParams));
 
+        $this->maybeFlashDevError($summaryResponse);
+        $this->maybeFlashDevError($timeseriesResponse);
+
         $summaryData = $this->extractData($summaryResponse);
         $timeseriesData = $this->extractData($timeseriesResponse);
 

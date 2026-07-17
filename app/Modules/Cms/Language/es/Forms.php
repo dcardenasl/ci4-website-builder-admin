@@ -118,6 +118,7 @@ return [
     'delete_success' => 'Formulario eliminado correctamente.',
     'delete_failed'  => 'No se pudo eliminar el formulario.',
     'not_found'      => 'Formulario no encontrado.',
+    'in_use_warning' => 'Este formulario está vinculado a {0} bloque(s). Elimina esos bloques antes de borrar el formulario.',
 
     // Field AJAX
     'save_field_failed' => 'No se pudo guardar el campo.',
@@ -126,5 +127,12 @@ return [
     'show_title'        => 'Detalle del Formulario',
     'translation_title' => 'Traducciones del Formulario',
     'fields_title'      => 'Campos del Formulario',
+    'usages_title'      => 'Vínculos del Formulario',
+    'usages_empty'      => 'Este formulario no está vinculado a ningún bloque de páginas o entradas.',
+    'usage_page'        => 'Página',
+    'usage_entry'       => 'Entrada',
+    'usage_block'       => 'Bloque',
+    'usage_instance'    => 'Instancia',
+    'usage_edit'        => 'Abrir editor del bloque',
     'view_submissions'  => 'Ver Envíos',
 ];

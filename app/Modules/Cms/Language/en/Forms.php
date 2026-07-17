@@ -118,6 +118,7 @@ return [
     'delete_success' => 'Form deleted successfully.',
     'delete_failed'  => 'Could not delete the form.',
     'not_found'      => 'Form not found.',
+    'in_use_warning' => 'This form is linked to {0} block(s). Remove those blocks before deleting the form.',
 
     // Field AJAX
     'save_field_failed' => 'Could not save the field.',
@@ -126,5 +127,12 @@ return [
     'show_title'        => 'Form Details',
     'translation_title' => 'Form Translations',
     'fields_title'      => 'Form Fields',
+    'usages_title'      => 'Linked Usages',
+    'usages_empty'      => 'This form is not linked to any page or entry block.',
+    'usage_page'        => 'Page',
+    'usage_entry'       => 'Entry',
+    'usage_block'       => 'Block',
+    'usage_instance'    => 'Instance',
+    'usage_edit'        => 'Open block editor',
     'view_submissions'  => 'View Submissions',
 ];

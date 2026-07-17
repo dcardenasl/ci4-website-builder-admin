@@ -46,6 +46,8 @@ class FormController extends BaseWebController
         $formResponse = $this->safeApiCall(fn () => $this->formService->get($id));
 
         if (! $formResponse['ok']) {
+            $this->maybeFlashDevError($formResponse);
+
             return $this->render('cms/forms/show', [
                 'title'     => lang('Forms.show_title'),
                 'form'      => [],
@@ -55,8 +57,12 @@ class FormController extends BaseWebController
         }
 
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
+        if (! $langResponse['ok']) {
+            $this->maybeFlashDevError($langResponse);
+        }
         $languages    = $this->extractItems($langResponse) ?: [];
         $form         = $this->normalizeForm($this->extractData($formResponse));
+        $form['usages'] = $this->prepareFormUsages($form['usages'] ?? []);
 
         return $this->render('cms/forms/show', [
             'title'     => lang('Forms.show_title'),
@@ -68,6 +74,9 @@ class FormController extends BaseWebController
     public function create(): string
     {
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
+        if (! $langResponse['ok']) {
+            $this->maybeFlashDevError($langResponse);
+        }
         $languages    = $this->extractItems($langResponse) ?: [];
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
@@ -105,10 +114,7 @@ class FormController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->formService->create($payload));
 
         if (! $response['ok']) {
-            return $this->withError(
-                $this->firstMessage($response, lang('Forms.create_failed')),
-                route_to('admin.cms.forms.create')
-            );
+            return $this->failApi($response, lang('Forms.create_failed'), route_to('admin.cms.forms.create'));
         }
 
         $form = $this->extractData($response);
@@ -124,12 +130,18 @@ class FormController extends BaseWebController
         $formResponse = $this->safeApiCall(fn () => $this->formService->get($id));
 
         if (! $formResponse['ok']) {
+            $this->maybeFlashDevError($formResponse);
+
             return $this->withError(lang('Forms.not_found'), route_to('admin.cms.forms'));
         }
 
         $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
+        if (! $langResponse['ok']) {
+            $this->maybeFlashDevError($langResponse);
+        }
         $languages    = $this->extractItems($langResponse) ?: [];
         $form         = $this->normalizeForm($this->extractData($formResponse));
+        $form['usages'] = $this->prepareFormUsages($form['usages'] ?? []);
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
         $fieldMap = ['name', 'submit_label', 'description', 'success_message', 'error_message'];
@@ -165,10 +177,7 @@ class FormController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->formService->update($id, $payload));
 
         if (! $response['ok']) {
-            return $this->withError(
-                $this->firstMessage($response, lang('Forms.update_failed')),
-                route_to('admin.cms.forms.edit', $id)
-            );
+            return $this->failApi($response, lang('Forms.update_failed'), route_to('admin.cms.forms.edit', $id));
         }
 
         return redirect()
@@ -181,10 +190,7 @@ class FormController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->formService->delete($id));
 
         if (! $response['ok']) {
-            return $this->withError(
-                $this->firstMessage($response, lang('Forms.delete_failed')),
-                route_to('admin.cms.forms')
-            );
+            return $this->failApi($response, lang('Forms.delete_failed'), route_to('admin.cms.forms'));
         }
 
         return redirect()
@@ -227,12 +233,56 @@ class FormController extends BaseWebController
     }
 
     /**
+     * @param mixed $usages
+     * @return list<array<string, mixed>>
+     */
+    private function prepareFormUsages(mixed $usages): array
+    {
+        if (! is_array($usages) || $usages === []) {
+            return [];
+        }
+
+        return array_values(array_map(function (array $usage): array {
+            $context = is_array($usage['context'] ?? null) ? (array) $usage['context'] : [];
+            $ownerType = (string) ($context['owner_type'] ?? '');
+            $ownerId   = (int) ($context['owner_id'] ?? 0);
+            $resourceId = (int) ($usage['resource_id'] ?? 0);
+
+            return array_merge($usage, [
+                'edit_url' => $this->resolveUsageEditUrl($ownerType, $ownerId, $resourceId),
+            ]);
+        }, $usages));
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function resolveUsageEditUrl(string $ownerType, int $ownerId, int $resourceId): ?string
+    {
+        if ($ownerType === 'page' && $ownerId > 0) {
+            return site_url('admin/cms/pages/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+        }
+
+        if ($ownerType === 'entry' && $ownerId > 0) {
+            return site_url('admin/cms/entries/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+        }
+
+        return null;
+    }
+
+    /**
      * @param array<string, mixed> $response
      */
     private function ajaxApiResponse(array $response): ResponseInterface
     {
         $ok     = (bool) ($response['ok'] ?? false);
         $status = (int) ($response['status'] ?? 0);
+
+        $devErrorHtml = '';
+        if (! $ok) {
+            $this->maybeFlashDevError($response);
+            $devErrorHtml = $this->renderDevApiErrorPanel($response);
+        }
 
         if ($status < 100) {
             $status = $ok ? 200 : 422;
@@ -249,6 +299,7 @@ class FormController extends BaseWebController
                 'data'        => $this->extractData($response),
                 'messages'    => $response['messages'] ?? [],
                 'fieldErrors' => $response['fieldErrors'] ?? [],
+                'devErrorHtml' => $devErrorHtml,
             ]);
     }
 
