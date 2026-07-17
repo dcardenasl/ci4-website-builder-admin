@@ -1,4 +1,4 @@
-import { bestFileOriginalUrl, bestFilePreviewUrl } from '../utils/fileUrl.js';
+import { bestFileOriginalUrl, bestFilePreviewUrl, resolveFilePreviewUrl } from '../utils/fileUrl.js';
 
 const DEFAULT_SOURCE_KIND = 'hub_file';
 
@@ -25,12 +25,40 @@ const normalizeReferenceValue = (value = {}) => {
         source_kind: sourceKind,
         file_id: fileId,
         url,
-        preview_url: String(raw.preview_url ?? raw.previewUrl ?? url ?? ''),
+        preview_url: String(raw.preview_url ?? raw.previewUrl ?? resolveFilePreviewUrl(fileId, url)),
     };
 };
 
+const snapshotReferenceForKind = (kind, reference = {}) => {
+    const normalized = normalizeReferenceValue(reference);
+
+    if (kind === 'external_url') {
+        return {
+            source_kind: 'external_url',
+            file_id: '',
+            url: normalized.url,
+            preview_url: normalized.preview_url || normalized.url,
+        };
+    }
+
+    return {
+        source_kind: 'hub_file',
+        file_id: normalized.file_id,
+        url: normalized.url,
+        preview_url: normalized.preview_url || resolveFilePreviewUrl(normalized.file_id, normalized.url),
+    };
+};
+
+const emptyReferenceForKind = (kind) => ({
+    source_kind: kind,
+    file_id: '',
+    url: '',
+    preview_url: '',
+});
+
 export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKey = '') => {
     const normalized = normalizeReferenceValue(initialValue);
+    const initialSnapshot = snapshotReferenceForKind(normalized.source_kind, normalized);
 
     return {
         fieldKey: String(fieldKey || ''),
@@ -38,6 +66,12 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
         fileId: normalized.file_id,
         url: normalized.url,
         previewUrl: normalized.preview_url,
+        cachedExternalReference: normalized.source_kind === 'external_url'
+            ? snapshotReferenceForKind('external_url', normalized)
+            : emptyReferenceForKind('external_url'),
+        cachedFileReference: normalized.source_kind === 'hub_file'
+            ? snapshotReferenceForKind('hub_file', normalized)
+            : emptyReferenceForKind('hub_file'),
         accept: String(accept || 'image'),
         pickerLabels: {
             image:    { select: 'Seleccionar imagen',    change: 'Cambiar imagen' },
@@ -49,6 +83,7 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
 
         init() {
             this._applySourceDefaults();
+            this._primeReferenceCache(initialSnapshot);
         },
 
         _applySourceDefaults() {
@@ -62,6 +97,37 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
             this.fileId = normalizedValues.file_id;
             this.url = normalizedValues.url;
             this.previewUrl = normalizedValues.preview_url;
+        },
+
+        _primeReferenceCache(reference = {}) {
+            const snapshot = snapshotReferenceForKind(this.sourceKind, reference);
+            if (snapshot.source_kind === 'external_url') {
+                this.cachedExternalReference = snapshot;
+            } else {
+                this.cachedFileReference = snapshot;
+            }
+        },
+
+        _snapshotCurrentReference() {
+            const snapshot = snapshotReferenceForKind(this.sourceKind, {
+                source_kind: this.sourceKind,
+                file_id: this.fileId,
+                url: this.url,
+                preview_url: this.previewUrl,
+            });
+
+            if (snapshot.source_kind === 'external_url') {
+                this.cachedExternalReference = snapshot;
+                return;
+            }
+
+            this.cachedFileReference = snapshot;
+        },
+
+        _referenceForKind(kind) {
+            return kind === 'external_url'
+                ? (this.cachedExternalReference ?? emptyReferenceForKind('external_url'))
+                : (this.cachedFileReference ?? emptyReferenceForKind('hub_file'));
         },
 
         isFileSource() {
@@ -105,23 +171,32 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
 
         setSourceKind(kind) {
             const nextKind = String(kind || DEFAULT_SOURCE_KIND);
+            if (nextKind === this.sourceKind) {
+                if (nextKind === 'external_url') {
+                    this.syncExternalUrl();
+                }
+                return;
+            }
+
+            this._snapshotCurrentReference();
+
             if (nextKind === 'external_url') {
-                const externalUrl = this.isExternalSource() ? this.url.trim() : '';
+                const externalReference = this._referenceForKind('external_url');
                 this.applyReference({
                     source_kind: 'external_url',
                     file_id: '',
-                    url: externalUrl,
-                    preview_url: externalUrl,
+                    url: externalReference.url,
+                    preview_url: externalReference.preview_url || externalReference.url,
                 });
                 return;
             }
 
-            const hasPickedFile = String(this.fileId || '') !== '';
+            const fileReference = this._referenceForKind('hub_file');
             this.applyReference({
                 source_kind: 'hub_file',
-                file_id: this.fileId,
-                url: hasPickedFile ? this.url : '',
-                preview_url: hasPickedFile ? this.previewUrl : '',
+                file_id: fileReference.file_id,
+                url: fileReference.url,
+                preview_url: fileReference.preview_url || resolveFilePreviewUrl(fileReference.file_id, fileReference.url),
             });
         },
 
@@ -131,6 +206,13 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
             this.fileId = normalizedValues.file_id;
             this.url = normalizedValues.url;
             this.previewUrl = normalizedValues.preview_url;
+
+            if (this.sourceKind === 'external_url') {
+                this.cachedExternalReference = snapshotReferenceForKind('external_url', normalizedValues);
+                return;
+            }
+
+            this.cachedFileReference = snapshotReferenceForKind('hub_file', normalizedValues);
         },
 
         openPicker() {
@@ -142,7 +224,7 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
                     ? this.accept
                     : this.accept + '/*';
 
-            this.sourceKind = 'hub_file';
+            this.setSourceKind('hub_file');
             Alpine.store('filePicker').show({
                 filterType,
                 accept: mimeAccept,
@@ -160,16 +242,19 @@ export const mediaReferenceField = (initialValue = {}, accept = 'image', fieldKe
 
         syncExternalUrl() {
             if (this.isExternalSource()) {
+                const trimmedUrl = this.url.trim();
                 this.applyReference({
                     source_kind: 'external_url',
                     file_id: '',
-                    url: this.url.trim(),
-                    preview_url: this.url.trim(),
+                    url: trimmedUrl,
+                    preview_url: trimmedUrl,
                 });
             }
         },
 
         clearReference() {
+            this.cachedExternalReference = emptyReferenceForKind('external_url');
+            this.cachedFileReference = emptyReferenceForKind('hub_file');
             this.applyReference({
                 source_kind: DEFAULT_SOURCE_KIND,
                 file_id: '',

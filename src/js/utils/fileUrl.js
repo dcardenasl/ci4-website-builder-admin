@@ -17,11 +17,29 @@ export const bestFilePreviewUrl = (file) => {
 };
 
 /**
+ * @param {string|number|null|undefined} fileId
+ * @param {string} fileUrl
+ * @returns {string}
+ */
+export const resolveFilePreviewUrl = (fileId, fileUrl = '') => {
+    const normalizedUrl = String(fileUrl || '').trim();
+    if (normalizedUrl !== '') {
+        return normalizedUrl;
+    }
+
+    const normalizedId = String(fileId || '').trim();
+    if (normalizedId !== '') {
+        return `/files/${encodeURIComponent(normalizedId)}/view`;
+    }
+
+    return '';
+};
+
+/**
  * @param {string} fileId
  * @param {string} fileUrl
  * @returns {string}
  */
 export const resolveTranslatableFilePreviewUrl = (fileId, fileUrl = '') => {
-    const normalizedUrl = String(fileUrl || '');
-    return normalizedUrl !== '' ? normalizedUrl : '';
+    return resolveFilePreviewUrl(fileId, fileUrl);
 };
