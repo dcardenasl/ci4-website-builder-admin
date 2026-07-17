@@ -95,6 +95,19 @@ abstract class BaseWebController extends BaseController
             return null;
         }
 
+        if (ENVIRONMENT === 'development') {
+            $errors = $request->errors();
+            $this->flashDevError(
+                422,
+                json_encode([
+                    'message'    => lang('App.errors_found'),
+                    'fieldErrors' => $errors,
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
+                array_values($errors),
+                $errors,
+            );
+        }
+
         return $this->withFieldErrors($request->errors());
     }
 
@@ -111,17 +124,7 @@ abstract class BaseWebController extends BaseController
         bool $withInput = true,
         array $allowedFieldErrors = [],
     ): RedirectResponse {
-        if (ENVIRONMENT === 'development') {
-            $devStatus = $response['status'] ?? 0;
-            $devRaw    = $response['raw'] ?? '';
-            log_message('debug', "[DEV] failApi — HTTP {$devStatus}\n{$devRaw}");
-            session()->setFlashdata('devApiError', [
-                'status'   => $devStatus,
-                'body'     => $devRaw,
-                'messages' => $response['messages'] ?? [],
-                'errors'   => $response['fieldErrors'] ?? [],
-            ]);
-        }
+        $this->maybeFlashDevError($response);
 
         $fieldErrors = $this->getFieldErrors($response);
 
@@ -146,6 +149,84 @@ abstract class BaseWebController extends BaseController
         }
 
         return $redirect->with('error', $message);
+    }
+
+    /**
+     * Store a development-only API/validation error snapshot for the flash
+     * message panel. This keeps the exact upstream payload visible in the UI
+     * so debugging stays fast without having to jump back to the terminal.
+     *
+     * @param list<string> $messages
+     * @param array<string, string> $errors
+     */
+    protected function flashDevError(int $status, string $body, array $messages = [], array $errors = []): void
+    {
+        if (ENVIRONMENT !== 'development') {
+            return;
+        }
+
+        session()->setFlashdata('devApiError', [
+            'status'   => $status,
+            'body'     => $body,
+            'messages' => $messages,
+            'errors'   => $errors,
+        ]);
+    }
+
+    /**
+     * Normalize a raw ApiClient/service response into the shape the dev error
+     * panel expects.
+     *
+     * @param array<string, mixed> $response
+     * @return array{status: int, body: string, messages: list<string>, errors: array<string, string>}
+     */
+    private function normalizeDevErr(array $response): array
+    {
+        $messages = is_array($response['messages'] ?? null) ? $response['messages'] : [];
+        $errors   = is_array($response['fieldErrors'] ?? null) ? $response['fieldErrors'] : [];
+
+        return [
+            'status'   => (int) ($response['status'] ?? 0),
+            'body'     => (string) ($response['raw'] ?? ''),
+            'messages' => array_values(array_map(static fn (mixed $m): string => (string) $m, $messages)),
+            'errors'   => array_map(static fn (mixed $e): string => (string) $e, $errors),
+        ];
+    }
+
+    /**
+     * Flash a dev error snapshot from a raw API response, if it failed. Use
+     * this on any full-page render (GET or POST) that consumes safeApiCall()
+     * results — the panel renders on the next response via flash_messages.php.
+     *
+     * @param array<string, mixed> $response
+     */
+    protected function maybeFlashDevError(array $response): void
+    {
+        if (ENVIRONMENT !== 'development' || ($response['ok'] ?? true) !== false) {
+            return;
+        }
+
+        $err = $this->normalizeDevErr($response);
+        log_message('debug', "[DEV] API call failed — HTTP {$err['status']}\n{$err['body']}");
+        $this->flashDevError($err['status'], $err['body'], $err['messages'], $err['errors']);
+    }
+
+    /**
+     * Render the dev error panel as inline HTML for a failed API response.
+     * Use this instead of maybeFlashDevError() for AJAX/partial responses
+     * (e.g. dashboard widgets) that get swapped into the DOM client-side —
+     * flash session data never surfaces there since there's no follow-up
+     * full-page render to display it on.
+     *
+     * @param array<string, mixed> $response
+     */
+    protected function renderDevApiErrorPanel(array $response): string
+    {
+        if (ENVIRONMENT !== 'development' || ($response['ok'] ?? true) !== false) {
+            return '';
+        }
+
+        return view('layouts/partials/dev_api_error_panel', ['devErr' => $this->normalizeDevErr($response)]);
     }
 
     /**
@@ -410,6 +491,7 @@ abstract class BaseWebController extends BaseController
         ];
 
         if (! ($response['ok'] ?? false)) {
+            $this->maybeFlashDevError($response);
             $data['error'] = $this->firstMessage($response, $notFoundMessage);
 
             return $this->render($view, $data);
