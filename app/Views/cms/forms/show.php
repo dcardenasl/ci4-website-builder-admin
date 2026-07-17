@@ -1,4 +1,6 @@
 <?php $form = $form ?? []; ?>
+<?php $usages = is_array($form['usages'] ?? null) ? array_values($form['usages']) : []; ?>
+<?php $hasUsages = $usages !== []; ?>
 
 <?php if (! empty($error)): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
@@ -136,6 +138,63 @@
                 <p class="mt-3 text-sm text-gray-500"><?= lang('Forms.fields_empty') ?></p>
             <?php endif; ?>
         </section>
+
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Forms.usages_title') ?></h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        <?= $hasUsages
+                            ? esc(lang('Forms.in_use_warning', [count($usages)]))
+                            : esc(lang('Forms.usages_empty'))
+                        ?>
+                    </p>
+                </div>
+                <?php if ($hasUsages): ?>
+                    <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                        <?= esc((string) count($usages)) ?>
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($hasUsages): ?>
+                <div class="mt-4 space-y-3">
+                    <?php foreach ($usages as $usage): ?>
+                        <?php
+                            $context = is_array($usage['context'] ?? null) ? (array) $usage['context'] : [];
+                            $ownerType = (string) ($context['owner_type'] ?? '');
+                            $ownerLabel = $ownerType === 'entry' ? lang('Forms.usage_entry') : lang('Forms.usage_page');
+                            $blockLabel = (string) ($context['block_name'] ?? $context['block_key'] ?? 'form_embed');
+                            $instanceId = (int) ($usage['resource_id'] ?? 0);
+                            $editUrl = (string) ($usage['edit_url'] ?? '');
+                        ?>
+                        <div class="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">
+                                            <?= esc($ownerLabel) ?>
+                                        </span>
+                                        <span class="text-sm font-semibold text-gray-900"><?= esc((string) ($usage['label'] ?? '')) ?></span>
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        <?= esc(lang('Forms.usage_block')) ?>: <?= esc($blockLabel) ?>
+                                        · <?= esc(lang('Forms.usage_instance')) ?> #<?= esc((string) $instanceId) ?>
+                                    </p>
+                                </div>
+
+                                <?php if ($editUrl !== ''): ?>
+                                    <a href="<?= esc($editUrl) ?>" class="inline-flex shrink-0 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-brand-600 transition hover:border-brand-200 hover:text-brand-700">
+                                        <?= ui_icon('pencil', 'h-3.5 w-3.5') ?>
+                                        <?= esc(lang('Forms.usage_edit')) ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
     </div>
     <?php $mainContent = ob_get_clean(); ?>
 
@@ -165,13 +224,19 @@
 
     <?php ob_start(); ?>
     <?php if (has_permission('cms.forms.write')): ?>
-        <form method="post" action="<?= route_to('admin.cms.forms.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($form['form_key'] ?? null), 'js') ?>', () => $el.submit())">
-            <?= csrf_field() ?>
-            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
-                <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                <?= esc(lang('App.delete')) ?>
-            </button>
-        </form>
+        <?php if (! $hasUsages): ?>
+            <form method="post" action="<?= route_to('admin.cms.forms.delete', $itemId) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($form['form_key'] ?? null), 'js') ?>', () => $el.submit())">
+                <?= csrf_field() ?>
+                <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center">
+                    <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                    <?= esc(lang('App.delete')) ?>
+                </button>
+            </form>
+        <?php else: ?>
+            <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <?= esc(lang('Forms.in_use_warning', [count($usages)])) ?>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
     <?php $dangerContent = ob_get_clean(); ?>
 

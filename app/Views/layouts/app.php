@@ -13,8 +13,8 @@
         <div class="flex-1 min-w-0">
             <?= $this->include('layouts/partials/navbar') ?>
             <main id="main-content" class="p-4 md:p-6">
-                <?= $this->include('layouts/partials/flash_messages') ?>
                 <?= $this->include('layouts/partials/toast_messages') ?>
+                <?= $this->include('layouts/partials/flash_messages') ?>
                 <?= $this->include($view) ?>
             </main>
         </div>
