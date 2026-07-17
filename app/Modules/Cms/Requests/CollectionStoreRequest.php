@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Modules\Cms\Support\TranslationRowNormalizer;
 use App\Support\Requests\BaseFormRequest;
 
 class CollectionStoreRequest extends BaseFormRequest
@@ -50,7 +51,6 @@ class CollectionStoreRequest extends BaseFormRequest
             'block_template' => 'permit_empty',
             'wizard_config' => 'permit_empty',
             'translations' => 'permit_empty',
-            'translations.*.slug' => 'required_with[translations]|string|min_length[1]|max_length[150]',
         ];
     }
 
@@ -59,35 +59,28 @@ class CollectionStoreRequest extends BaseFormRequest
      */
     protected function normalizeTranslations(): array
     {
-        $translations = [];
-        $rawTranslations = $this->postArray('translations');
+        return TranslationRowNormalizer::normalize(
+            $this->postArray('translations'),
+            static function (array $row): bool {
+                $slug = isset($row['slug']) ? trim((string) $row['slug'], " \t\n\r\0\x0B/") : '';
+                $name = isset($row['name']) ? trim((string) $row['name']) : '';
+                $description = isset($row['description']) ? trim((string) $row['description']) : '';
 
-        if ($rawTranslations === []) {
-            return [];
-        }
+                return $slug !== '' || $name !== '' || $description !== '';
+            },
+            static function (array $row): array {
+                $slug = isset($row['slug']) ? trim((string) $row['slug'], " \t\n\r\0\x0B/") : '';
+                $name = isset($row['name']) ? trim((string) $row['name']) : '';
+                $description = isset($row['description']) ? trim((string) $row['description']) : '';
 
-        foreach ($rawTranslations as $trans) {
-            if (! is_array($trans) || empty($trans['language_id'])) {
-                continue;
+                return [
+                    'language_id' => (int) ($row['language_id'] ?? 0),
+                    'slug' => $slug !== '' ? $slug : null,
+                    'name' => $name,
+                    'description' => $description !== '' ? $description : null,
+                ];
             }
-
-            $slug = isset($trans['slug']) ? trim((string) $trans['slug'], " \t\n\r\0\x0B/") : '';
-            $name = isset($trans['name']) ? trim((string) $trans['name']) : '';
-            $description = isset($trans['description']) ? trim((string) $trans['description']) : '';
-
-            if ($slug === '' && $name === '' && $description === '') {
-                continue;
-            }
-
-            $translations[] = [
-                'language_id' => (int) $trans['language_id'],
-                'slug' => $slug !== '' ? $slug : null,
-                'name' => $name,
-                'description' => $description !== '' ? $description : null,
-            ];
-        }
-
-        return $translations;
+        );
     }
 
     public function payload(): array

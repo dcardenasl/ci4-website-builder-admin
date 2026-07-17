@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Requests;
 
 use App\Modules\Cms\Support\CmsPresetCatalog;
+use App\Modules\Cms\Support\TranslationRowNormalizer;
 use App\Support\Requests\BaseFormRequest;
 
 class PageStoreRequest extends BaseFormRequest
@@ -71,38 +72,33 @@ class PageStoreRequest extends BaseFormRequest
      */
     protected function normalizeTranslations(): array
     {
-        $translations = [];
-        $rawTranslations = $this->request->getPost('translations');
+        return TranslationRowNormalizer::normalize(
+            $this->request->getPost('translations'),
+            static function (array $row): bool {
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
+                $title = isset($row['title']) ? trim((string) $row['title']) : '';
+                $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
+                $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
+                $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
 
-        if (! is_array($rawTranslations)) {
-            return $translations;
-        }
+                return $slug !== '' || $title !== '' || $excerpt !== '' || $metaTitle !== '' || $metaDescription !== '';
+            },
+            static function (array $row): array {
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
+                $title = isset($row['title']) ? trim((string) $row['title']) : '';
+                $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
+                $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
+                $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
 
-        foreach ($rawTranslations as $trans) {
-            if (! is_array($trans) || empty($trans['language_id'])) {
-                continue;
+                return [
+                    'language_id' => (int) ($row['language_id'] ?? 0),
+                    'slug' => $slug,
+                    'title' => $title,
+                    'excerpt' => $excerpt !== '' ? $excerpt : null,
+                    'meta_title' => $metaTitle !== '' ? $metaTitle : null,
+                    'meta_description' => $metaDescription !== '' ? $metaDescription : null,
+                ];
             }
-
-            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
-            $title = isset($trans['title']) ? trim((string) $trans['title']) : '';
-            $excerpt = isset($trans['excerpt']) ? trim((string) $trans['excerpt']) : '';
-            $metaTitle = isset($trans['meta_title']) ? trim((string) $trans['meta_title']) : '';
-            $metaDescription = isset($trans['meta_description']) ? trim((string) $trans['meta_description']) : '';
-
-            if ($slug === '' && $title === '' && $excerpt === '' && $metaTitle === '' && $metaDescription === '') {
-                continue;
-            }
-
-            $translations[] = [
-                'language_id' => (int) $trans['language_id'],
-                'slug' => $slug,
-                'title' => $title,
-                'excerpt' => $excerpt !== '' ? $excerpt : null,
-                'meta_title' => $metaTitle !== '' ? $metaTitle : null,
-                'meta_description' => $metaDescription !== '' ? $metaDescription : null,
-            ];
-        }
-
-        return $translations;
+        );
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Modules\Cms\Support\TranslationRowNormalizer;
 use App\Support\Requests\BaseFormRequest;
 
 class MenuItemStoreRequest extends BaseFormRequest
@@ -57,7 +58,7 @@ class MenuItemStoreRequest extends BaseFormRequest
             'css_class'     => $this->postString('css_class') ?: null,
             'sort_order'    => $this->postInt('sort_order'),
             'is_active'     => $this->postBool('is_active') ? '1' : '0',
-            'translations'  => []
+            'translations'  => [],
         ];
 
         if ($payload['link_type'] !== 'page') {
@@ -70,21 +71,25 @@ class MenuItemStoreRequest extends BaseFormRequest
             $payload['collection_id'] = null;
         }
 
-        // Format translations
-        $rawTranslations = $this->postArray('translations');
-        $translations = [];
-        foreach ($rawTranslations as $langId => $t) {
-            $label = isset($t['label']) ? trim((string)$t['label']) : '';
-            $customUrl = isset($t['custom_url']) ? trim((string)$t['custom_url']) : '';
+        $payload['translations'] = TranslationRowNormalizer::normalize(
+            $this->postArray('translations'),
+            static function (array $row): bool {
+                $label = isset($row['label']) ? trim((string) $row['label']) : '';
+                $customUrl = isset($row['custom_url']) ? trim((string) $row['custom_url']) : '';
 
-            $translations[] = [
-                'language_id' => (int) $langId,
-                'label'       => $label,
-                'custom_url'  => $payload['link_type'] === 'custom_url' ? $customUrl : null,
-            ];
-        }
+                return $label !== '' || $customUrl !== '';
+            },
+            function (array $row, int|string $languageId) use ($payload): array {
+                $label = isset($row['label']) ? trim((string) $row['label']) : '';
+                $customUrl = isset($row['custom_url']) ? trim((string) $row['custom_url']) : '';
 
-        $payload['translations'] = $translations;
+                return [
+                    'language_id' => (int) $languageId,
+                    'label'       => $label,
+                    'custom_url'  => $payload['link_type'] === 'custom_url' ? ($customUrl !== '' ? $customUrl : null) : null,
+                ];
+            }
+        );
 
         return $payload;
     }

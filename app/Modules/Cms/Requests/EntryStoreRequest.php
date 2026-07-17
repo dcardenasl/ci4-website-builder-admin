@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Modules\Cms\Support\TranslationRowNormalizer;
 use App\Support\Requests\BaseFormRequest;
 
 class EntryStoreRequest extends BaseFormRequest
@@ -50,43 +51,46 @@ class EntryStoreRequest extends BaseFormRequest
      */
     protected function normalizeTranslations(): array
     {
-        $translations = [];
-        $rawTranslations = $this->request->getPost('translations');
+        return TranslationRowNormalizer::normalize(
+            $this->request->getPost('translations'),
+            static function (array $row): bool {
+                $title = isset($row['title']) ? trim((string) $row['title']) : '';
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
+                $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
+                $featuredFileId = isset($row['featured_file_id']) && $row['featured_file_id'] !== '' ? (int) $row['featured_file_id'] : null;
+                $featuredImageUrl = isset($row['featured_image_url']) ? trim((string) $row['featured_image_url']) : '';
+                $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
+                $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
 
-        if (! is_array($rawTranslations)) {
-            return [];
-        }
+                return $title !== ''
+                    || $slug !== ''
+                    || $excerpt !== ''
+                    || $featuredFileId !== null
+                    || $featuredImageUrl !== ''
+                    || $metaTitle !== ''
+                    || $metaDescription !== '';
+            },
+            static function (array $row): array {
+                $title = isset($row['title']) ? trim((string) $row['title']) : '';
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
+                $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
+                $featuredFileId = isset($row['featured_file_id']) && $row['featured_file_id'] !== '' ? (int) $row['featured_file_id'] : null;
+                $featuredImageUrl = isset($row['featured_image_url']) ? trim((string) $row['featured_image_url']) : '';
+                $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
+                $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
 
-        foreach ($rawTranslations as $trans) {
-            if (! is_array($trans) || empty($trans['language_id'])) {
-                continue;
+                return [
+                    'language_id' => (int) ($row['language_id'] ?? 0),
+                    'slug' => $slug,
+                    'title' => $title,
+                    'excerpt' => $excerpt !== '' ? $excerpt : null,
+                    'featured_file_id' => $featuredFileId,
+                    'featured_image_url' => $featuredImageUrl !== '' ? $featuredImageUrl : null,
+                    'meta_title' => $metaTitle !== '' ? $metaTitle : null,
+                    'meta_description' => $metaDescription !== '' ? $metaDescription : null,
+                ];
             }
-
-            $title = isset($trans['title']) ? trim((string) $trans['title']) : '';
-            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
-            $excerpt = isset($trans['excerpt']) ? trim((string) $trans['excerpt']) : '';
-            $featuredFileId = isset($trans['featured_file_id']) && $trans['featured_file_id'] !== '' ? (int) $trans['featured_file_id'] : null;
-            $featuredImageUrl = isset($trans['featured_image_url']) ? trim((string) $trans['featured_image_url']) : '';
-            $metaTitle = isset($trans['meta_title']) ? trim((string) $trans['meta_title']) : '';
-            $metaDescription = isset($trans['meta_description']) ? trim((string) $trans['meta_description']) : '';
-
-            if ($title === '' && $slug === '' && $excerpt === '' && $featuredFileId === null && $featuredImageUrl === '' && $metaTitle === '' && $metaDescription === '') {
-                continue;
-            }
-
-            $translations[] = [
-                'language_id' => (int) $trans['language_id'],
-                'slug' => $slug,
-                'title' => $title,
-                'excerpt' => $excerpt !== '' ? $excerpt : null,
-                'featured_file_id' => $featuredFileId,
-                'featured_image_url' => $featuredImageUrl !== '' ? $featuredImageUrl : null,
-                'meta_title' => $metaTitle !== '' ? $metaTitle : null,
-                'meta_description' => $metaDescription !== '' ? $metaDescription : null,
-            ];
-        }
-
-        return $translations;
+        );
     }
 
     public function payload(): array

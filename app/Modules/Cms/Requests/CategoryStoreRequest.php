@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Cms\Requests;
 
+use App\Modules\Cms\Support\TranslationRowNormalizer;
 use App\Support\Requests\BaseFormRequest;
 
 class CategoryStoreRequest extends BaseFormRequest
@@ -28,33 +29,25 @@ class CategoryStoreRequest extends BaseFormRequest
      */
     protected function normalizeTranslations(): array
     {
-        $translations = [];
-        $rawTranslations = $this->request->getPost('translations');
+        return TranslationRowNormalizer::normalize(
+            $this->request->getPost('translations'),
+            static function (array $row): bool {
+                $name = isset($row['name']) ? trim((string) $row['name']) : '';
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
 
-        if (! is_array($rawTranslations)) {
-            return [];
-        }
+                return $name !== '' || $slug !== '';
+            },
+            static function (array $row): array {
+                $name = isset($row['name']) ? trim((string) $row['name']) : '';
+                $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
 
-        foreach ($rawTranslations as $trans) {
-            if (! is_array($trans) || empty($trans['language_id'])) {
-                continue;
+                return [
+                    'language_id' => (int) ($row['language_id'] ?? 0),
+                    'name' => $name,
+                    'slug' => $slug,
+                ];
             }
-
-            $name = isset($trans['name']) ? trim((string) $trans['name']) : '';
-            $slug = isset($trans['slug']) ? trim((string) $trans['slug']) : '';
-
-            if ($name === '' && $slug === '') {
-                continue;
-            }
-
-            $translations[] = [
-                'language_id' => (int) $trans['language_id'],
-                'name' => $name,
-                'slug' => $slug,
-            ];
-        }
-
-        return $translations;
+        );
     }
 
     public function payload(): array
