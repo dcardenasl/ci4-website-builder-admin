@@ -134,6 +134,90 @@ final class FormFlowTest extends CIUnitTestCase
         $result->assertSee('Your Email');
     }
 
+    public function testShowRendersLinkedUsagesAndOpenEditorLink(): void
+    {
+        $formMock = $this->createMock(FormApiService::class);
+        $formMock->method('get')
+            ->with('123')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 123,
+                    'form_key' => 'gdpr_rights',
+                    'is_active' => true,
+                    'has_captcha' => false,
+                    'notify_email' => null,
+                    'autoreply_enabled' => false,
+                    'autoreply_email_field' => null,
+                    'created_at' => '2026-06-25 00:00:00',
+                    'translations' => [
+                        [
+                            'language_id' => 1,
+                            'name' => 'GDPR Rights',
+                            'submit_label' => 'Submit',
+                            'description' => null,
+                            'success_message' => 'Thanks!',
+                            'error_message' => 'Error!'
+                        ]
+                    ],
+                    'fields' => [],
+                    'usages' => [
+                        [
+                            'resource' => 'block_instances',
+                            'resource_id' => 14,
+                            'role' => 'page',
+                            'label' => 'Contacto',
+                            'context' => [
+                                'owner_type' => 'page',
+                                'owner_id' => 11,
+                                'block_key' => 'form_embed',
+                                'block_name' => 'Formulario Embebido',
+                            ],
+                            'edit_url' => 'http://localhost:8182/admin/cms/pages/11/blocks/14/edit',
+                        ],
+                    ],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => []
+            ]);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'items' => [
+                        ['id' => 1, 'code' => 'es', 'name' => 'Spanish', 'is_active' => true]
+                    ]
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => []
+            ]);
+
+        Services::injectMock('formApiService', $formMock);
+        Services::injectMock('languageApiService', $langMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.forms.read']],
+            'permissions_refreshed_at' => time(),
+        ])->get('/admin/cms/forms/123');
+
+        $result->assertStatus(200);
+        $result->assertSee(lang('Forms.usages_title'));
+        $result->assertSee(lang('Forms.usage_page'));
+        $result->assertSee('Contacto');
+        $result->assertSee(lang('Forms.usage_edit'));
+        $result->assertSee('http://localhost:8182/admin/cms/pages/11/blocks/14/edit');
+        $result->assertDontSee('/admin/cms/forms/123/delete');
+    }
+
     public function testShowFormNotFoundRendersError(): void
     {
         $formMock = $this->createMock(FormApiService::class);

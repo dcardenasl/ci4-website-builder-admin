@@ -7,11 +7,12 @@ namespace Tests\Unit\Views\Cms;
 use CodeIgniter\Test\CIUnitTestCase;
 
 /**
- * The `image` block's `image` field resolves server-side to `image_file_id` +
- * `image_url` (the same file-field convention `hero_banner`'s preview already
- * follows) — the fallback preview used to read the wrong key (`url`) and
- * silently always fell back to the placeholder. See H-010,
- * ../../../../docs/audits/2026-07-10-auditoria-profunda-robustez.md.
+ * The `image` block's `image` field is `config_fields.image` of type
+ * `media_reference`, resolved server-side into the canonical nested shape
+ * `{source_kind, file_id, url}` (see
+ * BlockInstanceSerializer::mergeMediaReferenceField() in
+ * ci4-website-builder-domain). This previously asserted the pre-migration
+ * flat `data.image_url` key — updated to match the current contract.
  *
  * @internal
  */
@@ -20,9 +21,14 @@ final class ImagePreviewTest extends CIUnitTestCase
     public function testPreviewRendersTheResolvedImageUrlNotAPlaceholder(): void
     {
         $html = view('cms/block_types/previews/image', [
-            'config' => [],
+            'config' => [
+                'image' => [
+                    'source_kind' => 'external_url',
+                    'file_id' => null,
+                    'url' => 'https://cdn.example.com/photos/real-photo.jpg',
+                ],
+            ],
             'data' => [
-                'image_url' => 'https://cdn.example.com/photos/real-photo.jpg',
                 'alt' => 'A real photo',
                 'caption' => 'A real caption',
             ],

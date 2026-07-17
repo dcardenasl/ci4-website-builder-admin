@@ -50,6 +50,9 @@ final class MetricsApiServiceTest extends CIUnitTestCase
     {
         $mock = $this->createMock(ApiClientInterface::class);
 
+        // ApiClient::request() stores the full decoded response envelope
+        // ({status, data, ...}) under $response['data'] — the actual
+        // payload is nested one level deeper, same as every other endpoint.
         $mock->expects($this->once())
             ->method('get')
             ->with('/metrics/timeseries', ['period' => '24h'])
@@ -57,10 +60,13 @@ final class MetricsApiServiceTest extends CIUnitTestCase
                 'ok' => true,
                 'status' => 200,
                 'data' => [
-                    'dates' => ['2026-01-01', '2026-01-02'],
-                    'requests' => [100, 200],
-                    'errors' => [2, 5],
-                    'latency' => [45, 50],
+                    'status' => 'success',
+                    'data' => [
+                        'dates' => ['2026-01-01', '2026-01-02'],
+                        'requests' => [100, 200],
+                        'errors' => [2, 5],
+                        'latency' => [45, 50],
+                    ],
                 ],
             ]);
 
@@ -68,10 +74,11 @@ final class MetricsApiServiceTest extends CIUnitTestCase
         $result = $service->timeseries(['period' => '24h']);
 
         $this->assertTrue($result['ok']);
-        $this->assertCount(2, $result['data']);
-        $this->assertSame('2026-01-01', $result['data'][0]['period']);
-        $this->assertSame(100, $result['data'][0]['value']);
-        $this->assertSame(2, $result['data'][0]['errors']);
-        $this->assertSame(45, $result['data'][0]['latency']);
+        $points = $result['data']['data'];
+        $this->assertCount(2, $points);
+        $this->assertSame('2026-01-01', $points[0]['period']);
+        $this->assertSame(100, $points[0]['value']);
+        $this->assertSame(2, $points[0]['errors']);
+        $this->assertSame(45, $points[0]['latency']);
     }
 }
