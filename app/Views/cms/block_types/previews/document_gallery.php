@@ -6,7 +6,7 @@ $documents = is_array($data['documents'] ?? null) ? $data['documents'] : [];
 if ($documents === []) {
     $documents = [
         [
-            'file_url' => 'https://example.com/files/manual.pdf',
+            'file' => ['source_kind' => 'external_url', 'file_id' => null, 'url' => site_url('assets/docs/policies-handbook-demo.pdf')],
             'title' => 'Documento de ejemplo',
             'description' => 'Previsualización local del bloque de documentos.',
         ],
@@ -26,7 +26,7 @@ $layout = (string) ($config['layout'] ?? 'grid_cards');
     <div class="<?= $layout === 'simple_list' ? 'space-y-2' : 'grid gap-3 sm:grid-cols-2' ?>">
         <?php foreach ($documents as $document): ?>
             <?php
-                $url = (string) ($document['file_url'] ?? ($document['file']['url'] ?? ''));
+                $url = (string) ($document['file']['url'] ?? '');
                 $ext = strtoupper((string) pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
                 $ext = $ext !== '' ? $ext : 'DOC';
             ?>

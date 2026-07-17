@@ -3,7 +3,7 @@
 /** @var array<string, mixed> $data */
 
 $pdfFile = is_array($config['pdf_file'] ?? null) ? $config['pdf_file'] : (is_array($data['pdf_file'] ?? null) ? $data['pdf_file'] : []);
-$pdfUrl = $pdfFile['url'] ?? ($data['pdf_file'] ?? '');
+$pdfUrl = $pdfFile['url'] ?? site_url('assets/docs/policies-handbook-demo.pdf');
 $heading = $data['heading'] ?? 'PDF de ejemplo';
 $height = $config['height'] ?? '600px';
 ?>

@@ -33,7 +33,7 @@ $columnClass = match ($columns) {
         <?php foreach ($videos as $video): ?>
             <?php
                 $poster = is_array($video['poster'] ?? null) ? $video['poster'] : [];
-                $posterUrl = $poster['url'] ?? ($video['poster_url'] ?? 'https://placehold.co/600x400/1f2937/ffffff?text=Video');
+                $posterUrl = $poster['url'] ?? 'https://placehold.co/600x400/1f2937/ffffff?text=Video';
             ?>
             <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                 <div class="aspect-video">
