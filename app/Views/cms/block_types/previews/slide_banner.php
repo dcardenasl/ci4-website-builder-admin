@@ -1,7 +1,7 @@
 <?php
 /** @var array<string, mixed> $config */
 /** @var array<string, mixed> $data */
-$image = is_array($data['image'] ?? null) ? $data['image'] : [];
+$image = is_array($config['image'] ?? null) ? $config['image'] : (is_array($data['image'] ?? null) ? $data['image'] : []);
 $imageUrl = $image['url'] ?? '';
 $heading = $data['heading'] ?? '';
 $subtitle = $data['subtitle'] ?? '';

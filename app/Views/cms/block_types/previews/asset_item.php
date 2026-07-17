@@ -1,7 +1,7 @@
 <?php
 /** @var array<string, mixed> $config */
 /** @var array<string, mixed> $data */
-$logo = is_array($data['logo'] ?? null) ? $data['logo'] : [];
+$logo = is_array($config['logo'] ?? null) ? $config['logo'] : (is_array($data['logo'] ?? null) ? $data['logo'] : []);
 $logoUrl = $logo['url'] ?? '';
 $name = $data['name'] ?? '';
 $linkUrl = $data['link_url'] ?? '';
