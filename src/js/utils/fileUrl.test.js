@@ -35,8 +35,9 @@ describe('media reference fields', () => {
 
         field.setSourceKind('hub_file');
         expect(field.sourceKind).toBe('hub_file');
-        expect(field.url).toBe('');
-        expect(field.previewUrl).toBe('');
+        expect(field.fileId).toBe('');
+        expect(field.url).toBe('https://example.com/external.jpg');
+        expect(field.previewUrl).toBe('https://example.com/external.jpg');
 
         field.applyReference({
             source_kind: 'hub_file',
@@ -55,6 +56,22 @@ describe('media reference fields', () => {
         expect(field.fileId).toBe('99');
         expect(field.url).toBe('/files/99/original.jpg');
         expect(field.previewUrl).toBe('/files/99/view');
+    });
+
+    it('keeps the visible URL and preview when switching from library to external URL', () => {
+        const field = mediaReferenceField({
+            source_kind: 'hub_file',
+            file_id: '42',
+            url: '/files/42/view',
+            preview_url: '/files/42/view',
+        });
+
+        field.setSourceKind('external_url');
+
+        expect(field.sourceKind).toBe('external_url');
+        expect(field.fileId).toBe('');
+        expect(field.url).toBe('/files/42/view');
+        expect(field.previewUrl).toBe('/files/42/view');
     });
 
     it('keeps a typed external URL cached after syncing the field', () => {

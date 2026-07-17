@@ -84,9 +84,12 @@ $payload = normalize_media_reference_value(
 
     <input type="hidden" name="<?= esc($name . '[source_kind]', 'attr') ?>" x-model="sourceKind">
     <input type="hidden" name="<?= esc($name . '[file_id]', 'attr') ?>" x-model="fileId">
-    <input :type="isExternalSource() ? 'url' : 'hidden'"
+    <input type="url"
            name="<?= esc($name . '[url]', 'attr') ?>"
            x-model="url"
+           x-show="isExternalSource()"
+           x-cloak
+           :disabled="!isExternalSource()"
            @input="syncExternalUrl()"
            placeholder="https://..."
            inputmode="url"
