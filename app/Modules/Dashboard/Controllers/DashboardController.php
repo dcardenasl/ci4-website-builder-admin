@@ -93,7 +93,11 @@ class DashboardController extends BaseWebController
             $stats['uptime'] = ['label' => lang('Dashboard.api_uptime'), 'value' => $uptime . '%', 'icon' => 'activity'];
         }
 
-        return $this->response->setBody(view('dashboard/partials/widget_stats', ['stats' => $stats]));
+        $devPanel = $this->renderDevApiErrorPanel($metricsResponse)
+            . $this->renderDevApiErrorPanel($filesResponse)
+            . ($isAdmin ? $this->renderDevApiErrorPanel($usersResponse) : '');
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_stats', ['stats' => $stats]));
     }
 
     public function widgetHealth(): ResponseInterface
@@ -130,7 +134,12 @@ class DashboardController extends BaseWebController
             $healthServices[] = ['name' => lang('Dashboard.service_web'), 'health' => $webHealth];
         }
 
-        return $this->response->setBody(view('dashboard/partials/widget_health', [
+        $devPanel = $this->renderDevApiErrorPanel($hubHealth)
+            . ($domainHealth !== null ? $this->renderDevApiErrorPanel($domainHealth) : '')
+            . ($bffHealth !== null ? $this->renderDevApiErrorPanel($bffHealth) : '')
+            . ($webHealth !== null ? $this->renderDevApiErrorPanel($webHealth) : '');
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_health', [
             'healthServices' => $healthServices,
         ]));
     }
@@ -149,7 +158,7 @@ class DashboardController extends BaseWebController
             }
         }
 
-        return $this->response->setBody(view('dashboard/partials/widget_recent_files', [
+        return $this->response->setBody($this->renderDevApiErrorPanel($filesResponse) . view('dashboard/partials/widget_recent_files', [
             'recentFiles' => $this->extractItems($filesResponse),
         ]));
     }
@@ -169,7 +178,7 @@ class DashboardController extends BaseWebController
         }
         $metrics = $this->extractData($metricsResponse);
 
-        return $this->response->setBody(view('dashboard/partials/widget_activity', [
+        return $this->response->setBody($this->renderDevApiErrorPanel($metricsResponse) . view('dashboard/partials/widget_activity', [
             'recent_activity' => $metrics['recent_activity'] ?? [],
         ]));
     }

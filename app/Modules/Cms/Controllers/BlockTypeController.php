@@ -58,6 +58,7 @@ class BlockTypeController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->blockTypeService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->render('cms/block_types/show', [
                 'title' => lang('BlockTypes.block_types_details'),
                 'blockType' => [],
@@ -106,6 +107,7 @@ class BlockTypeController extends BaseWebController
     {
         $templates = $this->blockTypeService->templates();
         $listResponse = $this->safeApiCall(fn () => $this->blockTypeService->list(['limit' => 100]));
+        $this->maybeFlashDevError($listResponse);
         $blockTypes = $listResponse['ok'] ? $this->extractItems($listResponse) : [];
 
         return $this->render('cms/block_types/create', [
@@ -140,11 +142,13 @@ class BlockTypeController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->blockTypeService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->withError(lang('BlockTypes.block_types_not_found'), route_to('admin.cms.block_types'));
         }
 
         $templates = $this->blockTypeService->templates();
         $listResponse = $this->safeApiCall(fn () => $this->blockTypeService->list(['limit' => 100]));
+        $this->maybeFlashDevError($listResponse);
         $blockTypes = $listResponse['ok'] ? $this->extractItems($listResponse) : [];
 
         return $this->render('cms/block_types/edit', [

@@ -47,6 +47,12 @@ class AnalyticsController extends BaseWebController
         $devicesResponse   = $this->safeApiCall(fn () => $this->analyticsService->devices($params));
         $timeseriesResponse = $this->safeApiCall(fn () => $this->analyticsService->timeseries($params));
 
+        $this->maybeFlashDevError($overviewResponse);
+        $this->maybeFlashDevError($pagesResponse);
+        $this->maybeFlashDevError($referrersResponse);
+        $this->maybeFlashDevError($devicesResponse);
+        $this->maybeFlashDevError($timeseriesResponse);
+
         $overview  = $this->extractData($overviewResponse);
         $pages     = $this->extractData($pagesResponse);
         $referrers = $this->extractData($referrersResponse);

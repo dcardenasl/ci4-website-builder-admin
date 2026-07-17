@@ -46,6 +46,7 @@ class TagController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->tagService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->render('cms/tags/show', [
                 'title' => lang('Tags.tags_details'),
                 'tag' => [],
@@ -103,6 +104,7 @@ class TagController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->tagService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->withError(lang('Tags.tags_not_found'), route_to('admin.cms.tags'));
         }
 
@@ -160,6 +162,8 @@ class TagController extends BaseWebController
     private function getLanguages(): array
     {
         $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $this->maybeFlashDevError($response);
+
         return $this->extractItems($response);
     }
 }

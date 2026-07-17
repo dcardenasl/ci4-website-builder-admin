@@ -41,10 +41,16 @@ class TranslationAuditController extends BaseWebController
 
         // Get overall stats
         $statsRes = $this->safeApiCall(fn () => $this->auditService->getStats());
+        if (! $statsRes['ok']) {
+            $this->maybeFlashDevError($statsRes);
+        }
         $stats = $statsRes['ok'] ? $this->extractData($statsRes) : [];
 
         // Get languages list for filter dropdown
         $langsRes = $this->safeApiCall(fn () => $this->languageService->list(['is_active' => 1]));
+        if (! $langsRes['ok']) {
+            $this->maybeFlashDevError($langsRes);
+        }
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
 
         return $this->render('cms/translations/index', [
@@ -76,12 +82,14 @@ class TranslationAuditController extends BaseWebController
         $draw    = is_scalar($drawRaw) ? (int) $drawRaw : 0;
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return $this->response->setJSON([
                 'draw' => $draw,
                 'recordsTotal' => 0,
                 'recordsFiltered' => 0,
                 'data' => [],
-                'error' => $this->firstMessage($response, 'Failed to load audit data')
+                'error' => $this->firstMessage($response, lang('App.loadRetry'))
             ]);
         }
 

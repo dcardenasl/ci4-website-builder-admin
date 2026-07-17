@@ -47,6 +47,7 @@ class CategoryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->categoryService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->render('cms/categories/show', [
                 'title' => lang('Categories.categories_details'),
                 'category' => [],
@@ -108,6 +109,7 @@ class CategoryController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->categoryService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->withError(lang('Categories.categories_not_found'), route_to('admin.cms.categories'));
         }
 
@@ -189,6 +191,7 @@ class CategoryController extends BaseWebController
         }
 
         $response = $this->safeApiCall(fn () => $this->categoryService->list(['limit' => 250, 'sort' => 'sort_order']));
+        $this->maybeFlashDevError($response);
         $items = $this->extractItems($response);
 
         return $this->render('cms/categories/reorder', [
@@ -247,6 +250,7 @@ class CategoryController extends BaseWebController
     private function collectionsOptions(): array
     {
         $response = $this->safeApiCall(fn () => $this->categoryService->collections(['limit' => 100, 'is_active' => true]));
+        $this->maybeFlashDevError($response);
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {
@@ -264,6 +268,7 @@ class CategoryController extends BaseWebController
     private function categoriesOptions(?string $excludeId = null): array
     {
         $response = $this->safeApiCall(fn () => $this->categoryService->categories(['limit' => 100]));
+        $this->maybeFlashDevError($response);
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {
@@ -294,6 +299,7 @@ class CategoryController extends BaseWebController
     private function getLanguages(): array
     {
         $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $this->maybeFlashDevError($response);
         return $this->extractItems($response);
     }
 }

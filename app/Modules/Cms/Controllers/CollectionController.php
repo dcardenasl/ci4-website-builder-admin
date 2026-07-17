@@ -47,6 +47,7 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->render('cms/collections/show', [
                 'title' => lang('Collections.collections_details'),
                 'collection' => [],
@@ -68,6 +69,8 @@ class CollectionController extends BaseWebController
     private function getLanguages(): array
     {
         $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $this->maybeFlashDevError($response);
+
         return $this->extractItems($response);
     }
 
@@ -113,6 +116,7 @@ class CollectionController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->collectionService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
         }
 
@@ -139,6 +143,7 @@ class CollectionController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->collectionService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
         }
 
@@ -163,6 +168,7 @@ class CollectionController extends BaseWebController
 
         $currentResponse = $this->safeApiCall(fn () => $this->collectionService->get($id));
         if (! $currentResponse['ok']) {
+            $this->maybeFlashDevError($currentResponse);
             return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
         }
 
@@ -185,6 +191,7 @@ class CollectionController extends BaseWebController
     {
         $currentResponse = $this->safeApiCall(fn () => $this->collectionService->get($id));
         if (! $currentResponse['ok']) {
+            $this->maybeFlashDevError($currentResponse);
             return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
         }
 
@@ -230,6 +237,7 @@ class CollectionController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->collectionService->delete($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
             $message = $this->firstMessage($response, lang('Collections.collections_delete_failed'));
             return $this->withError($message, route_to('admin.cms.collections'));
         }
