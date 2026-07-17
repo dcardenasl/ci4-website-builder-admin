@@ -55,6 +55,8 @@ class EntryController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->entryService->get($id));
 
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return $this->render('cms/entries/show', [
                 'title' => lang('Entries.entries_details'),
                 'entry' => [],
@@ -75,6 +77,8 @@ class EntryController extends BaseWebController
             $colResponse = $this->safeApiCall(fn () => $this->collectionService->get((string) $collectionId));
             if ($colResponse['ok']) {
                 $collection = $this->extractData($colResponse);
+            } else {
+                $this->maybeFlashDevError($colResponse);
             }
         }
 
@@ -97,6 +101,8 @@ class EntryController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => service('blockInstanceApiService')->list($id, 'entry', ['sort' => 'sort_order']));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return [];
         }
 
@@ -172,6 +178,8 @@ class EntryController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->entryService->get($id));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return $this->withError(lang('Entries.entries_not_found'), route_to('admin.cms.entries'));
         }
 
@@ -214,6 +222,8 @@ class EntryController extends BaseWebController
 
         $response = $this->safeApiCall(fn () => $this->collectionService->get((string) $collectionId));
         if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+
             return null;
         }
 
@@ -266,6 +276,9 @@ class EntryController extends BaseWebController
 
         $collectionId = isset($entry['collection_id']) ? (int) $entry['collection_id'] : 0;
         $categories = $this->safeApiCall(fn () => $this->categoryService->list(['per_page' => 1000]));
+        if (! $categories['ok']) {
+            $this->maybeFlashDevError($categories);
+        }
         foreach ($this->extractItems($categories) as $category) {
             if (! is_array($category) || ! isset($category['id'])) {
                 continue;
@@ -277,6 +290,9 @@ class EntryController extends BaseWebController
         }
 
         $tags = $this->safeApiCall(fn () => $this->tagService->list(['per_page' => 1000]));
+        if (! $tags['ok']) {
+            $this->maybeFlashDevError($tags);
+        }
         foreach ($this->extractItems($tags) as $tag) {
             if (! is_array($tag) || ! isset($tag['id'])) {
                 continue;
@@ -390,6 +406,9 @@ class EntryController extends BaseWebController
         }
 
         $result = $this->safeApiCall(fn () => $this->entryService->checkSlug($slug, $languageId, $currentId));
+        if (! $result['ok']) {
+            $this->maybeFlashDevError($result);
+        }
         $data   = $this->extractData($result);
         return $this->response->setJSON(['available' => (bool) ($data['available'] ?? false)]);
     }
@@ -418,6 +437,9 @@ class EntryController extends BaseWebController
                     'collection_id' => (int) $collectionId,
                 ],
             ]));
+            if (! $response['ok']) {
+                $this->maybeFlashDevError($response);
+            }
             $items = $this->extractItems($response);
         }
 
@@ -501,6 +523,9 @@ class EntryController extends BaseWebController
     private function collectionsOptions(): array
     {
         $response = $this->safeApiCall(fn () => $this->entryService->collections(['limit' => 100, 'is_active' => true]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {
@@ -528,6 +553,9 @@ class EntryController extends BaseWebController
     private function getLanguages(): array
     {
         $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         return $this->extractItems($response);
     }
 }
