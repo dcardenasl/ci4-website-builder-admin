@@ -153,6 +153,28 @@ composer ci              # Full CI suite: tests + quality
 
 ## Core Architecture Patterns
 
+### Consistency Contract
+
+The admin must behave like one coherent product. When adding or changing a module:
+
+- Extend `BaseWebController` for feature controllers unless there is a very specific reason not to.
+- Route every failed API call through `failApi()` so development builds can expose the exact upstream payload in `devApiError`.
+- Route every failed form request through `validateRequest()` so validation errors use the same flash/field-error path as API failures.
+- Keep `app/Views/layouts/partials/flash_messages.php` as the canonical dev debug surface under the toast stack.
+- Localize the dev error panel itself through `app/Language/{locale}/App.php`; do not hardcode English labels in `dev_api_error_panel.php`.
+- For any form that posts `translations`, normalize and drop empty language rows before validation. Do not validate optional empty rows as if they were real content.
+- Keep validation messages localized in both `app/Language/es` and `app/Language/en`, including shared rules such as `required_with`.
+- When a module introduces a new error shape, update the shared helpers first and the module second. Avoid one-off error handling in individual controllers or views.
+- After changing validation, API response mapping, or flash behavior, verify the flow in `http://localhost:8182` with the real browser, not just in code.
+
+Reference implementations for this contract:
+
+- `App\Modules\Cms\Requests\PageStoreRequest`
+- `App\Modules\Cms\Requests\EntryStoreRequest`
+- `App\Modules\Cms\Requests\CategoryStoreRequest`
+- `App\Modules\Cms\Requests\MenuItemStoreRequest`
+- `App\Controllers\BaseWebController`
+
 ### ApiClient: Central HTTP Communication Layer
 
 The `app/Libraries/ApiClient.php` class is the heart of all API communication. It handles:
