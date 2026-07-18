@@ -44,7 +44,12 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
         <span><?= lang('SiteIdentity.cache_note') ?></span>
     </div>
 
-    <form method="post" action="<?= route_to('admin.cms.site_identity.update') ?>" class="space-y-6">
+    <form method="post"
+          action="<?= route_to('admin.cms.site_identity.update') ?>"
+          class="space-y-6"
+          x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }"
+          @submit.prevent="startSubmit()"
+          :aria-busy="submitting">
         <?= csrf_field() ?>
 
         <?php
@@ -76,6 +81,11 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
                         $key         = (string) ($setting['setting_key'] ?? '');
                         $inputType   = (string) ($setting['input_type'] ?? 'text');
                         $currentVal  = (string) ($setting['setting_value'] ?? '');
+                        if ($key === 'footer_menu_layout' && !in_array($currentVal, ['horizontal', 'vertical'], true)) {
+                            $currentVal = 'vertical';
+                        } elseif ($key === 'footer_legal_menu_layout' && !in_array($currentVal, ['horizontal', 'vertical'], true)) {
+                            $currentVal = 'horizontal';
+                        }
                         $isTrans     = cms_setting_is_translatable($setting);
                         $isReadonly  = !empty($setting['is_readonly']);
                         $label       = cms_setting_resolve_label($setting);
@@ -126,7 +136,17 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
                             $rawOptions = $setting['options_json'] ?? null;
                             $options    = [];
                             if (is_array($rawOptions)) {
+                                $rawOptions = isset($rawOptions['options']) && is_array($rawOptions['options'])
+                                    ? $rawOptions['options']
+                                    : $rawOptions;
                                 foreach ($rawOptions as $opt) {
+                                    if (is_string($opt)) {
+                                        $options[$opt] = $opt;
+                                        continue;
+                                    }
+                                    if (!is_array($opt)) {
+                                        continue;
+                                    }
                                     $options[(string) ($opt['value'] ?? '')] = (string) ($opt['label'] ?? '');
                                 }
                             }
@@ -286,10 +306,19 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= action_button_class('primary') ?>">
-                <?= lang('App.save') ?>
+            <button type="submit" :disabled="submitting" class="<?= action_button_class('primary') ?> disabled:cursor-not-allowed disabled:opacity-60">
+                <span x-show="!submitting"><?= lang('App.save') ?></span>
+                <span x-show="submitting" x-cloak class="inline-flex items-center gap-2">
+                    <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <?= esc(lang('Profile.saving_changes')) ?>
+                </span>
             </button>
         </div>
+
+        <?= view('components/form/submitting_overlay', ['message' => lang('Profile.saving_changes')]) ?>
 
     </form>
     <?php endif; ?>

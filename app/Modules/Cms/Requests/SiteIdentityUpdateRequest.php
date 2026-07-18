@@ -95,7 +95,13 @@ class SiteIdentityUpdateRequest extends BaseFormRequest
             return $this->buildFilePayload($key);
         }
 
-        $value = $this->postString("{$key}_value");
+        $field = "{$key}_value";
+        $postedValue = $this->request->getPost($field);
+        // Never convert an omitted metadata-driven control into an empty
+        // overwrite. Preserve the canonical value returned by the API.
+        $value = is_scalar($postedValue)
+            ? (string) $postedValue
+            : (string) ($setting['setting_value'] ?? '');
 
         $payload = ['setting_value' => $value];
 

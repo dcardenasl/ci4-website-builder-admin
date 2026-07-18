@@ -38,7 +38,15 @@ class SiteIdentityController extends BaseWebController
         }
         helper('cms_settings');
 
-        $response = $this->settingService->getByGroup('identity');
+        $response = $this->safeApiCall(fn () => $this->settingService->getByGroup('identity'));
+        if (! ($response['ok'] ?? false)) {
+            return $this->failApi(
+                $response,
+                lang('SiteIdentity.update_failed'),
+                route_to('admin.cms.site_identity'),
+                false
+            );
+        }
         $items    = $this->extractItems($response);
 
         $langsRes       = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
@@ -92,24 +100,88 @@ class SiteIdentityController extends BaseWebController
         }
 
         $payloads = $formRequest->payload();
-        $failed   = false;
+        $batchUpdates = [];
 
         foreach ($payloads as $settingKey => $updateData) {
             if (!isset($idMap[$settingKey])) {
                 continue;
             }
 
-            $result = $this->settingService->update($idMap[$settingKey], $updateData);
-            if (! ($result['ok'] ?? false)) {
-                $failed = true;
+            // The form contains every identity field, but an update must be
+            // sent only when that field actually changed. Apart from reducing
+            // load, this prevents an unrelated stale Domain API request from
+            // blocking the whole save operation.
+            $currentSetting = $this->findSettingByKey($items, (string) $settingKey);
+            if ($currentSetting !== null && $this->settingPayloadIsUnchanged($currentSetting, $updateData)) {
+                continue;
+            }
+
+            $batchUpdates[] = ['id' => $idMap[$settingKey], 'payload' => $updateData];
+        }
+
+        $result = $batchUpdates === []
+            ? ['ok' => true]
+            : $this->safeApiCall(fn () => $this->settingService->batchUpdate($batchUpdates));
+        if (! ($result['ok'] ?? false)) {
+            $this->maybeFlashDevError($result);
+            return redirect()->to(route_to('admin.cms.site_identity') . '?saved=error')
+                ->with('error', $this->firstMessage($result, lang('SiteIdentity.update_failed')));
+        }
+
+        return redirect()->to(route_to('admin.cms.site_identity') . '?saved=success')
+            ->with('success', lang('SiteIdentity.update_success'));
+    }
+
+    /** @param array<int, mixed> $items */
+    private function findSettingByKey(array $items, string $settingKey): ?array
+    {
+        foreach ($items as $item) {
+            if (is_array($item) && (string) ($item['setting_key'] ?? '') === $settingKey) {
+                return $item;
             }
         }
 
-        if ($failed) {
-            return redirect()->to(route_to('admin.cms.site_identity'))->with('error', lang('SiteIdentity.update_failed'));
+        return null;
+    }
+
+    /** @param array<string, mixed> $setting @param array<string, mixed> $payload */
+    private function settingPayloadIsUnchanged(array $setting, array $payload): bool
+    {
+        // Translation writes are intentionally left to the API because their
+        // persisted values are separate records and are not always included
+        // in the group response in the same shape.
+        if (isset($payload['translations'])) {
+            return false;
         }
 
-        return redirect()->to(route_to('admin.cms.site_identity'))->with('success', lang('SiteIdentity.update_success'));
+        if ((string) ($setting['setting_value'] ?? '') !== (string) ($payload['setting_value'] ?? '')) {
+            return false;
+        }
+
+        if (!array_key_exists('setting_meta', $payload)) {
+            return true;
+        }
+
+        return $this->normalizeSettingMeta($setting['setting_meta'] ?? null)
+            === $this->normalizeSettingMeta($payload['setting_meta']);
+    }
+
+    /** @return array<string, string> */
+    private function normalizeSettingMeta(mixed $meta): array
+    {
+        if (is_string($meta)) {
+            $decoded = json_decode($meta, true);
+            $meta = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($meta)) {
+            return [];
+        }
+
+        return [
+            'url' => trim((string) ($meta['url'] ?? '')),
+            'mime_type' => trim((string) ($meta['mime_type'] ?? '')),
+        ];
     }
 
     /**
