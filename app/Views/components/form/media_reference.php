@@ -5,8 +5,6 @@
  * Variables:
  *   $name         - base input name, e.g. block_config[image]
  *   $value        - array with source_kind, file_id, url
- *   $legacyFileId - legacy flat file id fallback
- *   $legacyUrl    - legacy flat url fallback
  *   $label        - visible label
  *   $help         - optional help text
  *   $required     - whether the field is required
@@ -26,11 +24,7 @@ $accept = (string) ($accept ?? 'image');
 $fieldKey = trim((string) ($fieldKey ?? ''));
 $copyEnabled = (bool) ($copyEnabled ?? false);
 $previewClass = (string) ($previewClass ?? 'h-36 w-full rounded-xl border border-gray-200 object-cover');
-$payload = normalize_media_reference_value(
-    is_array($value ?? null) ? $value : [],
-    $legacyFileId ?? null,
-    $legacyUrl ?? null
-);
+$payload = normalize_media_reference_value(is_array($value ?? null) ? $value : []);
 ?>
 
 <div class="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"

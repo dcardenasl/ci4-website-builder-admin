@@ -18,22 +18,15 @@ declare(strict_types=1);
 
 if (! function_exists('block_text_content')) {
     /**
-     * Resolve rich text content from a block payload using the canonical field
-     * name first, then common legacy fallbacks.
+     * Resolve rich text content from the canonical block field.
      *
      * @param array<string, mixed> $data
      */
     function block_text_content(array $data, string $default = ''): string
     {
-        foreach (['content', 'body', 'html'] as $key) {
-            if (! array_key_exists($key, $data)) {
-                continue;
-            }
-
-            $value = $data[$key];
-            if (is_string($value) && trim($value) !== '') {
-                return $value;
-            }
+        $value = $data['content'] ?? null;
+        if (is_string($value) && trim($value) !== '') {
+            return $value;
         }
 
         return $default;

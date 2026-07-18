@@ -147,7 +147,7 @@
                         <?= $hasUsages
                             ? esc(lang('Forms.in_use_warning', [count($usages)]))
                             : esc(lang('Forms.usages_empty'))
-                        ?>
+?>
                     </p>
                 </div>
                 <?php if ($hasUsages): ?>
@@ -161,12 +161,12 @@
                 <div class="mt-4 space-y-3">
                     <?php foreach ($usages as $usage): ?>
                         <?php
-                            $context = is_array($usage['context'] ?? null) ? (array) $usage['context'] : [];
-                            $ownerType = (string) ($context['owner_type'] ?? '');
-                            $ownerLabel = $ownerType === 'entry' ? lang('Forms.usage_entry') : lang('Forms.usage_page');
-                            $blockLabel = (string) ($context['block_name'] ?? $context['block_key'] ?? 'form_embed');
-                            $instanceId = (int) ($usage['resource_id'] ?? 0);
-                            $editUrl = (string) ($usage['edit_url'] ?? '');
+    $context = is_array($usage['context'] ?? null) ? (array) $usage['context'] : [];
+                        $ownerType = (string) ($context['owner_type'] ?? '');
+                        $ownerLabel = $ownerType === 'entry' ? lang('Forms.usage_entry') : lang('Forms.usage_page');
+                        $blockLabel = (string) ($context['block_name'] ?? $context['block_key'] ?? 'form_embed');
+                        $instanceId = (int) ($usage['resource_id'] ?? 0);
+                        $editUrl = (string) ($usage['edit_url'] ?? '');
                         ?>
                         <div class="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

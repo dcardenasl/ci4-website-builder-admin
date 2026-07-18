@@ -27,8 +27,8 @@ $layout = (string) ($config['layout'] ?? 'grid_cards');
         <?php foreach ($documents as $document): ?>
             <?php
                 $url = (string) ($document['file']['url'] ?? '');
-                $ext = strtoupper((string) pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
-                $ext = $ext !== '' ? $ext : 'DOC';
+            $ext = strtoupper((string) pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+            $ext = $ext !== '' ? $ext : 'DOC';
             ?>
             <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div class="min-w-0">

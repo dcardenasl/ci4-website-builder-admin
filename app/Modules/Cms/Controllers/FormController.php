@@ -254,9 +254,6 @@ class FormController extends BaseWebController
         }, $usages));
     }
 
-    /**
-     * @param array<string, mixed> $context
-     */
     private function resolveUsageEditUrl(string $ownerType, int $ownerId, int $resourceId): ?string
     {
         if ($ownerType === 'page' && $ownerId > 0) {

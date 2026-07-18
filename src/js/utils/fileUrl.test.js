@@ -26,6 +26,14 @@ describe('media reference fields', () => {
         expect(translatableFileField('42', '').previewUrl).toBe('/files/42/view');
     });
 
+    it('owns its picker labels without relying on a parent Alpine scope', () => {
+        const emptyDocument = mediaReferenceField({}, 'document');
+        expect(emptyDocument.pickerButtonLabel()).toBe('Seleccionar documento');
+
+        const selectedDocument = mediaReferenceField({ source_kind: 'hub_file', file_id: 42 }, 'document');
+        expect(selectedDocument.pickerButtonLabel()).toBe('Cambiar documento');
+    });
+
     it('preserves cached external and hub references when toggling between sources', () => {
         const field = mediaReferenceField({
             source_kind: 'external_url',

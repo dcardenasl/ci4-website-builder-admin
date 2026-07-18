@@ -11,11 +11,12 @@ use CodeIgniter\Test\CIUnitTestCase;
  */
 final class FormHelperTest extends CIUnitTestCase
 {
-    public function testNormalizeMediaReferenceValueInfersExternalUrl(): void
+    public function testNormalizeMediaReferenceValueKeepsCanonicalExternalUrl(): void
     {
         helper('form');
 
         $value = normalize_media_reference_value([
+            'source_kind' => 'external_url',
             'url' => 'https://cdn.example.com/image.jpg',
         ]);
 
@@ -24,11 +25,15 @@ final class FormHelperTest extends CIUnitTestCase
         $this->assertSame('https://cdn.example.com/image.jpg', $value['url']);
     }
 
-    public function testNormalizeMediaReferenceValueKeepsLegacyFileIds(): void
+    public function testNormalizeMediaReferenceValueKeepsCanonicalHubFile(): void
     {
         helper('form');
 
-        $value = normalize_media_reference_value(null, '42', '/files/42/view');
+        $value = normalize_media_reference_value([
+            'source_kind' => 'hub_file',
+            'file_id' => 42,
+            'url' => '/files/42/view',
+        ]);
 
         $this->assertSame('hub_file', $value['source_kind']);
         $this->assertSame('42', $value['file_id']);

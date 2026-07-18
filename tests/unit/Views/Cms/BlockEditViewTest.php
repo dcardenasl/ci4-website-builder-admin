@@ -164,7 +164,7 @@ final class BlockEditViewTest extends CIUnitTestCase
         $this->assertStringContainsString('mediaReferenceField(', $html);
     }
 
-    public function testEditViewRendersLegacyImageFilesAsMediaReferenceFields(): void
+    public function testEditViewRendersCanonicalMediaReferenceFields(): void
     {
         $html = view('cms/pages/blocks/edit', [
             'page' => ['id' => 21, 'title' => 'Page 21'],
@@ -178,8 +178,11 @@ final class BlockEditViewTest extends CIUnitTestCase
                     [
                         'language_id' => 1,
                         'block_data' => [
-                            'cover_file_id' => '42',
-                            'cover_url' => '/files/42/view',
+                            'cover' => [
+                                'source_kind' => 'hub_file',
+                                'file_id' => 42,
+                                'url' => '/files/42/view',
+                            ],
                         ],
                     ],
                 ],
@@ -188,7 +191,7 @@ final class BlockEditViewTest extends CIUnitTestCase
                 'block_key' => 'hero',
                 'fields' => [
                     'cover' => [
-                        'type' => 'file',
+                        'type' => 'media_reference',
                         'label' => 'Cover',
                         'accept' => 'image',
                     ],
@@ -297,5 +300,48 @@ final class BlockEditViewTest extends CIUnitTestCase
 
         $this->assertStringNotContainsString('Traducir automáticamente', $html);
         $this->assertStringNotContainsString('autoTranslateAll(', $html);
+    }
+
+    public function testEditViewUsesMediaReferenceComponentPickerLabel(): void
+    {
+        $html = view('cms/pages/blocks/edit', [
+            'page' => ['id' => 21, 'title' => 'Page 21'],
+            'block' => [
+                'id' => 12,
+                'block_id' => 5,
+                'sort_order' => 1,
+                'is_active' => true,
+                'block_config' => [],
+                'translations' => [[
+                    'language_id' => 1,
+                    'block_data' => [
+                        'documents' => [[
+                            'file' => ['source_kind' => 'external_url', 'url' => 'https://example.com/demo.pdf'],
+                        ]],
+                    ],
+                ]],
+            ],
+            'blockType' => [
+                'block_key' => 'document_gallery',
+                'fields' => [
+                    'documents' => [
+                        'type' => 'repeater',
+                        'item_fields' => [
+                            'file' => ['type' => 'media_reference', 'accept' => 'document'],
+                        ],
+                    ],
+                ],
+                'config_fields' => [],
+            ],
+            'languages' => [['id' => 1, 'is_default' => true, 'code' => 'es']],
+            'defaultLangId' => 1,
+            'defaultLangCode' => 'es',
+            'ownerBlocksRoute' => 'admin.cms.pages.blocks',
+            'ownerUpdateRoute' => 'admin.cms.pages.blocks.update',
+        ]);
+
+        $this->assertStringContainsString('x-text="pickerButtonLabel()"', $html);
+        $this->assertStringNotContainsString('pickerSelectLabels', $html);
+        $this->assertStringNotContainsString('pickerChangeLabels', $html);
     }
 }

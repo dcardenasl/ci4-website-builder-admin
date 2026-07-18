@@ -22,12 +22,10 @@ if ($parentInstanceId !== null) {
         $allowedChildren = $parentSchema['allowed_children'] ?? [];
     }
 
-    if (!empty($allowedChildren)) {
-        $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => in_array($bt['block_key'], $allowedChildren, true)));
-    } else {
-        // Fallback for backward compatibility
-        $blockTypes = array_values(array_filter($blockTypes, static fn (array $bt) => $bt['block_key'] === 'slide_banner'));
-    }
+    $blockTypes = array_values(array_filter(
+        $blockTypes,
+        static fn (array $bt) => in_array($bt['block_key'], $allowedChildren, true)
+    ));
 } else {
     // When creating a top-level block, exclude child-only block types dynamically.
     // A block type is child-only if it is allowed as a child of some container,
@@ -676,7 +674,7 @@ $isImageAccept = static function (string $accept): bool {
                                                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                 </svg>
-                                                                <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
+                                                                <span x-text="pickerButtonLabel()"></span>
                                                             </button>
                                                             <button type="button"
                                                                     @click="clearReference()"
@@ -733,7 +731,7 @@ $isImageAccept = static function (string $accept): bool {
                                                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
                                                                         </svg>
-                                                                        <span x-text="fileId ? (pickerChangeLabels[accept] || 'Cambiar archivo') : (pickerSelectLabels[accept] || 'Seleccionar archivo')"></span>
+                                                                        <span x-text="pickerButtonLabel()"></span>
                                                                     </button>
                                                                 <button type="button"
                                                                         @click="clearReference()"
@@ -925,9 +923,6 @@ $isImageAccept = static function (string $accept): bool {
 </div>
 
 <script>
-const pickerSelectLabels = { image: 'Seleccionar imagen', video: 'Seleccionar video', document: 'Seleccionar documento', any: 'Seleccionar archivo' };
-const pickerChangeLabels = { image: 'Cambiar imagen',    video: 'Cambiar video',     document: 'Cambiar documento',     any: 'Cambiar archivo'   };
-
 const findRichTextEditorComponent = (input) => {
     const container = input instanceof HTMLElement ? input.closest('[x-data*="richTextEditor"]') : null;
     const component = container?._x_dataStack?.[0];
@@ -988,8 +983,6 @@ function blockInstanceBuilder(blockTypes, languages, entryOptionsUrl = '', trans
         // Repeater state: keyed by `${langId}_${fieldKey}`
         repeaterItems: {},
 
-        pickerSelectLabels,
-        pickerChangeLabels,
         // Picked file metadata keyed by `${langId}_${fieldKey}` (top-level file fields)
         pickedFilesMap: {},
 
