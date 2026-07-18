@@ -156,8 +156,11 @@ class ApiClient implements ApiClientInterface
             }
         }
 
-        // Retry up to 2 times on 5xx errors with exponential backoff (250ms, 500ms).
-        $maxRetries = 2;
+        // Reads can be retried safely. Do not retry writes: a slow or
+        // unavailable upstream must fail within the configured request
+        // timeout instead of multiplying latency and exceeding PHP's global
+        // max_execution_time while the user is saving a form.
+        $maxRetries = in_array($method, ['GET', 'HEAD'], true) ? 2 : 0;
         $attempt    = 0;
         do {
             if ($attempt > 0) {
