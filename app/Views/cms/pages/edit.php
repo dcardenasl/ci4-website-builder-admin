@@ -107,7 +107,7 @@ if (!empty($languages)) {
                     <?= view('components/form/select', [
                     'name' => 'page_type',
                     'label' => 'Pages.field_page_type',
-                    'required' => true,
+                    'required' => false,
                     'placeholder' => 'Pages.field_page_type_placeholder',
                     'help' => 'Pages.field_page_type_help',
                     'options' => array_column($pageTypes ?? [], 'label', 'key'),

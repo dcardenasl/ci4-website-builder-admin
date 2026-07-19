@@ -31,7 +31,7 @@ class PageStoreRequest extends BaseFormRequest
         $pageTypes = implode(',', CmsPresetCatalog::pageTypes());
 
         return [
-            'page_type' => 'required|in_list[' . $pageTypes . ']',
+            'page_type' => 'permit_empty|in_list[' . $pageTypes . ']',
             'collection_id' => 'permit_empty|integer',
             'status' => 'required|in_list[draft,published,archived]',
             'parent_id' => 'permit_empty',
