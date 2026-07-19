@@ -16,15 +16,7 @@
 
 ## 🟡 Próximo (ordenado por prioridad)
 
-- **[AUD-001] Revisar y cerrar los hallazgos de la auditoría de filtros/buscador del admin**
-  - Referencia: [`../docs/audits/2026-06-29-admin-filters-search-audit.md`](../docs/audits/2026-06-29-admin-filters-search-audit.md)
-  - Alcance:
-    - decidir si `data-table-filter` se elimina o se implementa como auto-submit real;
-    - unificar o justificar la duplicidad de categoría en `files` / `files/trash`;
-    - normalizar o documentar las excepciones (`analytics`, `metrics`, `form-submissions`, `translations/audit`, `admin/universal`).
-  - Criterio de cierre:
-    - cada excepción queda corregida o documentada;
-    - la próxima sesión arranca desde este ítem y no desde la nota de auditoría.
+*(vacío — AUD-001 cerrado, ver Completadas)*
 
 ---
 
@@ -333,6 +325,10 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 ---
 
 ## ✅ Completadas
+
+### [AUD-001] Cierre de la auditoría de filtros/buscador del admin (2026-07-18)
+
+Referencia: [`../docs/audits/2026-06-29-admin-filters-search-audit.md`](../docs/audits/2026-06-29-admin-filters-search-audit.md), §9 Closure. Las 3 correcciones de código de la auditoría original (§5, ya aplicadas el 2026-06-29) se re-verificaron intactas: `data-table-filter` sigue ausente de las vistas, `files`/`files/trash` mantienen la duplicidad resuelta vía `$showCategoryFilter ?? false`, y `components/table/filter_panel.php` sigue eliminado. De los ítems de `## 7. Pending Work`, 3 ya estaban superados por esas correcciones (no eran pendientes reales); los 2 genuinos se documentaron como desviaciones intencionales en vez de forzarlos al contrato compartido: `admin/universal` es infraestructura "Zero-Code Admin" deliberadamente sin entrada de menú (escape hatch por URL directa), y el selector custom `language_id` de `cms/translations/audit` es apropiado para una pantalla de un solo eje de filtro. Sin cambios de código — la auditoría queda cerrada por documentación.
 
 ### [DEEP-WIZ-01..05] Refactor profundo del Wizard CMS — contenido + estructura (2026-07-12)
 
