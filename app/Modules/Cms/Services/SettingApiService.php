@@ -22,7 +22,10 @@ class SettingApiService extends ResourceApiService
         return $this->apiClient->get($this->resourcePath(), ['filter[setting_group]' => $group, 'per_page' => 100]);
     }
 
-    /** @param list<array{id: int, payload: array<string, mixed>}> $updates */
+    /**
+     * @param list<array{id: int, payload: array<string, mixed>}> $updates
+     * @return ApiResponse
+     */
     public function batchUpdate(array $updates): array
     {
         return $this->apiClient->post($this->resourcePath() . '/batch', ['updates' => $updates]);

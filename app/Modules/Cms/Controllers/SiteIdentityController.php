@@ -132,7 +132,10 @@ class SiteIdentityController extends BaseWebController
             ->with('success', lang('SiteIdentity.update_success'));
     }
 
-    /** @param array<int, mixed> $items */
+    /**
+     * @param array<string, mixed> $items
+     * @return array<string, mixed>|null
+     */
     private function findSettingByKey(array $items, string $settingKey): ?array
     {
         foreach ($items as $item) {
@@ -144,7 +147,10 @@ class SiteIdentityController extends BaseWebController
         return null;
     }
 
-    /** @param array<string, mixed> $setting @param array<string, mixed> $payload */
+    /**
+     * @param array<string, mixed> $setting
+     * @param array<string, mixed> $payload
+     */
     private function settingPayloadIsUnchanged(array $setting, array $payload): bool
     {
         // Translation writes are intentionally left to the API because their
