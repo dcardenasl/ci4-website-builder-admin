@@ -308,7 +308,7 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                 'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '">' . esc(lang('Menus.items_save')) . '</button>'
                     . '<a href="' . esc(route_to('admin.cms.menus.show', $menuId), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('Menus.items_cancel')) . '</a>',
             ]) ?>
-            </aside>
+        </aside>
         </form>
     </section>
 
