@@ -69,7 +69,9 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->post('settings/(:segment)/delete', '\App\Modules\Cms\Controllers\SettingController::delete/$1', ['as' => 'admin.cms.settings.delete', 'filter' => 'permission:cms.settings.write']);
 
     // Translate proxy (DeepL)
-    $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate']);
+    // Translation calls are expensive (external provider); throttle this
+    // read explicitly while normal Admin GET requests remain unrestricted.
+    $routes->get('translate', '\App\Modules\Cms\Controllers\TranslateController::translate', ['as' => 'admin.cms.translate', 'filter' => 'ratelimit:300,60']);
 
     // Translation Auditing
     $routes->get('translations/audit', '\App\Modules\Cms\Controllers\TranslationAuditController::index', ['as' => 'admin.cms.translations.audit', 'filter' => 'permission:cms.languages.read']);

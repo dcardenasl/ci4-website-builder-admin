@@ -12,8 +12,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 /**
  * RateLimitFilter — per-user (or per-IP for guests) request throttle.
  *
- * Applied to all authenticated routes to prevent API abuse.
- * Defaults: 200 requests per 60 seconds per user.
+ * Applied to authenticated routes to protect state-changing operations.
+ * Safe reads are intentionally not throttled: a single Admin screen can make
+ * several legitimate data requests while loading.
  *
  * Override via route arguments:
  *   $routes->get('...', [...], ['filter' => 'ratelimit:100,30']);
@@ -29,6 +30,13 @@ class RateLimitFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null): ResponseInterface|null
     {
+        // Normal Admin navigation and data reads must not consume the write
+        // budget. Expensive reads can opt into ratelimit explicitly per route.
+        if (in_array(strtoupper($request->getMethod()), ['GET', 'HEAD', 'OPTIONS'], true)
+            && empty($arguments)) {
+            return null;
+        }
+
         [$max, $window] = $this->parseArguments($arguments);
 
         $key  = $this->resolveKey($request);
@@ -78,8 +86,11 @@ class RateLimitFilter implements FilterInterface
      */
     private function parseArguments(?array $arguments): array
     {
-        $max    = self::DEFAULT_MAX_REQUESTS;
-        $window = self::DEFAULT_WINDOW_SECONDS;
+        $max    = (int) env('ADMIN_RATE_LIMIT_REQUESTS', self::DEFAULT_MAX_REQUESTS);
+        $window = (int) env('ADMIN_RATE_LIMIT_WINDOW', self::DEFAULT_WINDOW_SECONDS);
+
+        $max    = max(1, $max);
+        $window = max(1, $window);
 
         if (isset($arguments[0]) && is_numeric($arguments[0])) {
             $max = max(1, (int) $arguments[0]);
