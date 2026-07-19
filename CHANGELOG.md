@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Block catalog templates and filtering** — `BlockCatalogService` now provides `templates()` and `selectableForEntries()` methods for retrieving block type templates and filtering selectable blocks (excluding container-only types)
 - **Site identity translation panel** — new `cms_settings_build_translation_panel()` helper and `translatable_settings_panel` component for managing multilingual site settings across active languages
 
+### Changed
+- **Global submit guard** — replaced the per-form `submitting_overlay` Alpine component (duplicated `x-data`/`@submit.prevent` boilerplate on every mutating form) with a single global submit guard in `app.js`; it disables page controls and shows a blocking overlay on any `POST`/`PUT`/`PATCH`/`DELETE` form submission or fetch/XHR call, including Alpine-driven async submits, without per-view wiring
+
 ### Fixed
 - **Improved API error debugging in development** — enhanced `BaseWebController` with `flashDevError()` and `renderDevApiErrorPanel()` methods for standardized error snapshot storage; the dev error panel (`dev_api_error_panel.php`) now displays normalized API failures with exact HTTP status, request body, field errors, and messages; accessible on read-only screens (dashboard, metrics, analytics) without requiring a form submission
 - **CMS validation consistency** — all CMS Request DTOs now normalize empty translation rows before validation, preventing spurious validation errors on optional blank language tabs; updated validation messages for consistency across store/update forms
