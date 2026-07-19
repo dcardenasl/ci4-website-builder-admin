@@ -10,6 +10,7 @@ use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -54,30 +55,26 @@ final class CollectionFlowTest extends CIUnitTestCase
 
     public function testEditRendersIdentityWithoutStructureEditor(): void
     {
+        $fixtures = new AdminFixtureFactory(self::class);
+        $languages = $fixtures->languages();
+        $collection = $fixtures->collection([
+            [
+                'language_id' => $languages[0]['id'],
+                'slug' => $fixtures->value('collection-slug', $languages[0]['code']),
+                'name' => $fixtures->value('collection-name', $languages[0]['code']),
+                'description' => null,
+            ],
+            [
+                'language_id' => $languages[1]['id'],
+                'slug' => $fixtures->value('collection-slug', $languages[1]['code']),
+                'name' => $fixtures->value('collection-name', $languages[1]['code']),
+                'description' => null,
+            ],
+        ]);
         $collectionMock = $this->createMock(CollectionApiService::class);
         $collectionMock->method('get')
-            ->with('10')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    'id' => 10,
-                    'collection_key' => 'news',
-                    'translations' => [
-                        [
-                            'language_id' => 1,
-                            'slug' => 'news',
-                            'name' => 'News',
-                            'description' => null,
-                        ],
-                        [
-                            'language_id' => 2,
-                            'slug' => 'news-en',
-                            'name' => 'News EN',
-                            'description' => null,
-                        ],
-                    ],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with((string) $collection['id'])
+            ->willReturn($fixtures->response(['id' => $collection['id'], 'collection_key' => $collection['collection_key'], 'translations' => $collection['translations']]));
         $collectionMock->method('checkSlug')
             ->willReturn([
                 'ok' => true, 'status' => 200, 'data' => ['available' => true],
@@ -87,20 +84,14 @@ final class CollectionFlowTest extends CIUnitTestCase
 
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    ['id' => 1, 'code' => 'es', 'is_default' => true],
-                    ['id' => 2, 'code' => 'en', 'is_default' => false],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
             'permissions_refreshed_at' => time(),
-        ])->get('/admin/cms/collections/10/edit');
+        ])->get('/admin/cms/collections/' . $collection['id'] . '/edit');
 
         $body = (string) $result->getBody();
         $result->assertStatus(200);
@@ -115,10 +106,10 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertLessThan($slugPos, $namePos);
         $this->assertLessThan($collectionKeyPos, $translationPos);
         $this->assertStringContainsString('data-slug-check-url="', $body);
-        $this->assertStringContainsString('data-slug-current-id="10"', $body);
-        $this->assertStringContainsString('name="current_id" value="10"', $body);
+        $this->assertStringContainsString('data-slug-current-id="' . $collection['id'] . '"', $body);
+        $this->assertStringContainsString('name="current_id" value="' . $collection['id'] . '"', $body);
         $this->assertStringContainsString('name="default_language_id"', $body);
-        $this->assertStringContainsString("langTabs(1, '/admin/cms/translate', 'es')", $body);
+        $this->assertStringContainsString("langTabs(" . $languages[0]['id'] . ", '/admin/cms/translate', '" . $languages[0]['code'] . "')", $body);
         $this->assertStringContainsString('autoTranslateAll([', $body);
         $this->assertStringNotContainsString('name="collection_type"', $body);
         $this->assertStringNotContainsString('name="block_template"', $body);

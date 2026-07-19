@@ -16,25 +16,35 @@ final class LanguageFlowTest extends CIUnitTestCase
 
     public function testSetLocalePersistsSupportedLocaleInSession(): void
     {
+        $supported = config('App')->supportedLocales;
+        $locale = $supported[0];
+
         $result = $this->withHeaders([
             'Referer' => site_url('login'),
             'X-CSRF-TOKEN' => csrf_hash(),
-        ])->post('/language/set', ['locale' => 'en']);
+        ])->post('/language/set', ['locale' => $locale]);
 
         $result->assertRedirect();
-        $result->assertSessionHas('locale', 'en');
+        $result->assertSessionHas('locale', $locale);
     }
 
     public function testUnsupportedLocaleDoesNotOverwriteSession(): void
     {
+        $supported = config('App')->supportedLocales;
+        $currentLocale = $supported[0];
+        $unsupportedLocale = 'fixture-unsupported-locale';
+        while (in_array($unsupportedLocale, $supported, true)) {
+            $unsupportedLocale .= '-next';
+        }
+
         $result = $this->withSession([
-            'locale' => 'es',
+            'locale' => $currentLocale,
         ])->withHeaders([
             'Referer' => site_url('login'),
             'X-CSRF-TOKEN' => csrf_hash(),
-        ])->post('/language/set', ['locale' => 'fr']);
+        ])->post('/language/set', ['locale' => $unsupportedLocale]);
 
         $result->assertRedirect();
-        $result->assertSessionHas('locale', 'es');
+        $result->assertSessionHas('locale', $currentLocale);
     }
 }

@@ -75,6 +75,11 @@
             "**/Database/Migrations/**"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Support\\": "tests/_support/"
+        }
+    },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
@@ -97,6 +102,9 @@
         "test:unit": "phpunit tests/unit --no-coverage",
         "test:feature": "phpunit tests/feature --no-coverage",
         "test:contract": "phpunit --testsuite=Contract --no-coverage",
+        "test:dynamic": "phpunit tests/unit tests/feature --no-coverage",
+        "test:seed-contracts": "phpunit --testsuite=Contract --no-coverage",
+        "test:fixture-policy": "php scripts/check-test-fixture-policy.php",
         "analyse": "vendor/bin/phpstan analyse --memory-limit=-1",
         "format:check": "vendor/bin/php-cs-fixer fix --dry-run --diff",
         "format": "vendor/bin/php-cs-fixer fix",
@@ -105,7 +113,8 @@
         "quality": [
             "@analyse",
             "@format:check",
-            "@i18n-check"
+            "@i18n-check",
+            "@test:fixture-policy"
         ],
         "ci": [
             "@test",
