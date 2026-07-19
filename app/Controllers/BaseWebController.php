@@ -575,6 +575,12 @@ abstract class BaseWebController extends BaseController
      *                        Donde fieldKey es usado para construir el selector CSS
      * @param int $defaultLangId ID del idioma por defecto
      * @param string $prefix Prefijo para los selectores CSS (default: 'translations')
+     * @param bool $keyByLanguageId Si es true, los selectores usan el `id` real del idioma como
+     *                              índice del array (`translations[{id}][campo]`) en vez de la
+     *                              posición dentro de $languages (`translations[{posicion}][campo]`).
+     *                              Usar true solo para formularios cuyos inputs están nombrados
+     *                              por language id (p. ej. menu items); el resto de módulos de
+     *                              contenido nombra sus inputs por posición y debe dejar el default.
      * @return array Array de targets compatible con Alpine.js autoTranslateAll()
      *
      * @example
@@ -594,6 +600,7 @@ abstract class BaseWebController extends BaseController
         array $fieldMap,
         int $defaultLangId,
         string $prefix = 'translations',
+        bool $keyByLanguageId = false,
     ): array {
         if (empty($fieldMap) || empty($languages)) {
             return [];
@@ -602,17 +609,22 @@ abstract class BaseWebController extends BaseController
         $targets = [];
         $defaultLangIndex = 0;
 
-        // Encontrar el índice del idioma por defecto
-        foreach ($languages as $idx => $lang) {
-            if ((int) ($lang['id'] ?? 0) === $defaultLangId) {
-                $defaultLangIndex = $idx;
-                break;
+        if ($keyByLanguageId) {
+            $defaultLangIndex = $defaultLangId;
+        } else {
+            // Encontrar el índice del idioma por defecto
+            foreach ($languages as $idx => $lang) {
+                if ((int) ($lang['id'] ?? 0) === $defaultLangId) {
+                    $defaultLangIndex = $idx;
+                    break;
+                }
             }
         }
 
         // Para cada idioma no-default, crear los field pairs
         foreach ($languages as $idx => $lang) {
-            if ($idx === $defaultLangIndex) {
+            $langKey = $keyByLanguageId ? (int) ($lang['id'] ?? 0) : $idx;
+            if ($langKey === $defaultLangIndex) {
                 continue;
             }
 
@@ -623,7 +635,7 @@ abstract class BaseWebController extends BaseController
             foreach ($fieldMap as $fieldName) {
                 $fieldPairs[] = [
                     'from' => sprintf('[name="%s[%d][%s]"]', $prefix, $defaultLangIndex, $fieldName),
-                    'to'   => sprintf('[name="%s[%d][%s]"]', $prefix, $idx, $fieldName),
+                    'to'   => sprintf('[name="%s[%d][%s]"]', $prefix, $langKey, $fieldName),
                 ];
             }
 

@@ -144,6 +144,15 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                                 </button>
                             <?php endforeach; ?>
                         </div>
+                        <?php if (!empty($translateTargets)): ?>
+                        <button type="button"
+                            @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
+                            :disabled="translating || translatingAll"
+                            class="mb-px inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 border border-brand-200 rounded px-3 py-1.5 bg-brand-50 hover:bg-brand-100 transition-colors disabled:opacity-50">
+                            <span x-show="!translatingAll"><?= ui_icon('languages', 'h-3.5 w-3.5') ?> <?= esc(lang('App.translate_all')) ?></span>
+                            <span x-show="translatingAll" x-cloak><?= ui_icon('loader', 'h-3.5 w-3.5 animate-spin') ?> <span x-text="translateAllProgress"></span></span>
+                        </button>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Translate error message -->
@@ -168,6 +177,10 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
                                 [
                                     'from' => 'input[name="translations[' . $defaultLangId . '][label]"]',
                                     'to' => 'input[name="translations[' . $langId . '][label]"]'
+                                ],
+                                [
+                                    'from' => 'input[name="translations[' . $defaultLangId . '][custom_url]"]',
+                                    'to' => 'input[name="translations[' . $langId . '][custom_url]"]'
                                 ]
                             ];
                             ?>

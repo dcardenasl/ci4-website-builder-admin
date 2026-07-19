@@ -193,6 +193,12 @@ class MenuController extends BaseWebController
         $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
         $items = $this->extractItems($itemsResponse);
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveLanguageContext($languages)['defaultLangId'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, ['label', 'custom_url'], $defaultLangId, 'translations', true)
+            : [];
+
         return $this->render('cms/menus/items/create', [
             'title'     => lang('Menus.menus_items_create') ?? 'Add Menu Item',
             'menuId'    => $menuId,
@@ -201,7 +207,8 @@ class MenuController extends BaseWebController
             'pages'     => $this->pagesOptions(),
             'entries'   => $this->entriesOptions(),
             'collections' => $this->collectionsOptions(),
-            'languages' => $this->getLanguages(),
+            'languages' => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
@@ -240,6 +247,12 @@ class MenuController extends BaseWebController
         $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
         $items = $this->extractItems($itemsResponse);
 
+        $languages = $this->getLanguages();
+        $defaultLangId = $this->resolveLanguageContext($languages)['defaultLangId'];
+        $translateTargets = ($defaultLangId > 0 && !empty($languages))
+            ? $this->buildTranslateTargets($languages, ['label', 'custom_url'], $defaultLangId, 'translations', true)
+            : [];
+
         return $this->render('cms/menus/items/edit', [
             'title'     => lang('Menus.menus_items_edit') ?? 'Edit Menu Item',
             'menuId'    => $menuId,
@@ -250,7 +263,8 @@ class MenuController extends BaseWebController
             'pages'     => $this->pagesOptions(),
             'entries'   => $this->entriesOptions(),
             'collections' => $this->collectionsOptions(),
-            'languages' => $this->getLanguages(),
+            'languages' => $languages,
+            'translateTargets' => $translateTargets,
         ]);
     }
 
