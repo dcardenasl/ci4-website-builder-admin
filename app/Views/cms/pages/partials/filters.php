@@ -37,9 +37,6 @@
             <option value="contact" <?= $selected_type === 'contact' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_contact')) ?></option>
             <option value="privacy" <?= $selected_type === 'privacy' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_privacy')) ?></option>
             <option value="terms" <?= $selected_type === 'terms' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_terms')) ?></option>
-            <option value="about" <?= $selected_type === 'about' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_about')) ?></option>
-            <option value="history" <?= $selected_type === 'history' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_history')) ?></option>
-            <option value="events" <?= $selected_type === 'events' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_events')) ?></option>
             <option value="404" <?= $selected_type === '404' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_404')) ?></option>
             <option value="500" <?= $selected_type === '500' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_500')) ?></option>
             <option value="maintenance" <?= $selected_type === 'maintenance' ? 'selected' : '' ?>><?= esc(lang('Pages.page_type_maintenance')) ?></option>

@@ -19,7 +19,7 @@ final class CmsPresetCatalog
      */
     public static function pageTypes(): array
     {
-        return ['home', 'generic', 'contact', 'privacy', 'terms', '404', '500', 'maintenance', 'about', 'history', 'events', 'components', 'media', 'collection_index', 'portfolio'];
+        return ['home', 'generic', 'contact', 'privacy', 'terms', '404', '500', 'maintenance', 'collection_index'];
     }
 
     /**
