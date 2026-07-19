@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Global submit guard** — replaced the per-form `submitting_overlay` Alpine component (duplicated `x-data`/`@submit.prevent` boilerplate on every mutating form) with a single global submit guard in `app.js`; it disables page controls and shows a blocking overlay on any `POST`/`PUT`/`PATCH`/`DELETE` form submission or fetch/XHR call, including Alpine-driven async submits, without per-view wiring
-- **CMS page types** — added `components`, `media`, and `portfolio` presets to `CmsPresetCatalog::pageTypes()`; `page_type` is no longer required on page create/update, so pages can be saved without picking a preset upfront
+- **CMS page types** — `CmsPresetCatalog::pageTypes()` and the pages index filter dropped the editorial `about`, `history`, and `events` presets in favor of the domain's narrowed `page_type` enum (those distinctions now live in page content and slug); the `page_type_*` language keys for the removed presets (plus `components`, `media`, `portfolio`) stay in `Pages.php` so existing pages seeded with those values before the domain migration still render a readable label instead of a blank string
 
 ### Fixed
 - **`RateLimitFilter`** — `GET`/`HEAD`/`OPTIONS` requests no longer consume the shared write-throttle budget, so normal Admin navigation and page loads (which fire several reads at once) can no longer trip the limit; thresholds are now configurable via `ADMIN_RATE_LIMIT_REQUESTS`/`ADMIN_RATE_LIMIT_WINDOW`, and the CMS translate route (external DeepL call) now opts into an explicit `ratelimit:300,60` since it is no longer covered by the default
