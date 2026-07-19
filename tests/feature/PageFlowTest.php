@@ -9,6 +9,7 @@ use App\Modules\Cms\Services\PageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -71,6 +72,8 @@ final class PageFlowTest extends CIUnitTestCase
 
     public function testCreateRendersPresetDrivenPageTypes(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $language = $fixtures->languages(1)[0];
         $pageMock = $this->createMock(PageApiService::class);
         $pageMock->method('pages')
             ->willReturn([
@@ -81,14 +84,9 @@ final class PageFlowTest extends CIUnitTestCase
 
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('defaultId')
-            ->willReturn(1);
+            ->willReturn($language['id']);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    ['id' => 1, 'code' => 'es', 'is_default' => true],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response([$language]));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([

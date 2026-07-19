@@ -121,15 +121,11 @@ final class CollectionFlowTest extends CIUnitTestCase
 
     public function testCreateRendersIdentityWithoutStructureEditor(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $languages = $fixtures->languages();
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    ['id' => 1, 'code' => 'es', 'is_default' => true],
-                    ['id' => 2, 'code' => 'en', 'is_default' => false],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([
@@ -145,7 +141,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringNotContainsString('name="collection_type"', $body);
         $this->assertStringContainsString('name="collection_key"', $body);
         $this->assertStringContainsString('name="default_language_id"', $body);
-        $this->assertStringContainsString("langTabs(1, '/admin/cms/translate', 'es')", $body);
+        $this->assertStringContainsString("langTabs(" . $languages[0]['id'] . ", '/admin/cms/translate', '" . $languages[0]['code'] . "')", $body);
         $this->assertStringContainsString('autoTranslateAll([', $body);
         $this->assertStringContainsString('data-auto-slug-source=', $body);
         $this->assertStringContainsString('translations[0][name]', $body);
@@ -247,20 +243,11 @@ final class CollectionFlowTest extends CIUnitTestCase
 
     public function testStructureWizardShowsCollectionTypeAndHidesLegacyLanguageFields(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $languages = $fixtures->languages();
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true,
-                'status' => 200,
-                'data' => [
-                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
-                    ['id' => 2, 'code' => 'en', 'label' => 'English', 'is_default' => false],
-                ],
-                'raw' => '',
-                'headers' => [],
-                'messages' => [],
-                'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([
@@ -287,19 +274,11 @@ final class CollectionFlowTest extends CIUnitTestCase
 
     public function testStructureWizardShowsDedicatedCollectionSuccessScreen(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $languages = $fixtures->languages(1);
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true,
-                'status' => 200,
-                'data' => [
-                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
-                ],
-                'raw' => '',
-                'headers' => [],
-                'messages' => [],
-                'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([

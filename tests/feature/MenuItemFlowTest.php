@@ -11,6 +11,7 @@ use App\Modules\Cms\Services\PageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -27,54 +28,43 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testCreateRendersEntryAndCollectionSelectors(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $menu = $fixtures->menu();
+        $page = ['id' => $fixtures->id('page'), 'translations' => [['title' => $fixtures->value('page-title')]]];
+        $entry = ['id' => $fixtures->id('entry'), 'title' => $fixtures->value('entry-title')];
+        $collection = $fixtures->collection([]);
+        $languages = $fixtures->languages();
+
         $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('get')
-            ->with('1')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'menu_key' => 'main'],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with((string) $menu['id'])
+            ->willReturn($fixtures->response($menu));
         $menuMock->method('listItems')
-            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === (string) $menu['id']))
+            ->willReturn($fixtures->response([]));
         Services::injectMock('menuApiService', $menuMock);
 
         $pageMock = $this->createMock(PageApiService::class);
         $pageMock->method('pages')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['items' => [['id' => 2, 'translations' => [['title' => 'Home']]]]],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response(['items' => [$page]]));
         Services::injectMock('pageApiService', $pageMock);
 
         $entryMock = $this->createMock(EntryApiService::class);
         $entryMock->method('list')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['items' => [['id' => 9, 'title' => 'Noticias destacadas']]],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response(['items' => [$entry]]));
         $entryMock->method('collections')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['items' => [['id' => 7, 'collection_key' => 'noticias']]],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response(['items' => [$collection]]));
         Services::injectMock('entryApiService', $entryMock);
 
         $langMock = $this->createMock(LanguageApiService::class);
         $langMock->method('list')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [['id' => 1, 'code' => 'es', 'name' => 'ES', 'is_default' => 1]],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $langMock);
 
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
-        ])->get('/admin/cms/menus/1/items/create');
+        ])->get('/admin/cms/menus/' . $menu['id'] . '/items/create');
 
         $result->assertStatus(200);
         $this->assertStringContainsString('name="entry_id"', (string) $result->getBody());
@@ -85,33 +75,37 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testUpdateAcceptsCollectionListingTarget(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $menu = $fixtures->menu();
+        $item = $fixtures->menuItem($menu['id'], 4);
+        $collection = $fixtures->collection([]);
+        $label = $fixtures->value('menu-label');
+        $language = $fixtures->languages(3)[0];
+
         $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->expects($this->once())
             ->method('updateItem')
-            ->with('2', $this->callback(static function (array $payload): bool {
-                return $payload['menu_id'] === 1
+            ->with((string) $item['id'], $this->callback(static function (array $payload) use ($menu, $collection, $label): bool {
+                return $payload['menu_id'] === $menu['id']
                     && $payload['link_type'] === 'collection_listing'
                     && $payload['page_id'] === null
                     && $payload['entry_id'] === null
-                    && $payload['collection_id'] === 7
+                    && $payload['collection_id'] === $collection['id']
                     && $payload['sort_order'] === 4
-                    && $payload['translations'][0]['label'] === 'Noticias';
+                    && $payload['translations'][0]['label'] === $label;
             }))
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['id' => 2],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response(['id' => $item['id']]));
         Services::injectMock('menuApiService', $menuMock);
 
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
-        ])->post('/admin/cms/menus/1/items/2', [
+        ])->post('/admin/cms/menus/' . $menu['id'] . '/items/' . $item['id'], [
             csrf_token() => csrf_hash(),
-            'menu_id' => '1',
+            'menu_id' => (string) $menu['id'],
             'parent_id' => '',
             'link_type' => 'collection_listing',
-            'collection_id' => '7',
+            'collection_id' => (string) $collection['id'],
             'link_target' => '_self',
             'icon' => '',
             'css_class' => '',
@@ -119,38 +113,37 @@ final class MenuItemFlowTest extends CIUnitTestCase
             'is_active' => '1',
             'translations' => [
                 1 => [
-                    'label' => 'Noticias',
+                    'label' => $label,
                 ],
             ],
         ]);
 
-        $result->assertRedirectTo(site_url('admin/cms/menus/1'));
+        $result->assertRedirectTo(site_url('admin/cms/menus/' . $menu['id']));
     }
 
     public function testReorderItemsRendersComponent(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $menu = $fixtures->menu();
+        $firstItem = $fixtures->menuItem($menu['id'], 1);
+        $secondItem = $fixtures->menuItem($menu['id'], 0);
+
         $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('get')
-            ->with('1')
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'menu_key' => 'main'],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with((string) $menu['id'])
+            ->willReturn($fixtures->response($menu));
         $menuMock->method('listItems')
-            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    ['id' => 1, 'menu_id' => 1, 'sort_order' => 1, 'label' => 'Item 1'],
-                    ['id' => 2, 'menu_id' => 1, 'sort_order' => 0, 'label' => 'Item 2'],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === (string) $menu['id']))
+            ->willReturn($fixtures->response([
+                $firstItem + ['label' => $fixtures->value('item-label', 'first')],
+                $secondItem + ['label' => $fixtures->value('item-label', 'second')],
+            ]));
         Services::injectMock('menuApiService', $menuMock);
 
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
-        ])->get('/admin/cms/menus/1/items/reorder');
+        ])->get('/admin/cms/menus/' . $menu['id'] . '/items/reorder');
 
         $result->assertStatus(200);
         $this->assertStringContainsString('Reordenar', (string) $result->getBody());
@@ -158,22 +151,24 @@ final class MenuItemFlowTest extends CIUnitTestCase
 
     public function testSaveItemsOrderUpdatesAndReturnsOk(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $menu = $fixtures->menu();
+        $firstItem = $fixtures->menuItem($menu['id'], 1);
+        $secondItem = $fixtures->menuItem($menu['id'], 0);
+
         $menuMock = $this->createMock(MenuApiService::class);
         $menuMock->method('listItems')
-            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === '1'))
-            ->willReturn([
-                'ok' => true, 'status' => 200, 'data' => [
-                    ['id' => 1, 'menu_id' => 1, 'sort_order' => 1, 'translations' => []],
-                    ['id' => 2, 'menu_id' => 1, 'sort_order' => 0, 'translations' => []],
-                ],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
+            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === (string) $menu['id']))
+            ->willReturn($fixtures->response([
+                $firstItem + ['translations' => []],
+                $secondItem + ['translations' => []],
+            ]));
         $menuMock->expects($this->exactly(2))
             ->method('updateItem')
-            ->willReturnCallback(static function (string $id, array $payload): array {
-                if ($id === '2') {
+            ->willReturnCallback(static function (string $id, array $payload) use ($secondItem, $firstItem): array {
+                if ($id === (string) $secondItem['id']) {
                     self::assertSame(0, $payload['sort_order']);
-                } elseif ($id === '1') {
+                } elseif ($id === (string) $firstItem['id']) {
                     self::assertSame(1, $payload['sort_order']);
                 }
                 return ['ok' => true];
@@ -189,10 +184,10 @@ final class MenuItemFlowTest extends CIUnitTestCase
             'Content-Type'     => 'application/json',
         ])->withBody(json_encode([
             'items' => [
-                ['id' => 2, 'sort_order' => 0],
-                ['id' => 1, 'sort_order' => 1],
+                ['id' => $secondItem['id'], 'sort_order' => 0],
+                ['id' => $firstItem['id'], 'sort_order' => 1],
             ],
-        ]))->post('/admin/cms/menus/1/items/reorder');
+        ]))->post('/admin/cms/menus/' . $menu['id'] . '/items/reorder');
 
         $result->assertStatus(200);
         $this->assertStringContainsString('"ok": true', (string) $result->getBody());

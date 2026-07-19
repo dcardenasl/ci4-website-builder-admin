@@ -9,6 +9,7 @@ use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -54,15 +55,22 @@ final class FormFlowTest extends CIUnitTestCase
 
     public function testShowRendersForAdmin(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $formId = $fixtures->id('form');
+        $language = $fixtures->languages(1)[0];
+        $formKey = $fixtures->value('form-key');
+        $formName = $fixtures->value('form-name');
+        $fieldId = $fixtures->id('field');
+        $fieldLabel = $fixtures->value('field-label');
         $formMock = $this->createMock(FormApiService::class);
         $formMock->method('get')
-            ->with('123')
+            ->with((string) $formId)
             ->willReturn([
                 'ok' => true,
                 'status' => 200,
                 'data' => [
-                    'id' => 123,
-                    'form_key' => 'contact_us',
+                    'id' => $formId,
+                    'form_key' => $formKey,
                     'is_active' => true,
                     'has_captcha' => false,
                     'notify_email' => 'admin@test.com',
@@ -71,8 +79,8 @@ final class FormFlowTest extends CIUnitTestCase
                     'created_at' => '2026-06-25 00:00:00',
                     'translations' => [
                         [
-                            'language_id' => 1,
-                            'name' => 'Contact Us Form',
+                            'language_id' => $language['id'],
+                            'name' => $formName,
                             'submit_label' => 'Submit',
                             'description' => 'Send us a message',
                             'success_message' => 'Thanks!',
@@ -81,14 +89,14 @@ final class FormFlowTest extends CIUnitTestCase
                     ],
                     'fields' => [
                         [
-                            'id' => 1,
+                            'id' => $fieldId,
                             'field_key' => 'email',
                             'field_type' => 'email',
                             'is_required' => true,
                             'translations' => [
                                 [
-                                    'language_id' => 1,
-                                    'label' => 'Your Email',
+                                    'language_id' => $language['id'],
+                                    'label' => $fieldLabel,
                                     'placeholder' => 'Enter your email',
                                     'help_text' => 'Must be valid'
                                 ]
@@ -107,11 +115,7 @@ final class FormFlowTest extends CIUnitTestCase
             ->willReturn([
                 'ok' => true,
                 'status' => 200,
-                'data' => [
-                    'items' => [
-                        ['id' => 1, 'code' => 'en', 'name' => 'English', 'is_active' => true]
-                    ]
-                ],
+                'data' => ['items' => [$language]],
                 'raw' => '',
                 'headers' => [],
                 'messages' => [],
@@ -125,26 +129,33 @@ final class FormFlowTest extends CIUnitTestCase
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.forms.read']],
             'permissions_refreshed_at' => time(),
-        ])->get('/admin/cms/forms/123');
+        ])->get('/admin/cms/forms/' . $formId);
 
         $result->assertStatus(200);
-        $result->assertSee('Contact Us Form');
-        $result->assertSee('contact_us');
+        $result->assertSee($formName);
+        $result->assertSee($formKey);
         $result->assertSee('admin@test.com');
-        $result->assertSee('Your Email');
+        $result->assertSee($fieldLabel);
     }
 
     public function testShowRendersLinkedUsagesAndOpenEditorLink(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $formId = $fixtures->id('form');
+        $language = $fixtures->languages(1)[0];
+        $formKey = $fixtures->value('form-key');
+        $usageLabel = $fixtures->value('usage-label');
+        $ownerId = $fixtures->id('owner-page');
+        $blockId = $fixtures->id('block');
         $formMock = $this->createMock(FormApiService::class);
         $formMock->method('get')
-            ->with('123')
+            ->with((string) $formId)
             ->willReturn([
                 'ok' => true,
                 'status' => 200,
                 'data' => [
-                    'id' => 123,
-                    'form_key' => 'gdpr_rights',
+                    'id' => $formId,
+                    'form_key' => $formKey,
                     'is_active' => true,
                     'has_captcha' => false,
                     'notify_email' => null,
@@ -153,8 +164,8 @@ final class FormFlowTest extends CIUnitTestCase
                     'created_at' => '2026-06-25 00:00:00',
                     'translations' => [
                         [
-                            'language_id' => 1,
-                            'name' => 'GDPR Rights',
+                            'language_id' => $language['id'],
+                            'name' => $fixtures->value('form-name'),
                             'submit_label' => 'Submit',
                             'description' => null,
                             'success_message' => 'Thanks!',
@@ -165,16 +176,16 @@ final class FormFlowTest extends CIUnitTestCase
                     'usages' => [
                         [
                             'resource' => 'block_instances',
-                            'resource_id' => 14,
+                            'resource_id' => $blockId,
                             'role' => 'page',
-                            'label' => 'Contacto',
+                            'label' => $usageLabel,
                             'context' => [
                                 'owner_type' => 'page',
-                                'owner_id' => 11,
+                                'owner_id' => $ownerId,
                                 'block_key' => 'form_embed',
                                 'block_name' => 'Formulario Embebido',
                             ],
-                            'edit_url' => 'http://localhost:8182/admin/cms/pages/11/blocks/14/edit',
+                            'edit_url' => 'http://localhost:8182/admin/cms/pages/' . $ownerId . '/blocks/' . $blockId . '/edit',
                         ],
                     ],
                 ],
@@ -190,9 +201,7 @@ final class FormFlowTest extends CIUnitTestCase
                 'ok' => true,
                 'status' => 200,
                 'data' => [
-                    'items' => [
-                        ['id' => 1, 'code' => 'es', 'name' => 'Spanish', 'is_active' => true]
-                    ]
+                    'items' => [$language]
                 ],
                 'raw' => '',
                 'headers' => [],
@@ -207,15 +216,15 @@ final class FormFlowTest extends CIUnitTestCase
             'access_token' => 'token',
             'user'         => ['permissions' => ['cms.forms.read']],
             'permissions_refreshed_at' => time(),
-        ])->get('/admin/cms/forms/123');
+        ])->get('/admin/cms/forms/' . $formId);
 
         $result->assertStatus(200);
         $result->assertSee(lang('Forms.usages_title'));
         $result->assertSee(lang('Forms.usage_page'));
-        $result->assertSee('Contacto');
+        $result->assertSee($usageLabel);
         $result->assertSee(lang('Forms.usage_edit'));
-        $result->assertSee('http://localhost:8182/admin/cms/pages/11/blocks/14/edit');
-        $result->assertDontSee('/admin/cms/forms/123/delete');
+        $result->assertSee('http://localhost:8182/admin/cms/pages/' . $ownerId . '/blocks/' . $blockId . '/edit');
+        $result->assertDontSee('/admin/cms/forms/' . $formId . '/delete');
     }
 
     public function testShowFormNotFoundRendersError(): void

@@ -8,6 +8,7 @@ use App\Modules\Cms\Services\MenuApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -52,6 +53,15 @@ final class MenuFlowTest extends CIUnitTestCase
 
     public function testDataInjectsMenuItemCounts(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $headerMenu = $fixtures->menu('header');
+        $footerMenu = $fixtures->menu('footer');
+        $headerItems = [
+            $fixtures->menuItem($headerMenu['id'], 1),
+            $fixtures->menuItem($headerMenu['id'], 2),
+        ];
+        $footerItems = [$fixtures->menuItem($footerMenu['id'])];
+
         $mock = $this->createMock(MenuApiService::class);
         $mock->method('list')
             ->willReturn([
@@ -60,11 +70,11 @@ final class MenuFlowTest extends CIUnitTestCase
                 'data' => [
                     'status' => 'success',
                     'data' => [
-                        ['id' => 1, 'menu_key' => 'main', 'location' => 'header', 'is_active' => true, 'created_at' => '2026-06-23 20:32:58'],
-                        ['id' => 2, 'menu_key' => 'footer', 'location' => 'footer', 'is_active' => true, 'created_at' => '2026-06-23 20:32:58'],
+                        $headerMenu,
+                        $footerMenu,
                     ],
                     'meta' => [
-                        'total' => 2,
+                        'total' => count([$headerMenu, $footerMenu]),
                         'per_page' => 25,
                         'page' => 1,
                         'last_page' => 1,
@@ -84,12 +94,11 @@ final class MenuFlowTest extends CIUnitTestCase
                 'data' => [
                     'status' => 'success',
                     'data' => [
-                        ['id' => 10, 'menu_id' => 1, 'sort_order' => 1],
-                        ['id' => 11, 'menu_id' => 1, 'sort_order' => 2],
-                        ['id' => 12, 'menu_id' => 2, 'sort_order' => 1],
+                        ...$headerItems,
+                        ...$footerItems,
                     ],
                     'meta' => [
-                        'total' => 3,
+                        'total' => count([...$headerItems, ...$footerItems]),
                         'page' => 1,
                         'per_page' => 100,
                     ],

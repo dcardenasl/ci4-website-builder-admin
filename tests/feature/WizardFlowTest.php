@@ -11,6 +11,7 @@ use App\Modules\Cms\Services\LanguageApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Tests\Support\Fixtures\AdminFixtureFactory;
 
 /**
  * @internal
@@ -101,20 +102,11 @@ final class WizardFlowTest extends CIUnitTestCase
 
     public function testStructureWizardIndexRendersForAdmin(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $languages = $fixtures->languages();
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->method('list')
-            ->willReturn([
-                'ok' => true,
-                'status' => 200,
-                'data' => [
-                    ['id' => 1, 'code' => 'es', 'label' => 'Español', 'is_default' => true],
-                    ['id' => 2, 'code' => 'en', 'label' => 'English', 'is_default' => false],
-                ],
-                'raw' => '',
-                'headers' => [],
-                'messages' => [],
-                'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $result = $this->withSession([
@@ -180,21 +172,12 @@ final class WizardFlowTest extends CIUnitTestCase
     public function testStructureWizardConfigExposesActiveLanguagesWithoutDefaultLanguageId(): void
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $languages = $fixtures->languages();
         $languageMock = $this->createMock(LanguageApiService::class);
         $languageMock->expects($this->once())
             ->method('list')
-            ->willReturn([
-                'ok' => true,
-                'status' => 200,
-                'data' => [
-                    ['id' => 1, 'code' => 'es', 'is_default' => true],
-                    ['id' => 2, 'code' => 'en', 'is_default' => false],
-                ],
-                'raw' => '',
-                'headers' => [],
-                'messages' => [],
-                'fieldErrors' => [],
-            ]);
+            ->willReturn($fixtures->response($languages));
         Services::injectMock('languageApiService', $languageMock);
 
         $controller = new StructureWizardController();
@@ -216,12 +199,16 @@ final class WizardFlowTest extends CIUnitTestCase
     public function testStructureWizardCreateCollectionAcceptsDynamicTypeWithoutPreset(): void
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $language = $fixtures->languages(1)[0];
+        $collectionType = $fixtures->value('collection-type');
+        $collectionKey = $fixtures->value('collection-key');
 
         $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
             ->method('create')
-            ->with($this->callback(static function (array $payload): bool {
-                return ($payload['collection_type'] ?? null) === 'case-studies'
+            ->with($this->callback(static function (array $payload) use ($collectionType): bool {
+                return ($payload['collection_type'] ?? null) === $collectionType
                     && ($payload['block_template'] ?? null) === null
                     && ($payload['wizard_config'] ?? null) === null;
             }))
@@ -237,13 +224,13 @@ final class WizardFlowTest extends CIUnitTestCase
         Services::injectMock('collectionApiService', $collectionMock);
 
         $this->injectJsonBody([
-            'collection_type' => 'case-studies',
-            'collection_key' => 'case-studies',
+            'collection_type' => $collectionType,
+            'collection_key' => $collectionKey,
             'sort_order' => 0,
             'block_template' => null,
             'wizard_config' => null,
             'translations' => [
-                ['language_id' => 1, 'slug' => 'case-studies', 'name' => 'Case Studies'],
+                ['language_id' => $language['id'], 'slug' => $collectionKey, 'name' => $fixtures->value('collection-name')],
             ],
         ]);
 
@@ -256,6 +243,12 @@ final class WizardFlowTest extends CIUnitTestCase
 
     public function testConfigUnwrapsDomainPayload(): void
     {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $language = $fixtures->languages(1)[0];
+        $collection = $fixtures->collection([]);
+        $pageId = $fixtures->id('page');
+        $menuId = $fixtures->id('menu');
+        $blockTypeId = $fixtures->id('block-type');
         $mock = $this->createMock(DomainApiClientInterface::class);
         $configResponse = [
             'ok' => true,
@@ -263,18 +256,16 @@ final class WizardFlowTest extends CIUnitTestCase
             'data' => [
                 'status' => 'success',
                 'data' => [
-                    'default_language_id' => 1,
-                    'languages' => [
-                        ['id' => 1, 'code' => 'es', 'is_default' => true],
-                    ],
+                    'default_language_id' => $language['id'],
+                    'languages' => [$language],
                     'collections' => [
-                        ['id' => 1, 'name' => 'Noticias'],
+                        ['id' => $collection['id'], 'name' => $fixtures->value('collection-name')],
                     ],
                     'pages' => [
-                        ['id' => 2, 'title' => 'Inicio'],
+                        ['id' => $pageId, 'title' => $fixtures->value('page-title')],
                     ],
                     'menus' => [
-                        ['id' => 3, 'name' => 'Main'],
+                        ['id' => $menuId, 'name' => $fixtures->value('menu-name')],
                     ],
                 ],
                 'raw' => '',
@@ -294,7 +285,7 @@ final class WizardFlowTest extends CIUnitTestCase
             'data' => [
                 'items' => [
                     [
-                        'id' => 11,
+                        'id' => $blockTypeId,
                         'block_key' => 'rich_text',
                         'name' => 'Rich Text',
                         'description' => 'Editor de texto enriquecido',
@@ -339,14 +330,14 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertArrayHasKey('collection_types', $body);
         $this->assertArrayHasKey('page_types', $body);
         $this->assertArrayHasKey('languages', $body);
-        $this->assertSame(1, $body['default_language_id']);
+        $this->assertSame($language['id'], $body['default_language_id']);
         $this->assertTrue($body['languages'][0]['is_default']);
         $this->assertCount(1, $body['collections']);
         $this->assertCount(1, $body['pages']);
         $this->assertCount(1, $body['menus']);
         $this->assertNotEmpty($body['collection_types']);
         $this->assertNotEmpty($body['page_types']);
-        $this->assertSame(11, $body['block_types']['rich_text']['id']);
+        $this->assertSame($blockTypeId, $body['block_types']['rich_text']['id']);
         $this->assertTrue($body['block_types']['rich_text']['supports_entries']);
     }
 
@@ -465,6 +456,9 @@ final class WizardFlowTest extends CIUnitTestCase
     public function testStructureWizardCreateCollectionSurfacesApiValidationDetail(): void
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $language = $fixtures->languages(1)[0];
+        $collectionKey = $fixtures->value('collection-key');
 
         $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
@@ -481,11 +475,11 @@ final class WizardFlowTest extends CIUnitTestCase
         Services::injectMock('collectionApiService', $collectionMock);
 
         $this->injectJsonBody([
-            'collection_type' => 'blog',
-            'collection_key' => 'blog',
+            'collection_type' => $fixtures->value('collection-type'),
+            'collection_key' => $collectionKey,
             'sort_order' => 0,
             'translations' => [
-                ['language_id' => 1, 'slug' => 'blog', 'name' => 'Blog'],
+                ['language_id' => $language['id'], 'slug' => $collectionKey, 'name' => $fixtures->value('collection-name')],
             ],
         ]);
 
@@ -503,6 +497,9 @@ final class WizardFlowTest extends CIUnitTestCase
     public function testStructureWizardCreateCollectionRejectsSuccessfulResponseWithoutId(): void
     {
         session()->set('user', ['permissions' => ['cms.collections.write']]);
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $language = $fixtures->languages(1)[0];
+        $collectionKey = $fixtures->value('collection-key');
 
         $collectionMock = $this->createMock(\App\Modules\Cms\Services\CollectionApiService::class);
         $collectionMock->expects($this->once())
@@ -510,7 +507,7 @@ final class WizardFlowTest extends CIUnitTestCase
             ->willReturn([
                 'ok' => true,
                 'status' => 201,
-                'data' => ['collection_key' => 'blog'],
+                'data' => ['collection_key' => $collectionKey],
                 'raw' => '',
                 'headers' => [],
                 'messages' => [],
@@ -519,11 +516,11 @@ final class WizardFlowTest extends CIUnitTestCase
         Services::injectMock('collectionApiService', $collectionMock);
 
         $this->injectJsonBody([
-            'collection_type' => 'blog',
-            'collection_key' => 'blog',
+            'collection_type' => $fixtures->value('collection-type'),
+            'collection_key' => $collectionKey,
             'sort_order' => 0,
             'translations' => [
-                ['language_id' => 1, 'slug' => 'blog', 'name' => 'Blog'],
+                ['language_id' => $language['id'], 'slug' => $collectionKey, 'name' => $fixtures->value('collection-name')],
             ],
         ]);
 
