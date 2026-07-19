@@ -23,16 +23,14 @@
                 </div>
             </template>
         </div>
-        <form method="post" action="<?= route_to('profile.avatar') ?>" enctype="multipart/form-data" class="flex flex-col sm:flex-row sm:items-center gap-3" x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }" @submit.prevent="startSubmit()">
+        <form method="post" action="<?= route_to('profile.avatar') ?>" enctype="multipart/form-data" class="flex flex-col sm:flex-row sm:items-center gap-3">
             <?= csrf_field() ?>
             <input type="file" name="avatar" accept="image/jpeg,image/png,image/gif,image/webp" required
                    class="block text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-brand-700 hover:file:bg-brand-100"
                    @change="onChange($event)">
-            <button type="submit" :disabled="submitting" class="<?= esc(action_button_class('primary')) ?> disabled:cursor-not-allowed disabled:opacity-60">
-                <span x-show="!submitting"><?= ui_icon('upload', 'h-3.5 w-3.5') ?> <?= esc(lang('Profile.avatar_upload')) ?></span>
-                <span x-show="submitting" style="display:none"><?= esc(lang('Profile.saving_changes')) ?></span>
+            <button type="submit" class="<?= esc(action_button_class('primary')) ?>">
+                <?= ui_icon('upload', 'h-3.5 w-3.5') ?> <?= esc(lang('Profile.avatar_upload')) ?>
             </button>
-            <?= view('components/form/submitting_overlay', ['message' => lang('Profile.saving_changes')]) ?>
         </form>
     </div>
 </section>
@@ -40,7 +38,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <h3 class="text-lg font-semibold text-gray-900"><?= lang('Profile.personal_info') ?></h3>
-        <form method="post" action="<?= route_to('profile.update') ?>" class="mt-4 space-y-4" x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }" @submit.prevent="startSubmit()">
+        <form method="post" action="<?= route_to('profile.update') ?>" class="mt-4 space-y-4">
             <?= csrf_field() ?>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -61,24 +59,20 @@
                 <p class="mt-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"><?= esc($user['email'] ?? '') ?></p>
                 <p class="mt-1 text-xs text-gray-500"><?= lang('Profile.email_immutable_help') ?></p>
             </div>
-            <button type="submit" :disabled="submitting" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60">
-                <span x-show="!submitting"><?= lang('Profile.save_changes') ?></span>
-                <span x-show="submitting" style="display:none"><?= lang('Profile.saving_changes') ?></span>
+            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                <?= lang('Profile.save_changes') ?>
             </button>
-            <?= view('components/form/submitting_overlay', ['message' => lang('Profile.saving_changes')]) ?>
         </form>
     </section>
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <h3 class="text-lg font-semibold text-gray-900"><?= lang('Profile.security') ?></h3>
         <p class="mt-3 text-sm text-gray-600"><?= lang('Profile.password_reset_help') ?></p>
-        <form method="post" action="<?= site_url('profile/request-password-reset') ?>" class="mt-4" x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }" @submit.prevent="startSubmit()">
+        <form method="post" action="<?= site_url('profile/request-password-reset') ?>" class="mt-4">
             <?= csrf_field() ?>
-            <button type="submit" :disabled="submitting" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60">
-                <span x-show="!submitting"><?= lang('Profile.send_password_reset') ?></span>
-                <span x-show="submitting" style="display:none"><?= esc(lang('Profile.saving_changes')) ?></span>
+            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                <?= lang('Profile.send_password_reset') ?>
             </button>
-            <?= view('components/form/submitting_overlay', ['message' => lang('Profile.saving_changes')]) ?>
         </form>
 
         <div class="mt-6 pt-6 border-t border-gray-200">
@@ -91,13 +85,11 @@
                 </span>
             </p>
             <?php if (! $email_verified): ?>
-                <form method="post" action="<?= site_url('profile/resend-verification') ?>" class="mt-3" x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }" @submit.prevent="startSubmit()">
+                <form method="post" action="<?= site_url('profile/resend-verification') ?>" class="mt-3">
                     <?= csrf_field() ?>
-                    <button type="submit" :disabled="submitting" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60">
-                        <span x-show="!submitting"><?= lang('Profile.resend_verification') ?></span>
-                        <span x-show="submitting" style="display:none"><?= esc(lang('Profile.sending_verification')) ?></span>
+                    <button type="submit" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                        <?= lang('Profile.resend_verification') ?>
                     </button>
-                    <?= view('components/form/submitting_overlay', ['message' => lang('Profile.sending_verification')]) ?>
                 </form>
             <?php endif; ?>
         </div>

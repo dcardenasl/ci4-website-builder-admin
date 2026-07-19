@@ -46,10 +46,7 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
 
     <form method="post"
           action="<?= route_to('admin.cms.site_identity.update') ?>"
-          class="space-y-6"
-          x-data="{ submitting: false, startSubmit() { if (this.submitting) return; this.submitting = true; document.body.classList.add('overflow-hidden'); const form = $el; window.setTimeout(() => form.submit(), 120); } }"
-          @submit.prevent="startSubmit()"
-          :aria-busy="submitting">
+          class="space-y-6">
         <?= csrf_field() ?>
 
         <?php
@@ -306,19 +303,10 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-            <button type="submit" :disabled="submitting" class="<?= action_button_class('primary') ?> disabled:cursor-not-allowed disabled:opacity-60">
-                <span x-show="!submitting"><?= lang('App.save') ?></span>
-                <span x-show="submitting" x-cloak class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    <?= esc(lang('Profile.saving_changes')) ?>
-                </span>
+            <button type="submit" class="<?= action_button_class('primary') ?>">
+                <?= lang('App.save') ?>
             </button>
         </div>
-
-        <?= view('components/form/submitting_overlay', ['message' => lang('Profile.saving_changes')]) ?>
 
     </form>
     <?php endif; ?>

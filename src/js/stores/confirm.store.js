@@ -30,6 +30,7 @@ export const confirmStore = () => {
         },
         accept() {
             this.accepting = true;
+            if (typeof window.adminBeginSubmitGuard === 'function') window.adminBeginSubmitGuard();
             if (typeof this.onAccept === 'function') this.onAccept();
             const self = this;
             setTimeout(() => { if (self.accepting) self.close(); }, 5000);
