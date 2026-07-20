@@ -26,6 +26,7 @@ return [
     'logout'          => 'Log out',
     'my_profile'      => 'My profile',
     'settings'        => 'Settings',
+    'translations'    => 'Translations',
     'actions'         => 'Actions',
     'save'            => 'Save',
     'cancel'          => 'Cancel',

@@ -365,6 +365,20 @@ export const remoteTableFactory = (config = {}) => {
         },
 
         statusBadgeClass, statusLabel,
+        translationStatus(row, langId, requiredFields, isDefaultLanguage = false) {
+            if (isDefaultLanguage) {
+                const completed = requiredFields.filter((field) => String(row?.[field] ?? '').trim() !== '').length;
+                return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
+            }
+
+            const translations = row?.translations;
+            if (!translations) return 'missing';
+            const list = Array.isArray(translations) ? translations : Object.values(translations);
+            const translation = list.find((item) => item && Number(item.language_id ?? item.lang_id ?? item.id) === Number(langId));
+            if (!translation) return 'missing';
+            const completed = requiredFields.filter((field) => String(translation[field] ?? '').trim() !== '').length;
+            return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
+        },
         auditActionBadgeClass, auditActionLabel,
         auditResultBadgeClass, auditResultLabel,
         auditSeverityBadgeClass, auditSeverityLabel,

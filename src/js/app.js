@@ -35,6 +35,18 @@ import {
 import { wizard } from './components/wizard/index.js';
 import { structureWizard } from './components/wizard/structureIndex.js';
 
+window.getCmsTranslationStatus = function (row, langId, requiredFields) {
+    const translations = row?.translations;
+    if (!translations) return 'missing';
+
+    const list = Array.isArray(translations) ? translations : Object.values(translations);
+    const translation = list.find((item) => item && Number(item.language_id ?? item.lang_id ?? item.id) === Number(langId));
+    if (!translation) return 'missing';
+
+    const completed = requiredFields.filter((field) => String(translation[field] ?? '').trim() !== '').length;
+    return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
+};
+
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
     Alpine.store('toast', toastStore);

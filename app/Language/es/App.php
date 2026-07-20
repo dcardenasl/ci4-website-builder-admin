@@ -26,6 +26,7 @@ return [
     'logout'          => 'Cerrar sesión',
     'my_profile'      => 'Mi perfil',
     'settings'        => 'Configuración',
+    'translations'    => 'Traducciones',
     'actions'         => 'Acciones',
     'save'            => 'Guardar',
     'cancel'          => 'Cancelar',
