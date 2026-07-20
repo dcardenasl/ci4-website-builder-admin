@@ -114,9 +114,18 @@ class MenuController extends BaseWebController
 
     public function create(): string
     {
+        $languages = $this->getLanguages();
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
+
         return $this->render('cms/menus/create', [
             'title' => lang('Menus.menus_create'),
-            'languages' => $this->getLanguages(),
+            'languages' => $languages,
+            'defaultLangId' => $defaultLangId,
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'translateTargets' => $defaultLangId > 0
+                ? $this->buildTranslateTargets($languages, ['name'], $defaultLangId)
+                : [],
         ]);
     }
 
@@ -149,10 +158,19 @@ class MenuController extends BaseWebController
             return $this->withError(lang('Menus.menus_not_found'), route_to('admin.cms.menus'));
         }
 
+        $languages = $this->getLanguages();
+        $languageContext = $this->resolveLanguageContext($languages);
+        $defaultLangId = $languageContext['defaultLangId'];
+
         return $this->render('cms/menus/edit', [
             'title' => lang('Menus.menus_edit'),
             'item'  => $this->extractData($response),
-            'languages' => $this->getLanguages(),
+            'languages' => $languages,
+            'defaultLangId' => $defaultLangId,
+            'defaultLangCode' => $languageContext['defaultLangCode'],
+            'translateTargets' => $defaultLangId > 0
+                ? $this->buildTranslateTargets($languages, ['name'], $defaultLangId)
+                : [],
         ]);
     }
 

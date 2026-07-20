@@ -16,6 +16,7 @@ $showUrl = $itemId !== '' ? route_to('admin.cms.menus.show', $itemId) : route_to
     <?= csrf_field() ?>
 
     <div class="lg:col-span-2 space-y-6">
+        <?= view('cms/menus/_translations', get_defined_vars()) ?>
         <?php ob_start(); ?>
         <?= view('components/form/text', [
             'name' => 'menu_key',
