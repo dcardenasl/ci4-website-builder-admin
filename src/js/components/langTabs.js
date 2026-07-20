@@ -1,5 +1,6 @@
 /* global HTMLTextAreaElement, Event */
 import { resolveTranslatableFilePreviewUrl } from '../utils/fileUrl.js';
+import { copyFieldToAll, copyDefaultToAll } from '../utils/translationCopy.js';
 
 const toElement = (candidate) => {
     if (candidate instanceof HTMLElement) {
@@ -259,18 +260,8 @@ export const langTabs = (defaultId = 0, translateUrl = '', sourceLangCode = 'EN'
         } finally { this.translatingAll = false; }
     },
 
-    copyFieldToAll(sourceSelector, targetSelectors) {
-        const sourceEl = document.querySelector(sourceSelector);
-        if (!(sourceEl instanceof HTMLInputElement || sourceEl instanceof HTMLTextAreaElement)) return;
-        const sourceValue = sourceEl.value;
-        for (const targetSelector of targetSelectors) {
-            const targetEl = document.querySelector(targetSelector);
-            if (targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement) {
-                targetEl.value = sourceValue;
-                targetEl.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        }
-    },
+    copyFieldToAll,
+    copyDefaultToAll,
 
     copyFileFieldToAll: copyLangTabsFileFieldToAll,
     copyFileFieldToTargets: copyLangTabsFileFieldToTargets,

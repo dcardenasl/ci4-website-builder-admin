@@ -3,6 +3,8 @@ import { bootSlugFields } from './utils/slug.js';
 import { bestFilePreviewUrl, resolveTranslatableFilePreviewUrl } from './utils/fileUrl.js';
 import { formValuesToObject } from './utils/formSerialization.js';
 import { buildConfirmDeleteMessage } from './utils/labels.js';
+import { resolveCmsTranslationEditUrl } from './utils/translationNavigation.js';
+import { copyDefaultToAll } from './utils/translationCopy.js';
 
 import { confirmStore } from './stores/confirm.store.js';
 import { toastStore } from './stores/toast.store.js';
@@ -35,18 +37,6 @@ import {
 import { wizard } from './components/wizard/index.js';
 import { structureWizard } from './components/wizard/structureIndex.js';
 
-window.getCmsTranslationStatus = function (row, langId, requiredFields) {
-    const translations = row?.translations;
-    if (!translations) return 'missing';
-
-    const list = Array.isArray(translations) ? translations : Object.values(translations);
-    const translation = list.find((item) => item && Number(item.language_id ?? item.lang_id ?? item.id) === Number(langId));
-    if (!translation) return 'missing';
-
-    const completed = requiredFields.filter((field) => String(translation[field] ?? '').trim() !== '').length;
-    return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
-};
-
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
     Alpine.store('toast', toastStore);
@@ -77,6 +67,8 @@ document.addEventListener('alpine:init', () => {
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
     window.bestFilePreviewUrl = bestFilePreviewUrl;
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
+    window.resolveCmsTranslationEditUrl = resolveCmsTranslationEditUrl;
+    window.copyDefaultToAll = copyDefaultToAll;
     window.formValuesToObject = formValuesToObject;
     window.copyLangTabsFileFieldToTargets = copyLangTabsFileFieldToTargets;
     window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
