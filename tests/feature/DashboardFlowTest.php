@@ -257,54 +257,7 @@ final class DashboardFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
     }
 
-    public function testWidgetAttentionListsPendingTranslationsAndUnreadSubmissions(): void
-    {
-        $translationService = $this->createMock(TranslationAuditApiService::class);
-        $translationService->expects($this->once())
-            ->method('getReport')
-            ->willReturn([
-                'ok' => true, 'status' => 200,
-                'data' => [['resource' => 'page', 'resource_id' => 1, 'language_id' => 3, 'status' => 'missing']],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
-        Services::injectMock('translationAuditApiService', $translationService);
-
-        $submissionService = $this->createMock(FormSubmissionApiService::class);
-        $submissionService->expects($this->once())
-            ->method('counts')
-            ->willReturn([
-                'ok' => true, 'status' => 200,
-                'data' => ['new' => 3, 'read' => 1],
-                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
-            ]);
-        Services::injectMock('formSubmissionApiService', $submissionService);
-
-        $result = $this->withSession([
-            'access_token' => 'token',
-            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => ['cms.languages.read', 'cms.submissions.read']],
-        ])->get('/dashboard/widgets/attention');
-
-        $result->assertStatus(200);
-        $body = $result->getBody();
-        // Asserting on the link + count rather than the (accented) label text,
-        // since the rendered HTML entity-encodes non-ASCII characters.
-        $this->assertStringContainsString('admin/cms/translations/audit', $body);
-        $this->assertStringContainsString('admin/cms/form-submissions?status=new', $body);
-        $this->assertMatchesRegularExpression('/font-bold">\s*3\s*</', $body);
-    }
-
-    public function testWidgetAttentionShowsAllClearWhenNothingIsPermitted(): void
-    {
-        $result = $this->withSession([
-            'access_token' => 'token',
-            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => []],
-        ])->get('/dashboard/widgets/attention');
-
-        $result->assertStatus(200);
-        $this->assertStringContainsString('data-lucide="circle-check"', $result->getBody());
-    }
-
-    public function testWidgetContentSummaryOnlyQueriesPermittedResources(): void
+    public function testWidgetSummaryOnlyQueriesPermittedResources(): void
     {
         $pageService = $this->createMock(PageApiService::class);
         $pageService->expects($this->once())
@@ -334,16 +287,68 @@ final class DashboardFlowTest extends CIUnitTestCase
         $formService = $this->createMock(FormApiService::class);
         $formService->expects($this->never())->method('list');
         Services::injectMock('formApiService', $formService);
+        $submissionService = $this->createMock(FormSubmissionApiService::class);
+        $submissionService->expects($this->never())->method('counts');
+        Services::injectMock('formSubmissionApiService', $submissionService);
 
         $result = $this->withSession([
             'access_token' => 'token',
             'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => ['cms.pages.read']],
-        ])->get('/dashboard/widgets/content-summary');
+        ])->get('/dashboard/widgets/summary');
 
         $result->assertStatus(200);
         $body = $result->getBody();
         $this->assertStringContainsString('admin/cms/pages', $body);
         $this->assertStringContainsString('>7<', $body);
+    }
+
+    public function testWidgetSummaryShowsSubmissionsTotalAndPendingBadgeWhenPermitted(): void
+    {
+        $submissionService = $this->createMock(FormSubmissionApiService::class);
+        $submissionService->expects($this->once())
+            ->method('counts')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => ['new' => 3, 'read' => 5, 'replied' => 2, 'spam' => 0, 'archived' => 1],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('formSubmissionApiService', $submissionService);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => ['cms.submissions.read']],
+        ])->get('/dashboard/widgets/summary');
+
+        $result->assertStatus(200);
+        $body = $result->getBody();
+        // Card shows the total across all statuses (3+5+2+0+1 = 11)...
+        $this->assertMatchesRegularExpression('/text-xl font-bold text-gray-900">\s*11\s*</', $body);
+        // ...and a separate badge for the ones still needing a reply (new = 3).
+        $this->assertMatchesRegularExpression('/<span class="[^"]*bg-red-500[^"]*"[^>]*>\s*3\s*<\/span>/', $body);
+        $this->assertStringContainsString('admin/cms/form-submissions?status=new', $body);
+    }
+
+    public function testWidgetSummaryOmitsSubmissionsBadgeWhenNothingIsPending(): void
+    {
+        $submissionService = $this->createMock(FormSubmissionApiService::class);
+        $submissionService->expects($this->once())
+            ->method('counts')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => ['new' => 0, 'read' => 5, 'replied' => 2, 'spam' => 0, 'archived' => 1],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('formSubmissionApiService', $submissionService);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => ['cms.submissions.read']],
+        ])->get('/dashboard/widgets/summary');
+
+        $result->assertStatus(200);
+        $body = $result->getBody();
+        $this->assertMatchesRegularExpression('/text-xl font-bold text-gray-900">\s*8\s*</', $body);
+        $this->assertStringNotContainsString('bg-red-500', $body);
     }
 
     public function testWidgetCmsActivityMergesPagesAndEntriesSortedByRecency(): void

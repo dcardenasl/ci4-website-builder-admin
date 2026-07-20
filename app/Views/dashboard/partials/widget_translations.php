@@ -5,9 +5,9 @@
  */
 ?>
 <?php if ($stats === null || $stats === []): ?>
-    <p class="text-sm text-gray-500 text-center py-4"><?= esc(lang('Dashboard.no_content_visible')) ?></p>
+    <p class="text-sm text-gray-500 text-center py-4"><?= esc(lang('Dashboard.no_languages_visible')) ?></p>
 <?php else: ?>
-    <div class="space-y-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
         <?php foreach ($stats as $stat): ?>
             <?php $percentage = (float) ($stat['percentage'] ?? 0); ?>
             <div>

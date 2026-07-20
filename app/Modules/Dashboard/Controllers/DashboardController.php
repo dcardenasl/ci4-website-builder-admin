@@ -212,67 +212,18 @@ class DashboardController extends BaseWebController
     }
 
     /**
-     * Actionable pending-work counters (translation gaps, unread form
-     * submissions), each independently permission-gated so the widget only
-     * ever shows what the current user is allowed to act on.
+     * Full permission-aware overview: a count per CMS resource type plus
+     * form submissions (total + a "pending review" badge), one glance at
+     * "what's going on in my site right now". Each entry — and the
+     * submissions badge — is gated by its own read permission and omitted
+     * entirely when denied, so editors and admins each see only what they
+     * can reach. This subsumes what used to be a separate "needs attention"
+     * widget: translation gaps already have their own dedicated widget with
+     * per-language detail, so surfacing a duplicate "pending translations"
+     * counter here added no information: it was removed in favor of the one
+     * real actionable signal (submissions) living directly on its card.
      */
-    public function widgetAttention(): ResponseInterface
-    {
-        $cache = service('cache');
-        $items = [];
-        $devPanel = '';
-
-        if (has_permission('cms.languages.read')) {
-            $reportCacheKey = 'dashboard_translation_report_count';
-            $reportResponse = $cache->get($reportCacheKey);
-            if (!is_array($reportResponse)) {
-                $reportResponse = $this->safeApiCall(fn () => $this->translationAuditService->getReport());
-                if ($reportResponse['ok'] ?? false) {
-                    $cache->save($reportCacheKey, $reportResponse, 120);
-                }
-            }
-            $devPanel .= $this->renderDevApiErrorPanel($reportResponse);
-            $pendingCount = count($this->extractItems($reportResponse));
-            if ($pendingCount > 0) {
-                $items[] = [
-                    'label' => lang('Dashboard.pending_translations'),
-                    'count' => $pendingCount,
-                    'url'   => route_to('admin.cms.translations.audit'),
-                    'icon'  => 'languages',
-                ];
-            }
-        }
-
-        if (has_permission('cms.submissions.read')) {
-            $countsCacheKey  = 'dashboard_submission_counts';
-            $countsResponse = $cache->get($countsCacheKey);
-            if (!is_array($countsResponse)) {
-                $countsResponse = $this->safeApiCall(fn () => $this->formSubmissionService->counts());
-                if ($countsResponse['ok'] ?? false) {
-                    $cache->save($countsCacheKey, $countsResponse, 60);
-                }
-            }
-            $devPanel .= $this->renderDevApiErrorPanel($countsResponse);
-            $unread = (int) ($this->extractData($countsResponse)['new'] ?? 0);
-            if ($unread > 0) {
-                $items[] = [
-                    'label' => lang('Dashboard.unread_submissions'),
-                    'count' => $unread,
-                    'url'   => route_to('admin.cms.form_submissions') . '?status=new',
-                    'icon'  => 'mail',
-                ];
-            }
-        }
-
-        return $this->response->setBody($devPanel . view('dashboard/partials/widget_attention', ['items' => $items]));
-    }
-
-    /**
-     * Total counts per CMS resource type, one glance at "what's on my site" —
-     * each entry gated by its own read permission and omitted entirely when
-     * denied, so editors and admins each see only what they can reach.
-     */
-    public function widgetContentSummary(): ResponseInterface
+    public function widgetSummary(): ResponseInterface
     {
         $cache    = service('cache');
         $devPanel = '';
@@ -357,10 +308,39 @@ class DashboardController extends BaseWebController
                 'count' => $this->extractTotal($response),
                 'url'   => $resource['url'],
                 'icon'  => $resource['icon'],
+                'badge' => null,
             ];
         }
 
-        return $this->response->setBody($devPanel . view('dashboard/partials/widget_content_summary', ['items' => $items]));
+        if (has_permission('cms.submissions.read')) {
+            $countsCacheKey = 'dashboard_submission_counts';
+            $countsResponse = $cache->get($countsCacheKey);
+            if (!is_array($countsResponse)) {
+                $countsResponse = $this->safeApiCall(fn () => $this->formSubmissionService->counts());
+                if ($countsResponse['ok'] ?? false) {
+                    $cache->save($countsCacheKey, $countsResponse, 60);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($countsResponse);
+
+            $counts  = $this->extractData($countsResponse);
+            $pending = (int) ($counts['new'] ?? 0);
+            $total   = array_sum(array_map(static fn ($value): int => (int) $value, $counts));
+
+            $items[] = [
+                'label' => lang('FormSubmissions.submissions_title'),
+                'count' => $total,
+                'url'   => route_to('admin.cms.form_submissions'),
+                'icon'  => 'mail',
+                'badge' => $pending > 0 ? [
+                    'count' => $pending,
+                    'label' => lang('Dashboard.pending_review'),
+                    'url'   => route_to('admin.cms.form_submissions') . '?status=new',
+                ] : null,
+            ];
+        }
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_summary', ['items' => $items]));
     }
 
     /**
