@@ -399,6 +399,7 @@ class BlockInstanceController extends BaseWebController
             'ownerUpdateRoute' => BlockOwnerRouting::routes($ownerType)['update'],
             'ownerDeleteRoute' => BlockOwnerRouting::routes($ownerType)['delete'],
             'ownerChildrenRoute' => BlockOwnerRouting::routes($ownerType)['children'],
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -480,10 +481,10 @@ class BlockInstanceController extends BaseWebController
         }
 
         if ($parentInstanceId !== null) {
-            return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId))->with('success', lang('Pages.child_updated_success', [BlockOwnerRouting::childLabel($ownerType)]));
+            return redirect()->to($this->resolveReturnUrl(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, (string) $parentInstanceId)))->with('success', lang('Pages.child_updated_success', [BlockOwnerRouting::childLabel($ownerType)]));
         }
 
-        return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('success', lang('Pages.block_updated_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId)))->with('success', lang('Pages.block_updated_success'));
     }
 
     public function delete(string $ownerId, string $id): RedirectResponse

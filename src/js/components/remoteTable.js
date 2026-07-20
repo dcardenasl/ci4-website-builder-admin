@@ -365,18 +365,30 @@ export const remoteTableFactory = (config = {}) => {
         },
 
         statusBadgeClass, statusLabel,
+        // A translation row always wins when present, even for the default
+        // language: Pages/Collections/Menus/Forms have no canonical
+        // title/name field on the row itself (confirmed against their
+        // response DTOs) — their default language lives purely in a
+        // translation row like any other language. `row[field]` is only
+        // consulted to answer "is there no row at all" or to fill in a
+        // field a Category/Tag-style row left blank while its canonical
+        // twin has it. Mirrors TranslationStatus::evaluate() (PHP) so the
+        // list badges and the "Ver" panel never disagree.
         translationStatus(row, langId, requiredFields, isDefaultLanguage = false) {
-            if (isDefaultLanguage) {
+            const translations = row?.translations;
+            const list = translations ? (Array.isArray(translations) ? translations : Object.values(translations)) : [];
+            const translation = list.find((item) => item && Number(item.language_id ?? item.lang_id ?? item.id) === Number(langId));
+
+            if (!translation) {
+                if (!isDefaultLanguage) return 'missing';
                 const completed = requiredFields.filter((field) => String(row?.[field] ?? '').trim() !== '').length;
                 return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
             }
 
-            const translations = row?.translations;
-            if (!translations) return 'missing';
-            const list = Array.isArray(translations) ? translations : Object.values(translations);
-            const translation = list.find((item) => item && Number(item.language_id ?? item.lang_id ?? item.id) === Number(langId));
-            if (!translation) return 'missing';
-            const completed = requiredFields.filter((field) => String(translation[field] ?? '').trim() !== '').length;
+            const completed = requiredFields.filter((field) => {
+                const value = String(translation[field] ?? '').trim() !== '' ? translation[field] : (isDefaultLanguage ? row?.[field] : undefined);
+                return String(value ?? '').trim() !== '';
+            }).length;
             return completed === requiredFields.length ? 'complete' : completed > 0 ? 'incomplete' : 'missing';
         },
         auditActionBadgeClass, auditActionLabel,
@@ -386,6 +398,11 @@ export const remoteTableFactory = (config = {}) => {
 
         showUrl(id) { return `${this.routes.showBase}/${encodeURIComponent(String(id ?? ''))}`; },
         editUrl(id) { return `${this.routes.editBase}/${encodeURIComponent(String(id ?? ''))}/edit`; },
+        translationEditUrl(id, langId) {
+            const baseUrl = this.editUrl(id);
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            return `${baseUrl}${separator}focus_lang=${encodeURIComponent(String(langId ?? ''))}`;
+        },
         userShowUrl(id) { return `${this.routes.showBase}/${encodeURIComponent(String(id ?? ''))}`; },
         userEditUrl(id) { return `${this.routes.editBase}/${encodeURIComponent(String(id ?? ''))}/edit`; },
         auditShowUrl(id) { return `${this.routes.showBase}/${encodeURIComponent(String(id ?? ''))}`; },

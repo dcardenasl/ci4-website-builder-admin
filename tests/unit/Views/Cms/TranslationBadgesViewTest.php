@@ -26,8 +26,8 @@ final class TranslationBadgesViewTest extends CIUnitTestCase
         $this->assertStringContainsString('ES', $html);
         $this->assertStringContainsString('EN', $html);
         $this->assertStringContainsString('&#x5B;&quot;title&quot;,&quot;slug&quot;&#x5D;', $html);
-        $this->assertStringContainsString('focus_lang=1', $html);
-        $this->assertStringContainsString('focus_lang=2', $html);
         $this->assertStringContainsString('translationStatus(row, 1', $html);
+        $this->assertStringContainsString('translationEditUrl(row.id, 1)', $html);
+        $this->assertStringContainsString('translationEditUrl(row.id, 2)', $html);
     }
 }

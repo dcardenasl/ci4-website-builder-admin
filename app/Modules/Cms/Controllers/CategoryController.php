@@ -63,6 +63,7 @@ class CategoryController extends BaseWebController
             'category' => $this->extractData($response),
             'collections' => $this->collectionsOptions(),
             'categories' => $this->categoriesOptions(),
+            'languages' => $this->getLanguages(),
         ]);
     }
 
@@ -138,6 +139,7 @@ class CategoryController extends BaseWebController
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -156,7 +158,7 @@ class CategoryController extends BaseWebController
             return $this->failApi($response, lang('Categories.categories_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.categories'))->with('success', lang('Categories.categories_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.categories')))->with('success', lang('Categories.categories_update_success'));
     }
 
     public function delete(string $id): RedirectResponse

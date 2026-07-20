@@ -178,6 +178,7 @@ class MenuController extends BaseWebController
             'translateTargets' => $defaultLangId > 0
                 ? $this->buildTranslateTargets($languages, ['name'], $defaultLangId)
                 : [],
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -196,7 +197,7 @@ class MenuController extends BaseWebController
             return $this->failApi($response, lang('Menus.menus_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.menus.show', $id))->with('success', lang('Menus.menus_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.menus.show', $id)))->with('success', lang('Menus.menus_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -290,6 +291,7 @@ class MenuController extends BaseWebController
             'collections' => $this->collectionsOptions(),
             'languages' => $languages,
             'translateTargets' => $translateTargets,
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -314,7 +316,7 @@ class MenuController extends BaseWebController
             return $this->failApi($response, lang('Menus.menus_items_update_failed') ?? 'Failed to update menu item.', route_to('admin.cms.menus.show', $menuId));
         }
 
-        return redirect()->to(route_to('admin.cms.menus.show', $menuId))->with('success', lang('Menus.menus_items_update_success') ?? 'Menu item updated successfully.');
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.menus.show', $menuId)))->with('success', lang('Menus.menus_items_update_success') ?? 'Menu item updated successfully.');
     }
 
     public function deleteItem(string $menuId, string $itemId): RedirectResponse

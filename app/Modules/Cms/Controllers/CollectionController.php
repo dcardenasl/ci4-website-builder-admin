@@ -59,6 +59,7 @@ class CollectionController extends BaseWebController
         return $this->render('cms/collections/show', [
             'title' => lang('Collections.collections_details'),
             'collection' => $this->extractData($response),
+            'languages' => $this->getLanguages(),
 
         ]);
     }
@@ -142,6 +143,7 @@ class CollectionController extends BaseWebController
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -190,7 +192,7 @@ class CollectionController extends BaseWebController
             return $this->failApi($response, lang('Collections.collections_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.collections'))->with('success', lang('Collections.collections_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.collections')))->with('success', lang('Collections.collections_update_success'));
     }
 
     public function updateStructure(string $id): RedirectResponse

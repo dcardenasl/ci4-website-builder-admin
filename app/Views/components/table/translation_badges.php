@@ -47,7 +47,7 @@ $msgIncomplete = (string) (lang('Pages.translation_incomplete') ?: 'Incomplete')
                 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100': translationStatus(row, <?= $langId ?>, <?= esc($reqsJson, 'attr') ?>, <?= $defaultArg ?>) === 'missing'
             }"
             :title="'<?= esc($lang['name']) ?>: ' + (translationStatus(row, <?= $langId ?>, <?= esc($reqsJson, 'attr') ?>, <?= $defaultArg ?>) === 'complete' ? '<?= esc($msgComplete, 'js') ?>' : translationStatus(row, <?= $langId ?>, <?= esc($reqsJson, 'attr') ?>, <?= $defaultArg ?>) === 'incomplete' ? '<?= esc($msgIncomplete, 'js') ?>' : '<?= esc($msgMissing, 'js') ?>') + '. Click to edit translation.'"
-            @click="window.location.href = editUrl(row.id) + '?focus_lang=<?= $langId ?>'"
+            @click="window.location.href = translationEditUrl(row.id, <?= $langId ?>)"
         >
             <?= esc(strtoupper($lang['code'])) ?>
         </span>

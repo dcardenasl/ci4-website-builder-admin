@@ -210,6 +210,7 @@ class EntryController extends BaseWebController
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'blockTemplate'    => $blockTemplate,
             'translateTargets' => $translateTargets,
+            'returnTo'         => $this->incomingReturnTo(),
             ...$this->taxonomyOptions($item),
         ]);
     }
@@ -264,7 +265,7 @@ class EntryController extends BaseWebController
             return $this->failApi($taxonomyResponse, lang('Entries.entries_taxonomy_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.entries'))->with('success', lang('Entries.entries_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.entries')))->with('success', lang('Entries.entries_update_success'));
     }
 
     /**

@@ -567,6 +567,47 @@ abstract class BaseWebController extends BaseController
     }
 
     /**
+     * Reads `return_to` from the current GET query so an edit view can echo it
+     * back into a hidden form field. Validated here too so the round trip
+     * never carries something unsafe, even though the real security gate is
+     * {@see resolveReturnUrl()} at submit time.
+     */
+    protected function incomingReturnTo(): string
+    {
+        $value = $this->request->getGet('return_to');
+
+        return is_string($value) && $this->isSafeLocalReturnUrl($value) ? $value : '';
+    }
+
+    /**
+     * Resolves the redirect target for a save action: honors a posted
+     * `return_to` (e.g. "back to the translation audit workbench, filters
+     * preserved") when it is present and safe, otherwise falls back to the
+     * resource's own default destination.
+     */
+    protected function resolveReturnUrl(string $fallbackUrl): string
+    {
+        $returnTo = $this->request->getPost('return_to');
+
+        return is_string($returnTo) && $this->isSafeLocalReturnUrl($returnTo) ? $returnTo : $fallbackUrl;
+    }
+
+    /**
+     * Guards against open-redirect: only a same-app, absolute path is
+     * accepted — never a scheme, a protocol-relative `//host` URL, or a
+     * backslash trick some browsers normalize into one.
+     */
+    private function isSafeLocalReturnUrl(string $url): bool
+    {
+        $url = trim($url);
+        if ($url === '' || $url[0] !== '/' || str_starts_with($url, '//')) {
+            return false;
+        }
+
+        return ! str_contains($url, '\\') && ! preg_match('/[\r\n]/', $url);
+    }
+
+    /**
      * Build translation targets for automatic translation functionality.
      * Centralizado método que genera la configuración de traducción automática.
      *

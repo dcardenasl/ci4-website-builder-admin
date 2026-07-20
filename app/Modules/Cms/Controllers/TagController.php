@@ -58,6 +58,7 @@ class TagController extends BaseWebController
         return $this->render('cms/tags/show', [
             'title' => lang('Tags.tags_details'),
             'tag' => $this->extractData($response),
+            'languages' => $this->getLanguages(),
 
         ]);
     }
@@ -130,6 +131,7 @@ class TagController extends BaseWebController
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -148,7 +150,7 @@ class TagController extends BaseWebController
             return $this->failApi($response, lang('Tags.tags_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.tags'))->with('success', lang('Tags.tags_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.tags')))->with('success', lang('Tags.tags_update_success'));
     }
 
     public function delete(string $id): RedirectResponse

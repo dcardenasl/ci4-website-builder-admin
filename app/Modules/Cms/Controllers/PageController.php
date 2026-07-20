@@ -182,6 +182,7 @@ class PageController extends BaseWebController
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
             'pageTypes' => $this->pageTypeOptions(),
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -200,7 +201,7 @@ class PageController extends BaseWebController
             return $this->failApi($response, lang('Pages.pages_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.pages.show', $id))->with('success', lang('Pages.pages_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.pages.show', $id)))->with('success', lang('Pages.pages_update_success'));
     }
 
     public function delete(string $id): RedirectResponse

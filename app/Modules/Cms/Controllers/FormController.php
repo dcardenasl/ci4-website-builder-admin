@@ -170,6 +170,7 @@ class FormController extends BaseWebController
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -194,7 +195,7 @@ class FormController extends BaseWebController
         }
 
         return redirect()
-            ->to(route_to('admin.cms.forms.edit', $id))
+            ->to($this->resolveReturnUrl(route_to('admin.cms.forms.edit', $id)))
             ->with('success', lang('Forms.update_success'));
     }
 
