@@ -75,6 +75,12 @@ class TranslationAuditController extends BaseWebController
         if (is_scalar($langId) && $langId !== '') {
             $filters['language_id'] = (int) $langId;
         }
+        foreach (['resource', 'status', 'search'] as $filter) {
+            $value = $this->request->getGet($filter);
+            if (is_string($value) && trim($value) !== '') {
+                $filters[$filter] = trim($value);
+            }
+        }
 
         $response = $this->safeApiCall(fn () => $this->auditService->getReport($filters));
 

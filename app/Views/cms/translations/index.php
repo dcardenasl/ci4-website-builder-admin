@@ -12,7 +12,7 @@
 
     <!-- Stats / Progress Section -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php foreach ($stats as $stat): ?>
+        <?php foreach ($stats as $statIndex => $stat): ?>
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 space-y-4 flex flex-col justify-between">
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-2 min-h-[32px]">
@@ -25,13 +25,18 @@
                         <span class="text-lg font-bold text-gray-900 shrink-0"><?= esc($stat['percentage']) ?>%</span>
                     </div>
 
-                    <?php if ($stat['is_default']): ?>
-                        <div class="flex">
+                    <!-- Always rendered (default vs. positional label) so the progress bar below stays aligned across all cards. -->
+                    <div class="flex">
+                        <?php if ($stat['is_default']): ?>
                             <span class="inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold bg-green-50 text-green-700 border border-green-200 text-[10px] leading-3 whitespace-nowrap">
                                 <?= esc(lang('CmsLanguages.field_is_default')) ?>
                             </span>
-                        </div>
-                    <?php endif; ?>
+                        <?php else: ?>
+                            <span class="inline-flex items-center rounded-full px-1.5 py-0.5 font-semibold bg-gray-50 text-gray-600 border border-gray-200 text-[10px] leading-3 whitespace-nowrap">
+                                <?= esc(lang('Translations.language_position', ['position' => $statIndex + 1])) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     
                     <!-- Progress bar -->
                     <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -49,6 +54,16 @@
     <!-- Audit Issues Table Section -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5"
         x-data="{
+            translationRoutes: {
+                page: '<?= route_to('admin.cms.pages') ?>',
+                menu: '<?= route_to('admin.cms.menus') ?>',
+                setting: '<?= route_to('admin.cms.settings') ?>',
+                category: '<?= route_to('admin.cms.categories') ?>',
+                tag: '<?= route_to('admin.cms.tags') ?>',
+                collection: '<?= route_to('admin.cms.collections') ?>',
+                entry: '<?= route_to('admin.cms.entries') ?>',
+                form: '<?= route_to('admin.cms.forms') ?>'
+            },
             ...remoteTable({
                 apiUrl: '<?= route_to('admin.cms.translations.audit.data') ?>',
                 pageUrl: '<?= route_to('admin.cms.translations.audit') ?>',
@@ -72,6 +87,7 @@
                     'missing' => lang('Translations.status_missing'),
                     'incomplete' => lang('Translations.status_incomplete'),
                     'mismatch' => lang('Translations.status_mismatch'),
+                    'outdated' => lang('Translations.status_outdated'),
                 ],
                 'details' => [
                     'missing_all' => lang('Translations.detail_missing_all'),
@@ -121,25 +137,59 @@
                     return this.dict.details.missing_required_fields.replace('{fields}', fields);
                 }
                 return row.detail;
+            },
+            editUrl(row) {
+                // A relative path+query on purpose (not buildUrl(), which always
+                // resolves to an absolute http(s) URL): BaseWebController's
+                // return_to guard only accepts a same-app absolute *path*.
+                const q = new URLSearchParams(this.query).toString();
+                const returnTo = q !== '' ? `${this.pageUrl}?${q}` : this.pageUrl;
+                return window.resolveCmsTranslationEditUrl(this.translationRoutes, row, returnTo);
+            },
+            nextPendingUrl() {
+                const row = this.rows.find((candidate) => ['missing', 'incomplete', 'mismatch'].includes(candidate.status));
+                return row ? this.editUrl(row) : '#';
             }
         }" x-init="init()">
         
-        <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-gray-200 gap-4">
-            <div>
-                <h2 class="text-lg font-bold text-gray-900"><?= esc(lang('Translations.missing_incomplete')) ?></h2>
-                <p class="text-xs text-gray-500 mt-0.5"><?= esc(lang('Translations.missing_incomplete_desc')) ?></p>
+        <div class="pb-5 border-b border-gray-200 space-y-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                    <h2 class="text-lg font-bold text-gray-900"><?= esc(lang('Translations.missing_incomplete')) ?></h2>
+                    <p class="text-xs text-gray-500 mt-0.5"><?= esc(lang('Translations.missing_incomplete_desc')) ?></p>
+                </div>
+                <a :href="nextPendingUrl()" :aria-disabled="rows.length === 0" :class="rows.length === 0 ? 'pointer-events-none opacity-50' : ''" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700">
+                    <?= ui_icon('arrow-right', 'h-3.5 w-3.5') ?>
+                    <?= esc(lang('Translations.action_next_pending')) ?>
+                </a>
             </div>
-            
+
             <!-- Filters -->
-            <div class="flex items-center gap-2">
-                <select name="language_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" 
-                    @change="filter('language_id', $event.target.value)">
+            <form data-table-filter-form="1" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+                <input type="search" name="search" placeholder="<?= esc(lang('Translations.search_issues')) ?>" class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 lg:col-span-4" data-table-debounce="300">
+                <select name="language_id" class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 lg:col-span-2">
                     <option value=""><?= esc(lang('Translations.all_active_languages')) ?></option>
                     <?php foreach ($languages as $lang): ?>
                         <option value="<?= esc($lang['id']) ?>"><?= esc($lang['native_name'] ?? $lang['name']) ?> (<?= esc(strtoupper($lang['code'])) ?>)</option>
                     <?php endforeach; ?>
                 </select>
-            </div>
+                <select name="resource" class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 lg:col-span-2">
+                    <option value=""><?= esc(lang('Translations.all_resources')) ?></option>
+                    <?php foreach (['page', 'menu', 'menu_item', 'setting', 'category', 'tag', 'collection', 'entry', 'form', 'form_field', 'block_instance'] as $resource): ?>
+                        <option value="<?= esc($resource) ?>"><?= esc(lang('Translations.resource_' . $resource)) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="status" class="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 lg:col-span-2">
+                    <option value=""><?= esc(lang('Translations.all_statuses')) ?></option>
+                    <?php foreach (['missing', 'incomplete', 'mismatch'] as $status): ?>
+                        <option value="<?= esc($status) ?>"><?= esc(lang('Translations.status_' . $status)) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="<?= esc(filter_submit_button_class(true)) ?> lg:col-span-2">
+                    <?= ui_icon('search', 'h-3.5 w-3.5') ?>
+                    <?= esc(lang('App.search')) ?>
+                </button>
+            </form>
         </div>
 
         <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600 text-center" x-show="loading">
@@ -182,65 +232,13 @@
                                         <span class="font-bold text-xs uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200" x-text="row.language_code"></span>
                                     </td>
                                     <td class="<?= esc(table_td_class()) ?>">
-                                        <span :class="row.status === 'missing' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800' : row.status === 'mismatch' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800'" x-text="translateStatus(row.status)"></span>
+                                        <span :class="row.status === 'missing' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800' : row.status === 'mismatch' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800' : row.status === 'outdated' ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800'" x-text="translateStatus(row.status)"></span>
                                     </td>
                                     <td class="<?= esc(table_td_class('muted')) ?>" x-text="translateDetail(row)"></td>
                                     <td class="<?= esc(table_td_class()) ?>">
-                                        <template x-if="row.resource === 'page'">
-                                            <a :href="'<?= route_to('admin.cms.pages') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'menu'">
-                                            <a :href="'<?= route_to('admin.cms.menus') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'menu_item'">
-                                            <a :href="'<?= route_to('admin.cms.menus') ?>/' + row.extra_data.menu_id + '/items/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'setting'">
-                                            <a :href="'<?= route_to('admin.cms.settings') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'category'">
-                                            <a :href="'<?= route_to('admin.cms.categories') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'tag'">
-                                            <a :href="'<?= route_to('admin.cms.tags') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'collection'">
-                                            <a :href="'<?= route_to('admin.cms.collections') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'entry'">
-                                            <a :href="'<?= route_to('admin.cms.entries') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'form'">
-                                            <a :href="'<?= route_to('admin.cms.forms') ?>/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'form_field'">
-                                            <a :href="'<?= route_to('admin.cms.forms') ?>/' + row.extra_data.form_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
-                                        <template x-if="row.resource === 'block_instance'">
-                                            <a :href="row.extra_data.owner_type === 'page' ? '<?= route_to('admin.cms.pages') ?>/' + row.extra_data.owner_id + '/blocks/' + row.resource_id + '/edit' : '<?= route_to('admin.cms.entries') ?>/' + row.extra_data.owner_id + '/blocks/' + row.resource_id + '/edit'" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
-                                                <?= esc(lang('Translations.action_translate')) ?>
-                                            </a>
-                                        </template>
+                                        <a :href="editUrl(row)" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-900">
+                                            <?= esc(lang('Translations.action_translate')) ?>
+                                        </a>
                                     </td>
                                 </tr>
                             </template>
