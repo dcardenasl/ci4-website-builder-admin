@@ -121,10 +121,11 @@ final class RateLimitFilterTest extends CIUnitTestCase
     {
         $mock = $this->getMockBuilder(IncomingRequest::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getIPAddress'])
+            ->onlyMethods(['getIPAddress', 'getMethod'])
             ->getMock();
 
         $mock->method('getIPAddress')->willReturn('127.0.0.1');
+        $mock->method('getMethod')->willReturn('POST');
 
         return $mock;
     }
