@@ -4,7 +4,7 @@
 > Historial de completadas: ver `TASKS_ARCHIVE.md`.
 > Cross-repo: ver `../TASKS.md`.
 > Plan detallado CMS admin: ver [`../docs/cms_integration_plan.md`](../docs/cms_integration_plan.md).
-> Última actualización: 2026-07-12 (refactor profundo del Wizard CMS completado — ver DEEP-WIZ-01..05 en Completadas)
+> Última actualización: 2026-07-20 (flujo editorial de traducciones — TRN-001..005 y TRN-007 cerrados, TRN-006 diferido a decisión de producto — ver detalle abajo)
 
 ---
 
@@ -17,6 +17,67 @@
 ## 🟡 Próximo (ordenado por prioridad)
 
 *(vacío — AUD-001 cerrado, ver Completadas)*
+
+### 🌐 Flujo editorial de traducciones — Plan 2026-07-20
+> Plan: [`../docs/plans/2026-07-20-translation-workbench-plan.es.md`](../docs/plans/2026-07-20-translation-workbench-plan.es.md)
+> Seguimiento cross-repo: [`../TASKS.md`](../TASKS.md), TRN-001..TRN-007.
+
+- [x] **TRN-001** — Normalizador común y resolver de navegación contextual (`focus_lang`).
+  - [x] Eliminado el resolver global obsoleto de estados; las tablas usan exclusivamente `remoteTable.translationStatus`.
+  - [x] Navegación de badges centralizada en `translationEditUrl`, evitando concatenación insegura de query strings.
+  - [x] Resolver de auditoría extraído a utilidad testeada para recursos normales, ítems anidados y bloques; falla cerrado sin propietario.
+  - [x] **2026-07-20 — consolidación post-revisión:** `TranslationStatus::badgeClasses()`/`editUrl()` (PHP) reemplazan las 5 copias de la cadena de colores por estado y la concatenación manual de `?focus_lang=` repartidas en `translation_status_panel.php`, `categories/tags/collections/pages/show.php` y el árbol de `menus/show.php`. El árbol de `menu_item` ahora reutiliza `TranslationStatus::evaluate()` en vez de reimplementar la regla ad hoc.
+  - [x] **2026-07-20 — `return_to` implementado de verdad (ya no es parámetro decorativo).** `BaseWebController::resolveReturnUrl()`/`incomingReturnTo()` validan que el destino sea una ruta local absoluta (rechaza `//host`, `scheme://`, backslash-trick, CRLF) antes de redirigir — con tests unitarios cubriendo cada vector de open-redirect. Cableado en los 10 pares edit/update reachable desde la auditoría: Page, Entry, Category, Tag, Collection, Form, Menu, MenuItem, Setting, BlockInstance (cada `edit()` pasa `returnTo` a la vista vía un hidden input; cada `update()` envuelve su redirect de éxito con `resolveReturnUrl()`). `resolveCmsTranslationEditUrl` vuelve a incluir `return_to`, ahora construido como ruta relativa con los filtros activos (`this.pageUrl` + `this.query`), no con `buildUrl()` (que resuelve a URL absoluta y sería rechazada por el guard). Verificado end-to-end en navegador real: filtrar por `resource=setting` → Traducir → guardar → vuelve a `/admin/cms/translations/audit?resource=setting` con el filtro aplicado.
+- [x] **TRN-002** — Auditoría/workbench con nombres, filtros, faltantes y acciones. Validado con filtros server-side, i18n ES/EN y tests de servicio.
+  - [x] Filtros server-side por idioma, recurso, estado y búsqueda; i18n ES/EN.
+  - [x] **2026-07-20 — bug crítico encontrado y corregido en navegador real:** los filtros `resource`, `status`, `search` (y el ya existente `language_id`) llamaban a `filter('key', value)` en Alpine, un método que **no existe** en `remoteTable.js` (confirmado: `typeof data.filter === 'undefined'`, `Alpine Expression Error: filter is not defined` en consola). Los filtros nunca llegaban a golpear el backend a pesar de que el backend y sus tests sí funcionaban. Corregido envolviendo los campos en `<form data-table-filter-form="1">` con `data-table-debounce` en la búsqueda, siguiendo el mismo patrón que ya usan todas las demás tablas del admin (`filter_panel.php`). Verificado end-to-end: `GET .../audit/data?search=site_name&resource=setting` ahora se dispara realmente y filtra.
+- [x] **TRN-003** — Panel consistente de traducciones en vistas “Ver”.
+  - [x] Colecciones, categorías y etiquetas muestran código de idioma legible y enlace de edición con `focus_lang`.
+  - [x] Esas vistas iteran idiomas activos y muestran explícitamente idiomas faltantes.
+  - [x] Componente compartido de idiomas faltantes integrado en páginas, entradas, formularios, menús y settings.
+  - [x] `composer quality` pasa: PHPStan, formato, i18n y fixture policy.
+  - [x] El componente compartido distingue `missing`, `incomplete` y `complete` según campos obligatorios.
+  - [x] Evaluador PHP compartido con contrato explícito para idioma base, fila vacía, faltante y desactualizada; tests unitarios agregados.
+  - [x] El idioma predeterminado se considera completo desde los campos canónicos del recurso y no se marca como traducción faltante.
+  - [x] Colecciones, categorías y etiquetas usan la misma semántica de estados; PHPStan y PHP CS Fixer secuencial pasan.
+  - [x] Las tarjetas detalladas de colecciones, categorías y etiquetas respetan el idioma predeterminado como completo.
+  - [x] Estado `outdated` implementado comparando `updated_at` de traducción contra el recurso base.
+  - [x] Panel de detalle muestra campos obligatorios faltantes por idioma con etiquetas i18n.
+  - [x] Componente renombrado a `translation_status_panel` para evitar nomenclatura legacy.
+  - [x] **2026-07-20 — bug crítico encontrado y corregido probando en navegador real: "idioma por defecto completo" era falso para 4 de 8 recursos.** `TranslationStatus::evaluate()` asumía que el idioma por defecto siempre vive en campos canónicos del recurso (`$page['title']`) — cierto para Settings/Entry/Category/Tag, **falso** para Page/Collection/Menu/Form (confirmado contra sus Response DTOs en el dominio: no tienen `title`/`name` a nivel raíz, todo vive en `translations`). Antes del fix, `/admin/cms/pages/1` mostraba "ES Faltante (slug, título)" con una página 100% traducida. Corregido: una fila de traducción real siempre gana sobre los campos canónicos; estos solo se consultan si no existe fila, o para completar un campo que la fila dejó vacío (denormalización de Category/Tag). El mismo bug existía en paralelo en `remoteTable.js::translationStatus()` (usado por las columnas de traducción en las listas) y se corrigió con la misma lógica — confirmado visualmente que la columna ES en el listado de Páginas pasó de rojo a verde. Se agregaron el panel `translation_status_panel` a categorías/etiquetas/colecciones (antes solo tenían su tarjeta detallada) y tests unitarios nuevos en ambos lados (PHP y JS).
+- [x] **TRN-004** — Traducir todo, copiar base y siguiente pendiente como borradores.
+  - [x] Auditoría incluye “Abrir siguiente pendiente”, conserva filtros y abre edición con `focus_lang` sin escribir ni publicar.
+  - [x] Páginas y entradas incluyen “Copiar idioma base” con confirmación; solo modifica el formulario y requiere guardado explícito.
+  - [x] Colecciones, categorías, etiquetas y formularios incluyen la misma acción con campos declarados y confirmación.
+  - [x] Colecciones y menús incluyen “Copiar idioma base”; PHPStan y PHP CS Fixer pasan.
+  - [x] Settings incluye copia compatible por tipo (`string`, `int`, `bool`, `json`, `file_id`) con confirmación y guardado explícito.
+  - [x] Confirmaciones de copia externalizadas a i18n ES/EN; sin texto hardcodeado en las acciones.
+  - [x] Tests JS de confirmación/copia agregados; suite Vitest completa: 10 archivos, 61 tests.
+  - [x] Auditoría incorpora `outdated` en su diccionario y visualización; contrato de estados consistente.
+  - [x] Suite PHP admin completa: 579 tests, 2074 assertions; 0 errores (1 warning de cobertura y 1 skip conocidos).
+  - [x] Suite PHP admin actualizada: 582 tests, 2079 assertions; 0 errores (1 warning de cobertura y 1 skip conocidos).
+  - [x] Feature tests de auditoría cubren filtros contextuales y denegación sin `cms.languages.read`.
+  - [x] Tests de auditoría del dominio: 11 tests, 48 assertions; 0 errores.
+  - [x] **2026-07-20:** `copySettingDefaultToAll` (implementación propia, sin test, duplicada) reemplazada por el `copyDefaultToAll`/`copyFieldToAll` compartido de `src/js/utils/translationCopy.js`, expuesto como `window.copyDefaultToAll` para vistas sin `langTabs()`. De paso se corrigió un bug real: el binding `:name` de los campos base de Settings nunca funcionaba (CI4 `esc(..., 'attr')` escapa el `:` a `&#x3a;name`, dejando el atributo inerte para Alpine), por lo que el selector `[name="setting_value"]` jamás encontraba nada. `copyFieldToAll` ahora resuelve el candidato visible entre varios elementos que comparten selector (`querySelectorAll` + chequeo de `disabled`/`offsetParent`), robusto también si el usuario cambia el tipo de configuración sin recargar. Verificado en navegador real (`ChangeMe123!`): copiar "Mi Sitio" desde el valor base escribe correctamente en `translations[2]` (EN) y `translations[3]` (FR).
+  - [x] **2026-07-20 — regresión propia encontrada y corregida antes de cerrar la tarea:** el chequeo de visibilidad agregado al punto anterior (`offsetParent !== null`) rompía "Copiar idioma base" para TODOS los recursos con pestañas por idioma (páginas, entradas, categorías, etiquetas, colecciones, formularios, menús) — un campo de una pestaña inactiva (oculta vía `x-show`, no `disabled`) es un destino legítimo y dejó de recibir el valor copiado. Detectado probando en navegador real (Etiquetas: el botón no escribía nada). Corregido: la verificación de visibilidad solo aplica cuando un selector resuelve a *varios* elementos hermanos que comparten nombre (el caso real de Settings); con un único match (el caso normal de `langTabs`) siempre se usa, esté oculto o no. Test de regresión agregado; verificado de nuevo en navegador para Etiquetas, Páginas y Menús.
+  - [x] El bloque `$copyMappings` (7 copias casi idénticas en categories/collections/tags/entries/forms/pages `edit.php` y `menus/_translations.php`) se extrajo a `cms_translation_copy_mappings()` en `app/Helpers/cms_translations_helper.php` (autoloaded).
+  - [x] `SettingController` deduplicado: los 6 `service('languageApiService')->list(...)` inline (incluida la llamada nueva en `show()`, que además se saltaba `maybeFlashDevError`) se reemplazaron por el mismo `getLanguages()` privado que ya usan Category/Collection/Tag/Menu/Page/Entry.
+- [x] **TRN-005** — Menús, ítems, hijos y navegación contextual anidada.
+  - [x] Árbol de `menu_item` muestra estado por idioma y abre el primer idioma pendiente con `focus_lang`.
+  - [x] Árbol de `menu_item` distingue también traducciones `outdated`; lint/build JS y PHP CS Fixer pasan.
+  - [x] Renderizado recursivo convertido de función global a closure local; PHPStan y PHP CS Fixer pasan.
+  - [x] Eliminada la declaración global legacy del árbol de menús sin cambiar su contrato visual.
+  - [x] **2026-07-20:** cálculo de estado por `menu_item` reemplazado por `TranslationStatus::evaluate()` compartido (antes reimplementaba la regla a mano); verificado en navegador que el menú "legal" muestra correctamente "FR Faltante (nombre)" y los 7 ítems conservan su estado real.
+- [ ] **TRN-006** — Estados editoriales, outdated, permisos y controles de publicación.
+  - [x] `outdated` real (backend + UI) — ver TRN-002/003 arriba.
+  - [x] Permisos de escritura: toda acción de traducción (copiar, traducir, editar) ya vive detrás del filtro de ruta `permission:cms.*.write` existente — no hay pantalla de traducción alcanzable sin permiso de escritura.
+  - [ ] **Deliberadamente NO implementado — requiere decisión de producto, no es una corrección de algo roto:** el modelo de estados editoriales (`in_review`, `approved`, `published` *por idioma*) del plan original. Antes de construirlo hay que decidir: (1) ¿es una columna nueva por fila de traducción, y en qué migración/tabla — página, entrada, categoría, etiqueta, colección, formulario, menú, ítem de menú, configuración y bloque son 10 tipos distintos en el dominio? (2) ¿cómo convive con el `status` (publicado/borrador/archivado) que Page/Entry YA tienen a nivel de recurso completo, no por idioma — pueden pisarse o generar dos fuentes de verdad contradictorias? (3) ¿quién puede aprobar? ¿hace falta un rol/permiso nuevo distinto de `cms.*.write`? Construir esto sin esas respuestas sería inventar producto, no corregir deuda técnica. Recomendación: tratarlo como una iniciativa aparte con su propio diseño, no como parte de este cierre.
+- [x] **TRN-007** — Tests, i18n, rendimiento, documentación y validación browser.
+  - [x] Admin: `composer quality` (PHPStan 204 archivos, CS-Fixer, i18n-check, fixture policy) + suite completa 602 tests / 2116 assertions, todo en verde.
+  - [x] Domain: `composer quality` (PHPStan, CS-Fixer) + Unit/Architecture/Integration/Feature/SeederContracts, 429+18+13 tests, todo en verde.
+  - [x] Rendimiento: sin queries nuevas — el fix de `outdated` reutiliza datos ya cargados (`$resourceRow['updated_at']`), la consolidación en admin es puramente in-memory.
+  - [x] Validación browser real con credenciales del README en: Configuración (lista, detalle, editar, copiar, filtros de auditoría + `return_to`), Categorías, Etiquetas, Colecciones, Páginas (lista + detalle + editar), Entradas (lista), Menús (detalle + árbol de ítems + editar), Formularios (detalle + editar) — 2 bugs críticos preexistentes y 1 regresión propia encontrados y corregidos solo gracias a esta validación (ver notas en TRN-003/004).
+  - [x] Documentación: este archivo y `../TASKS.md` actualizados con cada hallazgo, causa raíz y verificación.
 
 ---
 

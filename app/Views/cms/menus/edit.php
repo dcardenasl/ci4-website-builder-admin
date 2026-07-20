@@ -14,6 +14,7 @@ $showUrl = $itemId !== '' ? route_to('admin.cms.menus.show', $itemId) : route_to
 
 <form method="post" action="<?= route_to('admin.cms.menus.update', $itemId) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <?= csrf_field() ?>
+    <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
 
     <div class="lg:col-span-2 space-y-6">
         <?= view('cms/menus/_translations', get_defined_vars()) ?>

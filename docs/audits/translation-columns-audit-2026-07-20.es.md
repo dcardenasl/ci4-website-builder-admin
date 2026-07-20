@@ -1,5 +1,13 @@
 # Auditoría de columnas de traducciones
 
+## Seguimiento de implementación — 2026-07-20
+
+- El plan ejecutable quedó documentado en [`../../../docs/plans/2026-07-20-translation-workbench-plan.es.md`](../../../docs/plans/2026-07-20-translation-workbench-plan.es.md) y enlazado desde ambos `TASKS`.
+- La auditoría dejó de tener bloques independientes de rutas: ahora usa un resolver único para generar la acción de edición.
+- Las acciones incluyen `focus_lang` y `return_to`, por lo que la pantalla de edición puede abrir directamente el idioma pendiente y retornar al workbench.
+- Se cubrieron páginas, menús, settings, categorías, tags, colecciones, entradas, formularios, ítems de menú, campos de formulario y bloques de páginas/entradas.
+- Validación ejecutada: `npm run lint:js`, `npm run build:js` y `vendor/bin/phpunit --filter TranslationBadgesViewTest --testdox`.
+
 ## 1. Objetivo
 
 Verificar que las columnas de traducciones funcionen correctamente en navegación, visualización y cálculo de estado para las tablas CMS del panel admin.
@@ -75,7 +83,11 @@ Los faltantes observados corresponden a idiomas secundarios sin contenido; no se
 
 ## 9. Resumen final
 
-Las ocho columnas revisadas cargan correctamente y reciben traducciones desde el API. El error importante encontrado —el idioma predeterminado marcado como faltante— quedó corregido. La principal mejora restante es reforzar la UX con leyenda, filtros, resumen por fila y pruebas E2E de navegación.
+Las ocho columnas revisadas cargan correctamente y reciben traducciones desde el API. El idioma predeterminado se valida desde los campos canónicos del recurso y ya no se marca como faltante en los detalles. La auditoría y el navegador integrado confirmaron que ES queda completo, mientras FR permanece pendiente cuando realmente no tiene contenido. La principal mejora restante es reforzar la UX con leyenda, filtros y resumen por fila.
+
+### Corrección adicional validada el 2026-07-20
+
+El detalle de Configuración no estaba pasando los idiomas activos a la vista; por ello su panel no se renderizaba. `SettingController::show()` ahora carga los idiomas activos y el componente compartido excluye explícitamente el idioma predeterminado de la búsqueda de filas de traducción. Verificación real: `/admin/cms/settings/1` muestra únicamente `FR Faltante (valor)` y abre `/admin/cms/settings/1/edit?focus_lang=3`.
 
 ## 10. Recomendaciones de flujo editorial detectadas al navegar
 

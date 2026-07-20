@@ -19,6 +19,7 @@
 <?php ob_start(); ?>
 <form method="post" action="<?= route_to('admin.cms.entries.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <?= csrf_field() ?>
+        <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
         <div class="lg:col-span-2 space-y-6">
 
         <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 space-y-4">
@@ -184,6 +185,10 @@ if ($selectedTagValues !== []) {
                             <?php endforeach; ?>
                         </div>
                         <?php if (!empty($translateTargets)): ?>
+                        <?php $copyMappings = cms_translation_copy_mappings(['slug', 'title', 'excerpt', 'meta_title', 'meta_description'], $languages, $defaultLangIndex); ?>
+                        <button type="button" @click="copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="mb-px inline-flex items-center gap-1.5 text-xs text-gray-700 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50 transition-colors">
+                            <?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?>
+                        </button>
                         <button type="button"
                             @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                             :disabled="translating || translatingAll"
@@ -199,7 +204,7 @@ if ($selectedTagValues !== []) {
 
                     <?php foreach ($languages as $index => $lang): ?>
                         <?php
-                            $transValue = [];
+                                $transValue = [];
                         if (!empty($item['translations']) && is_array($item['translations'])) {
                             foreach ($item['translations'] as $t) {
                                 if (is_array($t) && (int)($t['language_id'] ?? 0) === (int)$lang['id']) {

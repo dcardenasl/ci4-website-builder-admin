@@ -46,8 +46,7 @@ class SettingController extends BaseWebController
             return $deny;
         }
 
-        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages = $this->getLanguages();
 
         return $this->render('cms/settings/index', [
             'title'        => lang('Settings.settings_title'),
@@ -85,14 +84,18 @@ class SettingController extends BaseWebController
             return $this->render('cms/settings/show', [
                 'title' => lang('Settings.settings_details'),
                 'setting' => [],
+                'languages' => [],
                 'error' => $this->firstMessage($response, lang('Settings.settings_not_found')),
 
             ]);
         }
 
+        $languages = $this->getLanguages();
+
         return $this->render('cms/settings/show', [
             'title' => lang('Settings.settings_details'),
             'setting' => $this->extractData($response),
+            'languages' => $languages,
 
         ]);
     }
@@ -104,8 +107,7 @@ class SettingController extends BaseWebController
             return $deny;
         }
 
-        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
 
         return $this->render('cms/settings/create', [
@@ -129,8 +131,7 @@ class SettingController extends BaseWebController
             return $invalid;
         }
 
-        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages = $this->getLanguages();
         $request->setLanguages($languages);
         $request->setBaseLanguageId($this->resolveLanguageContext($languages)['defaultLangId']);
 
@@ -155,8 +156,7 @@ class SettingController extends BaseWebController
             return $this->withError(lang('Settings.settings_not_found'), route_to('admin.cms.settings'));
         }
 
-        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
 
         $focusLangRaw = $this->request->getGet('focus_lang');
@@ -170,6 +170,7 @@ class SettingController extends BaseWebController
             'languages' => $languages,
             'focusLangId' => $focusLangId,
             'baseLanguageId' => $languageContext['defaultLangId'],
+            'returnTo' => $this->incomingReturnTo(),
         ]);
     }
 
@@ -187,8 +188,7 @@ class SettingController extends BaseWebController
             return $invalid;
         }
 
-        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
-        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+        $languages = $this->getLanguages();
         $request->setLanguages($languages);
         $request->setBaseLanguageId($this->resolveLanguageContext($languages)['defaultLangId']);
 
@@ -198,7 +198,7 @@ class SettingController extends BaseWebController
             return $this->failApi($response, lang('Settings.settings_update_failed'));
         }
 
-        return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Settings.settings_update_success'));
+        return redirect()->to($this->resolveReturnUrl(route_to('admin.cms.settings')))->with('success', lang('Settings.settings_update_success'));
     }
 
     public function delete(string $id): RedirectResponse
@@ -215,5 +215,15 @@ class SettingController extends BaseWebController
         }
 
         return redirect()->to(route_to('admin.cms.settings'))->with('success', lang('Settings.settings_delete_success'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getLanguages(): array
+    {
+        $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        $this->maybeFlashDevError($response);
+        return $this->extractItems($response);
     }
 }

@@ -13,6 +13,7 @@
 <?php ob_start(); ?>
 <form method="post" action="<?= route_to('admin.cms.collections.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <?= csrf_field() ?>
+    <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
     <input type="hidden" name="current_id" value="<?= esc((string) ($item['id'] ?? '')) ?>">
     <div class="lg:col-span-2 space-y-6">
         <?php $checkSlugBase = route_to('admin.cms.collections.check_slug'); ?>
@@ -55,6 +56,8 @@
                             <?php endforeach; ?>
                         </div>
                         <?php if ($translateTargets !== []): ?>
+                            <?php $copyMappings = cms_translation_copy_mappings(['name', 'slug', 'description'], $languages, $defaultLangIndex); ?>
+                            <button type="button" @click="copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="shrink-0 inline-flex items-center gap-1.5 text-xs text-gray-700 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50"><?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?></button>
                             <?= view('layouts/partials/translate_button', [
                                 'translateTargets' => $translateTargets,
                             ]) ?>

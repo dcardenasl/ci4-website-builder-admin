@@ -85,6 +85,7 @@ if (!empty($languages)) {
     <?php ob_start(); ?>
     <form method="post" action="<?= route_to('admin.cms.pages.update', $itemIdStr) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3" x-data="{ expandedSections: { basic: true, translations: true, publishing: false, seo: false, advanced: false } }">
         <?= csrf_field() ?>
+        <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
         <div class="lg:col-span-2 space-y-0">
 
         <!-- SECTION: BASIC (Always expanded) -->
@@ -232,6 +233,10 @@ if (!empty($languages)) {
                                 <?php endforeach; ?>
                             </div>
                             <?php if (!empty($translateTargets)): ?>
+                                <?php $copyMappings = cms_translation_copy_mappings(['slug', 'title', 'excerpt', 'meta_title', 'meta_description'], $languages, $defaultLangIndex); ?>
+                                <button type="button" @click="copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="shrink-0 inline-flex items-center gap-1.5 text-xs text-gray-700 hover:text-gray-900 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50 transition-colors">
+                                    <?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?>
+                                </button>
                                 <button type="button"
                                     @click="autoTranslateAll(<?= esc(json_encode($translateTargets, JSON_THROW_ON_ERROR), 'attr') ?>)"
                                     :disabled="translating || translatingAll"

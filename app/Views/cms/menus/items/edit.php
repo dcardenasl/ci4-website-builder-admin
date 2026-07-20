@@ -89,6 +89,7 @@ $currentParentId = (string) ($item['parent_id'] ?? '');
 
         <form action="<?= route_to('admin.cms.menus.items.update', $menuId, $itemId) ?>" method="post" class="grid grid-cols-1 gap-6 p-6 lg:grid-cols-3">
             <?= csrf_field() ?>
+            <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
             <input type="hidden" name="menu_id" value="<?= esc($menuId) ?>">
 
             <div class="space-y-6 lg:col-span-2">

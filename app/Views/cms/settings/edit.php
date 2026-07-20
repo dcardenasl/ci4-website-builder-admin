@@ -16,7 +16,7 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
 </div>
 
 <div class="space-y-6"
-    x-data="{ 
+    x-data="{
         settingType: '<?= esc($selectedSettingType, 'js') ?>',
         isTranslatable: <?= $isTranslatable ? 'true' : 'false' ?>
     }">
@@ -27,6 +27,7 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
 
     <form method="post" action="<?= route_to('admin.cms.settings.update', (string) ($item['id'] ?? '')) ?>" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <?= csrf_field() ?>
+        <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
 
         <div class="lg:col-span-2 space-y-6">
             <?php ob_start(); ?>
@@ -139,13 +140,31 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                     </div>
                     <?php $translationsContent = ob_get_clean(); ?>
 
+                    <?php
+                    $copyTargets = [];
+                foreach ($languages as $lang) {
+                    $langId = (int) $lang['id'];
+                    if ($baseLanguageId !== null && $langId === $baseLanguageId) {
+                        continue;
+                    }
+                    $copyTargets[] = '[name="translations[' . $langId . ']"]';
+                }
+                $copySource = '[name="setting_value_string"], [name="setting_value_int"], [name="setting_value_bool"][type="checkbox"], [name="setting_value_json"]';
+                $copyMappings = [['source' => $copySource, 'targets' => $copyTargets]];
+                ?>
+                    <div class="mb-4 flex justify-end">
+                        <button type="button" x-show="isTranslatable" @click="window.copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="inline-flex items-center gap-1.5 text-xs text-gray-700 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50">
+                            <?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?>
+                        </button>
+                    </div>
+
                     <?= view('components/display/form_section', [
-                        'title' => 'Settings.settings_translations',
-                        'description' => 'Settings.field_is_translatable_help',
-                        'badge' => 'Settings.field_is_translatable',
-                        'content' => $translationsContent,
-                        'bodyClass' => 'space-y-4'
-                    ]) ?>
+                    'title' => 'Settings.settings_translations',
+                    'description' => 'Settings.field_is_translatable_help',
+                    'badge' => 'Settings.field_is_translatable',
+                    'content' => $translationsContent,
+                    'bodyClass' => 'space-y-4'
+                ]) ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -168,11 +187,11 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                 'placeholder' => 'Settings.field_setting_type_placeholder',
                 'help' => 'Settings.field_setting_type_help',
                 'options' => [
-                    'string' => lang('BlockTypes.type_string'),
-                    'int' => lang('BlockTypes.type_int'),
-                    'bool' => lang('BlockTypes.type_bool'),
-                    'json' => lang('BlockTypes.type_json'),
-                    'file_id' => lang('BlockTypes.type_file_id')
+                'string' => lang('BlockTypes.type_string'),
+                'int' => lang('BlockTypes.type_int'),
+                'bool' => lang('BlockTypes.type_bool'),
+                'json' => lang('BlockTypes.type_json'),
+                'file_id' => lang('BlockTypes.type_file_id')
                 ],
                 'value' => $item['setting_type'] ?? 'string',
                 'errors' => $errors ?? [],
@@ -180,13 +199,13 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
             ]) ?>
             <div @change="isTranslatable = $event.target.checked">
                 <?= view('components/form/boolean', [
-                    'name' => 'is_translatable',
-                    'label' => 'Settings.field_is_translatable',
-                    'value' => $item['is_translatable'] ?? false,
-                    'on_label' => 'Settings.field_is_translatable_on',
-                    'off_label' => 'Settings.field_is_translatable_off',
-                    'help' => 'Settings.field_is_translatable_help',
-                    'errors' => $errors ?? []
+                'name' => 'is_translatable',
+                'label' => 'Settings.field_is_translatable',
+                'value' => $item['is_translatable'] ?? false,
+                'on_label' => 'Settings.field_is_translatable_on',
+                'off_label' => 'Settings.field_is_translatable_off',
+                'help' => 'Settings.field_is_translatable_help',
+                'errors' => $errors ?? []
                 ]) ?>
             </div>
             <?= view('components/form/text', [

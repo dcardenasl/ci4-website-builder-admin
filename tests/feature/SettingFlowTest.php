@@ -121,6 +121,78 @@ final class SettingFlowTest extends CIUnitTestCase
         $update->assertRedirectTo(site_url('admin/cms/settings'));
     }
 
+    public function testEditEchoesReturnToAndUpdateRedirectsBackToIt(): void
+    {
+        $mock = $this->createMock(SettingApiService::class);
+        $mock->method('get')->willReturn([
+            'ok' => true, 'status' => 200,
+            'data' => [
+                'id' => 'test-uuid', 'setting_key' => 'site.title', 'setting_value' => 'Original title',
+                'setting_type' => 'string', 'setting_group' => 'general', 'is_translatable' => false,
+                'description' => 'Header title',
+            ],
+            'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+        ]);
+        $mock->method('update')->willReturn([
+            'ok' => true, 'status' => 200, 'data' => ['id' => 'test-uuid'],
+            'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+        ]);
+        Services::injectMock('settingApiService', $mock);
+
+        $session = [
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.settings.read', 'cms.settings.write']],
+        ];
+        $returnTo = '/admin/cms/translations/audit?resource=setting';
+
+        $edit = $this->withSession($session)->get('/admin/cms/settings/test-uuid/edit?return_to=' . urlencode($returnTo));
+        $edit->assertStatus(200);
+        $this->assertStringContainsString('name="return_to" value="' . $returnTo . '"', (string) $edit->getBody());
+
+        $update = $this->withSession($session)->post('/admin/cms/settings/test-uuid', [
+            csrf_token() => csrf_hash(),
+            'return_to' => $returnTo,
+            'setting_key' => 'site.title',
+            'setting_type' => 'string',
+            'setting_value' => 'Updated title',
+            'setting_value_string' => 'Updated title',
+            'setting_group' => 'general',
+            'is_translatable' => '0',
+            'description' => 'Header title',
+        ]);
+
+        $update->assertRedirectTo(site_url($returnTo));
+    }
+
+    public function testUpdateIgnoresUnsafeReturnToAndFallsBackToDefault(): void
+    {
+        $mock = $this->createMock(SettingApiService::class);
+        $mock->method('update')->willReturn([
+            'ok' => true, 'status' => 200, 'data' => ['id' => 'test-uuid'],
+            'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+        ]);
+        Services::injectMock('settingApiService', $mock);
+
+        $session = [
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.settings.read', 'cms.settings.write']],
+        ];
+
+        $update = $this->withSession($session)->post('/admin/cms/settings/test-uuid', [
+            csrf_token() => csrf_hash(),
+            'return_to' => 'https://evil.example.com/phish',
+            'setting_key' => 'site.title',
+            'setting_type' => 'string',
+            'setting_value' => 'Updated title',
+            'setting_value_string' => 'Updated title',
+            'setting_group' => 'general',
+            'is_translatable' => '0',
+            'description' => 'Header title',
+        ]);
+
+        $update->assertRedirectTo(site_url('admin/cms/settings'));
+    }
+
     public function testStoreValidationFailureRedirectsBack(): void
     {
         $result = $this->withSession([

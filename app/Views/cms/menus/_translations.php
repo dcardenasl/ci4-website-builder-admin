@@ -5,6 +5,13 @@ $defaultLangId = (int) ($defaultLangId ?? 0);
 $defaultLangCode = (string) ($defaultLangCode ?? '');
 $focusLangId = (int) ($focusLangId ?? 0);
 $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId;
+$defaultLangIndex = 0;
+foreach ($languages as $languageIndex => $language) {
+    if ((int) ($language['id'] ?? 0) === $defaultLangId) {
+        $defaultLangIndex = (int) $languageIndex;
+        break;
+    }
+}
 $translateTargets = is_array($translateTargets ?? null) ? $translateTargets : [];
 $translateUrl = route_to('admin.cms.translate');
 ?>
@@ -31,6 +38,8 @@ $translateUrl = route_to('admin.cms.translate');
                 <?php endforeach; ?>
             </div>
             <?php if ($translateTargets !== []): ?>
+                <?php $copyMappings = cms_translation_copy_mappings(['name'], $languages, $defaultLangIndex); ?>
+                <button type="button" @click="copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="inline-flex items-center gap-1.5 text-xs text-gray-700 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50"><?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?></button>
                 <?= view('layouts/partials/translate_button', ['translateTargets' => $translateTargets]) ?>
             <?php endif; ?>
         </div>

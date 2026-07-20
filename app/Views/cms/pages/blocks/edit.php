@@ -100,6 +100,7 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
               action="<?= route_to($ownerUpdateRoute, (string) $page['id'], (string) $block['id']) ?>"
               class="space-y-6">
             <?= csrf_field() ?>
+            <input type="hidden" name="return_to" value="<?= esc($returnTo ?? '', 'attr') ?>">
             <input type="hidden" name="block_id" value="<?= esc((string) $blockIdValue) ?>">
 
             <!-- Hidden sort order and active checkbox -->
