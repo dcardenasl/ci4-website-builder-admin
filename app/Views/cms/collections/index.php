@@ -67,6 +67,9 @@
                                 <span aria-hidden="true" x-text="sortIcon('collection_key')"></span>
                             </button>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('App.translations') ?></span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Collections.field_is_active')])) ?>">
                                 <span><?= lang('Collections.field_is_active') ?></span>
@@ -104,6 +107,9 @@
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.collection_key ?? '-')"></td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['name']]) ?>
+                            </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span class="inline-flex items-center">
                                     <template x-if="row.is_active">

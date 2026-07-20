@@ -65,6 +65,9 @@
                         <th class="<?= esc(table_th_class()) ?>">
                             <span><?= lang('Categories.field_name') ?></span>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('App.translations') ?></span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('collection_id')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('collection_id')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Categories.field_collection_id')])) ?>">
                                 <span><?= lang('Categories.field_collection_id') ?></span>
@@ -96,6 +99,9 @@
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? '-')"></td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['name', 'slug']]) ?>
+                            </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.collection_name ?? row.collection_key ?? row.collection_id ?? '-')"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.parent_label ?? row.parent_name ?? row.parent_id ?? '-')"></td>
                             <td class="<?= esc(table_td_class()) ?>">

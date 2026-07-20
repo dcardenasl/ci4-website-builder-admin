@@ -68,6 +68,9 @@
                             </button>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('App.translations') ?></span>
+                        </th>
+                        <th class="<?= esc(table_th_class()) ?>">
                             <span><?= lang('Menus.field_location') ?></span>
                         </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
@@ -93,6 +96,9 @@
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span class="font-medium text-gray-900 font-mono text-sm" x-text="String(row.menu_key ?? '-')"></span>
+                            </td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['name']]) ?>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>">
                                 <template x-if="row.location">

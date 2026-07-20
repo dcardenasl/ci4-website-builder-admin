@@ -50,15 +50,17 @@
         <!-- Translations with language tabs -->
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = (int) ($defaultLangId ?? 0);
+            $defaultLangId = (int) ($defaultLangId ?? 0);
             $defaultLangCode = (string) ($defaultLangCode ?? '');
             $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
+            $focusLangId = (int) ($focusLangId ?? 0);
+            $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId;
             $translateUrl = route_to('admin.cms.translate');
             ?>
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="text-sm font-semibold text-gray-800 mb-3"><?= esc(lang('Categories.translations_title')) ?></h4>
 
-                <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                     <div class="flex items-center justify-between border-b border-gray-200 mb-4">
                         <div class="flex gap-0.5" role="tablist">
                             <?php foreach ($languages as $lang): ?>

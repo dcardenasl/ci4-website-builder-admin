@@ -111,7 +111,8 @@ $isTranslatable = (bool) old('is_translatable', $item['is_translatable'] ?? fals
                                 }
                             }
                             ?>
-                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                            <?php $isFocusedLang = (int) ($focusLangId ?? 0) === $langId; ?>
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3" <?php if ($isFocusedLang): ?>x-data x-init="$el.scrollIntoView({ behavior: 'smooth', block: 'center' })"<?php endif; ?>>
                                 <div class="flex items-center gap-2">
                                     <span class="inline-flex items-center justify-center font-bold px-2.5 py-1 rounded bg-blue-50 text-blue-700 text-xs border border-blue-200 shrink-0">
                                         <?= $langCode ?>

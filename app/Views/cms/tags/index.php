@@ -64,6 +64,9 @@
                         <th class="<?= esc(table_th_class()) ?>">
                             <span><?= lang('Tags.translation_name_label') ?></span>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('App.translations') ?></span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('is_active')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Tags.field_is_active')])) ?>">
                                 <span><?= lang('Tags.field_is_active') ?></span>
@@ -83,6 +86,9 @@
                     <template x-for="row in rows" :key="String(row.id ?? Math.random())">
                         <tr class="<?= esc(table_row_class()) ?>">
                             <td class="<?= esc(table_td_class('bold')) ?>" x-text="String(row.name ?? row.slug ?? (Array.isArray(row.translations) && row.translations.length ? ((row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.name || (row.translations.find(t => t && t.name) || row.translations.find(t => t && t.slug) || row.translations.find(t => t))?.slug || '-') : '-'))"></td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['name', 'slug']]) ?>
+                            </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <span
                                     :class="row.is_active ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"

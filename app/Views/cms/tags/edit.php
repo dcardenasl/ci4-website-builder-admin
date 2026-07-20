@@ -18,9 +18,11 @@ $itemId = (string) ($item['id'] ?? '');
         <?php ob_start(); ?>
         <?php if (!empty($languages)): ?>
             <?php
-                $defaultLangId = (int) ($defaultLangId ?? 0);
+            $defaultLangId = (int) ($defaultLangId ?? 0);
             $defaultLangCode = (string) ($defaultLangCode ?? '');
             $defaultLangIndex = (int) ($defaultLangIndex ?? 0);
+            $focusLangId = (int) ($focusLangId ?? 0);
+            $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId;
             $translateUrl = route_to('admin.cms.translate');
             $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
             ?>
@@ -30,7 +32,7 @@ $itemId = (string) ($item['id'] ?? '');
                     <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Tags.tags_details')) ?></p>
                 </div>
 
-                <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                     <div class="flex items-center justify-between border-b border-gray-200 mb-4">
                         <div class="flex gap-0.5" role="tablist">
                             <?php foreach ($languages as $lang): ?>

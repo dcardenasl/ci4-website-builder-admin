@@ -91,6 +91,9 @@
                                 <span aria-hidden="true" x-text="sortIcon('is_translatable')"></span>
                             </button>
                         </th>
+                        <th class="<?= esc(table_th_class()) ?>">
+                            <span><?= lang('App.translations') ?></span>
+                        </th>
                         <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('description')">
                             <button type="button" class="inline-flex items-center gap-1 hover:text-gray-700" @click="toggleSort('description')" aria-label="<?= esc(lang('TableA11y.sort_by', [lang('Settings.field_description')])) ?>">
                                 <span><?= lang('Settings.field_description') ?></span>
@@ -120,6 +123,14 @@
                                     :class="row.is_translatable ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800'"
                                     x-text="row.is_translatable ? '<?= esc(lang('App.yes'), 'js') ?>' : '<?= esc(lang('App.no'), 'js') ?>'"
                                 ></span>
+                            </td>
+                            <td class="<?= esc(table_td_class()) ?>">
+                                <template x-if="row.is_translatable">
+                                    <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['setting_value']]) ?>
+                                </template>
+                                <template x-if="!row.is_translatable">
+                                    <span class="text-xs text-gray-400">—</span>
+                                </template>
                             </td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="String(row.description ?? '-')"></td>
                             <td class="<?= esc(table_td_class('muted')) ?>" x-text="formatDate(row.created_at)"></td>

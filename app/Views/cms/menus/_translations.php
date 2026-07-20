@@ -3,6 +3,8 @@ $languages = is_array($languages ?? null) ? $languages : [];
 $translations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
 $defaultLangId = (int) ($defaultLangId ?? 0);
 $defaultLangCode = (string) ($defaultLangCode ?? '');
+$focusLangId = (int) ($focusLangId ?? 0);
+$initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId;
 $translateTargets = is_array($translateTargets ?? null) ? $translateTargets : [];
 $translateUrl = route_to('admin.cms.translate');
 ?>
@@ -14,7 +16,7 @@ $translateUrl = route_to('admin.cms.translate');
         <p class="mt-1 text-xs text-gray-500"><?= esc(lang('Menus.menus_translations_help')) ?></p>
     </div>
 
-    <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+    <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
         <div class="mb-4 flex items-center justify-between gap-3 border-b border-gray-200">
             <div class="flex gap-0.5" role="tablist">
                 <?php foreach ($languages as $language): ?>

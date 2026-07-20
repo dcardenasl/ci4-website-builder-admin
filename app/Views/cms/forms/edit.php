@@ -89,14 +89,16 @@ $languageItems  = json_encode(array_values($languages), $jsonFlags);
 
     <?php if (!empty($languages)): ?>
         <?php
-            $defaultLangId = (int) ($defaultLangId ?? 0);
+        $defaultLangId = (int) ($defaultLangId ?? 0);
         $defaultLangCode = (string) ($defaultLangCode ?? '');
+        $focusLangId = (int) ($focusLangId ?? 0);
+        $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId;
         $translateUrl = route_to('admin.cms.translate');
         ?>
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-base font-semibold text-gray-800"><?= lang('Forms.section_translations') ?></h2>
 
-            <div x-data="langTabs(<?= $defaultLangId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+            <div x-data="langTabs(<?= $initialTabId ?>, '<?= esc($translateUrl, 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                 <div class="mb-4 flex items-center justify-between border-b border-gray-200">
                     <div class="flex gap-1">
                         <?php foreach ($languages as $lang): ?>

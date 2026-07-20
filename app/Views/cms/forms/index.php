@@ -98,6 +98,7 @@
                                 </button>
                             </th>
                             <th class="<?= esc(table_th_class()) ?>"><?= lang('Forms.col_name') ?></th>
+                            <th class="<?= esc(table_th_class()) ?>"><?= lang('App.translations') ?></th>
                             <th class="<?= esc(table_th_class()) ?>"><?= lang('Forms.col_captcha') ?></th>
                             <th class="<?= esc(table_th_class()) ?> text-center"><?= lang('Forms.col_fields') ?></th>
                             <th class="<?= esc(table_th_class()) ?>" :aria-sort="sortAria('is_active')">
@@ -116,6 +117,9 @@
                                     <code class="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700" x-text="String(row.form_key || '-')"></code>
                                 </td>
                                 <td class="<?= esc(table_td_class('primary')) ?>" x-text="formName(row)"></td>
+                                <td class="<?= esc(table_td_class()) ?>">
+                                    <?= view('components/table/translation_badges', ['languages' => $languages ?? [], 'requiredFields' => ['name']]) ?>
+                                </td>
                                 <td class="<?= esc(table_td_class()) ?>">
                                     <span
                                         :class="isTruthy(row.has_captcha) ? 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600'"
