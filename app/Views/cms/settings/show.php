@@ -10,6 +10,9 @@
 <?php elseif (! empty($setting)): ?>
     <?php $itemId = (string) ($setting['id'] ?? ''); ?>
     <?php $isTrans = ! empty($setting['is_translatable']); ?>
+    <?php if ($isTrans): ?>
+        <?= view('components/table/translation_status_panel', ['languages' => $languages ?? [], 'translations' => $setting['translations'] ?? [], 'requiredFields' => ['setting_value'], 'sourceFields' => $setting, 'sourceUpdatedAt' => $setting['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.settings.edit', $itemId)]) ?>
+    <?php endif; ?>
 
     <div class="space-y-6">
         <!-- Top Title and Actions -->

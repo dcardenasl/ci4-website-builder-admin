@@ -25,6 +25,7 @@ foreach ($languages as $l) {
     $itemId = (string) ($entry['id'] ?? '');
     $entryTitle = (string) (($entry['translations'][0]['title'] ?? null) ?: ($entry['title'] ?? $entry['slug'] ?? $itemId));
     ?>
+    <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $entry['translations'] ?? [], 'requiredFields' => ['slug', 'title'], 'sourceFields' => $entry, 'sourceUpdatedAt' => $entry['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.entries.edit', $itemId)]) ?>
 
     <?= view('components/display/admin_page_header', [
         'backUrl' => route_to('admin.cms.entries'),

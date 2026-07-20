@@ -1,4 +1,17 @@
-<?php $category = $category ?? []; ?>
+<?php
+$category = $category ?? [];
+$languages = $languages ?? [];
+$langCodeMap = [];
+foreach ($languages as $language) {
+    if (is_array($language) && isset($language['id'], $language['code'])) {
+        $langCodeMap[(int) $language['id']] = strtoupper((string) $language['code']);
+    }
+}
+$translationByLang = [];
+foreach (($category['translations'] ?? []) as $translation) {
+    $translationByLang[(int) ($translation['language_id'] ?? 0)] = $translation;
+}
+?>
 
 <?php if (! empty($error)): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
@@ -15,17 +28,24 @@
         'badge' => view('components/table/boolean_cell', ['value' => $category['is_active'] ?? false]),
     ]) ?>
 
+    <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $category['translations'] ?? [], 'requiredFields' => ['name', 'slug'], 'sourceFields' => $category, 'sourceUpdatedAt' => $category['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.categories.edit', $itemId)]) ?>
+
     <?php ob_start(); ?>
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <h3 class="text-lg font-semibold text-gray-900"><?= lang('Categories.translations_title') ?></h3>
 
         <?php if (! empty($category['translations']) && is_array($category['translations'])): ?>
             <div class="mt-4 space-y-4">
-                <?php foreach ($category['translations'] as $t): ?>
+                <?php foreach ($languages as $language):
+                    $tLangId = (int) ($language['id'] ?? 0);
+                    $t = $translationByLang[$tLangId] ?? [];
+                    $tState = \App\Modules\Cms\Support\TranslationStatus::evaluate(array_merge($language, ['_source' => $category]), $category['translations'] ?? [], ['name', 'slug'], $category['updated_at'] ?? null)['status'];
+                    ?>
                     <div class="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
-                        <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between">
-                            <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($t['language_id']) ?></span>
-                            <span class="text-gray-500 font-mono">/<?= esc($t['slug']) ?></span>
+                        <div class="font-bold text-sm text-brand-700 pb-2 border-b border-gray-200 flex justify-between gap-2">
+                            <span><?= esc(lang('CmsLanguages.field_code')) ?>: <?= esc($langCodeMap[$tLangId] ?? ('#' . $tLangId)) ?></span>
+                            <span class="inline-flex items-center gap-2"><span class="rounded-full px-2 py-0.5 text-[10px] font-semibold <?= \App\Modules\Cms\Support\TranslationStatus::badgeClasses($tState) ?>"><?= esc(lang('Translations.status_' . $tState)) ?></span><a href="<?= esc(\App\Modules\Cms\Support\TranslationStatus::editUrl(route_to('admin.cms.categories.edit', $itemId), $tLangId)) ?>" class="text-xs text-brand-600 hover:text-brand-700"><?= esc(lang('App.edit')) ?></a></span>
+                            <span class="text-gray-500 font-mono">/<?= esc($t['slug'] ?? '') ?></span>
                         </div>
                         <dl class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-xs">
                             <div>

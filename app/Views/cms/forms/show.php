@@ -18,7 +18,9 @@
             $langCodeMap[(int) $l['id']] = strtoupper((string) $l['code']);
         }
     }
+    $formLanguages = $languages ?? [];
     ?>
+    <?= view('components/table/translation_status_panel', ['languages' => $formLanguages, 'translations' => $form['translations'] ?? [], 'requiredFields' => ['name'], 'sourceFields' => $form, 'sourceUpdatedAt' => $form['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.forms.edit', $itemId)]) ?>
 
     <?= view('components/display/admin_page_header', [
         'backUrl' => route_to('admin.cms.forms'),

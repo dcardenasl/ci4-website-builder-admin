@@ -36,6 +36,7 @@ foreach ($languages as $l) {
     </div>
 <?php elseif (! empty($page)): ?>
     <?php $itemId = (string) ($page['id'] ?? ''); ?>
+    <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $page['translations'] ?? [], 'requiredFields' => ['slug', 'title'], 'sourceFields' => $page, 'sourceUpdatedAt' => $page['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.pages.edit', $itemId)]) ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
@@ -184,7 +185,7 @@ foreach ($languages as $l) {
                                         <?= esc(lang('Pages.blocks_view_page')) ?>
                                     </a>
                                     <?php endif; ?>
-                                    <a href="<?= route_to('admin.cms.pages.edit', $itemId) ?>?focus_lang=<?= $tLangId ?>"
+                                    <a href="<?= esc(\App\Modules\Cms\Support\TranslationStatus::editUrl(route_to('admin.cms.pages.edit', $itemId), $tLangId)) ?>"
                                        class="<?= esc(action_button_class('neutral')) ?> !text-xs !py-1 !px-2 whitespace-nowrap">
                                         <?= ui_icon('pencil', 'h-3 w-3') ?>
                                         <?= esc(lang('Pages.edit_in_language', ['lang' => $tLangCode])) ?>
