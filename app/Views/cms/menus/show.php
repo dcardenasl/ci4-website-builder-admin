@@ -23,6 +23,7 @@ foreach ($languages as $lang) {
     </div>
 <?php elseif (! empty($menu)): ?>
     <?php $itemId = (string) ($menu['id'] ?? ''); ?>
+    <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $menu['translations'] ?? [], 'requiredFields' => ['name'], 'sourceFields' => $menu, 'sourceUpdatedAt' => $menu['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.menus.edit', $itemId)]) ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -157,17 +158,16 @@ foreach ($languages as $lang) {
                     </div>
 
                     <div class="divide-y divide-gray-100">
-                        <?php
-    if (! function_exists('renderMenuTreeV2')):
+<?php
         /**
          * @param array<int, array<string, mixed>> $items
          * @param array<string, string> $langMap
          * @param array<string, string> $pages
          * @param array<string, string> $entries
          * @param array<string, string> $collections
+         * @param array<int, array<string, mixed>> $languages
          */
-        function renderMenuTreeV2(array $items, array $langMap, array $pages, array $entries, array $collections, ?int $parentId = null, int $depth = 0): void
-        {
+        $renderMenuTree = function (array $items, array $langMap, array $pages, array $entries, array $collections, array $languages, ?int $parentId = null, int $depth = 0) use (&$renderMenuTree): void {
             $items = array_filter($items, 'is_array');
             $siblings = array_values(array_filter($items, static function (array $item) use ($parentId): bool {
                 $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
@@ -229,6 +229,24 @@ foreach ($languages as $lang) {
 
                 $indentPx = 16 + ($depth * 24);
                 $connector = $depth > 0 ? ($isLast ? '└─' : '├─') : '';
+                $itemTranslations = is_array($item['translations'] ?? null) ? $item['translations'] : [];
+                $itemStates = [];
+                foreach ($languages as $language) {
+                    $itemStates[] = \App\Modules\Cms\Support\TranslationStatus::evaluate(
+                        ['id' => (int) ($language['id'] ?? 0)],
+                        $itemTranslations,
+                        ['label'],
+                        $item['updated_at'] ?? null,
+                    )['status'];
+                }
+                $itemState = in_array('missing', $itemStates, true) ? 'missing' : (in_array('incomplete', $itemStates, true) ? 'incomplete' : (in_array('outdated', $itemStates, true) ? 'outdated' : 'complete'));
+                $itemFocusLanguageId = 0;
+                foreach ($itemStates as $stateIndex => $state) {
+                    if ($state !== 'complete') {
+                        $itemFocusLanguageId = (int) ($languages[$stateIndex]['id'] ?? 0);
+                        break;
+                    }
+                }
                 ?>
                                     <div class="flex items-center justify-between py-3 pr-4 hover:bg-gray-50/70 transition-colors" style="padding-left: <?= $indentPx ?>px">
                                         <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -237,6 +255,7 @@ foreach ($languages as $lang) {
                                             <?php endif; ?>
 
                                             <span class="font-medium text-gray-900 truncate"><?= esc($label ?: 'Untitled') ?></span>
+                                            <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold <?= \App\Modules\Cms\Support\TranslationStatus::badgeClasses($itemState) ?>"><?= esc(lang('Translations.status_' . $itemState)) ?></span>
 
                                             <span class="shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium <?= esc($linkBadgeClass) ?>" title="<?= esc(lang('Menus.items_link_type_label')) ?>">
                                                 <?= esc($linkBadge) ?>
@@ -270,7 +289,7 @@ foreach ($languages as $lang) {
                                         <div class="flex items-center gap-2 shrink-0 ml-3">
                                             <span class="text-[10px] text-gray-400 font-mono" title="<?= esc(lang('Menus.items_sort_order_label')) ?>">#<?= esc((string) ($item['sort_order'] ?? 0)) ?></span>
                                             <?php if (has_permission('cms.menus.write')): ?>
-                                            <a href="<?= route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_edit')) ?></a>
+                                            <a href="<?= esc(\App\Modules\Cms\Support\TranslationStatus::editUrl(route_to('admin.cms.menus.items.edit', $item['menu_id'], $item['id']), $itemFocusLanguageId)) ?>" class="px-2.5 py-1 text-xs border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_edit')) ?></a>
                                             <form method="post" action="<?= route_to('admin.cms.menus.items.delete', $item['menu_id'], $item['id']) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($label ?: ($item['translations'][0]['label'] ?? null)), 'js') ?>', () => $el.submit())" class="inline">
                                                 <?= csrf_field() ?>
                                                 <button type="submit" class="px-2.5 py-1 text-xs border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg shadow-sm transition"><?= esc(lang('Menus.menus_item_delete')) ?></button>
@@ -279,12 +298,11 @@ foreach ($languages as $lang) {
                                         </div>
                                     </div>
                                     <?php
-                renderMenuTreeV2($items, $langMap, $pages, $entries, $collections, (int) $item['id'], $depth + 1);
+                $renderMenuTree($items, $langMap, $pages, $entries, $collections, $languages, (int) $item['id'], $depth + 1);
             }
-        }
-    endif;
+        };
 
-renderMenuTreeV2($items, $langMap, $pages, $entries, $collections);
+$renderMenuTree($items, $langMap, $pages, $entries, $collections, $languages);
 ?>
                     </div>
                 <?php endif; ?>
