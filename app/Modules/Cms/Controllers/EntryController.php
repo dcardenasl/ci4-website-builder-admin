@@ -38,6 +38,7 @@ class EntryController extends BaseWebController
             'title'        => lang('Entries.entries_title'),
             'limitOptions' => [10, 25, 50, 100],
             'collections' => $this->collectionsOptions(),
+            'languages'   => $this->getLanguages(),
         ]);
     }
 
@@ -46,7 +47,7 @@ class EntryController extends BaseWebController
         return $this->tableDataResponse(
             ['collection_id'],
             ['name', 'created_at'],
-            fn (array $params) => $this->entryService->list($params),
+            fn (array $params) => $this->entryService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -193,14 +194,20 @@ class EntryController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/entries/edit', [
             'title'            => lang('Entries.entries_edit'),
             'item'             => $item,
             'collections'      => $this->collectionsOptions(),
             'languages'        => $languages,
+            'focusLangId'      => $focusLangId,
             'defaultLangId'    => $languageContext['defaultLangId'],
             'defaultLangCode'  => $languageContext['defaultLangCode'],
-            'defaultLangIndex'  => $languageContext['defaultLangIndex'],
+            'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'blockTemplate'    => $blockTemplate,
             'translateTargets' => $translateTargets,
             ...$this->taxonomyOptions($item),

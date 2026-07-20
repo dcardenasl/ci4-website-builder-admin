@@ -28,7 +28,7 @@ class TagController extends BaseWebController
         return $this->render('cms/tags/index', [
             'title'        => lang('Tags.tags_title'),
             'limitOptions' => [10, 25, 50, 100],
-
+            'languages'    => $this->getLanguages(),
         ]);
     }
 
@@ -37,7 +37,7 @@ class TagController extends BaseWebController
         return $this->tableDataResponse(
             [],
             ['name', 'created_at'],
-            fn (array $params) => $this->tagService->list($params),
+            fn (array $params) => $this->tagService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -116,10 +116,16 @@ class TagController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/tags/edit', [
             'title'            => lang('Tags.tags_edit'),
             'item'             => $this->extractData($response),
             'languages'        => $languages,
+            'focusLangId'      => $focusLangId,
             'defaultLangId'    => $languageContext['defaultLangId'],
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],

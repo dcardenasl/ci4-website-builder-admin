@@ -30,6 +30,7 @@ class CategoryController extends BaseWebController
             'limitOptions' => [10, 25, 50, 100],
             'collections' => $this->collectionsOptions(),
             'categories' => $this->categoriesOptions(),
+            'languages'    => $this->getLanguages(),
         ]);
     }
 
@@ -38,7 +39,7 @@ class CategoryController extends BaseWebController
         return $this->tableDataResponse(
             ['collection_id', 'parent_id'],
             ['name', 'created_at'],
-            fn (array $params) => $this->categoryService->list($params),
+            fn (array $params) => $this->categoryService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -121,12 +122,18 @@ class CategoryController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/categories/edit', [
             'title'            => lang('Categories.categories_edit'),
             'item'             => $this->extractData($response),
             'collections'      => $this->collectionsOptions(),
             'categories'       => $this->categoriesOptions($id),
             'languages'        => $languages,
+            'focusLangId'      => $focusLangId,
             'defaultLangId'    => $languageContext['defaultLangId'],
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],

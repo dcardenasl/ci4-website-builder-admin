@@ -26,9 +26,16 @@ class FormController extends BaseWebController
 
     public function index(): string
     {
+        $langResponse = $this->safeApiCall(fn () => $this->languageService->list());
+        if (! $langResponse['ok']) {
+            $this->maybeFlashDevError($langResponse);
+        }
+        $languages = $this->extractItems($langResponse) ?: [];
+
         return $this->render('cms/forms/index', [
             'title'        => lang('Forms.title'),
             'limitOptions' => [10, 25, 50, 100],
+            'languages'    => $languages,
         ]);
     }
 
@@ -37,7 +44,7 @@ class FormController extends BaseWebController
         return $this->tableDataResponse(
             [],
             ['form_key', 'is_active', 'created_at'],
-            fn (array $params) => $this->formService->list($params),
+            fn (array $params) => $this->formService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -149,10 +156,16 @@ class FormController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId, 'translations')
             : [];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/forms/edit', [
             'title'            => lang('Forms.edit_title'),
             'form'             => $form,
             'languages'        => $languages,
+            'focusLangId'      => $focusLangId,
             'defaultLangId'    => $languageContext['defaultLangId'],
             'defaultLangCode'  => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],

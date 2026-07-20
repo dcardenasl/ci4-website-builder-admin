@@ -29,7 +29,7 @@ class CollectionController extends BaseWebController
         return $this->render('cms/collections/index', [
             'title'        => lang('Collections.collections_title'),
             'limitOptions' => [10, 25, 50, 100],
-
+            'languages'    => $this->getLanguages(),
         ]);
     }
 
@@ -38,7 +38,7 @@ class CollectionController extends BaseWebController
         return $this->tableDataResponse(
             [],
             ['name', 'created_at'],
-            fn (array $params) => $this->collectionService->list($params),
+            fn (array $params) => $this->collectionService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -128,10 +128,16 @@ class CollectionController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/collections/edit', [
             'title' => lang('Collections.collections_edit'),
             'item' => $this->extractData($response),
             'languages' => $languages,
+            'focusLangId' => $focusLangId,
             'defaultLangId' => $languageContext['defaultLangId'],
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],

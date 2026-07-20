@@ -46,9 +46,13 @@ class SettingController extends BaseWebController
             return $deny;
         }
 
+        $langsRes = $this->safeApiCall(fn () => service('languageApiService')->list(['is_active' => 1]));
+        $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
+
         return $this->render('cms/settings/index', [
             'title'        => lang('Settings.settings_title'),
             'limitOptions' => [10, 25, 50, 100],
+            'languages'    => $languages,
         ]);
     }
 
@@ -65,7 +69,7 @@ class SettingController extends BaseWebController
         return $this->tableDataResponse(
             [],
             ['setting_key', 'setting_value', 'setting_type', 'setting_group', 'is_translatable', 'created_at'],
-            fn (array $params) => $this->settingService->list($params),
+            fn (array $params) => $this->settingService->list([...$params, 'include_translations' => 1]),
         );
     }
 
@@ -155,10 +159,16 @@ class SettingController extends BaseWebController
         $languages = $langsRes['ok'] ? $this->extractItems($langsRes) : [];
         $languageContext = $this->resolveLanguageContext($languages);
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/settings/edit', [
             'title'     => lang('Settings.settings_edit'),
             'item'      => $this->extractData($response),
             'languages' => $languages,
+            'focusLangId' => $focusLangId,
             'baseLanguageId' => $languageContext['defaultLangId'],
         ]);
     }

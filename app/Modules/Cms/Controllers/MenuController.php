@@ -33,6 +33,7 @@ class MenuController extends BaseWebController
         return $this->render('cms/menus/index', [
             'title'        => lang('Menus.menus_title'),
             'limitOptions' => [10, 25, 50, 100],
+            'languages'    => $this->getLanguages(),
         ]);
     }
 
@@ -42,7 +43,7 @@ class MenuController extends BaseWebController
             [],
             ['menu_key', 'created_at'],
             function (array $params) {
-                $response = $this->menuService->list($params);
+                $response = $this->menuService->list([...$params, 'include_translations' => 1]);
                 $menusPayload = isset($response['data']) && is_array($response['data']) ? $response['data'] : [];
                 $menus = $this->extractItems($response);
 
@@ -162,10 +163,16 @@ class MenuController extends BaseWebController
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         return $this->render('cms/menus/edit', [
             'title' => lang('Menus.menus_edit'),
             'item'  => $this->extractData($response),
             'languages' => $languages,
+            'focusLangId' => $focusLangId,
             'defaultLangId' => $defaultLangId,
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'translateTargets' => $defaultLangId > 0
