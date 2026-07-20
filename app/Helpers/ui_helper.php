@@ -357,6 +357,8 @@ if (! function_exists('ui_icon')) {
             'grip-vertical'   => 'grip-vertical',
             'external-link'   => 'external-link',
             'copy'            => 'copy',
+            'clipboard-list'  => 'clipboard-list',
+            'circle-check'    => 'circle-check',
         ];
 
         if (! isset($icons[$name])) {

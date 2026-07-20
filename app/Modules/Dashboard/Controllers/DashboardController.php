@@ -5,6 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Dashboard\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Modules\Cms\Services\CategoryApiService;
+use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\EntryApiService;
+use App\Modules\Cms\Services\FormApiService;
+use App\Modules\Cms\Services\FormSubmissionApiService;
+use App\Modules\Cms\Services\MenuApiService;
+use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\TagApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Files\Services\FileApiService;
 use App\Modules\Metrics\Services\MetricsApiService;
@@ -20,14 +29,32 @@ class DashboardController extends BaseWebController
     protected HealthApiService $healthService;
     protected MetricsApiService $metricsService;
     protected UserApiService $userService;
+    protected TranslationAuditApiService $translationAuditService;
+    protected FormSubmissionApiService $formSubmissionService;
+    protected PageApiService $pageService;
+    protected EntryApiService $entryService;
+    protected CollectionApiService $collectionService;
+    protected MenuApiService $menuService;
+    protected CategoryApiService $categoryService;
+    protected TagApiService $tagService;
+    protected FormApiService $formService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
-        $this->fileService    = service('fileApiService');
-        $this->healthService  = service('healthApiService');
-        $this->metricsService = service('metricsApiService');
-        $this->userService    = service('userApiService');
+        $this->fileService             = service('fileApiService');
+        $this->healthService           = service('healthApiService');
+        $this->metricsService          = service('metricsApiService');
+        $this->userService             = service('userApiService');
+        $this->translationAuditService = service('translationAuditApiService');
+        $this->formSubmissionService   = service('formSubmissionApiService');
+        $this->pageService             = service('pageApiService');
+        $this->entryService            = service('entryApiService');
+        $this->collectionService       = service('collectionApiService');
+        $this->menuService             = service('menuApiService');
+        $this->categoryService         = service('categoryApiService');
+        $this->tagService               = service('tagApiService');
+        $this->formService             = service('formApiService');
     }
 
     public function index(): string
@@ -63,8 +90,7 @@ class DashboardController extends BaseWebController
                 $cache->save($filesCacheKey, $filesResponse, 60);
             }
         }
-        $payloadFiles = $filesResponse['data'] ?? [];
-        $totalFiles   = $payloadFiles['meta']['total'] ?? $payloadFiles['data']['meta']['total'] ?? $payloadFiles['total'] ?? 0;
+        $totalFiles = $this->extractTotal($filesResponse);
 
         $usersResponse = ['ok' => false, 'data' => []];
         if ($isAdmin) {
@@ -76,10 +102,7 @@ class DashboardController extends BaseWebController
                 }
             }
         }
-        $payloadUsers = $usersResponse['data'] ?? [];
-        $totalUsers   = $isAdmin
-            ? ($payloadUsers['meta']['total'] ?? $payloadUsers['data']['meta']['total'] ?? $payloadUsers['total'] ?? 0)
-            : 0;
+        $totalUsers = $isAdmin ? $this->extractTotal($usersResponse) : 0;
 
         $uptime = $metrics['request_stats']['availability_percent']
                ?? $metrics['slo']['availability_percent']
@@ -163,24 +186,263 @@ class DashboardController extends BaseWebController
         ]));
     }
 
-    public function widgetActivity(): ResponseInterface
+    /**
+     * Per-language translation completeness (mirrors the audit workbench's
+     * stat cards) so the dashboard surfaces the project's actual translation
+     * health instead of only generic ops metrics.
+     */
+    public function widgetTranslations(): ResponseInterface
     {
-        $cache           = service('cache');
-        $dateRange       = $this->resolveDateRange();
-        $metricsCacheKey = 'dashboard_metrics_' . md5(serialize($dateRange));
+        if (! has_permission('cms.languages.read')) {
+            return $this->response->setBody(view('dashboard/partials/widget_translations', ['stats' => null]));
+        }
 
-        $metricsResponse = $cache->get($metricsCacheKey);
-        if (!is_array($metricsResponse)) {
-            $metricsResponse = $this->safeApiCall(fn () => $this->metricsService->summary($dateRange));
-            if ($metricsResponse['ok'] ?? false) {
-                $cache->save($metricsCacheKey, $metricsResponse, 120);
+        $cache    = service('cache');
+        $response = $cache->get('dashboard_translation_stats');
+        if (!is_array($response)) {
+            $response = $this->safeApiCall(fn () => $this->translationAuditService->getStats());
+            if ($response['ok'] ?? false) {
+                $cache->save('dashboard_translation_stats', $response, 300);
             }
         }
-        $metrics = $this->extractData($metricsResponse);
 
-        return $this->response->setBody($this->renderDevApiErrorPanel($metricsResponse) . view('dashboard/partials/widget_activity', [
-            'recent_activity' => $metrics['recent_activity'] ?? [],
+        return $this->response->setBody($this->renderDevApiErrorPanel($response) . view('dashboard/partials/widget_translations', [
+            'stats' => $this->extractItems($response),
         ]));
+    }
+
+    /**
+     * Actionable pending-work counters (translation gaps, unread form
+     * submissions), each independently permission-gated so the widget only
+     * ever shows what the current user is allowed to act on.
+     */
+    public function widgetAttention(): ResponseInterface
+    {
+        $cache = service('cache');
+        $items = [];
+        $devPanel = '';
+
+        if (has_permission('cms.languages.read')) {
+            $reportCacheKey = 'dashboard_translation_report_count';
+            $reportResponse = $cache->get($reportCacheKey);
+            if (!is_array($reportResponse)) {
+                $reportResponse = $this->safeApiCall(fn () => $this->translationAuditService->getReport());
+                if ($reportResponse['ok'] ?? false) {
+                    $cache->save($reportCacheKey, $reportResponse, 120);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($reportResponse);
+            $pendingCount = count($this->extractItems($reportResponse));
+            if ($pendingCount > 0) {
+                $items[] = [
+                    'label' => lang('Dashboard.pending_translations'),
+                    'count' => $pendingCount,
+                    'url'   => route_to('admin.cms.translations.audit'),
+                    'icon'  => 'languages',
+                ];
+            }
+        }
+
+        if (has_permission('cms.submissions.read')) {
+            $countsCacheKey  = 'dashboard_submission_counts';
+            $countsResponse = $cache->get($countsCacheKey);
+            if (!is_array($countsResponse)) {
+                $countsResponse = $this->safeApiCall(fn () => $this->formSubmissionService->counts());
+                if ($countsResponse['ok'] ?? false) {
+                    $cache->save($countsCacheKey, $countsResponse, 60);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($countsResponse);
+            $unread = (int) ($this->extractData($countsResponse)['new'] ?? 0);
+            if ($unread > 0) {
+                $items[] = [
+                    'label' => lang('Dashboard.unread_submissions'),
+                    'count' => $unread,
+                    'url'   => route_to('admin.cms.form_submissions') . '?status=new',
+                    'icon'  => 'mail',
+                ];
+            }
+        }
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_attention', ['items' => $items]));
+    }
+
+    /**
+     * Total counts per CMS resource type, one glance at "what's on my site" —
+     * each entry gated by its own read permission and omitted entirely when
+     * denied, so editors and admins each see only what they can reach.
+     */
+    public function widgetContentSummary(): ResponseInterface
+    {
+        $cache    = service('cache');
+        $devPanel = '';
+        $items    = [];
+
+        /** @var list<array{permission: string, cacheKey: string, call: callable(): array<string, mixed>, label: string, url: string, icon: string}> $resources */
+        $resources = [
+            [
+                'permission' => 'cms.pages.read',
+                'cacheKey'   => 'dashboard_count_pages',
+                'call'       => fn () => $this->pageService->list(['limit' => 1]),
+                'label'      => lang('Pages.pages_title'),
+                'url'        => route_to('admin.cms.pages'),
+                'icon'       => 'cms-page',
+            ],
+            [
+                'permission' => 'cms.entries.read',
+                'cacheKey'   => 'dashboard_count_entries',
+                'call'       => fn () => $this->entryService->list(['limit' => 1]),
+                'label'      => lang('Entries.entries_title'),
+                'url'        => route_to('admin.cms.entries'),
+                'icon'       => 'cms-entry',
+            ],
+            [
+                'permission' => 'cms.collections.read',
+                'cacheKey'   => 'dashboard_count_collections',
+                'call'       => fn () => $this->collectionService->list(['limit' => 1]),
+                'label'      => lang('Collections.collections_title'),
+                'url'        => route_to('admin.cms.collections'),
+                'icon'       => 'cms-collection',
+            ],
+            [
+                'permission' => 'cms.menus.read',
+                'cacheKey'   => 'dashboard_count_menus',
+                'call'       => fn () => $this->menuService->list(['limit' => 1]),
+                'label'      => lang('Menus.menus_title'),
+                'url'        => route_to('admin.cms.menus'),
+                'icon'       => 'cms-menu',
+            ],
+            [
+                'permission' => 'cms.categories.read',
+                'cacheKey'   => 'dashboard_count_categories',
+                'call'       => fn () => $this->categoryService->list(['limit' => 1]),
+                'label'      => lang('Categories.categories_title'),
+                'url'        => route_to('admin.cms.categories'),
+                'icon'       => 'folder-open',
+            ],
+            [
+                'permission' => 'cms.tags.read',
+                'cacheKey'   => 'dashboard_count_tags',
+                'call'       => fn () => $this->tagService->list(['limit' => 1]),
+                'label'      => lang('Tags.tags_title'),
+                'url'        => route_to('admin.cms.tags'),
+                'icon'       => 'tag',
+            ],
+            [
+                'permission' => 'cms.forms.read',
+                'cacheKey'   => 'dashboard_count_forms',
+                'call'       => fn () => $this->formService->list(['limit' => 1]),
+                'label'      => lang('Forms.title'),
+                'url'        => route_to('admin.cms.forms'),
+                'icon'       => 'clipboard-list',
+            ],
+        ];
+
+        foreach ($resources as $resource) {
+            if (! has_permission($resource['permission'])) {
+                continue;
+            }
+
+            $response = $cache->get($resource['cacheKey']);
+            if (!is_array($response)) {
+                $response = $this->safeApiCall($resource['call']);
+                if ($response['ok'] ?? false) {
+                    $cache->save($resource['cacheKey'], $response, 300);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($response);
+
+            $items[] = [
+                'label' => $resource['label'],
+                'count' => $this->extractTotal($response),
+                'url'   => $resource['url'],
+                'icon'  => $resource['icon'],
+            ];
+        }
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_content_summary', ['items' => $items]));
+    }
+
+    /**
+     * Most recently updated Pages and Entries, merged and sorted — the
+     * project-relevant equivalent of a generic "recent activity" feed.
+     */
+    public function widgetCmsActivity(): ResponseInterface
+    {
+        $cache    = service('cache');
+        $devPanel = '';
+        $entries  = [];
+
+        if (has_permission('cms.pages.read')) {
+            $response = $cache->get('dashboard_recent_pages');
+            if (!is_array($response)) {
+                $response = $this->safeApiCall(fn () => $this->pageService->list([
+                    'limit' => 5,
+                    'sort' => '-updated_at',
+                    'include_translations' => 1,
+                ]));
+                if ($response['ok'] ?? false) {
+                    $cache->save('dashboard_recent_pages', $response, 60);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($response);
+            foreach ($this->extractItems($response) as $page) {
+                $entries[] = $this->buildActivityEntry(
+                    $page,
+                    lang('Translations.resource_page'),
+                    route_to('admin.cms.pages.show', (string) ($page['id'] ?? ''))
+                );
+            }
+        }
+
+        if (has_permission('cms.entries.read')) {
+            $response = $cache->get('dashboard_recent_entries');
+            if (!is_array($response)) {
+                $response = $this->safeApiCall(fn () => $this->entryService->list([
+                    'limit' => 5,
+                    'sort' => '-updated_at',
+                    'include_translations' => 1,
+                ]));
+                if ($response['ok'] ?? false) {
+                    $cache->save('dashboard_recent_entries', $response, 60);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($response);
+            foreach ($this->extractItems($response) as $entry) {
+                $entries[] = $this->buildActivityEntry(
+                    $entry,
+                    lang('Translations.resource_entry'),
+                    route_to('admin.cms.entries.show', (string) ($entry['id'] ?? ''))
+                );
+            }
+        }
+
+        usort($entries, static fn (array $a, array $b): int => strcmp((string) $b['updated_at'], (string) $a['updated_at']));
+
+        return $this->response->setBody($devPanel . view('dashboard/partials/widget_cms_activity', [
+            'items' => array_slice($entries, 0, 6),
+        ]));
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     * @return array{title: string, type_label: string, url: string, updated_at: string}
+     */
+    private function buildActivityEntry(array $resource, string $typeLabel, string $url): array
+    {
+        $translations = is_array($resource['translations'] ?? null) ? $resource['translations'] : [];
+        $firstTranslation = is_array($translations[0] ?? null) ? $translations[0] : [];
+        $title = trim((string) ($firstTranslation['title'] ?? $firstTranslation['name'] ?? ''));
+        if ($title === '') {
+            $title = trim((string) ($resource['slug'] ?? '')) !== '' ? (string) $resource['slug'] : '#' . (string) ($resource['id'] ?? '');
+        }
+
+        return [
+            'title'      => $title,
+            'type_label' => $typeLabel,
+            'url'        => $url,
+            'updated_at' => (string) ($resource['updated_at'] ?? ''),
+        ];
     }
 
     /**
@@ -199,5 +461,15 @@ class DashboardController extends BaseWebController
         }
 
         return $response;
+    }
+
+    /**
+     * @param array<string, mixed> $response
+     */
+    private function extractTotal(array $response): int
+    {
+        $payload = $response['data'] ?? [];
+
+        return (int) ($payload['meta']['total'] ?? $payload['data']['meta']['total'] ?? $payload['total'] ?? 0);
     }
 }

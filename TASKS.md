@@ -4,7 +4,7 @@
 > Historial de completadas: ver `TASKS_ARCHIVE.md`.
 > Cross-repo: ver `../TASKS.md`.
 > Plan detallado CMS admin: ver [`../docs/cms_integration_plan.md`](../docs/cms_integration_plan.md).
-> Última actualización: 2026-07-20 (flujo editorial de traducciones — TRN-001..005 y TRN-007 cerrados, TRN-006 diferido a decisión de producto — ver detalle abajo)
+> Última actualización: 2026-07-20 (dashboard rediseñado con widgets de traducciones/atención/contenido/actividad CMS — ver DASH-001 en Completadas)
 
 ---
 
@@ -386,6 +386,18 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 ---
 
 ## ✅ Completadas
+
+### [DASH-001] Rediseño del dashboard/escritorio con información relevante del proyecto (2026-07-20)
+
+El escritorio del admin solo mostraba stats genéricos (usuarios, archivos, uptime API) y un feed de "actividad" que ya no aportaba señal real de negocio. A pedido explícito del usuario ("construye todo eso", tras preguntarle qué tarjetas/paneles recomendaba), se reconstruyó `DashboardController` y `dashboard/index.php` con 5 zonas nuevas, todas gateadas por permiso y con caché (60–300s) sobre `safeApiCall()`:
+
+- **Traducciones** (`widgetTranslations`) — barra de cobertura por idioma activo (`TranslationAuditService::getStats()`), gateada por `cms.languages.read`.
+- **Necesita tu atención** (`widgetAttention`) — traducciones pendientes + envíos de formulario sin leer, cada ítem enlaza directo a la pantalla de acción; oculta la sección entera si no hay pendientes.
+- **Resumen de contenido** (`widgetContentSummary`) — grid de conteos por recurso CMS (páginas, entradas, colecciones, menús, categorías, etiquetas, formularios), array-driven, cada tarjeta gateada por su propio permiso.
+- **Actividad CMS reciente** (`widgetCmsActivity`) — reemplaza el widget `activity` genérico eliminado; combina páginas + entradas recientes por `updated_at`, resolviendo el título real desde `translations[0]['title']` (nunca "Page #N").
+- Health/uptime/usuarios/archivos **demovidos** a una columna lateral secundaria y a una fila de stats al final, en vez de ser lo primero que se ve.
+
+Verificación: `composer test` (607/607), `composer quality` (PHPStan nivel 8 sobre 204 archivos, CS-Fixer, i18n-check, fixture policy) todo en verde. Se detectó y corrigió a tiempo que las nuevas clases Tailwind (`min-w-[1.5rem]`, `xl:grid-cols-3`, `lg:grid-cols-4`, etc.) no estaban compiladas — `npm run build:css` no corre con el alias `npm=pnpm` de esta máquina; hay que invocar el binario real (`/opt/homebrew/bin/npm run build:css`). Validado en navegador real en desktop (1440px), tablet y mobile (375px): layout se apila correctamente, sin errores de consola, datos reales cargando en cada widget.
 
 ### [AUD-001] Cierre de la auditoría de filtros/buscador del admin (2026-07-18)
 
