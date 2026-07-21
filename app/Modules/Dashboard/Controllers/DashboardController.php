@@ -308,14 +308,6 @@ class DashboardController extends BaseWebController
                 'url'        => route_to('admin.cms.tags'),
                 'icon'       => 'tag',
             ],
-            [
-                'permission' => 'cms.forms.read',
-                'cacheKey'   => 'dashboard_count_forms',
-                'call'       => fn () => $this->formService->list(['limit' => 1]),
-                'label'      => lang('Forms.title'),
-                'url'        => route_to('admin.cms.forms'),
-                'icon'       => 'clipboard-list',
-            ],
         ];
 
         foreach ($resources as $resource) {
@@ -337,6 +329,31 @@ class DashboardController extends BaseWebController
                 'count' => $this->extractTotal($response),
                 'url'   => $resource['url'],
                 'icon'  => $resource['icon'],
+                'badge' => null,
+            ];
+        }
+
+        if (has_permission('cms.forms.read')) {
+            // The domain's /cms/forms list endpoint is intentionally unpaginated
+            // (FormService::list() ignores filters and always returns every
+            // form), unlike Pages/Entries/etc which return a {data, meta}
+            // envelope — so this can't reuse extractTotal()'s meta.total
+            // lookup and instead counts the flat array directly.
+            $formsCacheKey  = 'dashboard_count_forms';
+            $formsResponse = $cache->get($formsCacheKey);
+            if (!is_array($formsResponse)) {
+                $formsResponse = $this->safeApiCall(fn () => $this->formService->list());
+                if ($formsResponse['ok'] ?? false) {
+                    $cache->save($formsCacheKey, $formsResponse, 300);
+                }
+            }
+            $devPanel .= $this->renderDevApiErrorPanel($formsResponse);
+
+            $items[] = [
+                'label' => lang('Forms.title'),
+                'count' => count($this->extractItems($formsResponse)),
+                'url'   => route_to('admin.cms.forms'),
+                'icon'  => 'clipboard-list',
                 'badge' => null,
             ];
         }

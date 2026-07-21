@@ -350,6 +350,38 @@ final class DashboardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('>7<', $body);
     }
 
+    public function testWidgetSummaryCountsFormsFromTheUnpaginatedListResponse(): void
+    {
+        // Unlike Pages/Entries/etc, the domain's /cms/forms endpoint ignores
+        // filters and always returns a flat array with no `meta.total` — a
+        // regression test for the bug where the dashboard showed "0
+        // Formularios Dinámicos" despite forms existing, because it was
+        // looking for a pagination envelope that this endpoint never sends.
+        $formService = $this->createMock(FormApiService::class);
+        $formService->expects($this->once())
+            ->method('list')
+            ->with([])
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => [
+                    ['id' => 1, 'form_key' => 'contact'],
+                    ['id' => 2, 'form_key' => 'gdpr_rights'],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('formApiService', $formService);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => ['cms.forms.read']],
+        ])->get('/dashboard/widgets/summary');
+
+        $result->assertStatus(200);
+        $body = $result->getBody();
+        $this->assertStringContainsString('admin/cms/forms', $body);
+        $this->assertMatchesRegularExpression('/text-xl font-bold text-gray-900">\s*2\s*</', $body);
+    }
+
     public function testWidgetSummaryShowsSubmissionsTotalAndPendingBadgeWhenPermitted(): void
     {
         $submissionService = $this->createMock(FormSubmissionApiService::class);
