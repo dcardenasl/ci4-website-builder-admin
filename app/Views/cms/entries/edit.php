@@ -271,33 +271,17 @@ if ($selectedTagValues !== []) {
                                 'errors' => $errors ?? []
                             ]) ?>
 
-                            <?php
-                                $otherFileIdSelectors = [];
-                        $otherFileUrlSelectors = [];
-                        foreach ($languages as $targetIndex => $targetLanguage) {
-                            if ((int) ($targetLanguage['id'] ?? 0) === (int) ($lang['id'] ?? 0)) {
-                                continue;
-                            }
-                            $otherFileIdSelectors[] = '#entry_featured_file_id_' . $targetIndex;
-                            $otherFileUrlSelectors[] = '#entry_featured_image_url_' . $targetIndex;
-                        }
-                        ?>
-                            <?= view('components/form/translatable_image', [
-                            'label' => 'Entries.translation_featured_image_label',
-                            'help' => 'Entries.translation_featured_image_help',
-                            'fileIdName' => "translations[{$index}][featured_file_id]",
-                            'fileUrlName' => "translations[{$index}][featured_image_url]",
-                            'fileIdInputId' => 'entry_featured_file_id_' . $index,
-                            'fileUrlInputId' => 'entry_featured_image_url_' . $index,
-                            'fileIdValue' => old("translations.{$index}.featured_file_id", $transValue['featured_file_id'] ?? ''),
-                            'fileUrlValue' => old("translations.{$index}.featured_image_url", $transValue['featured_image_url'] ?? ''),
-                            'copyTargetFileIdSelectors' => $otherFileIdSelectors,
-                            'copyTargetFileUrlSelectors' => $otherFileUrlSelectors,
-                            'copyLabel' => 'Entries.translation_copy_to_other_languages',
+                            <?= view('components/form/media_reference', [
+                            'name' => "translations[{$index}][featured_image]",
+                            'label' => lang('Entries.translation_featured_image_label'),
+                            'help' => lang('Entries.translation_featured_image_help'),
+                            'value' => old("translations.{$index}.featured_image", $transValue['featured_image'] ?? []),
+                            'fieldKey' => 'featured_image',
+                            'copyEnabled' => true,
                             'accept' => 'image',
                         ]) ?>
 
-                            <details class="group border border-gray-100 rounded-lg bg-gray-50/30" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description'])) ? 'open' : '' ?>>
+                            <details class="group border border-gray-100 rounded-lg bg-gray-50/30" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description']) || !empty($transValue['og_image']['file_id'] ?? null) || !empty($transValue['og_image']['url'] ?? null)) ? 'open' : '' ?>>
                                 <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 rounded-lg select-none">
                                     <span><?= esc(lang('Entries.section_seo_per_lang')) ?></span>
                                     <svg class="h-3.5 w-3.5 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
@@ -323,6 +307,15 @@ if ($selectedTagValues !== []) {
                                     'maxlength' => 500,
                                     'rows' => 3,
                                     'errors' => $errors ?? []
+                                ]) ?>
+                                    <?= view('components/form/media_reference', [
+                                    'name' => "translations[{$index}][og_image]",
+                                    'label' => lang('Entries.translation_og_image_label'),
+                                    'help' => lang('Entries.translation_og_image_help'),
+                                    'value' => old("translations.{$index}.og_image", $transValue['og_image'] ?? []),
+                                    'fieldKey' => 'og_image',
+                                    'copyEnabled' => true,
+                                    'accept' => 'image',
                                 ]) ?>
                                 </div>
                             </details>

@@ -45,9 +45,10 @@ final class EntryCreateViewTest extends CIUnitTestCase
             'translateTargets' => [],
         ]);
 
-        $this->assertStringContainsString('translatableFileField(', $html);
+        $this->assertStringContainsString('mediaReferenceField(', $html);
         $this->assertStringContainsString('Copiar a otros idiomas', $html);
-        $this->assertStringContainsString('window.copyLangTabsFileFieldToTargets(', $html);
-        $this->assertStringContainsString('featured_image_url', $html);
+        $this->assertStringContainsString('copyToAllLanguages()', $html);
+        $this->assertStringContainsString('translations&#x5B;0&#x5D;&#x5B;featured_image&#x5D;&#x5B;url&#x5D;', $html);
+        $this->assertStringContainsString('translations&#x5B;0&#x5D;&#x5B;og_image&#x5D;&#x5B;url&#x5D;', $html);
     }
 }

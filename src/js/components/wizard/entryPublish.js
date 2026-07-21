@@ -246,6 +246,10 @@ export const entryPublish = {
 
     isBlockFieldFilled(draft, field) {
         if (field.uiType === 'image') return Boolean(draft[field.key + '_file_id']);
+        if (field.uiType === 'media_reference') {
+            const ref = draft[field.key];
+            return Boolean(ref && typeof ref === 'object' && (ref.file_id || ref.url));
+        }
         const val = draft[field.key];
         if (field.uiType === 'richtext') {
             const plain = String(val ?? '')
@@ -392,7 +396,7 @@ export const entryPublish = {
         const schemaFields = this.config?.block_types?.[blockKey]?.fields ?? {};
         const nonTranslatableTypes = Array.isArray(this.config?.non_translatable_types)
             ? this.config.non_translatable_types
-            : ['file', 'image', 'repeater', 'boolean', 'integer', 'select', 'number'];
+            : ['file', 'image', 'media_reference', 'repeater', 'boolean', 'integer', 'select', 'number'];
         const translatableKeys = Object.entries(schemaFields)
             .filter(([, def]) => !nonTranslatableTypes.includes(def?.primitive ?? def?.type ?? 'string'))
             .map(([key]) => key);

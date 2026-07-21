@@ -105,6 +105,8 @@ return [
     'translation_meta_description_label' => 'SEO Meta Description',
     'translation_meta_description_placeholder' => 'Enter SEO description',
     'translation_meta_description_help' => 'Enter the SEO meta description for this language.',
+    'translation_og_image_label'    => 'Social sharing image (Open Graph)',
+    'translation_og_image_help'     => 'Image shown when this entry is shared on social media. Falls back to the featured image if left empty.',
     'translations_help'              => 'Use the language tabs to complete the entry content for each locale.',
 
     'categories_title'              => 'Categories',

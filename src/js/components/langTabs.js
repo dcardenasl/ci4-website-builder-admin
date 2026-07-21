@@ -163,9 +163,14 @@ export const copyLangTabsMediaReferenceFieldToAll = (
         normalizedReference.file_id = '';
     }
 
-    const sourceKindPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[source_kind\\]$`);
-    const fileIdPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[file_id\\]$`);
-    const urlPattern = new RegExp(`\\[block_data\\]\\[${escapeRegExp(normalizedFieldKey)}\\]\\[url\\]$`);
+    // Matches the field's [source_kind]/[file_id]/[url] triple regardless of
+    // what nests above it — `translations[N][block_data][fieldKey][...]` for
+    // block config, or `translations[N][fieldKey][...]` for entry/page-level
+    // fields like featured_image/og_image. fieldKey values are unique per
+    // form, so a suffix match is unambiguous.
+    const sourceKindPattern = new RegExp(`\\[${escapeRegExp(normalizedFieldKey)}\\]\\[source_kind\\]$`);
+    const fileIdPattern = new RegExp(`\\[${escapeRegExp(normalizedFieldKey)}\\]\\[file_id\\]$`);
+    const urlPattern = new RegExp(`\\[${escapeRegExp(normalizedFieldKey)}\\]\\[url\\]$`);
     const blockDataInputs = Array.from(document.querySelectorAll('input[name]'));
     const sourceKindInputs = blockDataInputs.filter((input) => sourceKindPattern.test(input.name));
     sourceKindInputs.forEach((sourceKindInput) => {

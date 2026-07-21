@@ -105,6 +105,8 @@ return [
     'translation_meta_description_label' => 'Descripción Meta SEO',
     'translation_meta_description_placeholder' => 'Ingrese la descripción SEO',
     'translation_meta_description_help' => 'Ingrese la descripción meta SEO para este idioma.',
+    'translation_og_image_label'    => 'Imagen para redes sociales (Open Graph)',
+    'translation_og_image_help'     => 'Imagen que se muestra al compartir esta entrada en redes sociales. Si se deja vacía, se usa la imagen destacada.',
     'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la entrada para cada locale.',
 
     'categories_title'              => 'Categorías',

@@ -216,6 +216,15 @@
                                         'rows' => 3,
                                         'errors' => $errors ?? []
                                     ]) ?>
+                                    <?= view('components/form/media_reference', [
+                                        'name' => "translations[{$index}][og_image]",
+                                        'label' => lang('Pages.translation_og_image_label'),
+                                        'help' => lang('Pages.translation_og_image_help'),
+                                        'value' => old("translations.{$index}.og_image", []),
+                                        'fieldKey' => 'og_image',
+                                        'copyEnabled' => true,
+                                        'accept' => 'image',
+                                    ]) ?>
                                 </div>
                             </details>
                         </div>

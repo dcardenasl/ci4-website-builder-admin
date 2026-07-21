@@ -35,16 +35,16 @@ final class EntryEditViewTest extends CIUnitTestCase
                         'slug' => 'entrada-ejemplo',
                         'title' => 'Entrada ejemplo',
                         'excerpt' => 'Un resumen',
-                        'featured_file_id' => 42,
-                        'featured_image_url' => '/files/42/view',
+                        'featured_image' => ['source_kind' => 'hub_file', 'file_id' => 42, 'url' => '/files/42/view'],
+                        'og_image' => ['source_kind' => 'external_url', 'file_id' => null, 'url' => 'https://cdn.example.com/og.jpg'],
                     ],
                     [
                         'language_id' => 2,
                         'slug' => 'sample-entry',
                         'title' => 'Sample entry',
                         'excerpt' => 'Summary',
-                        'featured_file_id' => 42,
-                        'featured_image_url' => '/files/42/view',
+                        'featured_image' => ['source_kind' => 'hub_file', 'file_id' => 42, 'url' => '/files/42/view'],
+                        'og_image' => [],
                     ],
                 ],
             ],
@@ -70,9 +70,11 @@ final class EntryEditViewTest extends CIUnitTestCase
             'translateTargets' => [],
         ]);
 
-        $this->assertStringContainsString('translatableFileField(', $html);
+        $this->assertStringContainsString('mediaReferenceField(', $html);
         $this->assertStringContainsString('Copiar a otros idiomas', $html);
-        $this->assertStringContainsString('window.copyLangTabsFileFieldToTargets(', $html);
-        $this->assertStringContainsString('featured_image_url', $html);
+        $this->assertStringContainsString('copyToAllLanguages()', $html);
+        $this->assertStringContainsString('translations&#x5B;0&#x5D;&#x5B;featured_image&#x5D;&#x5B;url&#x5D;', $html);
+        $this->assertStringContainsString('&#x2F;files&#x2F;42&#x2F;view', $html);
+        $this->assertStringContainsString('cdn.example.com', $html);
     }
 }

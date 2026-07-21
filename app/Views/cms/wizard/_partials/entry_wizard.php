@@ -72,27 +72,57 @@
                 </template>
 
                 <template x-if="field.type === 'image'">
-                    <div>
-                        <template x-if="formData[field.key + '_url']">
-                            <div class="relative inline-block">
-                                <img :src="formData[field.key + '_url']"
-                                     class="rounded-lg max-h-48 object-cover border border-gray-200" />
-                                <button type="button"
-                                        @click="formData[field.key + '_id'] = null; formData[field.key + '_url'] = null"
-                                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                    <div x-data="{ mode: (formData[field.key + '_url'] && !formData[field.key + '_id']) ? 'external_url' : 'hub_file' }">
+                        <div class="grid grid-cols-2 gap-2 mb-2" role="group">
+                            <button type="button" @click="mode = 'hub_file'"
+                                    class="rounded-lg border px-3 py-2 text-xs font-medium text-left transition"
+                                    :class="mode === 'hub_file' ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'">
+                                <?= lang('Wizard.image_source_library') ?>
+                            </button>
+                            <button type="button" @click="mode = 'external_url'; formData[field.key + '_id'] = null"
+                                    class="rounded-lg border px-3 py-2 text-xs font-medium text-left transition"
+                                    :class="mode === 'external_url' ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'">
+                                <?= lang('Wizard.image_source_external') ?>
+                            </button>
+                        </div>
+
+                        <template x-if="mode === 'hub_file'">
+                            <div>
+                                <template x-if="formData[field.key + '_url']">
+                                    <div class="relative inline-block">
+                                        <img :src="formData[field.key + '_url']"
+                                             class="rounded-lg max-h-48 object-cover border border-gray-200" />
+                                        <button type="button"
+                                                @click="formData[field.key + '_id'] = null; formData[field.key + '_url'] = null"
+                                                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                                    </div>
+                                </template>
+                                <template x-if="!formData[field.key + '_url']">
+                                    <label :class="{'opacity-60': uploading}"
+                                           class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                                        <span class="text-4xl">📷</span>
+                                        <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
+                                        <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
+                                        <span x-show="uploading" class="text-xs text-brand-600"><?= lang('Wizard.upload_uploading') ?></span>
+                                        <input type="file" accept="image/*" class="hidden"
+                                               @change="uploadImage(field, $event.target.files[0])" />
+                                    </label>
+                                </template>
                             </div>
                         </template>
-                        <template x-if="!formData[field.key + '_url']">
-                            <label :class="{'opacity-60': uploading}"
-                                   class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
-                                <span class="text-4xl">📷</span>
-                                <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
-                                <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
-                                <span x-show="uploading" class="text-xs text-brand-600"><?= lang('Wizard.upload_uploading') ?></span>
-                                <input type="file" accept="image/*" class="hidden"
-                                       @change="uploadImage(field, $event.target.files[0])" />
-                            </label>
+
+                        <template x-if="mode === 'external_url'">
+                            <div>
+                                <input type="url" x-model="formData[field.key + '_url']"
+                                       placeholder="<?= esc(lang('Wizard.image_source_external_placeholder'), 'attr') ?>"
+                                       inputmode="url" spellcheck="false"
+                                       class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500" />
+                                <template x-if="formData[field.key + '_url']">
+                                    <img :src="formData[field.key + '_url']" class="mt-2 rounded-lg max-h-48 object-cover border border-gray-200" />
+                                </template>
+                            </div>
                         </template>
+
                         <p x-show="uploadError" class="mt-1 text-xs text-red-600" x-text="uploadError"></p>
                     </div>
                 </template>

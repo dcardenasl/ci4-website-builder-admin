@@ -107,6 +107,8 @@ return [
     'translation_meta_description_label' => 'SEO meta description',
     'translation_meta_description_placeholder' => 'Enter SEO description',
     'translation_meta_description_help' => 'Optional description used by search engines.',
+    'translation_og_image_label'     => 'Social sharing image (Open Graph)',
+    'translation_og_image_help'      => 'Image shown when this page is shared on social media.',
     'translations_help'              => 'Use the language tabs to complete the page content for each locale.',
 
     // Bloques (generales)

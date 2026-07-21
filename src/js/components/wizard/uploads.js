@@ -83,4 +83,5 @@ export const uploads = {
             this.uploading = false;
         }
     },
+
 };

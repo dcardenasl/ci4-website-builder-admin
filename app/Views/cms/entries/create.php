@@ -157,29 +157,13 @@
                                 'errors' => $errors ?? []
                             ]) ?>
 
-                            <?php
-                                $otherFileIdSelectors = [];
-                        $otherFileUrlSelectors = [];
-                        foreach ($languages as $targetIndex => $targetLanguage) {
-                            if ((int) ($targetLanguage['id'] ?? 0) === (int) ($lang['id'] ?? 0)) {
-                                continue;
-                            }
-                            $otherFileIdSelectors[] = '#entry_featured_file_id_' . $targetIndex;
-                            $otherFileUrlSelectors[] = '#entry_featured_image_url_' . $targetIndex;
-                        }
-                        ?>
-                            <?= view('components/form/translatable_image', [
-                            'label' => 'Entries.translation_featured_image_label',
-                            'help' => 'Entries.translation_featured_image_help',
-                            'fileIdName' => "translations[{$index}][featured_file_id]",
-                            'fileUrlName' => "translations[{$index}][featured_image_url]",
-                            'fileIdInputId' => 'entry_featured_file_id_' . $index,
-                            'fileUrlInputId' => 'entry_featured_image_url_' . $index,
-                            'fileIdValue' => old("translations.{$index}.featured_file_id", ''),
-                            'fileUrlValue' => old("translations.{$index}.featured_image_url", ''),
-                            'copyTargetFileIdSelectors' => $otherFileIdSelectors,
-                            'copyTargetFileUrlSelectors' => $otherFileUrlSelectors,
-                            'copyLabel' => 'Entries.translation_copy_to_other_languages',
+                            <?= view('components/form/media_reference', [
+                            'name' => "translations[{$index}][featured_image]",
+                            'label' => lang('Entries.translation_featured_image_label'),
+                            'help' => lang('Entries.translation_featured_image_help'),
+                            'value' => old("translations.{$index}.featured_image", []),
+                            'fieldKey' => 'featured_image',
+                            'copyEnabled' => true,
                             'accept' => 'image',
                         ]) ?>
 
@@ -209,6 +193,15 @@
                                     'maxlength' => 500,
                                     'rows' => 3,
                                     'errors' => $errors ?? []
+                                ]) ?>
+                                    <?= view('components/form/media_reference', [
+                                    'name' => "translations[{$index}][og_image]",
+                                    'label' => lang('Entries.translation_og_image_label'),
+                                    'help' => lang('Entries.translation_og_image_help'),
+                                    'value' => old("translations.{$index}.og_image", []),
+                                    'fieldKey' => 'og_image',
+                                    'copyEnabled' => true,
+                                    'accept' => 'image',
                                 ]) ?>
                                 </div>
                             </details>

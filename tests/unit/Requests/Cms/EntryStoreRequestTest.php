@@ -19,7 +19,7 @@ final class EntryStoreRequestTest extends CIUnitTestCase
         parent::tearDown();
     }
 
-    public function testPayloadKeepsFeaturedImagePerTranslation(): void
+    public function testPayloadKeepsFeaturedImagePerTranslationWhenSelectedFromTheHub(): void
     {
         $request = service('request');
         $request->setGlobal('post', [
@@ -40,8 +40,7 @@ final class EntryStoreRequestTest extends CIUnitTestCase
                     'slug' => 'hola-mundo',
                     'title' => 'Hola mundo',
                     'excerpt' => 'Resumen',
-                    'featured_file_id' => '42',
-                    'featured_image_url' => '',
+                    'featured_image' => ['source_kind' => 'hub_file', 'file_id' => '42', 'url' => ''],
                     'meta_title' => 'Meta title',
                     'meta_description' => 'Meta description',
                 ],
@@ -59,10 +58,69 @@ final class EntryStoreRequestTest extends CIUnitTestCase
                 'title' => 'Hola mundo',
                 'excerpt' => 'Resumen',
                 'featured_file_id' => 42,
-                'featured_image_url' => null,
+                'featured_image_url' => '/files/42/view',
+                'og_image_file_id' => null,
+                'og_image_url' => null,
                 'meta_title' => 'Meta title',
                 'meta_description' => 'Meta description',
             ],
         ], $payload['translations']);
+    }
+
+    public function testPayloadAcceptsExternalUrlSourceForFeaturedAndOgImage(): void
+    {
+        $request = service('request');
+        $request->setGlobal('post', [
+            'collection_id' => '12',
+            'status' => 'published',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'slug' => 'hola-mundo',
+                    'title' => 'Hola mundo',
+                    'featured_image' => ['source_kind' => 'external_url', 'file_id' => '', 'url' => 'https://cdn.example.com/cover.jpg'],
+                    'og_image' => ['source_kind' => 'external_url', 'file_id' => '', 'url' => 'https://cdn.example.com/og.jpg'],
+                ],
+            ],
+        ]);
+
+        $formRequest = new EntryStoreRequest($request, service('validation'));
+        $payload = $formRequest->payload();
+
+        $this->assertSame([
+            [
+                'language_id' => 1,
+                'slug' => 'hola-mundo',
+                'title' => 'Hola mundo',
+                'excerpt' => null,
+                'featured_file_id' => null,
+                'featured_image_url' => 'https://cdn.example.com/cover.jpg',
+                'og_image_file_id' => null,
+                'og_image_url' => 'https://cdn.example.com/og.jpg',
+                'meta_title' => null,
+                'meta_description' => null,
+            ],
+        ], $payload['translations']);
+    }
+
+    public function testTranslationRowWithOnlyAnOgImageIsKeptAsMeaningful(): void
+    {
+        $request = service('request');
+        $request->setGlobal('post', [
+            'collection_id' => '12',
+            'status' => 'published',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'og_image' => ['file_id' => '9'],
+                ],
+            ],
+        ]);
+
+        $formRequest = new EntryStoreRequest($request, service('validation'));
+        $payload = $formRequest->payload();
+
+        $this->assertCount(1, $payload['translations']);
+        $this->assertSame(9, $payload['translations'][0]['og_image_file_id']);
     }
 }

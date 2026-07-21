@@ -107,6 +107,8 @@ return [
     'translation_meta_description_label' => 'Meta descripción SEO',
     'translation_meta_description_placeholder' => 'Ingrese la descripción SEO',
     'translation_meta_description_help' => 'Descripción opcional usada por buscadores.',
+    'translation_og_image_label'     => 'Imagen para redes sociales (Open Graph)',
+    'translation_og_image_help'      => 'Imagen que se muestra al compartir esta página en redes sociales.',
     'translations_help'              => 'Usa las pestañas de idioma para completar el contenido de la página para cada locale.',
 
     // Bloques (generales)

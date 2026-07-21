@@ -314,7 +314,7 @@ if (!empty($languages)) {
                                 ]) ?>
 
                                 <!-- SEO per language (collapsible, open if has values) -->
-                                <details class="group border border-gray-200 rounded-lg bg-gray-50" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description'])) ? 'open' : '' ?>>
+                                <details class="group border border-gray-200 rounded-lg bg-gray-50" <?= (!empty($transValue['meta_title']) || !empty($transValue['meta_description']) || !empty($transValue['og_image']['file_id'] ?? null) || !empty($transValue['og_image']['url'] ?? null)) ? 'open' : '' ?>>
                                     <summary class="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg select-none transition-colors">
                                         <span><?= esc(lang('Pages.section_seo_per_lang')) ?></span>
                                         <svg class="h-3.5 w-3.5 text-gray-400 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
@@ -340,6 +340,15 @@ if (!empty($languages)) {
                                             'maxlength' => 500,
                                             'rows' => 3,
                                             'errors' => $errors ?? []
+                                        ]) ?>
+                                        <?= view('components/form/media_reference', [
+                                            'name' => "translations[{$index}][og_image]",
+                                            'label' => lang('Pages.translation_og_image_label'),
+                                            'help' => lang('Pages.translation_og_image_help'),
+                                            'value' => old("translations.{$index}.og_image", $transValue['og_image'] ?? []),
+                                            'fieldKey' => 'og_image',
+                                            'copyEnabled' => true,
+                                            'accept' => 'image',
                                         ]) ?>
                                     </div>
                                 </details>

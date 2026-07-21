@@ -41,9 +41,28 @@ class EntryStoreRequest extends BaseFormRequest
             'published_at' => 'permit_empty|valid_date',
             'scheduled_at' => 'permit_empty|valid_date',
             'translations' => 'permit_empty',
-            'translations.*.featured_file_id' => 'permit_empty|integer',
-            'translations.*.featured_image_url' => 'permit_empty|string|max_length[2048]',
+            'translations.*.featured_image' => 'permit_empty',
+            'translations.*.og_image' => 'permit_empty',
         ];
+    }
+
+    /**
+     * Pull a media_reference field's {source_kind, file_id, url} triple out of
+     * a translation row, dropping source_kind (a UI-only concern the domain
+     * doesn't need) and returning null for an empty reference.
+     *
+     * @param array<string, mixed> $row
+     * @return array{file_id: int|null, url: string|null}|null
+     */
+    private static function extractMediaReference(array $row, string $key): ?array
+    {
+        $raw = is_array($row[$key] ?? null) ? $row[$key] : [];
+        $normalized = normalize_media_reference_value($raw);
+
+        $fileId = $normalized['file_id'] !== '' ? (int) $normalized['file_id'] : null;
+        $url = $normalized['url'] !== '' ? $normalized['url'] : null;
+
+        return ($fileId !== null || $url !== null) ? ['file_id' => $fileId, 'url' => $url] : null;
     }
 
     /**
@@ -57,16 +76,14 @@ class EntryStoreRequest extends BaseFormRequest
                 $title = isset($row['title']) ? trim((string) $row['title']) : '';
                 $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
                 $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
-                $featuredFileId = isset($row['featured_file_id']) && $row['featured_file_id'] !== '' ? (int) $row['featured_file_id'] : null;
-                $featuredImageUrl = isset($row['featured_image_url']) ? trim((string) $row['featured_image_url']) : '';
                 $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
                 $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
 
                 return $title !== ''
                     || $slug !== ''
                     || $excerpt !== ''
-                    || $featuredFileId !== null
-                    || $featuredImageUrl !== ''
+                    || self::extractMediaReference($row, 'featured_image') !== null
+                    || self::extractMediaReference($row, 'og_image') !== null
                     || $metaTitle !== ''
                     || $metaDescription !== '';
             },
@@ -74,18 +91,20 @@ class EntryStoreRequest extends BaseFormRequest
                 $title = isset($row['title']) ? trim((string) $row['title']) : '';
                 $slug = isset($row['slug']) ? trim((string) $row['slug']) : '';
                 $excerpt = isset($row['excerpt']) ? trim((string) $row['excerpt']) : '';
-                $featuredFileId = isset($row['featured_file_id']) && $row['featured_file_id'] !== '' ? (int) $row['featured_file_id'] : null;
-                $featuredImageUrl = isset($row['featured_image_url']) ? trim((string) $row['featured_image_url']) : '';
                 $metaTitle = isset($row['meta_title']) ? trim((string) $row['meta_title']) : '';
                 $metaDescription = isset($row['meta_description']) ? trim((string) $row['meta_description']) : '';
+                $featuredImage = self::extractMediaReference($row, 'featured_image');
+                $ogImage = self::extractMediaReference($row, 'og_image');
 
                 return [
                     'language_id' => (int) ($row['language_id'] ?? 0),
                     'slug' => $slug,
                     'title' => $title,
                     'excerpt' => $excerpt !== '' ? $excerpt : null,
-                    'featured_file_id' => $featuredFileId,
-                    'featured_image_url' => $featuredImageUrl !== '' ? $featuredImageUrl : null,
+                    'featured_file_id' => $featuredImage['file_id'] ?? null,
+                    'featured_image_url' => $featuredImage['url'] ?? null,
+                    'og_image_file_id' => $ogImage['file_id'] ?? null,
+                    'og_image_url' => $ogImage['url'] ?? null,
                     'meta_title' => $metaTitle !== '' ? $metaTitle : null,
                     'meta_description' => $metaDescription !== '' ? $metaDescription : null,
                 ];
