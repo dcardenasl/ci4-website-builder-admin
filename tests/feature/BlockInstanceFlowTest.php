@@ -9,6 +9,7 @@ use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
@@ -576,5 +577,158 @@ final class BlockInstanceFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
         $result->assertSee('/admin/cms/entries?collection_id=42');
         $result->assertSee('/admin/cms/entries/create?collection_id=42');
+    }
+
+    public function testIndexRendersPerLanguageTranslationBadgesForEachBlock(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('list')
+            ->with('1', 'page')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 10, 'block_id' => 5, 'parent_instance_id' => null, 'is_active' => true, 'translations' => []],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'is_default' => false],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $langMock);
+
+        $auditMock = $this->createMock(TranslationAuditApiService::class);
+        $auditMock->method('auditOwnerBlocks')
+            ->with('page', '1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'blocks' => [
+                        10 => [
+                            'es' => ['language_id' => 1, 'status' => 'complete', 'detail' => ''],
+                            'en' => ['language_id' => 2, 'status' => 'missing', 'detail' => 'Translation is missing completely'],
+                        ],
+                    ],
+                    'summary' => [
+                        'es' => ['complete' => 1, 'total' => 1],
+                        'en' => ['complete' => 0, 'total' => 1],
+                    ],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('translationAuditApiService', $auditMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.read']],
+        ])->get('/admin/cms/pages/1/blocks');
+
+        $result->assertStatus(200);
+        $body = (string) $result->getBody();
+        // ES badge: complete (green pill).
+        $this->assertMatchesRegularExpression('/bg-green-100 text-green-700[^"]*"[^>]*>\s*ES/', $body);
+        // EN badge: missing (red pill).
+        $this->assertMatchesRegularExpression('/bg-red-100 text-red-700[^"]*"[^>]*>\s*EN/', $body);
+    }
+
+    public function testEditHonorsFocusLangQueryParamForInitialTab(): void
+    {
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('get')
+            ->with('1')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => ['id' => 1, 'title' => 'Test Page'],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $blockMock = $this->createMock(BlockInstanceApiService::class);
+        $blockMock->method('get')
+            ->with('1', 'page', '10')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'id' => 10,
+                    'block_id' => 2,
+                    'is_active' => true,
+                    'sort_order' => 1,
+                    'translations' => [],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockInstanceApiService', $blockMock);
+
+        $typeMock = $this->createMock(BlockTypeApiService::class);
+        $typeMock->method('get')
+            ->with(2)
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'id' => 2,
+                    'block_key' => 'rich_text',
+                    'schema_definition' => [
+                        'fields' => [
+                            'heading' => ['type' => 'text', 'label' => 'Título', 'required' => true],
+                        ],
+                    ],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('blockTypeApiService', $typeMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    ['id' => 1, 'code' => 'es', 'is_default' => true],
+                    ['id' => 2, 'code' => 'en', 'is_default' => false],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $langMock);
+
+        $auditMock = $this->createMock(TranslationAuditApiService::class);
+        $auditMock->method('auditResource')
+            ->with('block_instance', '10')
+            ->willReturn([
+                'ok' => true, 'status' => 200, 'data' => [
+                    'es' => ['language_id' => 1, 'status' => 'complete', 'detail' => ''],
+                    'en' => ['language_id' => 2, 'status' => 'missing', 'detail' => 'Translation is missing completely'],
+                ],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        Services::injectMock('translationAuditApiService', $auditMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.pages.write', 'cms.pages.read']],
+        ])->get('/admin/cms/pages/1/blocks/10/edit?focus_lang=2');
+
+        $result->assertStatus(200);
+        $body = (string) $result->getBody();
+        // Alpine's langTabs() is initialized with the focused language (2 = EN), not the default (1 = ES).
+        $this->assertStringContainsString('langTabs(2,', $body);
+        // The EN tab carries a 'missing' status dot.
+        $this->assertStringContainsString('bg-red-500', $body);
     }
 }

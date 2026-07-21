@@ -37,4 +37,18 @@ class TranslationAuditApiService extends BaseApiService
     {
         return $this->apiClient->get('/cms/translations/audit/resource/' . $type . '/' . $id);
     }
+
+    /**
+     * Audit every block instance belonging to a single page/entry — powers
+     * the contextual translation badges on the owner's "Ver" and "Bloques"
+     * views, instead of the sitewide report.
+     *
+     * @param string $ownerType 'page' | 'entry'
+     * @param int|string $ownerId
+     * @return ApiResponse
+     */
+    public function auditOwnerBlocks(string $ownerType, int|string $ownerId): array
+    {
+        return $this->apiClient->get('/cms/translations/audit/owner/' . $ownerType . '/' . $ownerId);
+    }
 }

@@ -139,6 +139,7 @@ return [
     'blocks_delete_confirm'       => '¿Seguro que deseas eliminar este bloque?',
     'blocks_reorder_success'      => 'Orden de bloques actualizado.',
     'blocks_reorder_error'        => 'No se pudo guardar el nuevo orden de bloques. Intenta de nuevo.',
+    'blocks_translation_badges_label'  => 'Estado de traducción por idioma',
 
     // Crear / Editar un bloque
     'block_add_title'             => 'Añadir Bloque',

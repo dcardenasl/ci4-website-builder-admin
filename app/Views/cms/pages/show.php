@@ -224,6 +224,8 @@ foreach ($languages as $l) {
                 'itemId'          => $itemId,
                 'ownerType'       => 'page',
                 'writePermission' => 'cms.pages.write',
+                'languages'       => $languages ?? [],
+                'blockTranslationStatus'  => $blockTranslationStatus ?? [],
             ]) ?>
         </div>
 

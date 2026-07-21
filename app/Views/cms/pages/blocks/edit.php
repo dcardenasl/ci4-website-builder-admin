@@ -1,8 +1,13 @@
 <?php
+
+use App\Modules\Cms\Support\TranslationStatus;
+
 $page      = $page      ?? [];
 $block     = $block     ?? [];
 $blockType = $blockType ?? [];
 $languages = $languages ?? [];
+$focusLangId = $focusLangId ?? 0;
+$blockTranslationStatus = $blockTranslationStatus ?? [];
 
 $schema      = is_array($blockType['schema_definition'] ?? [])
     ? ($blockType['schema_definition'] ?? [])
@@ -234,16 +239,20 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
 
             <!-- Content fields by language -->
             <?php if (! empty($fields)): ?>
+            <?php $initialTabId = $focusLangId > 0 ? $focusLangId : $defaultLangId; ?>
             <div class="border-t border-gray-100 pt-5"
                  x-ref="langTabs"
-                 x-data="langTabs(<?= $defaultLangId ?>, '<?= esc(route_to('admin.cms.translate'), 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
+                 x-data="langTabs(<?= $initialTabId ?>, '<?= esc(route_to('admin.cms.translate'), 'attr') ?>', '<?= esc($defaultLangCode, 'attr') ?>')">
                 <h4 class="text-sm font-semibold text-gray-800 mb-1"><?= esc(lang('Pages.block_content_section')) ?></h4>
                 <p class="text-xs text-gray-500 mb-4"><?= esc(lang('Pages.block_content_desc')) ?></p>
 
                 <!-- Tab bar -->
                 <div class="flex items-center justify-between border-b border-gray-200 mb-4">
                     <div class="flex" role="tablist">
-                        <?php foreach ($languages as $lang): ?>
+                        <?php foreach ($languages as $lang):
+                            $tabLangCode = strtolower((string) ($lang['code'] ?? ''));
+                            $tabStatus = (string) ($blockTranslationStatus[$tabLangCode]['status'] ?? '');
+                            ?>
                             <button type="button"
                                     role="tab"
                                     @click="setTab(<?= (int) $lang['id'] ?>)"
@@ -252,7 +261,11 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                                         ? 'border-brand-600 text-brand-700 bg-brand-50/40'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                     class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors">
-                                <?= esc(strtoupper((string) ($lang['code'] ?? ''))) ?>
+                                <?php if ($tabStatus !== ''): ?>
+                                    <span class="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle <?= TranslationStatus::badgeClasses($tabStatus, 'dot') ?>"
+                                          title="<?= esc(lang('Translations.status_' . $tabStatus), 'attr') ?>"></span>
+                                <?php endif; ?>
+                                <?= esc(strtoupper($tabLangCode)) ?>
                                 <?php if (! empty($lang['is_default'])): ?>
                                     <span class="ml-1 text-brand-400">★</span>
                                 <?php endif; ?>

@@ -8,6 +8,7 @@ use App\Controllers\BaseWebController;
 use App\Modules\Cms\Requests\PageStoreRequest;
 use App\Modules\Cms\Requests\PageUpdateRequest;
 use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use App\Modules\Cms\Support\CmsPresetCatalog;
 use App\Modules\Cms\Support\PagePresetApplier;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -19,12 +20,14 @@ class PageController extends BaseWebController
 {
     protected PageApiService $pageService;
     protected \App\Modules\Cms\Services\CollectionApiService $collectionService;
+    protected TranslationAuditApiService $translationAuditService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->pageService = service('pageApiService');
         $this->collectionService = service('collectionApiService');
+        $this->translationAuditService = service('translationAuditApiService');
     }
 
     public function index(): string
@@ -60,6 +63,7 @@ class PageController extends BaseWebController
                 'blocks'     => [],
                 'blockTypes' => [],
                 'languages'  => [],
+                'blockTranslationStatus'  => [],
             ]);
         }
 
@@ -80,7 +84,23 @@ class PageController extends BaseWebController
             'blocks'        => $blocks,
             'blockTypes'    => $this->fetchBlockTypesIndexed(),
             'languages'     => $this->getLanguages(),
+            'blockTranslationStatus'  => $this->ownerBlockTranslationStatus('page', $id),
         ]);
+    }
+
+    /**
+     * Translation status for every top-level/child block of this page.
+     * Degrades to empty on API failure so a status outage never breaks the
+     * page detail page itself.
+     *
+     * @return array<int|string, array<string, array<string, mixed>>>
+     */
+    private function ownerBlockTranslationStatus(string $ownerType, string $ownerId): array
+    {
+        $response = $this->safeApiCall(fn () => $this->translationAuditService->auditOwnerBlocks($ownerType, $ownerId));
+        $data = $response['ok'] ? $this->extractData($response) : [];
+
+        return is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
     }
 
     /**

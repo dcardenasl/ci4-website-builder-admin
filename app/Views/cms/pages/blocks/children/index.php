@@ -10,6 +10,8 @@ $ownerBlocksRoute = $ownerBlocksRoute ?? 'admin.cms.pages.blocks';
 $ownerCreateRoute = $ownerCreateRoute ?? 'admin.cms.pages.blocks.create';
 $ownerChildrenReorderRoute = $ownerChildrenReorderRoute ?? 'admin.cms.pages.blocks.children.reorder';
 $childLabel  = $childLabel  ?? 'Diapositiva';
+$languages   = $languages   ?? [];
+$blockTranslationStatus = $blockTranslationStatus ?? [];
 
 $pageId     = (string) ($page['id'] ?? '');
 $instanceId = (string) ($parentBlock['id'] ?? '');
@@ -159,6 +161,13 @@ $childLabelPlural = lang('Pages.' . ($ownerType === 'entry' ? 'child_label_subbl
                         <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"><?= esc(lang('Pages.blocks_status_inactive')) ?></span>
                     <?php endif; ?>
                 </div>
+
+                <!-- Translation status badges -->
+                <?= view('components/table/block_translation_badges', [
+                    'languages'        => $languages,
+                    'statusByLanguage' => $blockTranslationStatus[$childId] ?? [],
+                    'editUrl'          => route_to($ownerType === 'entry' ? 'admin.cms.entries.blocks.edit' : 'admin.cms.pages.blocks.edit', $pageId, $childId),
+                ]) ?>
 
                 <!-- Actions -->
                 <div class="flex w-full flex-wrap items-center gap-2 shrink-0 lg:w-auto lg:justify-end">

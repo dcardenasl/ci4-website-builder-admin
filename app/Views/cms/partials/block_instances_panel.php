@@ -12,6 +12,10 @@
  * Renders bare (no outer spacing/border) — the caller decides how it sits
  * relative to surrounding content (e.g. pages/show.php appends it after
  * translations inside the same card with its own border-t/mt-6 wrapper).
+ *
+ * Optional vars (translation status):
+ * @var array<int, array<string, mixed>> $languages Active languages (id, code, is_default)
+ * @var array<int|string, array<string, array<string, mixed>>> $blockTranslationStatus Keyed by block instance id -> language code -> {status, detail}
  */
 
 use App\Modules\Cms\Support\BlockOwnerRouting;
@@ -23,6 +27,8 @@ $emptyTKey = 'blocks_empty_title_' . $ownerType;
 $emptyDKey = 'blocks_empty_desc_' . $ownerType;
 
 $reorderUrl = route_to($routes['reorder'], $itemId);
+$languages  = $languages ?? [];
+$blockTranslationStatus = $blockTranslationStatus ?? [];
 ?>
 <div>
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -113,6 +119,13 @@ $reorderUrl = route_to($routes['reorder'], $itemId);
                     <span class="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 <?= $isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' ?>">
                         <?= esc($isActive ? lang('Pages.blocks_status_active') : lang('Pages.blocks_status_inactive')) ?>
                     </span>
+
+                    <!-- Translation status badges -->
+                    <?= view('components/table/block_translation_badges', [
+                        'languages'        => $languages,
+                        'statusByLanguage' => $blockTranslationStatus[$blockId] ?? [],
+                        'editUrl'          => route_to($routes['edit'], $itemId, $blockId),
+                    ]) ?>
 
                     <div class="grid grid-cols-2 gap-2 xl:hidden w-full">
                         <button type="button"

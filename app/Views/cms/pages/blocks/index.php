@@ -181,6 +181,13 @@ $blocksEmptyDesc = $ownerType === 'entry'
                             </span>
                         <?php endif; ?>
 
+                        <!-- Translation status badges -->
+                        <?= view('components/table/block_translation_badges', [
+                            'languages'        => $languages ?? [],
+                            'statusByLanguage' => $blockTranslationStatus[$blockId] ?? [],
+                            'editUrl'          => route_to($ownerEditRoute, (string) $page['id'], $blockId),
+                        ]) ?>
+
                         <!-- Actions -->
                         <div class="flex flex-wrap items-center gap-2 lg:ml-auto lg:justify-end">
                             <?php if (!empty($blockType['is_container'])): ?>

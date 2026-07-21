@@ -106,6 +106,8 @@ foreach ($languages as $l) {
             'itemId'          => $itemId,
             'ownerType'       => 'entry',
             'writePermission' => 'cms.entries.write',
+            'languages'       => $languages ?? [],
+            'blockTranslationStatus'  => $blockTranslationStatus ?? [],
         ]) ?>
     </section>
     <?php $mainContent = ob_get_clean(); ?>

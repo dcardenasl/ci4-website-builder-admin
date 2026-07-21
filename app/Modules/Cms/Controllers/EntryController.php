@@ -11,6 +11,7 @@ use App\Modules\Cms\Services\CategoryApiService;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\TagApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -22,6 +23,7 @@ class EntryController extends BaseWebController
     protected CollectionApiService $collectionService;
     protected CategoryApiService $categoryService;
     protected TagApiService $tagService;
+    protected TranslationAuditApiService $translationAuditService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -30,6 +32,7 @@ class EntryController extends BaseWebController
         $this->collectionService = service('collectionApiService');
         $this->categoryService   = service('categoryApiService');
         $this->tagService        = service('tagApiService');
+        $this->translationAuditService = service('translationAuditApiService');
     }
 
     public function index(): string
@@ -67,6 +70,7 @@ class EntryController extends BaseWebController
                 'collections' => $this->collectionsOptions(),
                 'blocks' => [],
                 'blockTypes' => [],
+                'blockTranslationStatus' => [],
                 'publicSiteUrl' => '',
             ]);
         }
@@ -91,8 +95,24 @@ class EntryController extends BaseWebController
             'collections' => $this->collectionsOptions(),
             'blocks' => $this->entryBlocks($id),
             'blockTypes' => $this->fetchBlockTypesIndexed(),
+            'blockTranslationStatus' => $this->ownerBlockTranslationStatus('entry', $id),
             'publicSiteUrl' => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
         ]);
+    }
+
+    /**
+     * Translation status for every top-level/child block of this entry.
+     * Degrades to empty on API failure so a status outage never breaks the
+     * entry detail page itself.
+     *
+     * @return array<int|string, array<string, array<string, mixed>>>
+     */
+    private function ownerBlockTranslationStatus(string $ownerType, string $ownerId): array
+    {
+        $response = $this->safeApiCall(fn () => $this->translationAuditService->auditOwnerBlocks($ownerType, $ownerId));
+        $data = $response['ok'] ? $this->extractData($response) : [];
+
+        return is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
     }
 
     /**

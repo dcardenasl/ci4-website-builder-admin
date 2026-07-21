@@ -8,6 +8,7 @@ use App\Controllers\BaseWebController;
 use App\Libraries\Cms\CmsEnums;
 use App\Modules\Cms\Services\BlockInstanceApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use App\Modules\Cms\Support\BlockOwnerRouting;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -18,6 +19,7 @@ class BlockInstanceController extends BaseWebController
 {
     protected BlockInstanceApiService $blockInstanceService;
     protected BlockTypeOptionsResolver $blockTypeOptions;
+    protected TranslationAuditApiService $translationAuditService;
 
     private const OWNER_PAGE = 'page';
     private const OWNER_ENTRY = 'entry';
@@ -27,6 +29,7 @@ class BlockInstanceController extends BaseWebController
         parent::initController($request, $response, $logger);
         $this->blockInstanceService = service('blockInstanceApiService');
         $this->blockTypeOptions = service('blockTypeOptionsResolver');
+        $this->translationAuditService = service('translationAuditApiService');
     }
 
     private function requireWrite(): ?RedirectResponse
@@ -56,6 +59,24 @@ class BlockInstanceController extends BaseWebController
             : $this->safeApiCall(fn () => service('pageApiService')->get($ownerId));
 
         return $response['ok'] ? $this->extractData($response) : [];
+    }
+
+    /**
+     * Translation status for every block belonging to a single page/entry,
+     * keyed by instance id -> language code -> {language_id,status,detail}.
+     * Backs the contextual per-language badges rendered in the block list
+     * views; degrades to empty on API failure so a badge outage never breaks
+     * the block builder itself (same graceful-degradation posture as
+     * activeLanguages() above).
+     *
+     * @return array<int|string, array<string, array<string, mixed>>>
+     */
+    private function ownerBlockTranslationStatus(string $ownerType, string $ownerId): array
+    {
+        $response = $this->safeApiCall(fn () => $this->translationAuditService->auditOwnerBlocks($ownerType, $ownerId));
+        $data = $response['ok'] ? $this->extractData($response) : [];
+
+        return is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
     }
 
     /**
@@ -133,6 +154,8 @@ class BlockInstanceController extends BaseWebController
             'blockTypes'        => $typesIndexed,
             'collectionsMap'    => $this->blockTypeOptions->collectionsMap(),
             'publicSiteUrl'     => rtrim((string) env('PUBLIC_SITE_URL'), '/'),
+            'languages'         => $this->activeLanguages(),
+            'blockTranslationStatus'  => $this->ownerBlockTranslationStatus($ownerType, $ownerId),
             'ownerType'         => $ownerType,
             'ownerLabel'        => BlockOwnerRouting::label($ownerType),
             'ownerShowRoute'    => BlockOwnerRouting::showRoute($ownerType),
@@ -334,6 +357,11 @@ class BlockInstanceController extends BaseWebController
             return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
+        $focusLangRaw = $this->request->getGet('focus_lang');
+        $focusLangId  = ($focusLangRaw !== null && is_scalar($focusLangRaw) && (int) $focusLangRaw > 0)
+            ? (int) $focusLangRaw
+            : 0;
+
         $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
         if (!$blockResponse['ok']) {
             return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['index'], $ownerId))->with('error', lang('Pages.block_not_found'));
@@ -380,6 +408,13 @@ class BlockInstanceController extends BaseWebController
             ? $this->buildTranslateTargets($languages, $translatableFieldNames, $defaultLangId, 'translations')
             : [];
 
+        // Per-language completeness for this single block, keyed by language
+        // code (e.g. 'es' => ['status' => 'incomplete', ...]) — powers the
+        // status dot on each ES/EN/FR tab. Degrades to [] on API failure so a
+        // status outage never blocks editing the block itself.
+        $blockStatusResponse = $this->safeApiCall(fn () => $this->translationAuditService->auditResource('block_instance', $id));
+        $blockTranslationStatus = $blockStatusResponse['ok'] ? $this->extractData($blockStatusResponse) : [];
+
         return $this->render('cms/pages/blocks/edit', [
             'title'        => lang('Pages.block_edit_title'),
             'page'         => $page,
@@ -391,6 +426,8 @@ class BlockInstanceController extends BaseWebController
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'focusLangId'  => $focusLangId,
+            'blockTranslationStatus' => $blockTranslationStatus,
             'ownerType'    => $ownerType,
             'ownerLabel'   => BlockOwnerRouting::label($ownerType),
             'ownerBlocksRoute' => BlockOwnerRouting::routes($ownerType)['index'],
@@ -673,6 +710,8 @@ class BlockInstanceController extends BaseWebController
             'children'             => $children,
             'blockTypes'           => $typesIndexed,
             'collectionsMap'       => $this->blockTypeOptions->collectionsMap(),
+            'languages'            => $this->activeLanguages(),
+            'blockTranslationStatus' => $this->ownerBlockTranslationStatus($ownerType, $ownerId),
             'ownerType'            => $ownerType,
             'ownerLabel'           => BlockOwnerRouting::label($ownerType),
             'ownerBlocksRoute'     => BlockOwnerRouting::routes($ownerType)['index'],

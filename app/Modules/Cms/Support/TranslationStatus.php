@@ -112,7 +112,8 @@ final class TranslationStatus
      * 'action' is the border+bg+text style used by the "translations pending"
      * banner (only ever renders non-complete statuses); 'pill' is the compact
      * bg+text badge used on detail cards and the menu tree, which also renders
-     * 'complete'.
+     * 'complete'; 'dot' is a solid-color w-1.5/h-1.5 background class (no
+     * text) for tight spaces like a language-tab indicator.
      */
     public static function badgeClasses(string $status, string $variant = 'pill'): string
     {
@@ -121,6 +122,15 @@ final class TranslationStatus
                 'missing' => 'border-red-200 bg-red-50 text-red-800',
                 'outdated' => 'border-orange-200 bg-orange-50 text-orange-800',
                 default => 'border-amber-200 bg-amber-50 text-amber-800',
+            };
+        }
+
+        if ($variant === 'dot') {
+            return match ($status) {
+                'missing' => 'bg-red-500',
+                'outdated' => 'bg-orange-500',
+                'incomplete' => 'bg-amber-500',
+                default => 'bg-green-500',
             };
         }
 
