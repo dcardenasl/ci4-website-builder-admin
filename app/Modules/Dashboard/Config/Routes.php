@@ -16,4 +16,5 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
     $routes->get('/dashboard/widgets/translations', '\App\Modules\Dashboard\Controllers\DashboardController::widgetTranslations', ['as' => 'dashboard.widgets.translations']);
     $routes->get('/dashboard/widgets/summary', '\App\Modules\Dashboard\Controllers\DashboardController::widgetSummary', ['as' => 'dashboard.widgets.summary']);
     $routes->get('/dashboard/widgets/cms-activity', '\App\Modules\Dashboard\Controllers\DashboardController::widgetCmsActivity', ['as' => 'dashboard.widgets.cms-activity']);
+    $routes->get('/dashboard/widgets/analytics', '\App\Modules\Dashboard\Controllers\DashboardController::widgetAnalytics', ['as' => 'dashboard.widgets.analytics']);
 });

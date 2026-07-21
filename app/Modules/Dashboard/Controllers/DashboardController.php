@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Dashboard\Controllers;
 
 use App\Controllers\BaseWebController;
+use App\Modules\Analytics\Services\AnalyticsApiService;
 use App\Modules\Cms\Services\CategoryApiService;
 use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\EntryApiService;
@@ -38,6 +39,7 @@ class DashboardController extends BaseWebController
     protected CategoryApiService $categoryService;
     protected TagApiService $tagService;
     protected FormApiService $formService;
+    protected AnalyticsApiService $analyticsService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -55,6 +57,7 @@ class DashboardController extends BaseWebController
         $this->categoryService         = service('categoryApiService');
         $this->tagService               = service('tagApiService');
         $this->formService             = service('formApiService');
+        $this->analyticsService         = service('analyticsApiService');
     }
 
     public function index(): string
@@ -208,6 +211,32 @@ class DashboardController extends BaseWebController
 
         return $this->response->setBody($this->renderDevApiErrorPanel($response) . view('dashboard/partials/widget_translations', [
             'stats' => $this->extractItems($response),
+        ]));
+    }
+
+    /**
+     * Lightweight traffic snapshot (total views, unique visitors, top page,
+     * top referrer) for the last 7 days, backed by the same cheap overview()
+     * endpoint the full Analytics page uses for its KPI cards — never the
+     * heavier per-page/referrer/timeseries breakdowns.
+     */
+    public function widgetAnalytics(): ResponseInterface
+    {
+        if (! has_permission('cms.analytics.read')) {
+            return $this->response->setBody(view('dashboard/partials/widget_analytics', ['overview' => null]));
+        }
+
+        $cache    = service('cache');
+        $response = $cache->get('dashboard_analytics_overview');
+        if (!is_array($response)) {
+            $response = $this->safeApiCall(fn () => $this->analyticsService->overview(['period' => '7d']));
+            if ($response['ok'] ?? false) {
+                $cache->save('dashboard_analytics_overview', $response, 300);
+            }
+        }
+
+        return $this->response->setBody($this->renderDevApiErrorPanel($response) . view('dashboard/partials/widget_analytics', [
+            'overview' => $this->extractData($response),
         ]));
     }
 

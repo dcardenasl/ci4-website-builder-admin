@@ -140,34 +140,37 @@
         <!-- ZONA 5: Sidebar (1/3) — navegación rápida y estado operativo -->
         <div class="space-y-6">
 
-            <!-- Widget: Quick Start -->
+            <!-- Widget: Analytics (vistazo de tráfico; el detalle completo vive en /admin/analytics) -->
             <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-2"><?= lang('Dashboard.quick_start') ?></h3>
-                <p class="text-xs text-gray-500 mb-4"><?= lang('Dashboard.quick_start_desc') ?></p>
-                <div class="grid grid-cols-2 gap-2">
-                    <?php if (has_permission('cms.pages.read')): ?>
-                        <a href="<?= route_to('admin.cms.pages') ?>" class="flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                            <?= ui_icon('cms-page', 'h-3.5 w-3.5 text-gray-400') ?>
-                            <?= lang('Pages.pages_title') ?>
-                        </a>
-                    <?php endif; ?>
-                    <?php if (has_permission('cms.entries.read')): ?>
-                        <a href="<?= route_to('admin.cms.entries') ?>" class="flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                            <?= ui_icon('cms-entry', 'h-3.5 w-3.5 text-gray-400') ?>
-                            <?= lang('Entries.entries_title') ?>
-                        </a>
-                    <?php endif; ?>
-                    <?php if (has_permission('users.read')): ?>
-                        <a href="<?= route_to('admin.users') ?>" class="flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                            <?= ui_icon('users', 'h-3.5 w-3.5 text-gray-400') ?>
-                            <?= lang('Dashboard.users') ?>
-                        </a>
-                    <?php endif; ?>
-                    <a href="<?= route_to('files') ?>" class="flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <?= ui_icon('files', 'h-3.5 w-3.5 text-gray-400') ?>
-                        <?= lang('Dashboard.files') ?>
-                    </a>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider"><?= lang('Dashboard.analytics_overview') ?></h3>
+                        <p class="text-xs text-gray-500 mt-0.5"><?= lang('Dashboard.analytics_overview_desc') ?></p>
+                    </div>
                 </div>
+                <div
+                    x-data="{ loaded: false, error: false }"
+                    x-init="
+                        fetch('<?= route_to('dashboard.widgets.analytics') ?>')
+                            .then(r => r.ok ? r.text() : Promise.reject())
+                            .then(h => { $refs.analyticsContent.innerHTML = h; loaded = true; })
+                            .catch(() => { error = true; loaded = true; })
+                    "
+                >
+                    <div x-show="!loaded" class="grid grid-cols-2 gap-3 animate-pulse">
+                        <?php for ($i = 0; $i < 2; $i++): ?>
+                        <div class="space-y-1.5">
+                            <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                            <div class="h-6 bg-gray-100 rounded w-1/2"></div>
+                        </div>
+                        <?php endfor; ?>
+                    </div>
+                    <div x-ref="analyticsContent" x-show="loaded && !error" x-cloak></div>
+                    <div x-show="loaded && error" class="py-4 text-center text-sm text-gray-400" x-cloak><?= lang('App.connection_error') ?></div>
+                </div>
+                <?php if (has_permission('cms.analytics.read')): ?>
+                    <a href="<?= route_to('admin.analytics') ?>" class="mt-4 inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"><?= lang('Dashboard.view_full_analytics') ?> &rarr;</a>
+                <?php endif; ?>
             </section>
 
             <!-- Widget: Service Health (compacto por defecto; se expande solo si algo necesita atención) -->

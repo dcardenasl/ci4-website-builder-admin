@@ -9,10 +9,6 @@ return [
     'edit_profile'     => 'Edit profile',
     'system_status'    => 'System Status',
     'recent_activity'  => 'Recent Activity',
-    'quick_start'      => 'Quick Start',
-    'quick_start_desc' => 'Shortcuts to most common tasks.',
-    'users'            => 'Users',
-    'files'            => 'Files',
     'latest_files'     => 'Latest Files',
     'manage_files'     => 'Manage files',
     'no_recent_files'  => 'No recently uploaded files.',
@@ -50,4 +46,7 @@ return [
     'summary_desc'                => 'Everything relevant to your project, at a glance.',
     'no_summary_visible'          => 'You do not have access to any section of the system.',
     'pending_review'              => 'Pending review',
+    'analytics_overview'          => 'Analytics',
+    'analytics_overview_desc'     => 'Traffic over the last 7 days.',
+    'view_full_analytics'         => 'View full Analytics',
 ];

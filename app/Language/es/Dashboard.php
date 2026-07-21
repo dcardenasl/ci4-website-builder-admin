@@ -9,10 +9,6 @@ return [
     'edit_profile'     => 'Editar perfil',
     'system_status'    => 'Estado del Sistema',
     'recent_activity'  => 'Actividad Reciente',
-    'quick_start'      => 'Inicio Rápido',
-    'quick_start_desc' => 'Accesos directos a las tareas más comunes.',
-    'users'            => 'Usuarios',
-    'files'            => 'Archivos',
     'latest_files'     => 'Últimos Archivos',
     'manage_files'     => 'Gestionar archivos',
     'no_recent_files'  => 'No hay archivos subidos recientemente.',
@@ -50,4 +46,7 @@ return [
     'summary_desc'                => 'Todo lo relevante de tu proyecto, de un vistazo.',
     'no_summary_visible'          => 'No tienes acceso a ninguna sección del sistema.',
     'pending_review'              => 'Pendientes de respuesta',
+    'analytics_overview'          => 'Analytics',
+    'analytics_overview_desc'     => 'Tráfico de los últimos 7 días.',
+    'view_full_analytics'         => 'Ver Analytics completo',
 ];
