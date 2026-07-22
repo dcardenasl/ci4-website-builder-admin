@@ -17,12 +17,6 @@
 - [ ] Definir la relación con `status` de páginas y entradas.
 - [ ] Definir roles/permisos de aprobación antes de implementar migraciones, servicios y UI.
 
-### MEDIA-002 — Media en bloques del Wizard
-
-- [ ] Diseñar cómo se captura y persiste `block_config` compartido cuando el Wizard encuentra un
-  campo `media_reference` dentro de `config_fields`.
-- [ ] Cubrir validación de campos requeridos y publicación con pruebas de integración/browser.
-
 ## ⚪ Backlog
 
 ### ADM-DEP-002 — lint-staged 16 → 17

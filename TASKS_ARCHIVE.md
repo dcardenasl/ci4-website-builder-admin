@@ -109,8 +109,12 @@
 - **WIZ-UNIFY-01** — pasos nativos y de bloques unificados, progreso único y soporte de media
   reference en el flujo guiado.
 - **MEDIA-001** — selector dual de biblioteca/URL externa para imágenes destacadas y SEO en
-  entradas y páginas. El diseño pendiente de media en `block_config` queda como **MEDIA-002** en
-  el tracker activo.
+  entradas y páginas.
+- **MEDIA-002** — cerrada sin trabajo adicional (2026-07-22): verificado en código que
+  `blockContentFieldsFor()`/`buildBlockContentConfig()` (`entryPublish.js`) ya capturan y persisten
+  `media_reference` dentro de `config_fields` a `block_config`, separado de `block_data`, con
+  cobertura en `entryPublish.test.js` — resuelta por **WIZ-UNIFY-01** (línea de arriba), la nota
+  de "diseño pendiente" que quedó en MEDIA-001 estaba desactualizada.
 - **DASH-001** — dashboard contextual, responsive, con widgets gateados por permisos.
 - **AUD-001** — cierre de la auditoría de filtros y buscador.
 - **DEEP-WIZ-01..05** y **DEEP-ADM-01..07** — refactor profundo del Wizard y hardening de módulos
