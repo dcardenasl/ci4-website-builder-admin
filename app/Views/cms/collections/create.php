@@ -111,6 +111,24 @@
                 'errors' => $errors ?? []
             ]) ?>
 
+            <?php $collectionTypeSuggestions = is_array($collectionTypeSuggestions ?? null) ? $collectionTypeSuggestions : []; ?>
+            <?= view('components/form/text', [
+                'name' => 'collection_type',
+                'label' => 'Collections.field_collection_type',
+                'required' => false,
+                'value' => $item['collection_type'] ?? '',
+                'placeholder' => 'Collections.field_collection_type_placeholder',
+                'help' => 'Collections.field_collection_type_help',
+                'maxlength' => 50,
+                'attributes' => ['list' => 'collection_type_options'],
+                'errors' => $errors ?? []
+            ]) ?>
+            <datalist id="collection_type_options">
+                <?php foreach ($collectionTypeSuggestions as $suggestion): ?>
+                    <option value="<?= esc($suggestion, 'attr') ?>"></option>
+                <?php endforeach; ?>
+            </datalist>
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <?= view('components/form/boolean', [
                     'name' => 'is_active',

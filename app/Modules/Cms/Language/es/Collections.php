@@ -42,7 +42,7 @@ return [
     'field_collection_key_create_help'  => 'Se completa automáticamente desde el nombre principal mientras creas la colección.',
     'field_collection_key_edit_help'    => 'Cambiar esta clave puede afectar referencias internas y bloques que dependan de ella.',
     'field_collection_type'              => 'Tipo de Colección',
-    'field_collection_type_placeholder'  => 'Seleccione tipo de colección',
+    'field_collection_type_placeholder'  => 'ej. eventos, news, portfolio',
     'field_collection_type_help'         => 'Usa un tipo técnico como blog, news o un slug personalizado. Los presets son sugerencias opcionales, no requisitos estructurales.',
     'field_default_sitemap_priority'    => 'Prioridad de mapa de sitio predeterminada',
     'field_default_sitemap_priority_placeholder' => '0.5',

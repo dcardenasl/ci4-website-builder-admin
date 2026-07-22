@@ -65,6 +65,28 @@ class CollectionController extends BaseWebController
     }
 
     /**
+     * Suggested values for the free-form `collection_type` field: the 5 starter
+     * preset keys plus whatever custom types are already in use, so a second
+     * "Eventos" collection reuses the same string instead of drifting into
+     * "evento"/"Eventos"/"eventos" by typo.
+     *
+     * @return list<string>
+     */
+    private function collectionTypeSuggestions(): array
+    {
+        $response = $this->safeApiCall(fn () => $this->collectionService->list(['limit' => 200]));
+        $existingTypes = array_map(
+            static fn (array $collection): string => (string) ($collection['collection_type'] ?? ''),
+            $this->extractItems($response)
+        );
+
+        $types = array_unique(array_filter([...CmsPresetCatalog::collectionTypes(), ...$existingTypes]));
+        sort($types);
+
+        return $types;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function getLanguages(): array
@@ -92,6 +114,7 @@ class CollectionController extends BaseWebController
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
+            'collectionTypeSuggestions' => $this->collectionTypeSuggestions(),
         ]);
     }
 
@@ -144,6 +167,7 @@ class CollectionController extends BaseWebController
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
             'translateTargets' => $translateTargets,
             'returnTo' => $this->incomingReturnTo(),
+            'collectionTypeSuggestions' => $this->collectionTypeSuggestions(),
         ]);
     }
 
@@ -182,7 +206,12 @@ class CollectionController extends BaseWebController
 
         $payload = $request->payload();
         $current = $this->extractData($currentResponse);
-        $payload['collection_type'] = (string) ($current['collection_type'] ?? $payload['collection_type'] ?? 'other');
+        // Read the raw posted field rather than $payload['collection_type']: the latter already
+        // defaults to 'other' inside CollectionStoreRequest::payload() when nothing meaningful was
+        // submitted, which would otherwise silently overwrite an existing custom type with 'other'.
+        $postedTypeRaw = $this->request->getPost('collection_type');
+        $rawPostedType = is_scalar($postedTypeRaw) ? trim((string) $postedTypeRaw) : '';
+        $payload['collection_type'] = $rawPostedType !== '' ? $rawPostedType : (string) ($current['collection_type'] ?? 'other');
         $payload['block_template'] = $current['block_template'] ?? null;
         $payload['wizard_config'] = $current['wizard_config'] ?? null;
 

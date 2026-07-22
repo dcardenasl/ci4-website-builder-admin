@@ -111,7 +111,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('name="default_language_id"', $body);
         $this->assertStringContainsString("langTabs(" . $languages[0]['id'] . ", '/admin/cms/translate', '" . $languages[0]['code'] . "')", $body);
         $this->assertStringContainsString('autoTranslateAll([', $body);
-        $this->assertStringNotContainsString('name="collection_type"', $body);
+        $this->assertStringContainsString('name="collection_type"', $body);
         $this->assertStringNotContainsString('name="block_template"', $body);
         $this->assertStringNotContainsString('collectionBlockTemplateBuilder(', $body);
         $this->assertStringContainsString('/structure', $body);
@@ -138,7 +138,7 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
         $translationPos = strpos($body, 'name="translations[0][name]"');
         $collectionKeyPos = strpos($body, 'name="collection_key"');
-        $this->assertStringNotContainsString('name="collection_type"', $body);
+        $this->assertStringContainsString('name="collection_type"', $body);
         $this->assertStringContainsString('name="collection_key"', $body);
         $this->assertStringContainsString('name="default_language_id"', $body);
         $this->assertStringContainsString("langTabs(" . $languages[0]['id'] . ", '/admin/cms/translate', '" . $languages[0]['code'] . "')", $body);
@@ -533,6 +533,133 @@ final class CollectionFlowTest extends CIUnitTestCase
                     'language_id' => '1',
                     'name' => 'News',
                     'slug' => 'news',
+                    'description' => '',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+    }
+
+    /**
+     * COL-001 regression: before this fix, `update()` always overwrote the posted
+     * `collection_type` with whatever the API's current record had, so the field could never
+     * actually be changed through the edit form even once it existed in the view.
+     */
+    public function testUpdateAppliesNewCollectionType(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'noticias',
+                    'collection_type' => 'news',
+                    'block_template' => ['version' => '1.0', 'blocks' => []],
+                    'wizard_config' => ['type' => 'news'],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $collectionMock->expects($this->once())
+            ->method('update')
+            ->with('10', $this->callback(static function (array $payload): bool {
+                return ($payload['collection_type'] ?? null) === 'eventos';
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections/10', [
+            csrf_token() => csrf_hash(),
+            'current_id' => '10',
+            'collection_type' => 'eventos',
+            'collection_key' => 'noticias',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'Noticias',
+                    'slug' => 'noticias',
+                    'description' => '',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+    }
+
+    /**
+     * COL-001 regression: a request that omits `collection_type` entirely (e.g. a direct API
+     * call, not the edit form) must keep the collection's current type rather than falling back
+     * to CollectionStoreRequest::payload()'s internal 'other' default and silently clobbering it.
+     */
+    public function testUpdateOmittingCollectionTypeKeepsCurrentValue(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'noticias',
+                    'collection_type' => 'news',
+                    'block_template' => ['version' => '1.0', 'blocks' => []],
+                    'wizard_config' => ['type' => 'news'],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $collectionMock->expects($this->once())
+            ->method('update')
+            ->with('10', $this->callback(static function (array $payload): bool {
+                return ($payload['collection_type'] ?? null) === 'news';
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections/10', [
+            csrf_token() => csrf_hash(),
+            'current_id' => '10',
+            'collection_key' => 'noticias',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'Noticias',
+                    'slug' => 'noticias',
                     'description' => '',
                 ],
             ],

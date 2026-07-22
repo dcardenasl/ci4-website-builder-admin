@@ -42,7 +42,7 @@ return [
     'field_collection_key_create_help'  => 'This is filled automatically from the main name while you create the collection.',
     'field_collection_key_edit_help'    => 'Changing this key can affect internal references and blocks that depend on it.',
     'field_collection_type'              => 'Collection Type',
-    'field_collection_type_placeholder'  => 'Select collection type',
+    'field_collection_type_placeholder'  => 'e.g. events, news, portfolio',
     'field_collection_type_help'         => 'Use a technical type like blog, news or a custom slug. Presets are optional suggestions, not structural requirements.',
     'field_default_sitemap_priority'    => 'Default sitemap priority',
     'field_default_sitemap_priority_placeholder' => '0.5',
