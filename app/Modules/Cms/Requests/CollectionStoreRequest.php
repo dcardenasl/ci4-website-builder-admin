@@ -72,12 +72,14 @@ class CollectionStoreRequest extends BaseFormRequest
                 $slug = isset($row['slug']) ? trim((string) $row['slug'], " \t\n\r\0\x0B/") : '';
                 $name = isset($row['name']) ? trim((string) $row['name']) : '';
                 $description = isset($row['description']) ? trim((string) $row['description']) : '';
+                $entryCtaLabel = isset($row['entry_cta_label']) ? trim((string) $row['entry_cta_label']) : '';
 
                 return [
                     'language_id' => (int) ($row['language_id'] ?? 0),
                     'slug' => $slug !== '' ? $slug : null,
                     'name' => $name,
                     'description' => $description !== '' ? $description : null,
+                    'entry_cta_label' => $entryCtaLabel !== '' ? $entryCtaLabel : null,
                 ];
             }
         );

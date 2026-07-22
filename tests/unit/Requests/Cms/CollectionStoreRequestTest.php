@@ -69,6 +69,7 @@ final class CollectionStoreRequestTest extends CIUnitTestCase
                 'slug' => 'coleccion-prueba',
                 'name' => 'Coleccion prueba',
                 'description' => 'Descripcion principal',
+                'entry_cta_label' => null,
             ],
         ], $payload['translations']);
     }

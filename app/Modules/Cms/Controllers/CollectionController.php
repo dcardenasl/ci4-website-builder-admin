@@ -102,7 +102,7 @@ class CollectionController extends BaseWebController
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
-        $fieldMap = ['name', 'slug', 'description'];
+        $fieldMap = ['name', 'slug', 'description', 'entry_cta_label'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
@@ -147,7 +147,7 @@ class CollectionController extends BaseWebController
         $languages = $this->getLanguages();
         $languageContext = $this->resolveLanguageContext($languages);
         $defaultLangId = $languageContext['defaultLangId'];
-        $fieldMap = ['name', 'slug', 'description'];
+        $fieldMap = ['name', 'slug', 'description', 'entry_cta_label'];
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];

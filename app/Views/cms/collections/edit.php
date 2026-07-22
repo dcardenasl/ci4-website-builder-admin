@@ -56,7 +56,7 @@
                             <?php endforeach; ?>
                         </div>
                         <?php if ($translateTargets !== []): ?>
-                            <?php $copyMappings = cms_translation_copy_mappings(['name', 'slug', 'description'], $languages, $defaultLangIndex); ?>
+                            <?php $copyMappings = cms_translation_copy_mappings(['name', 'slug', 'description', 'entry_cta_label'], $languages, $defaultLangIndex); ?>
                             <button type="button" @click="copyDefaultToAll(<?= esc(json_encode($copyMappings, JSON_THROW_ON_ERROR), 'attr') ?>, '<?= esc(lang('Translations.confirm_copy_default'), 'js') ?>')" class="shrink-0 inline-flex items-center gap-1.5 text-xs text-gray-700 border border-gray-300 rounded px-3 py-1.5 bg-white hover:bg-gray-50"><?= ui_icon('copy', 'h-3.5 w-3.5') ?> <?= esc(lang('Translations.action_copy_default')) ?></button>
                             <?= view('layouts/partials/translate_button', [
                                 'translateTargets' => $translateTargets,
@@ -108,6 +108,17 @@
                                 'placeholder' => 'Collections.translation_description_placeholder',
                                 'help' => 'Collections.translation_description_help',
                                 'value' => old("translations.{$index}.description", $transValue['description'] ?? ''),
+                                'errors' => $errors ?? []
+                            ]) ?>
+
+                            <?= view('components/form/text', [
+                                'name' => "translations[{$index}][entry_cta_label]",
+                                'label' => 'Collections.translation_entry_cta_label_label',
+                                'required' => false,
+                                'placeholder' => 'Collections.translation_entry_cta_label_placeholder',
+                                'help' => 'Collections.translation_entry_cta_label_help',
+                                'value' => old("translations.{$index}.entry_cta_label", $transValue['entry_cta_label'] ?? ''),
+                                'maxlength' => 100,
                                 'errors' => $errors ?? []
                             ]) ?>
                         </div>

@@ -85,6 +85,17 @@
                                 'value' => old("translations.{$index}.description", ''),
                                 'errors' => $errors ?? []
                             ]) ?>
+
+                            <?= view('components/form/text', [
+                                'name' => "translations[{$index}][entry_cta_label]",
+                                'label' => 'Collections.translation_entry_cta_label_label',
+                                'required' => false,
+                                'placeholder' => 'Collections.translation_entry_cta_label_placeholder',
+                                'help' => 'Collections.translation_entry_cta_label_help',
+                                'value' => old("translations.{$index}.entry_cta_label", ''),
+                                'maxlength' => 100,
+                                'errors' => $errors ?? []
+                            ]) ?>
                         </div>
                     <?php endforeach; ?>
                 </div>

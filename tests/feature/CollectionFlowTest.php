@@ -710,6 +710,54 @@ final class CollectionFlowTest extends CIUnitTestCase
         $result->assertRedirect();
     }
 
+    /**
+     * COL-002 regression: CollectionStoreRequest::normalizeTranslations() rebuilds each
+     * translation row from an explicit field list (language_id/slug/name/description) — adding
+     * a new per-language field to the view without also adding it here silently drops it before
+     * it ever reaches the API, even though the field renders and looks like it saved.
+     */
+    public function testStorePersistsEntryCtaLabelPerLanguage(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->expects($this->once())
+            ->method('create')
+            ->with($this->callback(static function (array $payload): bool {
+                return ($payload['translations'][0]['entry_cta_label'] ?? null) === 'Ver evento';
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 201,
+                'data' => ['id' => 45],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections', [
+            csrf_token() => csrf_hash(),
+            'collection_type' => 'eventos',
+            'collection_key' => 'eventos',
+            'translations' => [
+                [
+                    'language_id' => '1',
+                    'name' => 'Eventos',
+                    'slug' => 'eventos',
+                    'description' => '',
+                    'entry_cta_label' => 'Ver evento',
+                ],
+            ],
+        ]);
+
+        $result->assertRedirect();
+    }
+
     public function testDeleteSuccessRedirectsToList(): void
     {
         $mock = $this->createMock(CollectionApiService::class);
