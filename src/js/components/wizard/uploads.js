@@ -84,4 +84,33 @@ export const uploads = {
         }
     },
 
+    // ── Media reference upload (block content wizard step, config fields) ──
+    // Mirrors uploadBlockMediaReference() from the canonical block editor —
+    // writes into blockContentDrafts[stepIdx][field.key] as the shared
+    // {source_kind, file_id, url} shape, split into block_config at save time
+    // by buildBlockContentConfig() (see entryPublish.js).
+    async uploadBlockContentMediaReference(stepIdx, field, file) {
+        if (!file) return;
+        this.uploading = true;
+        this.uploadError = '';
+        try {
+            const fileData = await this._uploadFile(file);
+            if (!this.blockContentDrafts[stepIdx]) this.blockContentDrafts[stepIdx] = {};
+            this.blockContentDrafts[stepIdx][field.key] = {
+                source_kind: 'hub_file',
+                file_id:     fileData?.id ?? null,
+                url:         fileData?.url ?? fileData?.variants?.md?.url ?? null,
+            };
+        } catch {
+            this.uploadError = this.strings.error_upload;
+        } finally {
+            this.uploading = false;
+        }
+    },
+
+    clearBlockContentMediaReference(stepIdx, field) {
+        if (!this.blockContentDrafts[stepIdx]) this.blockContentDrafts[stepIdx] = {};
+        this.blockContentDrafts[stepIdx][field.key] = null;
+    },
+
 };

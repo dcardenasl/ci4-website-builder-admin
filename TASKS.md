@@ -399,6 +399,25 @@ bash bin/make-module.sh Redirect Cms /cms/redirects \
 
 ## ✅ Completadas
 
+### [WIZ-UNIFY-01] Wizard de contenido: pasos unificados + cierre del gap `media_reference` en bloques (2026-07-21)
+
+David pidió mejorar el flujo de "Agregar contenido" del Wizard: título+resumen en una sola vista, imagen de portada como segundo paso, y un único progress bar para todo (nativo + bloques) — pidiendo explícitamente probar los flujos reales antes de proponer nada.
+
+**Probado en navegador real antes de tocar código** (Portafolio, 6 bloques): confirmé `Paso 1 de 2` → `Paso 2 de 2` (Título, Resumen) saltando sin aviso a `Paso 1 de 6` (bloques) — dos barras de progreso independientes. Y until ahora sin solución: el bloque **"Imagen del Proyecto" (obligatorio)** solo pedía "Texto Alternativo"/"Pie de Foto" — nunca la imagen — permitiendo "completar" un bloque requerido de imagen sin ninguna imagen. Esto es exactamente el hallazgo de MEDIA-001 (abajo), reproducido y con causa raíz confirmada: `blockContentFieldsFor()` en `entryPublish.js` solo leía `block_types[key].fields`, nunca `config_fields` (donde vive el `media_reference` real de bloques como `image`/`hero_banner`).
+
+**Cambios:**
+- `CmsPresetCatalog.php`: los 5 presets de colección (blog/news/portfolio/services/other) combinan título+resumen en un solo `step` con dos `fields`, y agregan un segundo `step` para `featured_image` (dual biblioteca/URL) — antes ningún preset lo pedía nunca.
+- `entryPublish.js::blockContentFieldsFor()`: ahora también lee `config_fields` filtrados a `media_reference` (mismo patrón que `blocks.js::blockFields()`), tag `source:'config'`.
+- `entryPublish.js::saveBlockContentDrafts()`/`buildBlockTranslations()`: nuevo `buildBlockContentConfig()` separa valores `source:'config'` hacia `block_config` (antes solo se mandaba `translations`, el `media_reference` nunca se hubiera podido persistir aunque se hubiera capturado en el paso).
+- `uploads.js`: `uploadBlockContentMediaReference()`/`clearBlockContentMediaReference()`, mismo shape `{source_kind,file_id,url}` que el editor canónico de bloques.
+- `navigation.js`: `totalUnifiedSteps`/`currentUnifiedIndex`/`isLastUnifiedStep`/`unifiedStepLabel()`/`unifiedProgressPercent()` — una sola barra de progreso para pasos nativos + bloques (las dos pantallas internas `steps`/`block-steps` se mantienen, solo la presentación se unificó — cambio de bajo riesgo, no una reescritura de la máquina de estados).
+- `entry_wizard.php`: ambas barras de progreso usan los cálculos unificados; nuevo bloque `field.uiType === 'media_reference'` en el loop de campos de bloque (mismo markup que `block_edit.php`); **bug adicional encontrado y corregido**: el botón del último paso nativo decía "Revisar y publicar" aunque quedaran pasos de bloque pendientes (confirmado en vivo con Portafolio) — ahora usa `isLastUnifiedStep`.
+- Domain (seed data únicamente, sin cambios de lógica): `NewsCollectionSeeder.php`, `PortfolioCollectionSeeder.php`, `WizardConfigSeeder.php` — mismo wizard_config combinado; re-corridos contra la BD dev (`php spark db:seed ...`) para que Noticias/Portafolio ya sembradas reflejen el cambio sin recrear las colecciones.
+
+**Verificación:** `composer test` admin (619/619, 1 skip conocido), `composer analyse` (PHPStan 204 archivos, 0 errores), `composer format:check` limpio, `npm run test:js` (83/83), `npm run lint:js` limpio, `npm run build:all` sin errores. Domain: `composer analyse` + `format:check` limpios. Verificado en navegador real (Noticias y Portafolio): `Paso 1 de 8` con título+resumen combinados, `Paso 2 de 8` imagen destacada dual-mode, `Paso 3 de 8` "Imagen del Proyecto" ahora muestra el campo "Imagen" (antes invisible) — confirmado que llenarlo habilita "Siguiente" y que `buildBlockContentConfig()`/`buildBlockTranslations()` separan correctamente config vs data (sin fuga de la key `image` hacia `block_data`). Botón del último paso nativo confirmado que ya no dice "Revisar y publicar" prematuramente.
+
+**Nota de alcance, no implementada a propósito:** el "required" de un bloque sigue siendo a nivel de bloque completo (`block_template.blocks[].required`, "al menos un campo lleno"), no fuerza específicamente el campo `media_reference` — igual que el resto de la validación de bloques ya existente. Forzar el campo específico sería un cambio de semántica más amplio, fuera de lo pedido. Tampoco existe hoy una UI para editar `wizard_config.steps` de una colección ya creada (solo se cargan presets completos) — colecciones nuevas heredan el fix automáticamente vía preset; colecciones custom existentes con wizard_config propio necesitan edición manual (seeder/API) igual que antes.
+
 ### [MEDIA-001] Selector dual (biblioteca/URL externa) extendido a Entradas y Páginas (2026-07-21)
 
 El usuario notó que Bloques ya tiene un componente (`media_reference.php` / Alpine `mediaReferenceField`) que deja elegir entre un archivo subido al Hub o pegar una URL externa, pero Entradas solo tenía el selector viejo de solo-archivo (`translatable_image.php`). Pidió revisar dónde más se suben imágenes e integrar el componente dual donde falte.

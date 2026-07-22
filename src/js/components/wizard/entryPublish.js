@@ -180,9 +180,32 @@ export const entryPublish = {
 
     // Field descriptors for a block-content wizard step, keyed by block_key directly
     // (no editMode/selectedBlock dependency — the entry doesn't exist yet at this point).
+    //
+    // Mirrors blocks.js's blockFields(): schema `fields` (translatable content,
+    // source: 'data') plus `config_fields` filtered to media_reference (shared
+    // asset config, source: 'config'). Without the config_fields half, a block
+    // type like "image" or "hero_banner" — whose actual image lives in
+    // config_fields, not fields — would never expose an image control here at
+    // all, even when the collection's block_template marks that block required.
     blockContentFieldsFor(blockKey) {
         const schemaFields = blockKey ? (this.config?.block_types?.[blockKey]?.fields ?? null) : null;
-        if (!schemaFields || Object.keys(schemaFields).length === 0) return [];
+        const configFields = blockKey ? (this.config?.block_types?.[blockKey]?.config_fields ?? null) : null;
+
+        const mediaConfigFields = configFields
+            ? Object.entries(configFields)
+                .filter(([, def]) => schemaTypeToUiType(def.type ?? '', def.accept ?? '') === 'media_reference')
+                .map(([k, def]) => ({
+                    key:      k,
+                    label:    def.label ?? humanizeKey(k),
+                    required: def.required ?? false,
+                    uiType:   'media_reference',
+                    accept:   def.accept ?? 'image',
+                    options:  [],
+                    source:   'config',
+                }))
+            : [];
+
+        if (!schemaFields || Object.keys(schemaFields).length === 0) return mediaConfigFields;
 
         return Object.entries(schemaFields).map(([k, def]) => ({
             key:      k,
@@ -190,7 +213,8 @@ export const entryPublish = {
             required: def.required ?? false,
             uiType:   schemaTypeToUiType(def.type ?? '', def.accept ?? '', def.primitive ?? ''),
             options:  def.options ?? [],
-        }));
+            source:   'data',
+        })).concat(mediaConfigFields);
     },
 
     // ── Block content steps (collection block_template) ─────────────────
@@ -381,15 +405,32 @@ export const entryPublish = {
 
             try {
                 const translations = await this.buildBlockTranslations(blockDef.block_key, draft, defaultLangId, defaultLangCode, otherLanguages);
+                const blockConfig = this.buildBlockContentConfig(blockDef.block_key, draft);
+                const payload = { is_active: true, translations };
+                if (Object.keys(blockConfig).length > 0) payload.block_config = blockConfig;
                 const res = await adminFetch(`${this.wizardBase}/entries/${entryId}/blocks/${instance.id}`, {
                     method: 'POST',
-                    body: JSON.stringify({ is_active: true, translations }),
+                    body: JSON.stringify(payload),
                 }, this.csrf);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
             } catch {
                 this.publishBlockWarnings.push({ label, blockKey: blockDef.block_key });
             }
         }
+    },
+
+    // Config-field values (media_reference) live in block_config, not block_data —
+    // they're a shared asset across languages, not per-language content.
+    buildBlockContentConfig(blockKey, draft) {
+        const configKeys = this.blockContentFieldsFor(blockKey)
+            .filter((field) => field.source === 'config')
+            .map((field) => field.key);
+
+        const blockConfig = {};
+        for (const key of configKeys) {
+            if (draft[key] !== undefined) blockConfig[key] = draft[key];
+        }
+        return blockConfig;
     },
 
     async buildBlockTranslations(blockKey, draft, defaultLangId, defaultLangCode, otherLanguages) {
@@ -401,7 +442,15 @@ export const entryPublish = {
             .filter(([, def]) => !nonTranslatableTypes.includes(def?.primitive ?? def?.type ?? 'string'))
             .map(([key]) => key);
 
-        const baseData = normalizeBlockPayload(draft);
+        // Config-sourced keys (media_reference) must never leak into block_data —
+        // they belong exclusively in block_config (see buildBlockContentConfig()).
+        const configFieldKeys = this.blockContentFieldsFor(blockKey)
+            .filter((field) => field.source === 'config')
+            .map((field) => field.key);
+        const draftData = { ...draft };
+        for (const key of configFieldKeys) delete draftData[key];
+
+        const baseData = normalizeBlockPayload(draftData);
         const rows = [{ language_id: defaultLangId, block_data: baseData, is_published: true }];
 
         for (const lang of otherLanguages) {

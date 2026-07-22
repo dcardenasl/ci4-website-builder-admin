@@ -34,6 +34,18 @@ export const navigation = {
     get totalBlockSteps() {
         return this.blockContentSteps.length;
     },
+    // ── Unified progress (native fields + block content share one sequence) ──
+    get totalUnifiedSteps() {
+        return this.totalSteps + this.totalBlockSteps;
+    },
+    get currentUnifiedIndex() {
+        return this.screen === 'block-steps'
+            ? this.totalSteps + this.blockContentStepIndex
+            : this.currentStep;
+    },
+    get isLastUnifiedStep() {
+        return this.currentUnifiedIndex >= this.totalUnifiedSteps - 1;
+    },
     get defaultLanguage() {
         const languages = Array.isArray(this.config?.languages) ? this.config.languages : [];
         return languages.find((language) => language?.is_default) || languages[0] || null;
@@ -46,12 +58,13 @@ export const navigation = {
     },
 
     // ── Helpers ───────────────────────────────────────────────────────
-    stepLabel() {
-        return this.strings.step_of.replace('%s', this.currentStep + 1).replace('%s', this.totalSteps);
+    unifiedStepLabel() {
+        return this.strings.step_of.replace('%s', this.currentUnifiedIndex + 1).replace('%s', this.totalUnifiedSteps);
     },
 
-    blockStepLabel() {
-        return this.strings.step_of.replace('%s', this.blockContentStepIndex + 1).replace('%s', this.totalBlockSteps);
+    unifiedProgressPercent() {
+        if (this.totalUnifiedSteps <= 0) return 0;
+        return Math.round(((this.currentUnifiedIndex + 1) / this.totalUnifiedSteps) * 100);
     },
 
     deleteConfirmText() {

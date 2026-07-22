@@ -54,34 +54,50 @@ final class CmsPresetCatalog
                 ['block_key' => 'rich_text', 'label' => 'Introducción', 'help_text' => 'Primer bloque editorial', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
                 ['block_key' => 'image', 'label' => 'Imagen destacada', 'help_text' => 'Apoyo visual para la entrada', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Título', 'step_hint' => 'Define el nombre de la entrada', 'fields' => [['key' => 'title', 'label' => 'Título', 'type' => 'text', 'required' => true]]],
-                ['step_title' => 'Resumen', 'step_hint' => 'Aporta contexto breve', 'fields' => [['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false]]],
+                ['step_title' => 'Detalles de la entrada', 'step_hint' => 'Define el nombre y un breve contexto', 'fields' => [
+                    ['key' => 'title', 'label' => 'Título', 'type' => 'text', 'required' => true],
+                    ['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false],
+                ]],
+                ['step_title' => 'Imagen destacada', 'step_hint' => 'Portada de la entrada (biblioteca o URL)', 'fields' => [['key' => 'featured_image', 'label' => 'Imagen destacada', 'type' => 'image', 'required' => false]]],
             ]),
             self::collectionPreset('news', [
                 ['block_key' => 'rich_text', 'label' => 'Titular', 'help_text' => 'Bloque principal de la noticia', 'required' => true, 'locked' => true, 'block_config_defaults' => new \stdClass()],
                 ['block_key' => 'image', 'label' => 'Imagen de portada', 'help_text' => 'Acompaña la noticia con una imagen', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Titular', 'step_hint' => 'Título visible para la noticia', 'fields' => [['key' => 'title', 'label' => 'Titular', 'type' => 'text', 'required' => true]]],
-                ['step_title' => 'Resumen', 'step_hint' => 'Una breve bajada informativa', 'fields' => [['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false]]],
+                ['step_title' => 'Titular y resumen', 'step_hint' => 'Título visible y una breve bajada informativa', 'fields' => [
+                    ['key' => 'title', 'label' => 'Titular', 'type' => 'text', 'required' => true],
+                    ['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false],
+                ]],
+                ['step_title' => 'Imagen destacada', 'step_hint' => 'Portada de la noticia (biblioteca o URL)', 'fields' => [['key' => 'featured_image', 'label' => 'Imagen destacada', 'type' => 'image', 'required' => false]]],
             ]),
             self::collectionPreset('portfolio', [
                 ['block_key' => 'image', 'label' => 'Imagen del Proyecto', 'help_text' => 'Imagen principal del proyecto realizado', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
                 ['block_key' => 'rich_text', 'label' => 'Detalle del Proyecto', 'help_text' => 'Descripción detallada del caso de estudio', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Proyecto', 'step_hint' => 'Nombre o título del proyecto', 'fields' => [['key' => 'title', 'label' => 'Proyecto', 'type' => 'text', 'required' => true]]],
-                ['step_title' => 'Resumen', 'step_hint' => 'Una breve descripción del trabajo realizado', 'fields' => [['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false]]],
+                ['step_title' => 'Proyecto y resumen', 'step_hint' => 'Nombre del proyecto y una breve descripción del trabajo realizado', 'fields' => [
+                    ['key' => 'title', 'label' => 'Proyecto', 'type' => 'text', 'required' => true],
+                    ['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false],
+                ]],
+                ['step_title' => 'Imagen destacada', 'step_hint' => 'Portada del proyecto (biblioteca o URL)', 'fields' => [['key' => 'featured_image', 'label' => 'Imagen destacada', 'type' => 'image', 'required' => false]]],
             ]),
             self::collectionPreset('services', [
                 ['block_key' => 'rich_text', 'label' => 'Servicio', 'help_text' => 'Descripción principal del servicio', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
                 ['block_key' => 'cta', 'label' => 'Llamado a la acción', 'help_text' => 'Invita a contactar o cotizar', 'required' => false, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Nombre', 'step_hint' => 'Nombre del servicio', 'fields' => [['key' => 'title', 'label' => 'Nombre', 'type' => 'text', 'required' => true]]],
-                ['step_title' => 'Descripción', 'step_hint' => 'Breve explicación', 'fields' => [['key' => 'excerpt', 'label' => 'Descripción', 'type' => 'textarea', 'required' => false]]],
+                ['step_title' => 'Nombre y descripción', 'step_hint' => 'Nombre del servicio y una breve explicación', 'fields' => [
+                    ['key' => 'title', 'label' => 'Nombre', 'type' => 'text', 'required' => true],
+                    ['key' => 'excerpt', 'label' => 'Descripción', 'type' => 'textarea', 'required' => false],
+                ]],
+                ['step_title' => 'Imagen destacada', 'step_hint' => 'Portada del servicio (biblioteca o URL)', 'fields' => [['key' => 'featured_image', 'label' => 'Imagen destacada', 'type' => 'image', 'required' => false]]],
             ]),
             self::collectionPreset('other', [
                 ['block_key' => 'rich_text', 'label' => 'Contenido', 'help_text' => 'Punto de partida genérico', 'required' => true, 'locked' => false, 'block_config_defaults' => new \stdClass()],
             ], [
-                ['step_title' => 'Título', 'step_hint' => 'Nombre visible de la entrada', 'fields' => [['key' => 'title', 'label' => 'Título', 'type' => 'text', 'required' => true]]],
+                ['step_title' => 'Título y resumen', 'step_hint' => 'Nombre visible de la entrada y un breve contexto', 'fields' => [
+                    ['key' => 'title', 'label' => 'Título', 'type' => 'text', 'required' => true],
+                    ['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false],
+                ]],
+                ['step_title' => 'Imagen destacada', 'step_hint' => 'Portada de la entrada (biblioteca o URL)', 'fields' => [['key' => 'featured_image', 'label' => 'Imagen destacada', 'type' => 'image', 'required' => false]]],
             ]),
         ];
     }

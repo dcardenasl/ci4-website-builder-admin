@@ -25,15 +25,15 @@
 <!-- ── SCREEN: STEPS ── -->
 <template x-if="screen === 'steps' && currentStepSchema">
     <div>
-        <!-- Progress bar -->
+        <!-- Progress bar (unified across native fields + block content steps) -->
         <div class="mb-4">
             <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
-                <span x-text="stepLabel()"></span>
+                <span x-text="unifiedStepLabel()"></span>
                 <span x-text="collectionDisplayLabel(selectedCollection)"></span>
             </div>
             <div class="h-2 w-full rounded-full bg-gray-200">
                 <div class="h-2 rounded-full bg-brand-600 transition-all"
-                     :style="`width: ${Math.round(((currentStep + 1) / totalSteps) * 100)}%`"></div>
+                     :style="`width: ${unifiedProgressPercent()}%`"></div>
             </div>
         </div>
 
@@ -140,8 +140,8 @@
             <button @click="nextStep()"
                     :disabled="!canAdvance()"
                     :class="canAdvance() ? 'btn-primary' : 'btn-primary opacity-50 cursor-not-allowed'">
-                <span x-show="currentStep < steps.length - 1"><?= lang('Wizard.btn_next') ?></span>
-                <span x-show="currentStep === steps.length - 1"><?= lang('Wizard.btn_review') ?></span>
+                <span x-show="!isLastUnifiedStep"><?= lang('Wizard.btn_next') ?></span>
+                <span x-show="isLastUnifiedStep"><?= lang('Wizard.btn_review') ?></span>
             </button>
         </div>
     </div>
@@ -150,15 +150,15 @@
 <!-- ── SCREEN: BLOCK CONTENT STEPS (collection block_template) ── -->
 <template x-if="screen === 'block-steps' && blockContentSteps[blockContentStepIndex]">
     <div>
-        <!-- Progress bar -->
+        <!-- Progress bar (unified across native fields + block content steps) -->
         <div class="mb-4">
             <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
-                <span x-text="blockStepLabel()"></span>
+                <span x-text="unifiedStepLabel()"></span>
                 <span x-text="collectionDisplayLabel(selectedCollection)"></span>
             </div>
             <div class="h-2 w-full rounded-full bg-gray-200">
                 <div class="h-2 rounded-full bg-brand-600 transition-all"
-                     :style="`width: ${Math.round(((blockContentStepIndex + 1) / totalBlockSteps) * 100)}%`"></div>
+                     :style="`width: ${unifiedProgressPercent()}%`"></div>
             </div>
         </div>
 
@@ -239,6 +239,35 @@
                     </div>
                 </template>
 
+                <!-- media reference (shared asset, lives in block_config — e.g. an "image"
+                     or "hero_banner" block type's own picture, distinct from the `image`
+                     uiType above which is a translatable schema field). -->
+                <template x-if="field.uiType === 'media_reference'">
+                    <div>
+                        <template x-if="blockContentDrafts[blockContentStepIndex][field.key]?.url">
+                            <div class="relative inline-block">
+                                <img :src="blockContentDrafts[blockContentStepIndex][field.key].url"
+                                     class="rounded-lg max-h-48 object-cover border border-gray-200" />
+                                <button type="button"
+                                        @click="clearBlockContentMediaReference(blockContentStepIndex, field)"
+                                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                            </div>
+                        </template>
+                        <template x-if="!blockContentDrafts[blockContentStepIndex][field.key]?.url">
+                            <label :class="{'opacity-60': uploading}"
+                                   class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                                <span class="text-4xl">📷</span>
+                                <span class="text-sm text-gray-500"><?= lang('Wizard.upload_image') ?></span>
+                                <span class="text-xs text-gray-400"><?= lang('Wizard.upload_click_hint') ?></span>
+                                <span x-show="uploading" class="text-xs text-brand-600"><?= lang('Wizard.upload_uploading') ?></span>
+                                <input type="file" :accept="(field.accept || 'image') + '/*'" class="hidden"
+                                       @change="uploadBlockContentMediaReference(blockContentStepIndex, field, $event.target.files[0])" />
+                            </label>
+                        </template>
+                        <p x-show="uploadError" class="mt-1 text-xs text-red-600" x-text="uploadError"></p>
+                    </div>
+                </template>
+
                 <template x-if="field.uiType === 'richtext'">
                     <div :data-wizard-content-richtext-field="blockContentStepIndex + ':' + field.key"
                          :data-field-key="field.key"
@@ -282,8 +311,8 @@
                 <button @click="nextBlockStep()"
                         :disabled="!canAdvanceBlockStep()"
                         :class="canAdvanceBlockStep() ? 'btn-primary' : 'btn-primary opacity-50 cursor-not-allowed'">
-                    <span x-show="blockContentStepIndex < blockContentSteps.length - 1"><?= lang('Wizard.btn_next') ?></span>
-                    <span x-show="blockContentStepIndex === blockContentSteps.length - 1"><?= lang('Wizard.btn_review') ?></span>
+                    <span x-show="!isLastUnifiedStep"><?= lang('Wizard.btn_next') ?></span>
+                    <span x-show="isLastUnifiedStep"><?= lang('Wizard.btn_review') ?></span>
                 </button>
             </div>
         </div>
