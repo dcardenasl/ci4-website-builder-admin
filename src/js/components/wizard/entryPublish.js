@@ -6,7 +6,7 @@ import { humanizeKey } from '../../utils/wizard/humanizeKey.js';
 import { normalizeBlockPayload } from '../../utils/wizard/normalizeBlockPayload.js';
 import { validateEntryPayload as validateEntryPayloadPure } from '../../utils/wizard/validateEntryPayload.js';
 
-const NATIVE_KEYS = ['title', 'excerpt', 'featured_image', 'body', 'status'];
+const NATIVE_KEYS = ['title', 'excerpt', 'featured_image', 'body', 'status', 'meta_title', 'meta_description', 'og_image'];
 
 // ── Entry creation flow (screens A) + publish ─────────────────────────────
 export const entryPublish = {
@@ -31,6 +31,8 @@ export const entryPublish = {
             meta_description: String(this.formData.meta_description || '').trim(),
             featured_file_id: this.formData.featured_image_id ?? null,
             featured_image_url: this.formData.featured_image_url ?? null,
+            og_image_file_id: this.formData.og_image_id ?? null,
+            og_image_url: this.formData.og_image_url ?? null,
         };
     },
 
@@ -520,6 +522,8 @@ export const entryPublish = {
                 meta_description: truncateText(source.meta_description, 500),
                 featured_file_id: source.featured_file_id,
                 featured_image_url: source.featured_image_url,
+                og_image_file_id: source.og_image_file_id,
+                og_image_url: source.og_image_url,
             });
         }
 
@@ -538,6 +542,8 @@ export const entryPublish = {
                         meta_description: truncateText(row.meta_description, 500),
                         featured_file_id: source.featured_file_id,
                         featured_image_url: source.featured_image_url,
+                        og_image_file_id: source.og_image_file_id,
+                        og_image_url: source.og_image_url,
                     });
                 });
         }
@@ -552,6 +558,8 @@ export const entryPublish = {
                 meta_description: truncateText(source.meta_description, 500),
                 featured_file_id: source.featured_file_id,
                 featured_image_url: source.featured_image_url,
+                og_image_file_id: source.og_image_file_id,
+                og_image_url: source.og_image_url,
             });
         }
 
