@@ -66,3 +66,39 @@
 ---
 
 *TASKS_ARCHIVE · ci4-admin-starter · 2026-05-08*
+
+---
+
+## 📦 Migrado desde `TASKS.md` — 2026-07-21
+
+### Flujo editorial de traducciones
+
+- **TRN-001..005** — contrato común, auditoría/workbench, paneles de estado, copia de idioma base,
+  navegación contextual y árbol de menús.
+- **TRN-007** — tests PHP/JS, i18n, rendimiento, documentación y validación browser.
+- **TRN-008** — badges de traducción por idioma en bloques de páginas y entradas, navegación por
+  `focus_lang` y cobertura de tests.
+
+### Integración CMS admin
+
+- **CMS-019..020**, **CMS-012..018** y **CMS-020b** — módulos de Language, Setting, Page, Menu,
+  BlockType, Collection, Entry, Category, Tag y Redirect; CRUD, filtros, traducciones, permisos,
+  import/export y suites de calidad.
+- **WIZ-STEPS-EDITOR-01** — editor visual de pasos del Wizard con catálogo de campos válido,
+  validación server-side y persistencia round-trip.
+- **WIZ-UNIFY-01** — pasos nativos y de bloques unificados, progreso único y soporte de media
+  reference en el flujo guiado.
+- **MEDIA-001** — selector dual de biblioteca/URL externa para imágenes destacadas y SEO en
+  entradas y páginas. El diseño pendiente de media en `block_config` queda como **MEDIA-002** en
+  el tracker activo.
+- **DASH-001** — dashboard contextual, responsive, con widgets gateados por permisos.
+- **AUD-001** — cierre de la auditoría de filtros y buscador.
+- **DEEP-WIZ-01..05** y **DEEP-ADM-01..07** — refactor profundo del Wizard y hardening de módulos
+  y dependencias.
+- **ADM-010**, **ADM-009**, **FAQ-010**, **ADM-008**, **ADM-007** y **ADM-006** — import/export,
+  scaffolding relation-aware, empty states, diccionario de iconos, hooks y alcance de módulos.
+
+### Notas de archivo
+
+Los bloques completos se retiraron del tracker activo para que solo queden decisiones pendientes,
+backlog real y el contrato de calidad del repositorio.
