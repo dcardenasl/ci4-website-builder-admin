@@ -241,6 +241,129 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('"block_key":"collection_grid"', $body);
     }
 
+    public function testUpdateStructurePersistsWizardConfigStepsRoundTrip(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'news',
+                    'collection_type' => 'news',
+                    'block_template' => ['version' => '1.0', 'blocks' => []],
+                    'wizard_config' => ['type' => 'news', 'steps' => []],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        $postedWizardConfig = [
+            'type' => 'news',
+            'steps' => [
+                ['step_title' => 'Titular', 'step_hint' => '', 'fields' => [
+                    ['key' => 'title', 'label' => 'Titular', 'type' => 'text', 'required' => true],
+                ]],
+                ['step_title' => 'Resumen y meta', 'step_hint' => '', 'fields' => [
+                    ['key' => 'excerpt', 'label' => 'Resumen', 'type' => 'textarea', 'required' => false],
+                    ['key' => 'meta_title', 'label' => 'Meta título', 'type' => 'text', 'required' => false],
+                ]],
+            ],
+        ];
+
+        $collectionMock->expects($this->once())
+            ->method('update')
+            ->with('10', $this->callback(static function (array $payload) use ($postedWizardConfig): bool {
+                return ($payload['wizard_config'] ?? null) === $postedWizardConfig;
+            }))
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections/10/structure', [
+            csrf_token() => csrf_hash(),
+            'current_id' => '10',
+            'block_template' => json_encode(['version' => '1.0', 'blocks' => []], JSON_THROW_ON_ERROR),
+            'wizard_config' => json_encode($postedWizardConfig, JSON_THROW_ON_ERROR),
+        ]);
+
+        $result->assertRedirect();
+        $result->assertSessionHas('success');
+    }
+
+    public function testUpdateStructureSurfacesWizardConfigValidationErrorFromApi(): void
+    {
+        $collectionMock = $this->createMock(CollectionApiService::class);
+        $collectionMock->method('get')
+            ->with('10')
+            ->willReturn([
+                'ok' => true,
+                'status' => 200,
+                'data' => [
+                    'id' => 10,
+                    'collection_key' => 'news',
+                    'collection_type' => 'news',
+                    'block_template' => ['version' => '1.0', 'blocks' => []],
+                    'wizard_config' => ['type' => 'news', 'steps' => []],
+                ],
+                'raw' => '',
+                'headers' => [],
+                'messages' => [],
+                'fieldErrors' => [],
+            ]);
+        $collectionMock->method('update')
+            ->willReturn([
+                'ok' => false,
+                'status' => 422,
+                'data' => [],
+                'raw' => '',
+                'headers' => [],
+                'messages' => ["Field 'custom_field': not part of the native field catalog"],
+                'fieldErrors' => ['wizard_config' => "Field 'custom_field': not part of the native field catalog"],
+            ]);
+
+        Services::injectMock('collectionApiService', $collectionMock);
+
+        $invalidWizardConfig = [
+            'type' => 'news',
+            'steps' => [
+                ['step_title' => 'Paso', 'step_hint' => '', 'fields' => [
+                    ['key' => 'custom_field', 'label' => 'Campo custom', 'type' => 'text', 'required' => false],
+                ]],
+            ],
+        ];
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.collections.write', 'cms.collections.read']],
+            'permissions_refreshed_at' => time(),
+        ])->post('/admin/cms/collections/10/structure', [
+            csrf_token() => csrf_hash(),
+            'current_id' => '10',
+            'block_template' => json_encode(['version' => '1.0', 'blocks' => []], JSON_THROW_ON_ERROR),
+            'wizard_config' => json_encode($invalidWizardConfig, JSON_THROW_ON_ERROR),
+        ]);
+
+        $result->assertRedirect();
+        $result->assertSessionHas('fieldErrors');
+    }
+
     public function testStructureWizardShowsCollectionTypeAndHidesLegacyLanguageFields(): void
     {
         $fixtures = new AdminFixtureFactory(__METHOD__);
