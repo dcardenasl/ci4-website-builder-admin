@@ -1,7 +1,27 @@
 # TASKS_ARCHIVE — ci4-admin-starter
 
 > Historial de tareas completadas.
-> Última actualización: 2026-05-15
+> Última actualización: 2026-07-22
+
+---
+
+## ✅ Escalabilidad de colecciones — COL-001/002/003 (2026-07-22)
+
+- **COL-001** — `collection_type` libre (`create.php`/`edit.php`, `<datalist>` con sugerencias).
+  Corregidos 2 bugs reales encontrados al implementar: `CollectionController::update()` siempre
+  sobreescribía el valor posteado con el actual (el campo nunca hubiera podido editarse), y
+  `CollectionResponseDTO` (domain) no exponía `collection_type` en absoluto. Tests nuevos en
+  ambos repos.
+- **COL-002** — CTA label editable por colección (`entry_cta_label`, nuevo campo por idioma en
+  "Detalles de la colección"). Bug real encontrado: `CollectionStoreRequest::normalizeTranslations()`
+  reconstruye cada fila de traducción desde una lista explícita de campos — el valor se veía en
+  el formulario pero se descartaba antes de llegar a la API. Corregido agregando el campo a esa
+  lista. Verificado end-to-end en navegador (admin → domain → API pública → web).
+- **COL-003** — `CmsPresetCatalog::filterAvailablePresets()` pasa de todo-o-nada a filtrar bloque
+  por bloque; nuevo campo `missing_blocks` + mensaje en el Wizard de estructura cuando un preset
+  queda parcial. Verificado desactivando temporalmente un tipo de bloque en el catálogo.
+- `composer test`/`analyse`/`format:check`/`i18n-check` y `npm run test:js`/`lint:js`/`build:all`
+  en verde. Detalle completo en `../ARCHIVE.md`.
 
 ---
 

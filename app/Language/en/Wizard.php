@@ -53,6 +53,7 @@ return [
     'wizard_structure_preset_apply' => 'Use recommended preset',
     'wizard_structure_preset_skip' => 'Create without preset',
     'wizard_structure_preset_empty_hint' => 'The collection will be created without a base block template.',
+    'wizard_structure_preset_missing_blocks' => 'This preset does not include these blocks because they don\'t exist in your active catalog: %s. You can create them under Block Types or continue without them.',
     'wizard_structure_preset_block_required' => 'Required',
     'wizard_structure_preset_block_optional' => 'Optional',
     'wizard_structure_preset_block_locked' => 'Locked',

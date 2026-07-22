@@ -103,7 +103,12 @@ final class CmsPresetCatalog
     }
 
     /**
-     * Keeps optional starter presets only when all referenced block types exist.
+     * Keeps a preset's blocks that reference an active block type only, dropping the whole
+     * preset only when none of its blocks survive. Each returned preset also carries
+     * `missing_blocks` — the `block_key` values from its original definition that were dropped
+     * because that type doesn't exist in this deployment's active block catalog — so the caller
+     * can explain a partial preset instead of the previous all-or-nothing behavior, where a
+     * single missing block type silently hid the entire preset with no indication why.
      *
      * @param array<int, array<string, mixed>> $presets
      * @param list<string> $activeBlockKeys
@@ -115,11 +120,18 @@ final class CmsPresetCatalog
             return [];
         }
 
-        return array_values(array_filter($presets, static function (array $preset) use ($activeBlockKeys): bool {
-            $blocks = $preset['block_template']['blocks'] ?? [];
+        $available = [];
+
+        foreach ($presets as $preset) {
+            $blocks = $preset['block_template']['blocks'] ?? null;
             if (! is_array($blocks) || $blocks === []) {
-                return true;
+                $preset['missing_blocks'] = [];
+                $available[] = $preset;
+                continue;
             }
+
+            $keptBlocks = [];
+            $missingBlocks = [];
 
             foreach ($blocks as $block) {
                 if (! is_array($block)) {
@@ -127,13 +139,23 @@ final class CmsPresetCatalog
                 }
 
                 $blockKey = (string) ($block['block_key'] ?? '');
-                if ($blockKey !== '' && ! in_array($blockKey, $activeBlockKeys, true)) {
-                    return false;
+                if ($blockKey === '' || in_array($blockKey, $activeBlockKeys, true)) {
+                    $keptBlocks[] = $block;
+                } else {
+                    $missingBlocks[] = $blockKey;
                 }
             }
 
-            return true;
-        }));
+            if ($keptBlocks === []) {
+                continue;
+            }
+
+            $preset['block_template']['blocks'] = $keptBlocks;
+            $preset['missing_blocks'] = $missingBlocks;
+            $available[] = $preset;
+        }
+
+        return $available;
     }
 
     /**

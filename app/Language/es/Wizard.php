@@ -53,6 +53,7 @@ return [
     'wizard_structure_preset_apply' => 'Usar preset recomendado',
     'wizard_structure_preset_skip' => 'Crear sin preset',
     'wizard_structure_preset_empty_hint' => 'La colección se creará sin una plantilla base de bloques.',
+    'wizard_structure_preset_missing_blocks' => 'Este preset no incluye estos bloques porque no existen en tu catálogo activo: %s. Puedes crearlos en Tipos de bloque o continuar sin ellos.',
     'wizard_structure_preset_block_required' => 'Obligatorio',
     'wizard_structure_preset_block_optional' => 'Opcional',
     'wizard_structure_preset_block_locked' => 'Bloqueado',

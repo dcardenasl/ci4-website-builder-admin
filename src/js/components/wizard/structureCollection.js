@@ -8,6 +8,14 @@ export const structureCollection = {
         return Array.isArray(this.collectionPreset?.block_template?.blocks) ? this.collectionPreset.block_template.blocks : [];
     },
 
+    // COL-003: block types the selected preset originally referenced but that don't exist in
+    // this deployment's active block catalog — CmsPresetCatalog::filterAvailablePresets() drops
+    // just those blocks (not the whole preset) and reports them here instead of silently hiding
+    // the preset with no explanation.
+    collectionPresetMissingBlocks() {
+        return Array.isArray(this.collectionPreset?.missing_blocks) ? this.collectionPreset.missing_blocks : [];
+    },
+
     resolveCollectionPreset(type) {
         const presets = this.config?.collection_presets || {};
         return presets?.[type] || presets?.other || null;

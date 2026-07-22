@@ -153,6 +153,9 @@ $wizardDefaultLanguageLabel = (string) ($wizardDefaultLanguage['label'] ?? $wiza
                                     </button>
                                 </div>
                             </div>
+                            <div x-show="collectionPresetMissingBlocks().length > 0" x-cloak class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                                <span x-text="'<?= esc(lang('Wizard.wizard_structure_preset_missing_blocks'), 'js') ?>'.replace('%s', collectionPresetMissingBlocks().join(', '))"></span>
+                            </div>
                             <template x-if="collectionPresetBlocks().length > 0">
                                 <div class="mt-4 space-y-3">
                                     <template x-for="block in collectionPresetBlocks()" :key="block.sort_order + '-' + block.block_key">
