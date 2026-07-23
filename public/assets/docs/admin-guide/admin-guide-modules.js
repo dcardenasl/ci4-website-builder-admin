@@ -357,7 +357,7 @@ window.ADMIN_GUIDE_MODULES = [
       ['Target, icono y clase CSS', 'Pestaña destino, icono Lucide y estilo.', 'Usa <code>_self</code> para navegación interna salvo necesidad.'],
       ['Activo', 'Hace visible el elemento.', 'No arregla un destino inexistente.']
     ],
-    steps: ['Elige el menú correcto por clave/ubicación.', 'Confirma que esté activo.', 'Crea el elemento y selecciona el tipo de enlace.', 'Elige el destino existente.', 'Completa etiqueta por idioma.', 'Define padre, target e icono si corresponde.', 'Guarda, ordena y pulsa Guardar Orden.', 'Prueba header/footer, escritorio, móvil y todos los idiomas.'],
+    steps: ['Elige el menú correcto por clave/ubicación.', 'Confirma que esté activo.', 'Crea el elemento y selecciona el tipo de enlace.', 'Elige el destino existente.', 'Completa etiqueta por idioma.', 'Define padre, target e icono si corresponde.', 'Guarda, ordena y pulsa Guardar Orden.', 'Prueba header/footer/footer_secondary cuando existan, escritorio, móvil y todos los idiomas.'],
     can: ['Crear, editar, ordenar y activar enlaces.', 'Construir jerarquías de navegación.'],
     avoid: ['No escribir URL manual si existe un destino seleccionable.', 'No enlazar una página en borrador.', 'No eliminar el destino para corregir un ítem.'],
     verify: ['Cada elemento abre la URL esperada.', 'El árbol no tiene padres incorrectos.', 'La navegación funciona en móvil y por idioma.'],
@@ -406,7 +406,7 @@ window.ADMIN_GUIDE_MODULES = [
       ['Nombre y nombre nativo', 'Etiquetas visibles para el equipo y visitantes.', 'Escribe ambos con claridad.'],
       ['Predeterminado y activo', 'Define el idioma base y si el idioma está disponible.', 'Desactivar es un cambio global; debe existir un único idioma predeterminado.'],
       ['Idioma de reserva', 'Fallback ante contenido faltante.', 'Confirma qué experiencia tendrá la persona.'],
-      ['Predeterminado', 'Idioma base del sitio.', 'Solo debe existir uno.'],
+      ['Establecer como predeterminado', 'Acción que convierte este idioma en el idioma base del sitio.', 'Úsala solo después de revisar URLs, menús, traducciones y SEO; solo debe existir uno.'],
       ['Orden / Reordenar', 'Posición de los idiomas en selectores y navegación.', 'El orden puede afectar la experiencia pública.']
     ],
     steps: ['Consulta los idiomas activos actuales.', 'Define código, nombres y estado.', 'Selecciona fallback compatible.', 'Guarda solo si el impacto global está aprobado.', 'Si corresponde, establece predeterminado.', 'Reordena y prueba selector, URLs y menús.', 'Revisa Auditoría de Traducciones.'],
@@ -666,7 +666,7 @@ window.ADMIN_GUIDE_NOVICE = {
   idiomas: {
     outcome: 'Agregar o ajustar idiomas entendiendo el impacto global en URLs, menús, contenido y fallback.',
     before: ['Confirma el código de localización y plan de traducción.', 'Identifica el idioma predeterminado actual y el fallback.', 'No desactives un idioma para esconder faltantes sin aprobación.'],
-    steps: ['Consulta la lista y comprueba cuál está predeterminado y activo.', 'Para crear, completa Código, Nombre y, si corresponde, Nombre nativo.', 'Decide si será el idioma predeterminado o uno secundario, y si estará activo.', 'Selecciona Idioma de reserva para el caso de traducción faltante.', 'Crea o guarda y revisa el selector público, URLs y menús.', 'Abre Auditoría de Traducciones y prioriza recursos críticos.', 'Reordena idiomas solo después de comprobar la experiencia pública.'],
+    steps: ['Consulta la lista y comprueba cuál está predeterminado y activo.', 'Para crear, completa Código, Nombre y, si corresponde, Nombre nativo.', 'Decide si será el idioma predeterminado o un idioma adicional, y si estará activo.', 'Selecciona Idioma de reserva para el caso de traducción faltante.', 'Crea o guarda y revisa el selector público, URLs y menús.', 'Abre Auditoría de Traducciones y prioriza recursos críticos.', 'Reordena idiomas solo después de comprobar la experiencia pública.'],
     continue: 'Cambiar el idioma predeterminado o el fallback cambia la experiencia de todo el sitio, no solo la pantalla actual.',
     finish: ['Existe un único idioma predeterminado.', 'El selector y las URLs muestran el orden aprobado.', 'El fallback ofrece un contenido entendible y los faltantes están identificados.'],
     trouble: ['Si el idioma no aparece, revisa activo, orden y caché.', 'Si una URL cae al idioma equivocado, comprueba código y fallback.', 'Si faltan traducciones, corrige recursos desde Auditoría en vez de cambiar el idioma global.']
