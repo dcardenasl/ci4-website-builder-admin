@@ -19,6 +19,7 @@ return [
     'collections_structure'          => 'Block structure',
     'collections_structure_help'     => 'The block template defines how entries in this collection are assembled. We keep it on a separate screen so the main form stays lighter and easier to scan.',
     'collections_manage_structure'    => 'Manage structure',
+    'collections_structure_save'      => 'Save structure',
     'collections_structure_create_help' => 'The block structure is optional. You can create the collection first and define it later.',
     'collections_structure_empty'     => 'There is no structure defined for this collection yet.',
     'collections_structure_has_template' => 'This collection already has a configured block template.',

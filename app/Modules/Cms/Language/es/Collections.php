@@ -19,6 +19,7 @@ return [
     'collections_structure'          => 'Estructura de bloques',
     'collections_structure_help'     => 'La plantilla de bloques define cómo se construyen las entradas de esta colección. La mantenemos en una pantalla separada para que el formulario principal sea más liviano y ordenado.',
     'collections_manage_structure'    => 'Administrar estructura',
+    'collections_structure_save'      => 'Guardar estructura',
     'collections_structure_create_help' => 'La estructura de bloques es opcional. Puedes crear la colección primero y definirla después.',
     'collections_structure_empty'     => 'Aún no hay una estructura definida para esta colección.',
     'collections_structure_has_template' => 'Ya existe una plantilla de bloques configurada para esta colección.',

@@ -236,7 +236,9 @@ final class CollectionFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('name="block_template"', $body);
         $this->assertStringContainsString('row.advancedOpen', $body);
         $this->assertStringContainsString('/admin/cms/collections/10/structure', $body);
-        $this->assertStringContainsString('Administrar estructura', $body);
+        $this->assertStringContainsString('data-testid="collection-structure-save"', $body);
+        $this->assertStringContainsString('Guardar estructura', $body);
+        $this->assertStringContainsString('order-first space-y-6 lg:order-none', $body);
         $this->assertStringContainsString('"block_key":"rich_text"', $body);
         $this->assertStringContainsString('"block_key":"collection_grid"', $body);
     }

@@ -62,10 +62,10 @@ $templateBlocks = is_array($templateData['blocks'] ?? null) ? $templateData['blo
 ]) ?>
     </div>
 
-    <aside class="space-y-6">
+    <aside class="order-first space-y-6 lg:order-none">
         <?php ob_start(); ?>
-        <button type="submit" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5">
-            <?= esc(lang('Collections.collections_manage_structure')) ?>
+        <button type="submit" data-testid="collection-structure-save" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center py-2.5">
+            <?= esc(lang('Collections.collections_structure_save')) ?>
         </button>
         <a href="<?= route_to('admin.cms.collections.edit', $itemId) ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center py-2.5">
             <?= esc(lang('App.cancel')) ?>
