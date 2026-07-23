@@ -219,6 +219,9 @@ class StructureWizardController extends BaseWebController
     {
         $languageService = service('languageApiService');
         $languagesResponse = $this->safeApiCall(fn () => $languageService->list(['limit' => 100, 'is_active' => true]));
+        if (! $languagesResponse['ok']) {
+            $this->maybeFlashDevError($languagesResponse);
+        }
 
         $rows = [];
         foreach ($this->extractItems($languagesResponse) as $row) {

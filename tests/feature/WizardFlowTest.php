@@ -139,6 +139,42 @@ final class WizardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('Idioma base', $body);
     }
 
+    public function testStructureWizardIndexStillRendersWhenLanguageServiceFails(): void
+    {
+        $languageMock = $this->createMock(LanguageApiService::class);
+        $languageMock->method('list')
+            ->willReturn([
+                'ok' => false,
+                'status' => 502,
+                'data' => null,
+                'raw' => '',
+                'headers' => [],
+                'messages' => ['Upstream unavailable'],
+                'fieldErrors' => [],
+            ]);
+        Services::injectMock('languageApiService', $languageMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'permissions_refreshed_at' => time(),
+            'user' => ['permissions' => [
+                'cms.entries.read',
+                'cms.collections.read',
+                'cms.collections.write',
+                'cms.pages.read',
+                'cms.pages.write',
+                'cms.menus.read',
+                'cms.menus.write',
+            ]],
+        ])->get('/admin/cms/wizard/structure');
+
+        // languageApiService failing must not crash the wizard's structure
+        // screen — it renders with an empty language list instead, and the
+        // dev error panel path (maybeFlashDevError) must be reachable
+        // without throwing.
+        $result->assertStatus(200);
+    }
+
     public function testStructureWizardRedirectsForCMSReaderWithoutWritePermissions(): void
     {
         $result = $this->withSession([
