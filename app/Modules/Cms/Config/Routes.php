@@ -14,6 +14,12 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('wizard/config', '\App\Modules\Cms\Controllers\WizardController::config', ['as' => 'admin.cms.wizard.config',  'filter' => 'permission:cms.entries.read']);
     $routes->post('wizard/publish', '\App\Modules\Cms\Controllers\WizardController::publish', ['as' => 'admin.cms.wizard.publish', 'filter' => 'permission:cms.entries.write']);
     $routes->post('wizard/upload', '\App\Modules\Cms\Controllers\WizardController::uploadImage', ['as' => 'admin.cms.wizard.upload',  'filter' => 'permission:cms.entries.write']);
+    // wizard/structure/* intentionally has no route-level `permission:` filter: access needs an
+    // OR of cms.pages.write / cms.menus.write / cms.collections.write (which resource within the
+    // wizard is being built varies per-request), and the `permission:<code>` filter only accepts
+    // one code. Each action enforces its own permission(s) in-code instead — see
+    // StructureWizardController::index()/config() (OR of all three) and
+    // createPage()/createMenu()/createCollection() (the single matching write permission).
     $routes->get('wizard/structure', '\App\Modules\Cms\Controllers\StructureWizardController::index', ['as' => 'admin.cms.wizard.structure']);
     $routes->get('wizard/structure/config', '\App\Modules\Cms\Controllers\StructureWizardController::config', ['as' => 'admin.cms.wizard.structure.config']);
     $routes->post('wizard/structure/create-collection', '\App\Modules\Cms\Controllers\StructureWizardController::createCollection', ['as' => 'admin.cms.wizard.structure.create_collection']);
