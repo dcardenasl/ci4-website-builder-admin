@@ -73,6 +73,52 @@ final class MenuItemFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('value="collection_listing"', (string) $result->getBody());
     }
 
+    public function testCreateStillRendersWhenOptionServicesFail(): void
+    {
+        $fixtures = new AdminFixtureFactory(__METHOD__);
+        $menu = $fixtures->menu();
+        $failure = [
+            'ok' => false,
+            'status' => 502,
+            'data' => null,
+            'raw' => '',
+            'headers' => [],
+            'messages' => ['Upstream unavailable'],
+            'fieldErrors' => [],
+        ];
+
+        $menuMock = $this->createMock(MenuApiService::class);
+        $menuMock->method('get')
+            ->with((string) $menu['id'])
+            ->willReturn($fixtures->response($menu));
+        $menuMock->method('listItems')
+            ->willReturn($fixtures->response([]));
+        Services::injectMock('menuApiService', $menuMock);
+
+        $pageMock = $this->createMock(PageApiService::class);
+        $pageMock->method('pages')->willReturn($failure);
+        Services::injectMock('pageApiService', $pageMock);
+
+        $entryMock = $this->createMock(EntryApiService::class);
+        $entryMock->method('list')->willReturn($failure);
+        $entryMock->method('collections')->willReturn($failure);
+        Services::injectMock('entryApiService', $entryMock);
+
+        $langMock = $this->createMock(LanguageApiService::class);
+        $langMock->method('list')->willReturn($failure);
+        Services::injectMock('languageApiService', $langMock);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['permissions' => ['cms.menus.write', 'cms.menus.read']],
+        ])->get('/admin/cms/menus/' . $menu['id'] . '/items/create');
+
+        // Every options() helper hits a failing upstream — the page must still
+        // render (empty selectors) instead of a fatal, and the dev error panel
+        // path (maybeFlashDevError) must be reachable without throwing.
+        $result->assertStatus(200);
+    }
+
     public function testUpdateAcceptsCollectionListingTarget(): void
     {
         $fixtures = new AdminFixtureFactory(__METHOD__);

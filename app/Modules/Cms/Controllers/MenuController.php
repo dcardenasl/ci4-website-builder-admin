@@ -336,6 +336,9 @@ class MenuController extends BaseWebController
     private function getLanguages(): array
     {
         $response = $this->safeApiCall(fn () => service('languageApiService')->list(['limit' => 100, 'is_active' => true]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         return $this->extractItems($response);
     }
 
@@ -343,6 +346,9 @@ class MenuController extends BaseWebController
     private function pagesOptions(?string $excludeId = null): array
     {
         $response = $this->safeApiCall(fn () => service('pageApiService')->pages(['limit' => 250]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {
@@ -372,6 +378,9 @@ class MenuController extends BaseWebController
     private function entriesOptions(): array
     {
         $response = $this->safeApiCall(fn () => $this->entryService->list(['limit' => 250]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {
@@ -400,6 +409,9 @@ class MenuController extends BaseWebController
     private function collectionsOptions(): array
     {
         $response = $this->safeApiCall(fn () => $this->entryService->collections(['limit' => 100, 'is_active' => true]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+        }
         $options = [];
 
         foreach ($this->extractItems($response) as $item) {

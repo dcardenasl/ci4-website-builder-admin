@@ -38,30 +38,32 @@ $defaultLangCode = $defaultLang ? (string) $defaultLang['code'] : '';
 $translateUrl = route_to('admin.cms.translate');
 
 // Build ordered parent options with indentation
-function buildParentOptions(array $items, ?int $parentId = null, int $depth = 0): array
-{
-    $options = [];
-    foreach ($items as $item) {
-        $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
-        if ($pid === $parentId) {
-            $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
-            $label = $item['label'] ?? 'Item #' . $item['id'];
-            if (! empty($item['translations']) && is_array($item['translations'])) {
-                foreach ($item['translations'] as $translation) {
-                    if (is_array($translation) && ! empty($translation['label'])) {
-                        $label = (string) $translation['label'];
-                        break;
+if (! function_exists('buildParentOptions')) {
+    function buildParentOptions(array $items, ?int $parentId = null, int $depth = 0): array
+    {
+        $options = [];
+        foreach ($items as $item) {
+            $pid = isset($item['parent_id']) && $item['parent_id'] !== '' ? (int) $item['parent_id'] : null;
+            if ($pid === $parentId) {
+                $prefix = str_repeat('  ', $depth) . ($depth > 0 ? '└ ' : '');
+                $label = $item['label'] ?? 'Item #' . $item['id'];
+                if (! empty($item['translations']) && is_array($item['translations'])) {
+                    foreach ($item['translations'] as $translation) {
+                        if (is_array($translation) && ! empty($translation['label'])) {
+                            $label = (string) $translation['label'];
+                            break;
+                        }
                     }
                 }
-            }
-            $options[] = ['id' => (string) $item['id'], 'label' => $prefix . $label];
-            $children = buildParentOptions($items, (int) $item['id'], $depth + 1);
-            foreach ($children as $child) {
-                $options[] = $child;
+                $options[] = ['id' => (string) $item['id'], 'label' => $prefix . $label];
+                $children = buildParentOptions($items, (int) $item['id'], $depth + 1);
+                foreach ($children as $child) {
+                    $options[] = $child;
+                }
             }
         }
+        return $options;
     }
-    return $options;
 }
 $parentOptions = buildParentOptions($items);
 $suggestedSortOrder = count($items);
