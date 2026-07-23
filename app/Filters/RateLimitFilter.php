@@ -22,9 +22,6 @@ use CodeIgniter\HTTP\ResponseInterface;
  */
 class RateLimitFilter implements FilterInterface
 {
-    private const DEFAULT_MAX_REQUESTS = 200;
-    private const DEFAULT_WINDOW_SECONDS = 60;
-
     /**
      * @param list<string>|null $arguments [maxRequests, windowSeconds]
      */
@@ -86,11 +83,9 @@ class RateLimitFilter implements FilterInterface
      */
     private function parseArguments(?array $arguments): array
     {
-        $max    = (int) env('ADMIN_RATE_LIMIT_REQUESTS', self::DEFAULT_MAX_REQUESTS);
-        $window = (int) env('ADMIN_RATE_LIMIT_WINDOW', self::DEFAULT_WINDOW_SECONDS);
-
-        $max    = max(1, $max);
-        $window = max(1, $window);
+        $config = config('RateLimit');
+        $max    = $config->maxRequests;
+        $window = $config->windowSeconds;
 
         if (isset($arguments[0]) && is_numeric($arguments[0])) {
             $max = max(1, (int) $arguments[0]);
