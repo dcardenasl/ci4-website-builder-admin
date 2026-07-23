@@ -128,6 +128,22 @@ final class BlockTypeOptionsResolver
             ? ($blockType['schema_definition'] ?? [])
             : json_decode((string) ($blockType['schema_definition'] ?? '{}'), true);
 
+        // Some domain API versions expose config fields both inside the
+        // schema and at the top level. Merge them before resolving dynamic
+        // options so a partial top-level projection cannot hide fields that
+        // are present in the canonical schema (for example, hero_slider's
+        // transition field).
+        $schemaConfigFields = is_array($schema['config_fields'] ?? null)
+            ? $schema['config_fields']
+            : [];
+        $projectedConfigFields = is_array($blockType['config_fields'] ?? null)
+            ? $blockType['config_fields']
+            : [];
+        $mergedConfigFields = array_replace($schemaConfigFields, $projectedConfigFields);
+        $schema['config_fields'] = $mergedConfigFields;
+        $blockType['config_fields'] = $mergedConfigFields;
+        $blockType['schema_definition'] = $schema;
+
         $hasFormEmbed     = ($blockType['block_key'] ?? '') === 'form_embed';
         $hasCollectionKey = isset($schema['config_fields']['collection_key']) || isset($blockType['config_fields']['collection_key']);
         $hasCollectionId  = isset($schema['config_fields']['collection_id'])  || isset($blockType['config_fields']['collection_id']);
