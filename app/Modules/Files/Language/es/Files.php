@@ -81,6 +81,12 @@ return [
 
     'file_not_found'           => 'Archivo no encontrado.',
 
+    'replace'                  => 'Reemplazar archivo',
+    'replace_button'           => 'Subir reemplazo',
+    'replace_help'             => 'Elige un archivo nuevo. La URL queda igual para no romper referencias existentes.',
+    'replace_success'          => 'Archivo reemplazado.',
+    'replace_failed'           => 'No se pudo reemplazar el archivo.',
+
     'regenerate'               => 'Regenerar variantes',
     'regenerate_help'          => 'Re-ejecuta procesamiento de imagen y lectura de metadata para este archivo.',
     'regenerate_success'       => 'Variantes regeneradas.',
@@ -111,5 +117,7 @@ return [
     'gallery_add_success'      => 'Imágenes agregadas.',
 
     'in_use_warning_title' => 'Este archivo está en uso. ',
-    'in_use_warning_body'  => 'Referenciado por {0} recurso(s). El borrado permanente estará bloqueado hasta que se desvincule.',
+    'in_use_warning_body'  => 'Referenciado por {0} recurso(s). No se puede eliminar hasta que se cambie o desvincule en cada uno de ellos.',
+    'cannot_delete_in_use' => 'No se puede eliminar el archivo porque está en uso en otros recursos.',
+    'bulk_failed_in_use'   => 'Algunos archivos no se pudieron eliminar porque están en uso en otros recursos.',
 ];

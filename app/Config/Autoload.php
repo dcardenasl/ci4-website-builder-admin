@@ -52,7 +52,9 @@ class Autoload extends AutoloadConfig
         'App\Modules\Language'  => APPPATH . 'Modules/Language',
         'App\Modules\Iam'       => APPPATH . 'Modules/Iam',
         'App\Modules\System'    => APPPATH . 'Modules/System',
-        'App\Modules\Catalog'  => APPPATH . 'Modules/Catalog',
+        'App\Modules\Catalog'   => APPPATH . 'Modules/Catalog',
+        'App\Modules\Cms'       => APPPATH . 'Modules/Cms',
+        'App\Modules\Analytics' => APPPATH . 'Modules/Analytics',
     ];
 
     /**
@@ -102,5 +104,5 @@ class Autoload extends AutoloadConfig
      *
      * @var list<string>
      */
-    public $helpers = ['auth', 'ui', 'form', 'badge', 'asset'];
+    public $helpers = ['auth', 'ui', 'form', 'badge', 'asset', 'cms_translations'];
 }

@@ -59,6 +59,15 @@ final class PermissionFilterTest extends CIUnitTestCase
         $this->assertNull($result, 'Filter must return null (= continue) when permission is held.');
     }
 
+    public function testAllowsSuperadminForAnyRequiredPermission(): void
+    {
+        session()->set('user', ['permissions' => ['iam.superadmin-access']]);
+
+        $result = $this->filter->before($this->requestWithAjax(false), ['cms.pages.read']);
+
+        $this->assertNull($result, 'Superadmin should pass module permission gates even before domain permissions are synced into the session.');
+    }
+
     public function testRedirectsBrowserRequestsToDashboardWhenPermissionMissing(): void
     {
         session()->set('user', ['permissions' => ['users.read']]);

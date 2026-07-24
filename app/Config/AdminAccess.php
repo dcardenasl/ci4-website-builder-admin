@@ -36,6 +36,18 @@ class AdminAccess extends BaseConfig
         'apikeys.read',
         'metrics.read',
         'iam.admin-access',
+        'cms.languages.read',
+        'cms.settings.read',
+        'cms.pages.read',
+        'cms.menus.read',
+        'cms.blocks.read',
+        'cms.collections.read',
+        'cms.entries.read',
+        'cms.categories.read',
+        'cms.tags.read',
+        'cms.redirects.read',
+        'cms.forms.read',
+        'cms.submissions.read',
     ];
 
     public function __construct()

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'required'      => 'El campo {field} es obligatorio.',
+    'required_with' => 'El campo {field} es obligatorio cuando {param} está presente.',
     'valid_email'   => 'El campo {field} debe ser un correo valido.',
     'min_length'    => 'El campo {field} debe tener al menos {param} caracteres.',
     'max_length'    => 'El campo {field} no debe exceder {param} caracteres.',

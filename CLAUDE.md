@@ -92,6 +92,11 @@ Application will be available at: `http://localhost:8182`
 - Production builds use `npm run build:css` to generate minified CSS (see DEPLOYMENT.md)
 
 ### Testing
+
+Prefer `composer test*` (passes `--no-coverage`). Bare `vendor/bin/phpunit` triggers a harmless
+`XDEBUG_MODE=coverage` warning (`phpunit.xml.dist` declares a `<coverage>` block but xdebug isn't
+active by default) and returns a non-zero exit code on an otherwise-passing run.
+
 ```bash
 # Run all tests
 vendor/bin/phpunit
@@ -147,6 +152,28 @@ composer ci              # Full CI suite: tests + quality
 ```
 
 ## Core Architecture Patterns
+
+### Consistency Contract
+
+The admin must behave like one coherent product. When adding or changing a module:
+
+- Extend `BaseWebController` for feature controllers unless there is a very specific reason not to.
+- Route every failed API call through `failApi()` so development builds can expose the exact upstream payload in `devApiError`.
+- Route every failed form request through `validateRequest()` so validation errors use the same flash/field-error path as API failures.
+- Keep `app/Views/layouts/partials/flash_messages.php` as the canonical dev debug surface under the toast stack.
+- Localize the dev error panel itself through `app/Language/{locale}/App.php`; do not hardcode English labels in `dev_api_error_panel.php`.
+- For any form that posts `translations`, normalize and drop empty language rows before validation. Do not validate optional empty rows as if they were real content.
+- Keep validation messages localized in both `app/Language/es` and `app/Language/en`, including shared rules such as `required_with`.
+- When a module introduces a new error shape, update the shared helpers first and the module second. Avoid one-off error handling in individual controllers or views.
+- After changing validation, API response mapping, or flash behavior, verify the flow in `http://localhost:8182` with the real browser, not just in code.
+
+Reference implementations for this contract:
+
+- `App\Modules\Cms\Requests\PageStoreRequest`
+- `App\Modules\Cms\Requests\EntryStoreRequest`
+- `App\Modules\Cms\Requests\CategoryStoreRequest`
+- `App\Modules\Cms\Requests\MenuItemStoreRequest`
+- `App\Controllers\BaseWebController`
 
 ### ApiClient: Central HTTP Communication Layer
 
@@ -321,6 +348,40 @@ The API supports an optional `X-App-Key` header that identifies the admin app as
 ```
 
 When present, `ApiClient` injects `X-App-Key` on every request (public and authenticated). When absent, the header is not sent. Configuring an invalid key causes every request to return `401` from the API — a misconfiguration that is caught immediately.
+
+## CMS — Two-Audience Model
+
+The CMS module serves two distinct user audiences with separate UI flows. **Never mix permissions or routes between them.**
+
+### Audience 1: Non-technical editors (`cms-editor` role)
+- Use the **Wizard** (`/admin/cms/wizard`) — guided step-by-step flow for creating/editing entries and managing menus.
+- See the **Contenido** sidebar group: Entradas, Colecciones, Categorías, Tags, Formularios, Envíos.
+- Gate: `cms.entries.read` permission (also grants wizard access).
+
+### Audience 2: Technical administrators (`cms-admin` role)
+- Use both the Wizard AND the **canonical CMS modules** for full control.
+- See the **Estructura** sidebar group: Páginas, Menús, Tipos de bloque, Redirecciones.
+- Gate: `cms.pages.read`, `cms.menus.read`, `cms.blocks.read` permissions.
+
+### Sidebar permission structure
+
+```
+[CMS]
+  ├── Wizard link            → cms.entries.read
+  ├── [Contenido group]      → cms.entries.read OR cms.collections.read OR cms.categories.read
+  │     Entradas, Colecciones, Categorías, Tags, Formularios, Envíos
+  └── [Estructura group]     → cms.pages.read OR cms.menus.read OR cms.blocks.read OR cms.redirects.read
+        Páginas, Menús, Tipos de bloque, Redirecciones
+```
+
+### Rules
+- Structural routes (pages, menus, block types, redirects) must NEVER appear under `cms.entries.*` permission gates.
+- Content routes (entries, collections, taxonomy, forms) must NEVER appear under `cms.pages.*`/`cms.blocks.*` gates.
+- The Wizard and canonical modules are **parallel flows** — do not remove one to replace the other.
+- Permission codes are authoritative in `ci4-website-builder-domain/app/Config/DomainPermissions.php`.
+- Hub roles `cms-editor` and `cms-admin` are seeded by `CmsRolesSeeder` in the API project. Run it after `domain:sync-permissions`.
+
+---
 
 ## Implemented Modules
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Libraries\ApiClientInterface;
+use App\Libraries\DomainApiClientInterface;
 use App\Modules\Files\Services\FileApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 
@@ -16,6 +17,18 @@ final class FileApiServiceTest extends CIUnitTestCase
     private function createMockClient(array $returnValue): ApiClientInterface
     {
         $mock = $this->createMock(ApiClientInterface::class);
+
+        $mock->method('get')->willReturn($returnValue);
+        $mock->method('post')->willReturn($returnValue);
+        $mock->method('put')->willReturn($returnValue);
+        $mock->method('delete')->willReturn($returnValue);
+
+        return $mock;
+    }
+
+    private function createMockDomainClient(array $returnValue): DomainApiClientInterface
+    {
+        $mock = $this->createMock(DomainApiClientInterface::class);
 
         $mock->method('get')->willReturn($returnValue);
         $mock->method('post')->willReturn($returnValue);
@@ -41,7 +54,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             'fieldErrors' => [],
         ];
 
-        $service = new FileApiService($this->createMockClient($expected));
+        $service = new FileApiService($this->createMockClient($expected), $this->createMockDomainClient($expected));
         $result = $service->list();
 
         $this->assertTrue($result['ok']);
@@ -67,7 +80,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             'fieldErrors' => [],
         ];
 
-        $service = new FileApiService($this->createMockClient($expected));
+        $service = new FileApiService($this->createMockClient($expected), $this->createMockDomainClient($expected));
         $result = $service->get('123');
 
         $this->assertTrue($result['ok']);
@@ -92,7 +105,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             ->with('/files', ['name' => 'newfile.txt'])
             ->willReturn($expected);
 
-        $service = new FileApiService($mock);
+        $service = new FileApiService($mock, $this->createMockDomainClient($expected));
         $result = $service->create(['name' => 'newfile.txt']);
 
         $this->assertTrue($result['ok']);
@@ -116,7 +129,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             ->with('/files/123', ['filename' => 'renamed.pdf'])
             ->willReturn($expected);
 
-        $service = new FileApiService($mock);
+        $service = new FileApiService($mock, $this->createMockDomainClient($expected));
         $result = $service->update('123', ['filename' => 'renamed.pdf']);
 
         $this->assertTrue($result['ok']);
@@ -140,7 +153,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             ->with('/files/123')
             ->willReturn($expected);
 
-        $service = new FileApiService($mock);
+        $service = new FileApiService($mock, $this->createMockDomainClient($expected));
         $result = $service->delete('123');
 
         $this->assertTrue($result['ok']);
@@ -173,7 +186,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             )
             ->willReturn($expected);
 
-        $service = new FileApiService($mock);
+        $service = new FileApiService($mock, $this->createMockDomainClient($expected));
 
         // Create a temporary test file
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_');
@@ -194,7 +207,7 @@ final class FileApiServiceTest extends CIUnitTestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('File does not exist');
 
-        $service = new FileApiService($this->createMockClient([]));
+        $service = new FileApiService($this->createMockClient([]), $this->createMockDomainClient([]));
         $service->upload('file', '/nonexistent/file.txt', 'file.txt');
     }
 
@@ -223,7 +236,7 @@ final class FileApiServiceTest extends CIUnitTestCase
             )
             ->willReturn($expected);
 
-        $service = new FileApiService($mock);
+        $service = new FileApiService($mock, $this->createMockDomainClient($expected));
 
         // Create a temporary test file with PNG header
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_');

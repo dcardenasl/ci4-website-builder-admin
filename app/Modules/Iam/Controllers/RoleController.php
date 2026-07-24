@@ -7,8 +7,8 @@ namespace App\Modules\Iam\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Iam\Requests\RoleStoreRequest;
 use App\Modules\Iam\Requests\RoleUpdateRequest;
-use App\Modules\Iam\Services\PermissionApiServiceInterface;
-use App\Modules\Iam\Services\RoleApiServiceInterface;
+use App\Modules\Iam\Services\PermissionApiService;
+use App\Modules\Iam\Services\RoleApiService;
 use App\Modules\Iam\Support\IamLookups;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -17,8 +17,8 @@ use Psr\Log\LoggerInterface;
 
 class RoleController extends BaseWebController
 {
-    protected RoleApiServiceInterface $roleService;
-    protected PermissionApiServiceInterface $permissionService;
+    protected RoleApiService $roleService;
+    protected PermissionApiService $permissionService;
     protected IamLookups $lookups;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
@@ -102,6 +102,8 @@ class RoleController extends BaseWebController
             return $this->failApi($response, lang('Iam.roles_create_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.roles'))->with('success', lang('Iam.roles_create_success'));
     }
 
@@ -130,9 +132,24 @@ class RoleController extends BaseWebController
      */
     private function loadAllPermissions(): array
     {
-        $response = $this->safeApiCall(fn () => $this->permissionService->list(['limit' => 200]));
+        $all = [];
+        $page = 1;
 
-        return $this->extractItems($response);
+        do {
+            $response = $this->safeApiCall(fn () => $this->permissionService->list([
+                'page'     => $page,
+                'per_page' => 500,
+            ]));
+
+            $items = $this->extractItems($response);
+            $all = array_merge($all, $items);
+            $meta = $response['data']['meta'] ?? $response['data'] ?? [];
+            $total = (int) ($meta['total'] ?? count($all));
+            $perPage = (int) ($meta['per_page'] ?? 500);
+            $page++;
+        } while ($perPage > 0 && count($all) < $total);
+
+        return $all;
     }
 
     public function update(string $id): RedirectResponse
@@ -150,6 +167,8 @@ class RoleController extends BaseWebController
             return $this->failApi($response, lang('Iam.roles_update_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.roles'))->with('success', lang('Iam.roles_update_success'));
     }
 
@@ -160,6 +179,8 @@ class RoleController extends BaseWebController
         if (! $response['ok']) {
             return $this->failApi($response, lang('Iam.roles_delete_failed'), route_to('admin.iam.roles'), false);
         }
+
+        service('permissionsSessionRefresher')->forceRefresh();
 
         return redirect()->to(route_to('admin.iam.roles'))->with('success', lang('Iam.roles_delete_success'));
     }
@@ -180,6 +201,8 @@ class RoleController extends BaseWebController
             return $this->failApi($response, lang('Iam.permissions_attach_failed'), route_to('admin.iam.roles.show', $id), false);
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.roles.show', $id))
             ->with('success', lang('Iam.permissions_attach_success'));
     }
@@ -191,6 +214,8 @@ class RoleController extends BaseWebController
         if (! $response['ok']) {
             return $this->failApi($response, lang('Iam.permissions_detach_failed'), route_to('admin.iam.roles.show', $id), false);
         }
+
+        service('permissionsSessionRefresher')->forceRefresh();
 
         return redirect()->to(route_to('admin.iam.roles.show', $id))
             ->with('success', lang('Iam.permissions_detach_success'));

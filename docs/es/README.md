@@ -295,7 +295,7 @@ Este proyecto es de código abierto. Ver archivo LICENSE para detalles.
 
 ## 🤝 Contribuyendo
 
-¡Las contribuciones son bienvenidas! Por favor ver [CONTRIBUTING.md](../CONTRIBUTING.md) para directrices.
+¡Las contribuciones son bienvenidas! Por favor ver [CONTRIBUTING.md](../../CONTRIBUTING.md) para directrices.
 
 ## ❓ ¿Necesitas Ayuda?
 

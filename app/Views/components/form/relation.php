@@ -16,6 +16,7 @@ helper('form');
 $required = $required ?? false;
 $value = old($name, $value ?? '');
 $placeholder = $placeholder ?? '';
+$placeholderText = $placeholder !== '' ? lang($placeholder) : lang('App.select_option');
 $help = $help ?? '';
 $async = $async ?? false;
 $options = $options ?? [];
@@ -86,7 +87,7 @@ $hasOptions = is_array($options) && $options !== [];
             class="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             <?= $required ? 'required' : '' ?>
         >
-            <span x-text="label || '<?= esc($placeholder ?: lang('App.select_option'), 'js') ?>'" :class="!label && 'text-gray-400'"></span>
+            <span x-text="label || '<?= esc($placeholderText, 'js') ?>'" :class="!label && 'text-gray-400'"></span>
             <span class="pointer-events-none flex items-center">
                 <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4" />
@@ -141,7 +142,7 @@ $hasOptions = is_array($options) && $options !== [];
             <span class="text-red-500" aria-hidden="true">*</span>
         <?php endif; ?>
     </label>
-    <?php if (! $hasOptions): ?>
+    <?php if (! $hasOptions && $required): ?>
         <div class="mt-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="alert">
             <p class="font-medium"><?= esc(lang('App.relation_missing_options')) ?></p>
             <p class="mt-1 text-xs text-amber-800"><?= esc(lang('App.relation_missing_options_desc')) ?></p>
@@ -156,14 +157,19 @@ $hasOptions = is_array($options) && $options !== [];
             name="<?= esc($name, 'attr') ?>" 
             class="<?= input_class($name) ?>"
             <?= $required ? 'required' : '' ?>
+            <?= ! $hasOptions ? 'disabled' : '' ?>
             <?= field_aria_attrs($name, $required) ?>
         >
-            <option value=""><?= esc($placeholder ?: lang('App.select_option')) ?></option>
-            <?php foreach ($options as $val => $lbl): ?>
-                <option value="<?= esc($val, 'attr') ?>" <?= (string) $val === (string) $value ? 'selected' : '' ?>>
-                    <?= esc($lbl) ?>
-                </option>
-            <?php endforeach; ?>
+            <?php if (! $hasOptions): ?>
+                <option value=""><?= esc(lang('App.relation_no_options')) ?></option>
+            <?php else: ?>
+                <option value=""><?= esc($placeholderText) ?></option>
+                <?php foreach ($options as $val => $lbl): ?>
+                    <option value="<?= esc($val, 'attr') ?>" <?= (string) $val === (string) $value ? 'selected' : '' ?>>
+                        <?= esc($lbl) ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </select>
         <?php if ($help): ?>
             <p class="mt-1 text-xs text-gray-500"><?= lang($help) ?></p>

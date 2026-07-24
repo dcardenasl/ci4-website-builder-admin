@@ -7,6 +7,7 @@ namespace Tests\Unit\Controllers;
 use App\Controllers\BaseWebController;
 use CodeIgniter\Test\CIUnitTestCase;
 use Config\Services;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Tests for BaseWebController protected utility methods:
@@ -61,6 +62,13 @@ final class BaseWebControllerTest extends CIUnitTestCase
             {
                 return $this->firstMessage($response, $fallback);
             }
+
+            public function callIsSafeLocalReturnUrl(string $url): bool
+            {
+                $method = new \ReflectionMethod($this, 'isSafeLocalReturnUrl');
+
+                return $method->invoke($this, $url);
+            }
         };
     }
 
@@ -98,7 +106,25 @@ final class BaseWebControllerTest extends CIUnitTestCase
         $this->assertSame([], $this->ctrl->callExtractItems(['data' => 'not-an-array']));
     }
 
+    public function testExtractItemsReturnsEmptyArrayWhenOkIsFalse(): void
+    {
+        $response = [
+            'ok' => false,
+            'data' => [['id' => 1]],
+        ];
+        $this->assertSame([], $this->ctrl->callExtractItems($response));
+    }
+
     // ─── extractData() ───────────────────────────────────────────────────────
+
+    public function testExtractDataReturnsEmptyArrayWhenOkIsFalse(): void
+    {
+        $response = [
+            'ok' => false,
+            'data' => ['id' => 1],
+        ];
+        $this->assertSame([], $this->ctrl->callExtractData($response));
+    }
 
     public function testExtractDataReturnsSingleObjectPayload(): void
     {
@@ -215,5 +241,30 @@ final class BaseWebControllerTest extends CIUnitTestCase
 
         $this->assertStringNotContainsString('ApiErrors.', $result);
         $this->assertNotSame('email_already_registered', $result, 'Should be localized');
+    }
+
+    // ─── isSafeLocalReturnUrl() — return_to open-redirect guard ─────────────
+
+    public function testSafeLocalReturnUrlAcceptsAbsoluteLocalPath(): void
+    {
+        $this->assertTrue($this->ctrl->callIsSafeLocalReturnUrl('/admin/cms/translations/audit?resource=page'));
+    }
+
+    /** @return iterable<string, list<string>> */
+    public static function unsafeReturnUrlProvider(): iterable
+    {
+        yield 'empty string' => [''];
+        yield 'protocol-relative' => ['//evil.com/phish'];
+        yield 'absolute external URL' => ['https://evil.com/phish'];
+        yield 'javascript scheme (no leading slash)' => ['javascript:alert(1)'];
+        yield 'relative without leading slash' => ['admin/cms/pages'];
+        yield 'backslash trick' => ['/\\evil.com'];
+        yield 'embedded CRLF' => ["/admin/cms/pages\r\nSet-Cookie: pwn=1"];
+    }
+
+    #[DataProvider('unsafeReturnUrlProvider')]
+    public function testSafeLocalReturnUrlRejectsOpenRedirectAttempts(string $url): void
+    {
+        $this->assertFalse($this->ctrl->callIsSafeLocalReturnUrl($url));
     }
 }

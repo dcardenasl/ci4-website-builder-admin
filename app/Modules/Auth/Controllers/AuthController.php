@@ -10,7 +10,7 @@ use App\Modules\Auth\Requests\GoogleLoginRequest;
 use App\Modules\Auth\Requests\LoginRequest;
 use App\Modules\Auth\Requests\RegisterRequest;
 use App\Modules\Auth\Requests\ResetPasswordRequest;
-use App\Modules\Auth\Services\AuthApiServiceInterface;
+use App\Modules\Auth\Services\AuthApiService;
 use App\Support\SessionKeys;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -18,7 +18,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class AuthController extends BaseWebController
 {
-    protected AuthApiServiceInterface $authService;
+    protected AuthApiService $authService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, \Psr\Log\LoggerInterface $logger): void
     {
@@ -123,6 +123,7 @@ class AuthController extends BaseWebController
 
         $payload = $request->payload();
         $payload['client_base_url'] = $this->clientBaseUrl();
+        $payload['locale'] = $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es';
 
         $response = $this->safeApiCall(fn () => $this->authService->register($payload));
 
@@ -158,8 +159,13 @@ class AuthController extends BaseWebController
 
         $payload = $request->payload();
         $payload['client_base_url'] = $this->clientBaseUrl();
+        $payload['locale'] = $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es';
 
-        $response = $this->safeApiCall(fn () => $this->authService->forgotPassword($payload['email'], $payload['client_base_url']));
+        $response = $this->safeApiCall(fn () => $this->authService->forgotPassword(
+            $payload['email'],
+            $payload['client_base_url'],
+            $payload['locale']
+        ));
 
         if (! $response['ok']) {
             return redirect()->back()->withInput()->with('error', $this->firstMessage($response, lang('Auth.forgot_failed')));

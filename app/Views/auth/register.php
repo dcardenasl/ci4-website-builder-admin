@@ -1,4 +1,6 @@
-<form method="post" action="<?= site_url('register') ?>" class="space-y-4" x-data="{ password: '' }">
+<form method="post" action="<?= site_url('register') ?>"
+      class="relative space-y-4"
+      x-data="{ password: '' }">
     <?= csrf_field() ?>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -39,7 +41,10 @@
         <?= render_field_error('password_confirmation') ?>
     </div>
 
-    <button type="submit" class="w-full rounded-lg bg-brand-600 text-white px-4 py-2 font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"><?= lang('Auth.register_button') ?></button>
+    <button type="submit"
+            class="w-full rounded-lg bg-brand-600 text-white px-4 py-2 font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+        <?= lang('Auth.register_button') ?>
+    </button>
 </form>
 
 <div class="mt-4 text-sm text-gray-600 text-center">

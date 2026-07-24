@@ -7,7 +7,7 @@ namespace App\Modules\Iam\Controllers;
 use App\Controllers\BaseWebController;
 use App\Modules\Iam\Requests\PermissionStoreRequest;
 use App\Modules\Iam\Requests\PermissionUpdateRequest;
-use App\Modules\Iam\Services\PermissionApiServiceInterface;
+use App\Modules\Iam\Services\PermissionApiService;
 use App\Modules\Iam\Support\IamLookups;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class PermissionController extends BaseWebController
 {
-    protected PermissionApiServiceInterface $permissionService;
+    protected PermissionApiService $permissionService;
     protected IamLookups $lookups;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
@@ -88,6 +88,8 @@ class PermissionController extends BaseWebController
             return $this->failApi($response, lang('Iam.permissions_create_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_create_success'));
     }
 
@@ -120,6 +122,8 @@ class PermissionController extends BaseWebController
             return $this->failApi($response, lang('Iam.permissions_update_failed'));
         }
 
+        service('permissionsSessionRefresher')->forceRefresh();
+
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_update_success'));
     }
 
@@ -130,6 +134,8 @@ class PermissionController extends BaseWebController
         if (! $response['ok']) {
             return $this->failApi($response, lang('Iam.permissions_delete_failed'), route_to('admin.iam.permissions'), false);
         }
+
+        service('permissionsSessionRefresher')->forceRefresh();
 
         return redirect()->to(route_to('admin.iam.permissions'))->with('success', lang('Iam.permissions_delete_success'));
     }

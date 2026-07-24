@@ -35,6 +35,7 @@ $currentCategory = (string) request()->getGet('category');
     }, remoteTable({
         apiUrl: '<?= site_url('files/data') ?>',
         pageUrl: '<?= route_to('files') ?>',
+        defaultSort: '-uploaded_at',
         routes: {
             downloadBase: '<?= route_to('files') ?>',
             deleteBase: '<?= route_to('files') ?>'
@@ -119,7 +120,10 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
             </button>
         </div>
         <form method="post" action="<?= route_to('files.bulk') ?>"
-              @submit="return confirm('<?= esc(lang('Files.bulk_confirm_delete')) ?>')">
+              @submit.prevent="$store.confirm.show(
+                  '<?= esc(lang('Files.bulk_confirm_delete'), 'js') ?>',
+                  () => $el.submit()
+              )">
             <input type="hidden" :name="csrf.name" :value="csrf.hash">
             <input type="hidden" name="action" value="delete">
             <template x-for="id in selectedIds" :key="id">
@@ -132,9 +136,13 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
         </form>
     </div>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('App.loading') ?>
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'App.loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'loader',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
@@ -189,7 +197,7 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
                             </td>
                             <td class="<?= esc(table_td_class()) ?>">
                                 <template x-if="row.is_image || (row.variants && row.variants.sm && row.variants.sm.url)">
-                                    <button type="button" @click="$dispatch('open-preview', (row.variants && row.variants.lg && row.variants.lg.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view'))">
+                                    <button type="button" @click="$dispatch('open-preview', (row.variants && row.variants.md && row.variants.md.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view'))">
                                         <img :src="(row.variants && row.variants.sm && row.variants.sm.url) || ('<?= route_to('files') ?>/' + (row.id ?? '') + '/view')"
                                              class="h-10 w-10 rounded-lg object-cover border border-gray-200 hover:scale-110 transition-transform shadow-sm"
                                              :alt="row.alt_text || row.original_name">
@@ -214,12 +222,19 @@ unset($tabsBaseQuery['page'], $tabsBaseQuery['cursor'], $tabsBaseQuery['category
                                     <a :href="fileDownloadUrl(row.id)" class="<?= esc(action_button_class()) ?>" :title="'<?= esc(lang('App.download')) ?>'">
                                         <?= ui_icon('download', 'h-3.5 w-3.5') ?>
                                     </a>
-                                    <form method="post" :action="fileDeleteUrl(row.id)" @submit="return confirm(confirmDelete)">
-                                        <input type="hidden" :name="csrf.name" :value="csrf.hash">
-                                        <button type="submit" class="<?= esc(action_button_class('danger')) ?>" :title="'<?= esc(lang('App.delete')) ?>'">
-                                            <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                        @click="$store.confirm.show(confirmDelete, () => {
+                                            const f = document.createElement('form');
+                                            f.method = 'post';
+                                            f.action = fileDeleteUrl(row.id);
+                                            const c = document.createElement('input');
+                                            c.type = 'hidden'; c.name = csrf.name; c.value = csrf.hash;
+                                            f.appendChild(c); document.body.appendChild(f); f.submit();
+                                        })"
+                                        class="<?= esc(action_button_class('danger')) ?>"
+                                        :title="'<?= esc(lang('App.delete')) ?>'">
+                                        <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

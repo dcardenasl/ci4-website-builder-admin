@@ -222,7 +222,7 @@ class UniversalController extends BaseWebController
                     ];
                 }
 
-                // Fall back to name-based heuristics for backward compatibility
+                // Fall back to name-based heuristics when the explicit resource field is absent
                 $name = $entity['name'] ?? '';
                 // Pluralize snake-cased entity name to map typical resource paths
                 $snakePlural = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name)) . 's';

@@ -15,11 +15,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.3']
+        php-version: ['8.2', '8.3', '8.4', '8.5']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Checkout ci4-website-builder-domain (App\Libraries\Cms\ PSR-4 dependency)
+        # actions/checkout's `path` input is confined to $GITHUB_WORKSPACE and
+        # rejects `../` targets, so a real sibling checkout (matching this
+        # repo's composer.json App\Libraries\Cms\ => ../ci4-website-builder-domain/...
+        # PSR-4 mapping) needs a plain git clone instead of the checkout action.
+        run: git clone --branch dev --depth 1 https://github.com/dcardenasl/ci4-website-builder-domain.git ../ci4-website-builder-domain
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -48,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Prepare writable directories
+        run: chmod -R 777 writable
+
       - name: Install frontend dependencies
         run: npm ci
 
@@ -70,14 +80,12 @@ jobs:
         run: composer i18n-check
 
       - name: Run test suite
-        run: vendor/bin/phpunit ${{ matrix.php-version == '8.2' && '' || '--no-coverage' }}
+        # GH Actions' `cond && A || B` collapses to B whenever A is falsy —
+        # and '' *is* falsy — so this can't branch to "no extra flag" via an
+        # empty string; use an explicit, non-empty flag for the 8.2/coverage
+        # branch instead.
+        run: vendor/bin/phpunit ${{ matrix.php-version == '8.2' && '--coverage-clover=tests/coverage.xml' || '--no-coverage' }}
 
-      # Audit B9.4: enforce a coverage floor on the PHP 8.2 run (where
-      # xdebug is enabled). Soft-fail for now — the threshold (70%) needs
-      # one CI run with the actual measurement to decide whether to keep
-      # it as a hard gate or ratchet down. Flip `continue-on-error` to
-      # `false` once the baseline is confirmed.
-      - name: Coverage gate (>= 70% line coverage)
+      - name: Coverage gate (>= 54.20% line coverage)
         if: matrix.php-version == '8.2'
-        continue-on-error: true
         run: composer coverage:check

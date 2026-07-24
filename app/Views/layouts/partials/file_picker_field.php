@@ -40,8 +40,8 @@ $fpFilter = $filterType ?? '';
          class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
 
         <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-100 bg-white">
-            <template x-if="fileInfo.is_image && fileInfo.url !== ''">
-                <img :src="fileInfo.url" :alt="fileInfo.original_name"
+            <template x-if="fileInfo.is_image && (fileInfo.previewUrl || fileInfo.url)">
+                <img :src="fileInfo.previewUrl || fileInfo.url" :alt="fileInfo.original_name"
                      class="h-full w-full object-cover">
             </template>
             <template x-if="!fileInfo.is_image || fileInfo.url === ''">
@@ -58,11 +58,11 @@ $fpFilter = $filterType ?? '';
 
         <div class="flex flex-shrink-0 flex-col gap-1">
             <button type="button" @click="openPicker()"
-                    class="rounded px-2 py-1 text-xs bg-brand-50 text-brand-700 hover:bg-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    class="<?= action_button_class() ?>">
                 <?= esc(lang('Files.picker_change')) ?>
             </button>
             <button type="button" @click="clearFile()"
-                    class="rounded px-2 py-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    class="<?= action_button_class('danger') ?>">
                 <?= esc(lang('App.remove')) ?>
             </button>
         </div>

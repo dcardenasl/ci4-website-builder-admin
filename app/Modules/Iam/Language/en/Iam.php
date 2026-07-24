@@ -82,8 +82,17 @@ return [
     'permissions_help_create'               => 'Select the permissions to grant to this role. You can change this later.',
     'permissions_help_edit'                 => 'Tick the permissions this role should grant. Saving replaces the entire set.',
     'permissions_none_grantable'            => 'You do not own any permission that can be granted from here.',
+    'permissions_none_available'            => 'No permissions are available yet.',
     'permissions_some_locked'               => 'This role has permissions you cannot modify; they will be preserved on save.',
+    'permissions_locked_tooltip'            => 'You can see this permission, but the API will not let you grant it.',
     'permissions_edit_link'                 => 'Edit',
+    'role_permissions_title'                => 'Roles × Permissions',
+    'role_permissions_help'                 => 'Manage role permission assignments by role.',
+    'role_permissions_hint'                 => 'Check the permissions this role should have, then save to apply changes.',
+    'role_permissions_selected_label'       => 'permissions selected',
+    'role_permissions_load_failed'          => 'Could not load the role permission matrix.',
+    'role_permissions_save_failed'          => 'Could not save role permissions.',
+    'role_permissions_save_success'         => 'Role permissions updated successfully.',
 
     // Membership ↔ Role M2M
     'roles_assigned'                  => 'Assigned roles',

@@ -20,7 +20,7 @@ $help = $help ?? '';
 ?>
 <div x-data="{
     newTag: '',
-    tags: <?= json_encode(array_filter(array_map('trim', explode(',', (string) $rawValue)))) ?>,
+    tags: <?= esc(json_encode(array_filter(array_map('trim', explode(',', (string) $rawValue))), JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG), 'attr') ?>,
     addTag() {
         let tag = this.newTag.trim();
         if (tag && !this.tags.includes(tag)) {
@@ -58,7 +58,7 @@ $help = $help ?? '';
                 @keydown.enter.prevent="addTag()" 
                 @keydown.comma.prevent="addTag()"
                 @blur="addTag()"
-                placeholder="<?= esc($placeholder, 'attr') ?>"
+                placeholder="<?= esc(lang($placeholder), 'attr') ?>"
                 class="flex-1 min-w-[120px] bg-transparent border-0 p-0 text-sm focus:ring-0 focus:outline-none"
             >
         </div>

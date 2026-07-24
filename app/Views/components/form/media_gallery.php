@@ -14,15 +14,6 @@ $name  = $name ?? 'media';
 $label = $label ?? '';
 $help  = $help ?? '';
 
-// Self-contained localization helper with fallback
-if (!function_exists('safe_lang')) {
-    function safe_lang(string $key, string $fallback): string
-    {
-        $val = lang($key);
-        return ($val === $key) ? $fallback : $val;
-    }
-}
-
 $label = $label !== '' ? lang($label) : safe_lang('Catalog.field_media', 'Galería Multimedia');
 $help  = $help  !== '' ? lang($help) : safe_lang('Catalog.help_item_media', 'Administra las imágenes y videos de este recurso.');
 
@@ -66,8 +57,8 @@ if ($mediaRows === []) {
                     <!-- File Preview & Selector -->
                     <div class="space-y-3">
                         <div class="flex h-36 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white">
-                            <template x-if="row.file && row.file.is_image && row.file.url">
-                                <img :src="row.file.url" :alt="fileName(row)" class="h-full w-full object-cover">
+                            <template x-if="row.file && row.file.is_image && (row.file.previewUrl || row.file.url)">
+                                <img :src="row.file.previewUrl || row.file.url" :alt="fileName(row)" class="h-full w-full object-cover">
                             </template>
                             <template x-if="!(row.file && row.file.is_image && row.file.url)">
                                 <div class="text-gray-400">
@@ -137,7 +128,7 @@ if ($mediaRows === []) {
                             <button type="button" class="text-xs text-gray-500 hover:text-gray-900" x-show="row.hub_file_id" @click="clearFile(row)">
                                 <?= esc(safe_lang('Catalog.button_clear_media_file', 'Limpiar Archivo')) ?>
                             </button>
-                            <button type="button" class="text-xs text-red-600 hover:text-red-700 font-semibold" @click="removeRow(index)">
+                            <button type="button" class="<?= esc(action_button_class('danger')) ?>" @click="removeRow(index)">
                                 <?= esc(lang('App.remove') ?? 'Eliminar Fila') ?>
                             </button>
                         </div>

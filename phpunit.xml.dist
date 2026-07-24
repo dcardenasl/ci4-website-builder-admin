@@ -13,7 +13,7 @@
     cacheDirectory="build/.phpunit.cache">
     <coverage
         includeUncoveredFiles="true"
-        pathCoverage="true"
+        pathCoverage="false"
         ignoreDeprecatedCodeUnits="true"
         disableCodeCoverageIgnore="true">
         <report>
@@ -23,7 +23,11 @@
     </coverage>
     <testsuites>
         <testsuite name="App">
-            <directory>./tests</directory>
+            <directory>./tests/unit</directory>
+            <directory>./tests/feature</directory>
+        </testsuite>
+        <testsuite name="Contract">
+            <directory>./tests/contract</directory>
         </testsuite>
     </testsuites>
     <logging>
@@ -41,7 +45,7 @@
         </exclude>
     </source>
     <php>
-        <server name="app.baseURL" value="http://example.com/"/>
+        <server name="app.baseURL" value="http://localhost:8182/"/>
         <server name="CODEIGNITER_SCREAM_DEPRECATIONS" value="0"/>
         <!-- Directory containing phpunit.xml -->
         <const name="HOMEPATH" value="./"/>
@@ -49,6 +53,10 @@
         <const name="CONFIGPATH" value="./app/Config/"/>
         <!-- Directory containing the front controller (index.php) -->
         <const name="PUBLICPATH" value="./public/"/>
+        <env name="DOMAIN_API_BASE_URL" value="http://localhost:8190"/>
+        <env name="API_BASE_URL" value="http://localhost:8180"/>
+        <env name="PUBLIC_SITE_URL" value="http://localhost:8186"/>
+        <env name="CMS_PREVIEW_SECRET" value="testing-preview-secret-at-least-32-characters"/>
         <!-- Database configuration -->
         <!-- Uncomment to provide your own database for testing
             <env name="database.tests.hostname" value="localhost"/>

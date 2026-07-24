@@ -6,7 +6,7 @@ namespace App\Modules\Files\Controllers;
 
 use App\Controllers\BaseWebController;
 use App\Modules\Files\Requests\FileUploadRequest;
-use App\Modules\Files\Services\FileApiServiceInterface;
+use App\Modules\Files\Services\FileApiService;
 use App\Support\CatalogOptions;
 use App\Support\FileSizeLimits;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 class FileController extends BaseWebController
 {
-    protected FileApiServiceInterface $fileService;
+    protected FileApiService $fileService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -27,13 +27,9 @@ class FileController extends BaseWebController
     public function index(): string
     {
         return $this->render('files/index', [
-            'title'             => lang('Files.title'),
-            'visibilityOptions' => CatalogOptions::options([], 'files.visibility', [
-                ['value' => 'private', 'label' => lang('Files.private')],
-                ['value' => 'public',  'label' => lang('Files.public')],
-            ]),
-            'limitOptions'      => CatalogOptions::limitOptions([]),
-            'categoryOptions'   => $this->categoryOptions(),
+            'title'          => lang('Files.title'),
+            'limitOptions'   => CatalogOptions::limitOptions([]),
+            'categoryOptions' => $this->categoryOptions(),
         ]);
     }
 
@@ -162,10 +158,18 @@ class FileController extends BaseWebController
             $usageData = $usageData['data'];
         }
 
+        $usageData = array_map(fn (array $u) => array_merge($u, [
+            'edit_url' => $this->resolveEditUrl(
+                (string) ($u['resource'] ?? ''),
+                (int) ($u['resource_id'] ?? 0),
+                is_array($u['context'] ?? null) ? (array) $u['context'] : [],
+            ),
+        ]), array_values($usageData));
+
         return $this->render('files/show', [
             'title'  => lang('Files.detail_title'),
             'file'   => $this->extractData($info),
-            'usages' => array_values($usageData),
+            'usages' => $usageData,
         ]);
     }
 
@@ -271,12 +275,25 @@ class FileController extends BaseWebController
         $items   = isset($data['data']) && is_array($data['data']) ? $data['data'] : $data;
         $total   = count($items);
         $okCount = 0;
+        $errors  = [];
         foreach ($items as $item) {
-            if (is_array($item) && ! empty($item['ok'])) {
-                $okCount++;
+            if (is_array($item)) {
+                if (! empty($item['ok'])) {
+                    $okCount++;
+                } else {
+                    $errors[] = '#' . ($item['id'] ?? '') . ': ' . ($item['error'] ?? lang('Files.bulk_item_failed'));
+                }
             }
         }
         $message = lang('Files.bulk_summary', [$okCount, $total]);
+
+        if ($errors !== []) {
+            $errorMessage = lang('Files.bulk_failed_in_use') . ' ' . implode(' | ', $errors);
+            if ($okCount > 0) {
+                session()->setFlashdata('success', $message);
+            }
+            return redirect()->to($back)->with('error', $errorMessage);
+        }
 
         return redirect()->to($back)->with('success', $message);
     }
@@ -336,6 +353,16 @@ class FileController extends BaseWebController
 
     public function delete(string $id): RedirectResponse
     {
+        $usages    = $this->safeApiCall(fn () => $this->fileService->usages($id));
+        $usageData = ($usages['ok'] ?? false) ? $this->extractData($usages) : [];
+        if (isset($usageData['data']) && is_array($usageData['data'])) {
+            $usageData = $usageData['data'];
+        }
+
+        if (! empty($usageData)) {
+            return redirect()->to(route_to('files'))->with('error', lang('Files.cannot_delete_in_use'));
+        }
+
         $response = $this->safeApiCall(fn () => $this->fileService->delete($id));
 
         if (! $response['ok']) {
@@ -450,6 +477,37 @@ class FileController extends BaseWebController
             ['value' => 'video',    'label' => lang('Files.category_video')],
             ['value' => 'audio',    'label' => lang('Files.category_audio')],
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
+    /**
+     * @param array<string, mixed> $context
+     */
+    private function resolveEditUrl(string $resource, int $resourceId, array $context = []): ?string
+    {
+        if ($resource === 'block_instances') {
+            $ownerType = (string) ($context['owner_type'] ?? '');
+            $ownerId   = (int) ($context['owner_id'] ?? 0);
+            if ($ownerType === 'page' && $ownerId > 0) {
+                return site_url('admin/cms/pages/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+            }
+            if ($ownerType === 'entry' && $ownerId > 0) {
+                return site_url('admin/cms/entries/' . $ownerId . '/blocks/' . $resourceId . '/edit');
+            }
+            return null;
+        }
+
+        $map = [
+            'entries'  => fn (int $id): string => site_url('admin/cms/entries/' . $id . '/edit'),
+            'pages'    => fn (int $id): string => site_url('admin/cms/pages/' . $id . '/edit'),
+            'users'    => fn (int $id): string => site_url('admin/users/' . $id . '/edit'),
+            'settings' => fn (int $id): string => site_url('admin/cms/settings/' . $id . '/edit'),
+        ];
+
+        return isset($map[$resource]) ? $map[$resource]($resourceId) : null;
     }
 
     /**

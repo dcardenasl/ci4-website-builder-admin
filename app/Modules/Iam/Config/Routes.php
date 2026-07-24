@@ -12,6 +12,8 @@ use CodeIgniter\Router\RouteCollection;
 // directly from the Users module via the form's role multi-select.
 $routes->group('admin/iam', ['filter' => ['auth', 'superadmin']], static function (RouteCollection $routes): void {
     // Role
+    $routes->get('role-permissions', '\\App\\Modules\\Iam\\Controllers\\RolePermissionsController::index', ['as' => 'admin.iam.role_permissions']);
+    $routes->post('role-permissions/(:segment)', '\\App\\Modules\\Iam\\Controllers\\RolePermissionsController::save/$1', ['as' => 'admin.iam.role_permissions.save']);
     $routes->get('roles', '\\App\\Modules\\Iam\\Controllers\\RoleController::index', ['as' => 'admin.iam.roles']);
     $routes->get('roles/data', '\\App\\Modules\\Iam\\Controllers\\RoleController::data', ['as' => 'admin.iam.roles.data']);
     $routes->get('roles/create', '\\App\\Modules\\Iam\\Controllers\\RoleController::create', ['as' => 'admin.iam.roles.create']);

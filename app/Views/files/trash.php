@@ -31,6 +31,7 @@ $csrfHash = csrf_hash();
     }, remoteTable({
         apiUrl: '<?= site_url('files/trash/data') ?>',
         pageUrl: '<?= route_to('files.trash') ?>',
+        defaultSort: '-uploaded_at',
         routes: {},
         csrf: { name: '<?= esc($csrfName) ?>', hash: '<?= esc($csrfHash) ?>' },
         limitOptions: <?= esc(json_encode(array_map('strval', $limitOptions ?? [10, 25, 50, 100]))) ?>
@@ -44,8 +45,9 @@ $csrfHash = csrf_hash();
         'filterDefaults'     => ['limit' => '25'],
         'fieldsView'         => 'files/partials/filters',
         'fieldsData'         => [
-            'limitOptions'    => $limitOptions ?? [10, 25, 50, 100],
-            'categoryOptions' => $categoryOptions ?? [],
+            'limitOptions'       => $limitOptions ?? [10, 25, 50, 100],
+            'categoryOptions'    => $categoryOptions ?? [],
+            'showCategoryFilter' => true,
         ],
         'submitLabel' => lang('App.search'),
     ]) ?>
@@ -74,7 +76,7 @@ $csrfHash = csrf_hash();
                 </button>
             </form>
             <form method="post" action="<?= route_to('files.bulk') ?>"
-                  @submit="return confirm('<?= esc(lang('Files.bulk_confirm_force')) ?>')">
+                  @submit.prevent="$store.confirm.show('<?= esc(lang('Files.bulk_confirm_force'), 'js') ?>', () => $el.submit())">
                 <input type="hidden" :name="csrf.name" :value="csrf.hash">
                 <input type="hidden" name="action" value="force">
                 <template x-for="id in selectedIds" :key="id">
@@ -88,9 +90,13 @@ $csrfHash = csrf_hash();
         </div>
     </div>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('App.loading') ?>
-    </div>
+    <template x-if="loading">
+        <?= view('components/display/loading_state', [
+            'title'       => 'App.loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'trash',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
@@ -158,7 +164,7 @@ $csrfHash = csrf_hash();
                                         </button>
                                     </form>
                                     <form method="post" :action="'<?= route_to('files') ?>/' + (row.id ?? '') + '/force'"
-                                          @submit="return confirm('<?= esc(lang('Files.confirm_force_delete')) ?>')">
+                                          @submit.prevent="$store.confirm.show('<?= esc(lang('Files.confirm_force_delete'), 'js') ?>', () => $el.submit())">
                                         <input type="hidden" :name="csrf.name" :value="csrf.hash">
                                         <button type="submit" class="<?= esc(action_button_class('danger')) ?>" :title="'<?= esc(lang('Files.force_delete')) ?>'">
                                             <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

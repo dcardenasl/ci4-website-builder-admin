@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "CodeIgniter 4 API Starter",
+        "title": "ci4-website-builder Hub",
         "description": "RESTful API built with CodeIgniter 4, featuring JWT authentication, standardized responses, and comprehensive documentation.",
-        "version": "1.0.0"
+        "version": "2.2.2"
     },
     "servers": [
         {
@@ -292,11 +292,11 @@
                                     },
                                     "is_active": {
                                         "type": "integer",
+                                        "example": 0,
                                         "enum": [
                                             0,
                                             1
-                                        ],
-                                        "example": 0
+                                        ]
                                     },
                                     "rate_limit_requests": {
                                         "type": "integer",
@@ -850,11 +850,12 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Get current user profile",
+                "summary": "Get the authenticated user (with effective permissions)",
+                "description": "Returns the canonical \"me\" shape: profile fields plus the effective permission codes used for UI gating. Permissions are resolved fresh from the IAM tables on each call.",
                 "operationId": "30fd9073987ec366646e1b08842dfe42",
                 "responses": {
                     "200": {
-                        "description": "Current user profile",
+                        "description": "Authenticated user profile + permissions",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -864,7 +865,7 @@
                                             "example": "success"
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/UserResponse"
+                                            "$ref": "#/components/schemas/MeResponse"
                                         }
                                     },
                                     "type": "object"
@@ -879,6 +880,114 @@
                 "security": [
                     {
                         "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update the authenticated user's own profile",
+                "description": "Allowlist: first_name, last_name, avatar_url. Email, password and role assignments are not modifiable through self-update. Returns the canonical \"me\" shape with refreshed permissions.",
+                "operationId": "48f6420b41bc5b5cdf1a97598edc8d89",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated authenticated user profile + permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MeResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/introspect": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Introspect a JWT issued by this server",
+                "description": "Validates a JWT (signature, expiration, revocation) and returns its claims. Authenticated by X-App-Key — domain apps can verify user tokens without sharing the JWT secret. Always responds 200 with `valid: true|false` unless the calling app itself is unauthorized.",
+                "operationId": "5e0116c223b4e2208df9f9438069ba7c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntrospectRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Introspection result (check `valid` for the verdict)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/IntrospectResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "403": {
+                        "description": "X-App-Key is invalid or inactive"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "appKeyAuth": []
                     }
                 ]
             }
@@ -1073,12 +1182,61 @@
                 }
             }
         },
+        "/api/v1/auth/service-token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Issue a service (machine-to-machine) JWT",
+                "description": "OAuth client_credentials-style endpoint. The calling domain application authenticates with `X-App-Key` and receives a short-lived JWT whose `sub` is `service:<app_code>` and whose `scope` is the application's permission set. No request body is required.",
+                "operationId": "c9b2e7c51cc4e03d7da2142b38a76f5e",
+                "responses": {
+                    "200": {
+                        "description": "Service token issued",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/ServiceTokenResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "403": {
+                        "description": "X-App-Key invalid, inactive, or not bound to an application"
+                    },
+                    "404": {
+                        "description": "The application bound to the API key has been deleted"
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "appKeyAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/refresh": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Refresh access token",
+                "description": "Issues a fresh access/refresh token pair and returns the canonical authenticated user (including effective permissions) so consumers can re-hydrate UI gating without an extra `/auth/me` call.",
                 "operationId": "063a05c344969a8428f2deffd730d406",
                 "requestBody": {
                     "required": true,
@@ -1310,45 +1468,13 @@
                 ]
             }
         },
-        "/api/v1/demo-products": {
-            "get": {
-                "tags": [
-                    "Demoproducts"
-                ],
-                "summary": "List Demoproducts",
-                "operationId": "2c110892f7e902e0879f1e7e707dc4aa",
-                "responses": {
-                    "200": {
-                        "description": "List retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/DemoproductResponse"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/files": {
             "get": {
                 "tags": [
                     "Files"
                 ],
                 "summary": "List files for current user",
+                "description": "By default only non-trashed files are returned. Use `trashed=only` to list the trash bin, or `trashed=with` to include both.",
                 "operationId": "32d01599dc632a4988116bc96b542436",
                 "parameters": [
                     {
@@ -1367,6 +1493,20 @@
                         "schema": {
                             "type": "integer",
                             "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "trashed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "without",
+                            "enum": [
+                                "without",
+                                "only",
+                                "with"
+                            ]
                         }
                     }
                 ],
@@ -1553,7 +1693,8 @@
                 "tags": [
                     "Files"
                 ],
-                "summary": "Delete file",
+                "summary": "Move file to trash (soft-delete)",
+                "description": "Sets `deleted_at` so the file disappears from default listings. Storage bytes are preserved so the file can be restored. To purge permanently, call `DELETE /files/{id}/force` after.",
                 "operationId": "e2d213f1a143d4656d600707b3e97580",
                 "parameters": [
                     {
@@ -1567,7 +1708,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "File deleted",
+                        "description": "File moved to trash",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1585,11 +1726,632 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "File already trashed"
+                    },
                     "401": {
                         "$ref": "#/components/responses/UnauthorizedResponse"
                     },
                     "404": {
                         "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Update file metadata",
+                "description": "Update editable metadata fields. At least one field must be provided. Does not affect the stored binary or variants.",
+                "operationId": "5481aeece41cbdb2ea2c6dc5834e3661",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "original_name": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "alt_text": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "caption": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "credit": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "enum": [
+                                            "document",
+                                            "image",
+                                            "video",
+                                            "audio"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "File metadata updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/FileResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No metadata fields provided"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/replace": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Replace a file's binary content",
+                "description": "Uploads a new file to replace the existing one. Preserves the record ID and all references. Deletes the old storage object.",
+                "operationId": "1f791dc24cbbc88bc24b4711143521c5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "File replaced",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/FileResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "File is trashed"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/restore": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Restore a trashed file",
+                "operationId": "386a0e4ae8e96d5e1340ae613dd45b98",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File restored"
+                    },
+                    "400": {
+                        "description": "File is not in the trash"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/force": {
+            "delete": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Permanently delete a trashed file",
+                "description": "Removes storage bytes AND the DB row. Only valid for files already in the trash — call `DELETE /files/{id}` first.",
+                "operationId": "b79a0af5fcbb6fbfd852c6c659e9fe08",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File permanently deleted"
+                    },
+                    "400": {
+                        "description": "File is not in the trash"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/info": {
+            "get": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Get file metadata (JSON)",
+                "description": "Returns the JSON metadata for a single file. Unlike the main GET /{id} endpoint, this never triggers a binary download.",
+                "operationId": "45f7766d86d5ab2f316f623ae1d34296",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File metadata",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/FileResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/usages": {
+            "get": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "List resources referencing this file",
+                "description": "Returns a list of business resources (e.g. Products, Categories, Posts) that have a foreign key reference to this file.",
+                "operationId": "324a2d2148a1472e2f5b24193a68060e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usage list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "resource": {
+                                                        "type": "string",
+                                                        "example": "products"
+                                                    },
+                                                    "resource_id": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "label": {
+                                                        "type": "string",
+                                                        "example": "Logo Apple.png",
+                                                        "nullable": true
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "cover"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/{id}/regenerate-variants": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Regenerate image variants",
+                "description": "Deletes existing image variants and recreates them from the stored original file. Only valid for processable image MIME types.",
+                "operationId": "7191bfba770ecd9780dcebd6f32f8dba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Variants regenerated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "properties": {
+                                                    "path": {
+                                                        "type": "string"
+                                                    },
+                                                    "url": {
+                                                        "type": "string"
+                                                    },
+                                                    "width": {
+                                                        "type": "integer"
+                                                    },
+                                                    "height": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "File is not a processable image"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "404": {
+                        "description": "File not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/bulk-delete": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Bulk move files to trash",
+                "operationId": "ccc8d200baf5727c072e5147061e2b58",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ids"
+                                ],
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Per-item bulk outcome",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "ok": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "error": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/bulk-restore": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Bulk restore trashed files",
+                "operationId": "8ea6ae543fe290ad11f1e7d02d697fc1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ids"
+                                ],
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Per-item bulk outcome"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/files/bulk-force-delete": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Bulk permanently delete trashed files",
+                "operationId": "81a1a2c0be5f7789b979173461290d74",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ids"
+                                ],
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Per-item bulk outcome"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationErrorResponse"
                     }
                 },
                 "security": [
@@ -1735,6 +2497,393 @@
                 }
             }
         },
+        "/api/v1/permissions": {
+            "get": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "List Permissions",
+                "operationId": "502622a255362c811db579d2b04e98fa",
+                "responses": {
+                    "200": {
+                        "description": "List retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PermissionResponse"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Create new Permission",
+                "operationId": "19afd648e3f6975944d51febe3549dc3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermissionCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/permissions/{id}": {
+            "get": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Get Permission by ID",
+                "operationId": "45e62e9213f9164f7523f6d91a2c1e33",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Update existing Permission",
+                "operationId": "838f17e9d3353b6ca31b3ef8cf91252a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermissionUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermissionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Delete Permission by ID",
+                "operationId": "ea7f660a2495fbb1e7876ab2aeff4a7c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "List Roles",
+                "operationId": "e0b1cfefc67992e068b6422394ad9a9e",
+                "responses": {
+                    "200": {
+                        "description": "List retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RoleResponse"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Create new Role",
+                "operationId": "4ac8c070b4b2a6dfc0d715f53326f784",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/roles/{id}": {
+            "get": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Get Role by ID",
+                "operationId": "04e69ec78b74099ac4ccffb01e7e8e0d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Update existing Role",
+                "operationId": "0a0d27f20fec4718fd5280a90c73abb0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "Delete Role by ID",
+                "operationId": "d48073893d81dd228cef7eac59aff4ea",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/iam/users/{user_id}/permissions": {
+            "get": {
+                "tags": [
+                    "Iam"
+                ],
+                "summary": "List a user's effective permissions for a specific application (by code)",
+                "operationId": "5a3841f7f8f5d306c7265164d5d6c3b6",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    },
+                    {
+                        "name": "app",
+                        "in": "query",
+                        "description": "Application code (e.g. self, blog, shop)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "self"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Effective permissions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserPermissionsResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication required"
+                    },
+                    "403": {
+                        "description": "Caller lacks iam.superadmin-access"
+                    },
+                    "404": {
+                        "description": "User or application not found"
+                    },
+                    "422": {
+                        "description": "Missing or invalid app code"
+                    }
+                }
+            }
+        },
         "/api/v1/metrics": {
             "get": {
                 "tags": [
@@ -1749,13 +2898,13 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "example": "24h",
                             "enum": [
                                 "1h",
                                 "24h",
                                 "7d",
                                 "30d"
-                            ],
-                            "example": "24h"
+                            ]
                         }
                     }
                 ],
@@ -1807,13 +2956,13 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "example": "24h",
                             "enum": [
                                 "1h",
                                 "24h",
                                 "7d",
                                 "30d"
-                            ],
-                            "example": "24h"
+                            ]
                         }
                     }
                 ],
@@ -1909,6 +3058,61 @@
                 ]
             }
         },
+        "/api/v1/metrics/timeseries": {
+            "get": {
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Get time-bucketed request/error/latency series",
+                "operationId": "a68821f455efb59ee5957a9f760ae4e0",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "24h",
+                            "enum": [
+                                "1h",
+                                "24h",
+                                "7d",
+                                "30d"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Time series data: parallel arrays of bucket labels, request counts, error counts, and average latency",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/MetricsPayloadResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/metrics/custom/{name}": {
             "get": {
                 "tags": [
@@ -1931,13 +3135,13 @@
                         "required": false,
                         "schema": {
                             "type": "string",
+                            "example": "24h",
                             "enum": [
                                 "1h",
                                 "24h",
                                 "7d",
                                 "30d"
-                            ],
-                            "example": "24h"
+                            ]
                         }
                     },
                     {
@@ -2630,6 +3834,435 @@
                 },
                 "type": "object"
             },
+            "IntrospectRequest": {
+                "title": "Introspect Request",
+                "description": "JWT to validate via the introspection endpoint",
+                "required": [
+                    "token"
+                ],
+                "properties": {
+                    "token": {
+                        "description": "JWT access token to introspect",
+                        "type": "string",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "title": "Login Request",
+                "description": "User credentials for authentication",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "User registered email",
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "password": {
+                        "description": "User password",
+                        "type": "string",
+                        "format": "password",
+                        "example": "P@ssw0rd123!"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterRequest": {
+                "title": "Register Request",
+                "description": "User data for self-registration",
+                "required": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "User email address",
+                        "type": "string",
+                        "example": "newuser@example.com"
+                    },
+                    "first_name": {
+                        "description": "User first name",
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "description": "User last name",
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "password": {
+                        "description": "User password (must be strong)",
+                        "type": "string",
+                        "format": "password",
+                        "example": "P@ssw0rd123!"
+                    },
+                    "locale": {
+                        "description": "Preferred locale for localized emails and messages",
+                        "type": "string",
+                        "example": "es",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateMeRequest": {
+                "title": "Update Me Request",
+                "description": "Fields the authenticated user may modify on their own profile",
+                "properties": {
+                    "first_name": {
+                        "description": "Updated first name",
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "description": "Updated last name",
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "avatar_url": {
+                        "description": "URL to user avatar image",
+                        "type": "string",
+                        "example": "https://example.com/avatar.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "GalleryAttachRequest": {
+                "description": "Body for `POST /<resource>/<id>/images`. Attaches an existing file (already\nuploaded via the files endpoint) to a parent resource's gallery."
+            },
+            "GalleryReorderRequest": {
+                "description": "Body for `PUT /<resource>/<id>/images/reorder`.\n\nFormat: `{ \"items\": [{ \"id\": 12, \"sort_order\": 0 }, { \"id\": 13, \"sort_order\": 1 }, ...] }`.\nEach entry is a pivot row id paired with its new sort position. Entries\npointing at a different parent are silently ignored by the service."
+            },
+            "ApplicationIndexRequest": {},
+            "AttachPermissionsRequest": {
+                "required": [
+                    "permission_ids"
+                ],
+                "properties": {
+                    "permission_ids": {
+                        "description": "Permission ids to attach to the role",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "permission_codes": {
+                        "description": "Permission codes to attach to the role",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ListUserPermissionsRequest": {
+                "title": "List User Permissions Request",
+                "required": [
+                    "app"
+                ]
+            },
+            "PermissionCreateRequest": {
+                "properties": {
+                    "application_id": {
+                        "description": "application_id",
+                        "type": "integer"
+                    },
+                    "code": {
+                        "description": "code",
+                        "type": "string"
+                    },
+                    "resource": {
+                        "description": "resource",
+                        "type": "string"
+                    },
+                    "action": {
+                        "description": "action",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "description",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionIndexRequest": {},
+            "PermissionUpdateRequest": {
+                "properties": {
+                    "application_id": {
+                        "description": "application_id",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "code": {
+                        "description": "code",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "resource": {
+                        "description": "resource",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "action": {
+                        "description": "action",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "description": "description",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RoleCreateRequest": {
+                "properties": {
+                    "application_id": {
+                        "description": "Application id; null for global roles",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "code": {
+                        "description": "Role code (unique within application)",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Display name",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Free-form description",
+                        "type": "string"
+                    },
+                    "is_system": {
+                        "description": "System role (cannot be deleted)",
+                        "type": "boolean"
+                    },
+                    "permission_ids": {
+                        "description": "Optional list of permission ids to attach to the new role. Omit to create a role with no permissions.",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RoleIndexRequest": {},
+            "RoleUpdateRequest": {
+                "properties": {
+                    "application_id": {
+                        "description": "Application id; null for global roles",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "code": {
+                        "description": "Role code (unique within application)",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "description": "Display name",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "description": "Free-form description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_system": {
+                        "description": "System role (cannot be deleted)",
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "permission_ids": {
+                        "description": "Replace the role permission set with this list of permission ids. Omit to leave permissions unchanged. Empty list removes all permissions.",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserCreateRequest": {
+                "title": "User Create Request",
+                "description": "Data needed to create a new user",
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "Unique email address",
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "first_name": {
+                        "description": "User first name",
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "description": "User last name",
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "oauth_provider": {
+                        "description": "OAuth provider name",
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "google",
+                            "github"
+                        ]
+                    },
+                    "oauth_provider_id": {
+                        "description": "OAuth unique identifier from provider",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "avatar_url": {
+                        "description": "URL to user avatar image",
+                        "type": "string",
+                        "example": "https://example.com/avatar.jpg",
+                        "nullable": true
+                    },
+                    "locale": {
+                        "description": "Preferred locale for localized notifications",
+                        "type": "string",
+                        "example": "es",
+                        "nullable": true
+                    },
+                    "role_ids": {
+                        "description": "Global role ids to assign to the new user (multi-rol). If empty, the default \"user\" role is assigned.",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            3
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UserIndexRequest": {
+                "title": "User Index Request",
+                "description": "Parameters for filtering and paginating the user list",
+                "properties": {
+                    "page": {
+                        "description": "Current page number",
+                        "type": "integer",
+                        "example": 1,
+                        "default": 1
+                    },
+                    "per_page": {
+                        "description": "Items per page",
+                        "type": "integer",
+                        "example": 20,
+                        "default": 20,
+                        "maximum": 100
+                    },
+                    "search": {
+                        "description": "Search term for email, first name or last name",
+                        "type": "string",
+                        "example": "john",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Filter by account status",
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "active",
+                            "inactive",
+                            "pending_approval",
+                            "invited"
+                        ]
+                    },
+                    "sort": {
+                        "description": "Sort field and direction",
+                        "type": "string",
+                        "example": "created_at or -created_at",
+                        "nullable": true,
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "UserUpdateRequest": {
+                "title": "User Update Request",
+                "description": "Data needed to update an existing user",
+                "properties": {
+                    "email": {
+                        "description": "Updated email address",
+                        "type": "string",
+                        "example": "user@example.com",
+                        "nullable": true
+                    },
+                    "first_name": {
+                        "description": "Updated first name",
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "description": "Updated last name",
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "password": {
+                        "description": "New password (must be strong)",
+                        "type": "string",
+                        "example": "P@ssw0rd123!",
+                        "nullable": true
+                    },
+                    "avatar_url": {
+                        "description": "URL to user avatar image",
+                        "type": "string",
+                        "example": "https://example.com/avatar.jpg",
+                        "nullable": true
+                    },
+                    "role_ids": {
+                        "description": "Replace the user role set with this list of global role ids. Omit to leave roles unchanged.",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            3
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "ApiKeyResponse": {
                 "title": "API Key Response",
                 "description": "API key object metadata",
@@ -2719,14 +4352,14 @@
                     "action": {
                         "description": "Action performed",
                         "type": "string",
+                        "example": "update",
                         "enum": [
                             "create",
                             "update",
                             "delete",
                             "login_success",
                             "login_failure"
-                        ],
-                        "example": "update"
+                        ]
                     },
                     "entity_type": {
                         "description": "Affected entity type",
@@ -2761,6 +4394,12 @@
                         "example": "admin@example.com",
                         "nullable": true
                     },
+                    "user_full_name": {
+                        "description": "Full name of user who performed the action",
+                        "type": "string",
+                        "example": "Jane Doe",
+                        "nullable": true
+                    },
                     "ip_address": {
                         "description": "IP address of the requester",
                         "type": "string",
@@ -2776,22 +4415,22 @@
                     "result": {
                         "description": "Execution result",
                         "type": "string",
+                        "example": "success",
                         "enum": [
                             "success",
                             "failure",
                             "denied"
-                        ],
-                        "example": "success"
+                        ]
                     },
                     "severity": {
                         "description": "Event severity",
                         "type": "string",
+                        "example": "info",
                         "enum": [
                             "info",
                             "warning",
                             "critical"
-                        ],
-                        "example": "info"
+                        ]
                     },
                     "request_id": {
                         "description": "Request correlation ID",
@@ -2808,6 +4447,54 @@
                         "description": "Log timestamp",
                         "type": "string",
                         "example": "2026-02-26 12:00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "IntrospectResponse": {
+                "title": "Introspect Response",
+                "description": "Token introspection result",
+                "required": [
+                    "valid",
+                    "permissions"
+                ],
+                "properties": {
+                    "valid": {
+                        "description": "True if the token is valid, not expired and not revoked",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "uid": {
+                        "description": "User ID from the token (null when invalid)",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "permissions": {
+                        "description": "Effective permission codes carried by the token",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "users.read"
+                        }
+                    },
+                    "exp": {
+                        "description": "Token expiration timestamp (Unix seconds)",
+                        "type": "integer",
+                        "example": 1735689600,
+                        "nullable": true
+                    },
+                    "error": {
+                        "description": "Reason when valid=false: invalid_or_expired | revoked",
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "app_id": {
+                        "description": "Application ID for which the permissions were resolved",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -2838,7 +4525,122 @@
                         "example": 3600
                     },
                     "user": {
-                        "$ref": "#/components/schemas/UserResponse"
+                        "$ref": "#/components/schemas/MeResponse"
+                    }
+                },
+                "type": "object"
+            },
+            "MeResponse": {
+                "title": "Authenticated User Response",
+                "description": "Canonical shape for the authenticated subject. Extends UserResponse with the effective permission codes used for UI gating.",
+                "required": [
+                    "id",
+                    "email",
+                    "status",
+                    "permissions"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique user identifier",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "email": {
+                        "description": "User email address",
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "first_name": {
+                        "description": "User first name",
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "description": "User last name",
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "status": {
+                        "description": "Account status",
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "pending_approval",
+                            "active",
+                            "invited"
+                        ]
+                    },
+                    "avatar_url": {
+                        "description": "URL to user avatar",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "roles": {
+                        "description": "Global roles assigned to this user.",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "code": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "permissions": {
+                        "description": "Effective permission codes for the current application. Drives UI gating on the frontend.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "users.read",
+                            "users.write",
+                            "iam.admin-access"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "PendingRegistrationResponse": {
+                "title": "Pending Registration Response",
+                "description": "Minimal user envelope for accounts awaiting admin approval (e.g. first-time Google sign-in).",
+                "required": [
+                    "id",
+                    "email",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique user identifier",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "email": {
+                        "description": "User email address",
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "status": {
+                        "description": "Account status",
+                        "type": "string",
+                        "example": "pending_approval"
                     }
                 },
                 "type": "object"
@@ -2851,7 +4653,6 @@
                     "email",
                     "first_name",
                     "last_name",
-                    "role",
                     "status"
                 ],
                 "properties": {
@@ -2875,25 +4676,15 @@
                         "type": "string",
                         "example": "Doe"
                     },
-                    "role": {
-                        "description": "User role",
-                        "type": "string",
-                        "enum": [
-                            "user",
-                            "admin",
-                            "superadmin"
-                        ],
-                        "example": "user"
-                    },
                     "status": {
                         "description": "Account status",
                         "type": "string",
+                        "example": "pending_approval",
                         "enum": [
                             "pending_approval",
                             "active",
                             "invited"
-                        ],
-                        "example": "pending_approval"
+                        ]
                     },
                     "created_at": {
                         "description": "Creation timestamp",
@@ -2904,75 +4695,78 @@
                 },
                 "type": "object"
             },
-            "DemoproductResponse": {
-                "title": "Demoproduct Response",
+            "ServiceTokenResponse": {
+                "title": "Service Token Response",
+                "description": "JWT issued to a domain application via X-App-Key",
                 "required": [
-                    "id",
-                    "name"
+                    "access_token",
+                    "token_type",
+                    "expires_in",
+                    "scope"
                 ],
                 "properties": {
-                    "id": {
-                        "description": "Unique identifier",
+                    "access_token": {
+                        "description": "Signed JWT (HS256) carrying the application scope",
+                        "type": "string",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "token_type": {
+                        "description": "Always \"Bearer\"",
+                        "type": "string",
+                        "example": "Bearer"
+                    },
+                    "expires_in": {
+                        "description": "Token lifetime in seconds",
                         "type": "integer",
-                        "example": 1
+                        "example": 900
                     },
-                    "name": {
-                        "description": "Resource name",
-                        "type": "string",
-                        "example": "Example Name"
-                    },
-                    "created_at": {
-                        "description": "Creation timestamp",
-                        "type": "string",
-                        "example": "2026-02-26 12:00:00",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "PaginatedResponse": {
-                "title": "Paginated Response",
-                "description": "Generic pagination payload",
-                "required": [
-                    "data",
-                    "total",
-                    "page",
-                    "per_page"
-                ],
-                "properties": {
-                    "data": {
-                        "description": "Result set",
+                    "scope": {
+                        "description": "Permission codes embedded in the token",
                         "type": "array",
                         "items": {
-                            "type": "object"
+                            "type": "string",
+                            "example": "mydomain.access"
                         }
-                    },
-                    "total": {
-                        "description": "Total number of records",
-                        "type": "integer",
-                        "example": 120
-                    },
-                    "page": {
-                        "description": "Current page",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "per_page": {
-                        "description": "Items per page",
-                        "type": "integer",
-                        "example": 20
                     }
                 },
                 "type": "object"
             },
-            "PayloadResponse": {
-                "title": "Payload Response",
-                "description": "Generic payload wrapper",
+            "GalleryImageResponse": {
+                "description": "Response payload for a single gallery item: the pivot record enriched with\nthe underlying file's metadata (original name, image flag, variants).",
                 "properties": {
-                    "payload": {
-                        "description": "Payload data",
+                    "id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "example": "5"
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "original_name": {
+                        "type": "string",
+                        "example": "photo.jpg",
+                        "nullable": true
+                    },
+                    "is_image": {
+                        "type": "boolean",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "variants": {
                         "type": "object",
-                        "additionalProperties": true
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -3038,14 +4832,19 @@
                         "example": "document.pdf"
                     },
                     "filename": {
-                        "description": "Stored filename",
+                        "description": "Opaque stored filename/key",
                         "type": "string",
-                        "example": "abc123_document.pdf"
+                        "example": "f8c0d1e2f3a4-9b8c7d6e.pdf"
                     },
                     "mime_type": {
                         "description": "MIME type",
                         "type": "string",
                         "example": "application/pdf"
+                    },
+                    "category": {
+                        "description": "File category derived from MIME type",
+                        "type": "string",
+                        "example": "document"
                     },
                     "size": {
                         "description": "File size in bytes",
@@ -3072,6 +4871,227 @@
                         "type": "string",
                         "example": "2026-02-26 12:00:00",
                         "nullable": true
+                    },
+                    "variants": {
+                        "description": "Generated image variants (thumb, sm, md)",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "mixed"
+                        }
+                    },
+                    "width": {
+                        "description": "Original image width in pixels",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "height": {
+                        "description": "Original image height in pixels",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "alt_text": {
+                        "description": "Accessibility alt text for images",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "caption": {
+                        "description": "Display caption",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "credit": {
+                        "description": "Attribution credit",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApplicationResponse": {
+                "title": "Application Response",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Application name",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionResponse": {
+                "title": "Permission Response",
+                "required": [
+                    "id",
+                    "application_id",
+                    "code"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "application_id": {
+                        "description": "application_id",
+                        "type": "integer"
+                    },
+                    "code": {
+                        "description": "code",
+                        "type": "string"
+                    },
+                    "resource": {
+                        "description": "resource",
+                        "type": "string"
+                    },
+                    "action": {
+                        "description": "action",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "description",
+                        "type": "string"
+                    },
+                    "application_name": {
+                        "description": "Display name of the related application",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RolePermissionMatrixResponse": {},
+            "RoleResponse": {
+                "title": "Role Response",
+                "required": [
+                    "id",
+                    "code",
+                    "name",
+                    "is_system"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "application_id": {
+                        "description": "Application id; null for global roles",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "code": {
+                        "description": "Role code",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Display name",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_system": {
+                        "description": "System role flag",
+                        "type": "boolean"
+                    },
+                    "application_name": {
+                        "description": "Display name of the related application",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "example": "2026-02-26 12:00:00",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserPermissionsResponse": {
+                "title": "User Permissions Response",
+                "required": [
+                    "user_id",
+                    "application",
+                    "permissions"
+                ],
+                "properties": {
+                    "user_id": {
+                        "description": "User identifier",
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "application": {
+                        "description": "Summary of the application the permissions are scoped to",
+                        "required": [
+                            "id",
+                            "code",
+                            "name"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "code": {
+                                "type": "string",
+                                "example": "self"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Self"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "permissions": {
+                        "description": "Sorted, deduplicated effective permission codes for the user within the application",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "users.read"
+                        }
                     }
                 },
                 "type": "object"
@@ -3126,34 +5146,14 @@
                 },
                 "type": "object"
             },
-            "PasswordResetResponse": {
-                "title": "Password Reset Response",
-                "description": "Password reset acknowledgement",
-                "required": [
-                    "message",
-                    "success"
-                ],
-                "properties": {
-                    "message": {
-                        "description": "Result message",
-                        "type": "string",
-                        "example": "Password reset successful"
-                    },
-                    "success": {
-                        "description": "Whether the reset was successful",
-                        "type": "boolean",
-                        "example": true
-                    }
-                },
-                "type": "object"
-            },
             "TokenResponse": {
                 "title": "Token Response",
-                "description": "Token Response DTO",
+                "description": "Token Response DTO\n\nReturned by `POST /auth/refresh`. Carries a fresh access/refresh\ntoken pair plus the canonical authenticated user (`MeResponse`) so\nconsumers can re-hydrate UI gating without an extra `/auth/me` call.",
                 "required": [
                     "access_token",
                     "refresh_token",
-                    "expires_in"
+                    "expires_in",
+                    "user"
                 ],
                 "properties": {
                     "access_token": {
@@ -3170,43 +5170,7 @@
                         "example": 3600
                     },
                     "user": {
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/UserResponse"
-                            }
-                        ],
-                        "nullable": true,
-                        "description": "Associated user data"
-                    }
-                },
-                "type": "object"
-            },
-            "VerificationResponse": {
-                "title": "Verification Response",
-                "description": "Verification Response DTO",
-                "required": [
-                    "message",
-                    "user_id",
-                    "email",
-                    "verified_at"
-                ],
-                "properties": {
-                    "message": {
-                        "description": "Success message",
-                        "type": "string"
-                    },
-                    "user_id": {
-                        "description": "Verified user id",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "email": {
-                        "description": "User email",
-                        "type": "string"
-                    },
-                    "verified_at": {
-                        "description": "Verification timestamp",
-                        "type": "string"
+                        "$ref": "#/components/schemas/MeResponse"
                     }
                 },
                 "type": "object"
@@ -3287,7 +5251,6 @@
                 "required": [
                     "id",
                     "email",
-                    "role",
                     "status"
                 ],
                 "properties": {
@@ -3313,25 +5276,15 @@
                         "example": "Doe",
                         "nullable": true
                     },
-                    "role": {
-                        "description": "User role",
-                        "type": "string",
-                        "enum": [
-                            "user",
-                            "admin",
-                            "superadmin"
-                        ],
-                        "example": "user"
-                    },
                     "status": {
                         "description": "Account status",
                         "type": "string",
+                        "example": "active",
                         "enum": [
                             "pending_approval",
                             "active",
                             "invited"
-                        ],
-                        "example": "active"
+                        ]
                     },
                     "avatar_url": {
                         "description": "URL to user avatar",
@@ -3350,6 +5303,137 @@
                         "type": "string",
                         "example": "2026-02-26 12:00:00",
                         "nullable": true
+                    },
+                    "roles": {
+                        "description": "Global roles assigned to this user.",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "code": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CollectionResponse": {
+                "title": "Collection Response",
+                "description": "Generic collection payload wrapper",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "description": "Result list",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "meta": {
+                        "description": "Optional metadata",
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "PayloadResponse": {
+                "title": "Payload Response",
+                "description": "Generic payload wrapper",
+                "properties": {
+                    "payload": {
+                        "description": "Payload data",
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "title": "Error Response",
+                "description": "RFC 7807 compliant error payload",
+                "required": [
+                    "type",
+                    "title",
+                    "status"
+                ],
+                "properties": {
+                    "type": {
+                        "description": "URI identifying the problem type",
+                        "type": "string",
+                        "example": "about:blank"
+                    },
+                    "title": {
+                        "description": "Short, human-readable summary of the problem",
+                        "type": "string",
+                        "example": "Validation Failed"
+                    },
+                    "status": {
+                        "description": "HTTP status code",
+                        "type": "integer",
+                        "example": 422
+                    },
+                    "detail": {
+                        "description": "Detailed explanation specific to this occurrence",
+                        "type": "string",
+                        "example": "The email field is required.",
+                        "nullable": true
+                    },
+                    "instance": {
+                        "description": "URI identifying the specific occurrence",
+                        "type": "string",
+                        "example": "/api/v1/users",
+                        "nullable": true
+                    },
+                    "errors": {
+                        "description": "Map of field-specific validation errors",
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedResponse": {
+                "title": "Paginated Response",
+                "description": "Generic pagination payload",
+                "required": [
+                    "data",
+                    "total",
+                    "page",
+                    "per_page"
+                ],
+                "properties": {
+                    "data": {
+                        "description": "Result set",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "total": {
+                        "description": "Total number of records",
+                        "type": "integer",
+                        "example": 120
+                    },
+                    "page": {
+                        "description": "Current page",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "per_page": {
+                        "description": "Items per page",
+                        "type": "integer",
+                        "example": 20
                     }
                 },
                 "type": "object"
@@ -3609,6 +5693,12 @@
                 "description": "Enter your JWT token in the format: Bearer {token}",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
+            },
+            "appKeyAuth": {
+                "type": "apiKey",
+                "description": "Per-application API key issued by this server, used to authenticate the calling app (no user JWT required).",
+                "name": "X-App-Key",
+                "in": "header"
             }
         }
     },
@@ -3642,8 +5732,8 @@
             "description": "API Keys"
         },
         {
-            "name": "Demoproducts",
-            "description": "Demoproducts"
+            "name": "Iam",
+            "description": "Iam"
         }
     ]
 }

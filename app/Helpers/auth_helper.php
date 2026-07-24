@@ -49,7 +49,7 @@ if (! function_exists('is_email_verified')) {
 if (! function_exists('has_permission')) {
     /**
      * Check whether the authenticated user has a specific permission code
-     * (e.g. 'iam.admin-access', 'users.write').
+     * (e.g. 'iam.superadmin-access', 'users.write').
      *
      * Reads from `session('user.permissions')`, an array of permission codes
      * populated at login from the API's session response.
@@ -62,7 +62,12 @@ if (! function_exists('has_permission')) {
             return false;
         }
 
-        return in_array($code, $permissions, true);
+        if (in_array($code, $permissions, true)) {
+            return true;
+        }
+
+        return $code !== 'iam.superadmin-access'
+            && in_array('iam.superadmin-access', $permissions, true);
     }
 }
 

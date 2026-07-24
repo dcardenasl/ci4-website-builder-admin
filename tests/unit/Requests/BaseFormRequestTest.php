@@ -9,7 +9,7 @@ use CodeIgniter\Test\CIUnitTestCase;
 use Config\Services;
 
 /**
- * Tests for BaseFormRequest typed helper methods (postInt, postBool, postArray).
+ * Tests for BaseFormRequest typed helper methods.
  *
  * @internal
  */
@@ -46,6 +46,20 @@ final class BaseFormRequestTest extends CIUnitTestCase
     {
         $form = $this->makeForm(['count' => '3.9']);
         $this->assertSame(3, $form->getTestInt('count'));
+    }
+
+    public function testPostNullableIntReturnsNullForEmptyOptionalField(): void
+    {
+        $form = $this->makeForm(['parent_id' => '']);
+
+        $this->assertNull($form->getTestNullableInt('parent_id'));
+    }
+
+    public function testPostNullableIntReturnsIntegerForNumericString(): void
+    {
+        $form = $this->makeForm(['parent_id' => '12']);
+
+        $this->assertSame(12, $form->getTestNullableInt('parent_id'));
     }
 
     // ─── postBool() ──────────────────────────────────────────────────────────
@@ -122,6 +136,11 @@ final class BaseFormRequestTest extends CIUnitTestCase
             public function getTestBool(string $field): bool
             {
                 return $this->postBool($field);
+            }
+
+            public function getTestNullableInt(string $field): ?int
+            {
+                return $this->postNullableInt($field);
             }
 
             /** @return array<mixed> */

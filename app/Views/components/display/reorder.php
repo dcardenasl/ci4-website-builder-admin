@@ -5,6 +5,8 @@
  * @var array       $items         Flat list of items or array of groups
  * @var string      $saveUrl       Endpoint to POST the final sorted array
  * @var string|null $displayKey    Attribute name to show in lists (default: 'name')
+ * @var string[]    $subtitleKeys  Optional extra field keys shown as a subtitle row (default: [])
+ * @var array<string, string> $subtitleLabels Optional labels for subtitle keys
  * @var bool|null   $grouped       Whether the list is grouped by category/parent (default: false)
  * @var string|null $groupTitleKey Attribute name for the group's title (default: 'name')
  * @var string|null $itemsKey      Attribute name for the child array inside groups (default: 'items')
@@ -16,12 +18,18 @@
 helper('form');
 
 $displayKey    = $displayKey ?? 'name';
+$subtitleKeys  = $subtitleKeys ?? [];
+$subtitleLabels = is_array($subtitleLabels ?? null) ? $subtitleLabels : [];
 $grouped       = $grouped ?? false;
 $groupTitleKey = $groupTitleKey ?? 'name';
 $itemsKey      = $itemsKey ?? 'items';
 $backUrl       = $backUrl ?? '#';
 $title         = $title ?? lang('App.reorder') ?? 'Reordenar';
 $helpText      = $helpText ?? lang('Files.gallery_drag_help') ?? 'Arrastra los elementos para cambiar su orden.';
+$dragLabel     = (string) ($dragLabel ?? 'Arrastrar');
+$noChangesLabel = (string) ($noChangesLabel ?? 'Sin cambios');
+$pendingLabel   = (string) ($pendingLabel ?? 'Cambios pendientes');
+$csrfHeader    = config('Security')->headerName;
 
 // Normalize data structure to support both grouped and flat lists uniformly in Alpine.js
 $groups = [];
@@ -54,9 +62,20 @@ if ($grouped) {
 
 <section class="max-w-4xl" x-data="{
     groups: <?= esc(json_encode(array_values($groups))) ?>,
+    initialGroups: <?= esc(json_encode(array_values($groups))) ?>,
     draggingGroupIndex: null,
     draggingItemIndex: null,
     saving: false,
+    subtitleLabels: <?= esc(json_encode($subtitleLabels)) ?>,
+    dragLabel: <?= esc(json_encode($dragLabel)) ?>,
+    noChangesLabel: <?= esc(json_encode($noChangesLabel)) ?>,
+    pendingLabel: <?= esc(json_encode($pendingLabel)) ?>,
+    hasPendingChanges() {
+        return JSON.stringify(this.groups) !== JSON.stringify(this.initialGroups);
+    },
+    statusLabel() {
+        return this.hasPendingChanges() ? this.pendingLabel : this.noChangesLabel;
+    },
     dragStart(groupIndex, itemIndex) {
         this.draggingGroupIndex = groupIndex;
         this.draggingItemIndex = itemIndex;
@@ -70,6 +89,15 @@ if ($grouped) {
         const movedItem = list.splice(this.draggingItemIndex, 1)[0];
         list.splice(itemIndex, 0, movedItem);
         this.draggingItemIndex = itemIndex;
+    },
+    moveItem(groupIndex, itemIndex, direction) {
+        const list = this.groups[groupIndex].items;
+        const targetIndex = itemIndex + direction;
+
+        if (targetIndex < 0 || targetIndex >= list.length) return;
+
+        const movedItem = list.splice(itemIndex, 1)[0];
+        list.splice(targetIndex, 0, movedItem);
     },
     async saveOrder() {
         this.saving = true;
@@ -89,12 +117,13 @@ if ($grouped) {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                    '<?= esc($csrfHeader, 'js') ?>': '<?= csrf_hash() ?>'
                 },
                 body: JSON.stringify({ items: itemsToSave })
             });
             const result = await response.json();
             if (result.ok) {
+                this.initialGroups = JSON.parse(JSON.stringify(this.groups));
                 if (window.Alpine && this.$store && this.$store.toast) {
                     this.$store.toast.push('success', result.message || 'Orden guardado con éxito.');
                 } else {
@@ -118,13 +147,18 @@ if ($grouped) {
         }
     }
 }">
-    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h3 class="text-xl font-bold text-gray-900"><?= esc($title) ?></h3>
-            <p class="text-sm text-gray-500 mt-1"><?= esc($helpText) ?></p>
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="space-y-2">
+            <div class="flex items-center gap-3">
+                <h3 class="text-xl font-bold text-gray-900"><?= esc($title) ?></h3>
+                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold"
+                    :class="hasPendingChanges() ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'"
+                    x-text="statusLabel()"></span>
+            </div>
+            <p class="text-sm text-gray-500"><?= esc($helpText) ?></p>
         </div>
-        <button type="button" @click="saveOrder()" :disabled="saving"
-            class="<?= esc(action_button_class('primary')) ?> px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
+        <button type="button" @click="saveOrder()" :disabled="saving || !hasPendingChanges()"
+            class="<?= esc(action_button_class('primary')) ?> px-4 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <span x-show="!saving" class="flex items-center gap-2">
                 <?= ui_icon('check', 'h-4 w-4') ?>
                 <?= esc(lang('App.save') ?? 'Guardar Orden') ?>
@@ -144,7 +178,7 @@ if ($grouped) {
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
                 <!-- Group / Category Header (Only shown if grouped or has distinct category name) -->
                 <div x-show="group.category.id !== 0 || <?= $grouped ? 'true' : 'false' ?>"
-                     class="bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                     class="bg-gradient-to-r from-gray-50 to-gray-100/50 px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <span class="p-1.5 rounded-lg bg-brand-50 text-brand-600">
                             <?= ui_icon('layers', 'h-4 w-4') ?>
@@ -156,9 +190,9 @@ if ($grouped) {
                 </div>
 
                 <!-- Items list container -->
-                <div class="divide-y divide-gray-100 p-2 min-h-[60px] bg-gray-50/30">
+                <div class="divide-y divide-gray-100 p-2.5 min-h-[60px] bg-gray-50/30">
                     <template x-if="group.items.length === 0">
-                        <div class="py-6 text-center text-sm text-gray-400">
+                        <div class="py-5 text-center text-sm text-gray-400">
                             <?= esc(lang('App.no_results') ?? 'Sin elementos.') ?>
                         </div>
                     </template>
@@ -168,21 +202,51 @@ if ($grouped) {
                             @dragstart="dragStart(gIdx, iIdx)"
                             @dragover.prevent="dragOver(gIdx, iIdx)"
                             @dragend="draggingGroupIndex = null; draggingItemIndex = null"
-                            class="group relative flex items-center justify-between gap-4 p-4 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200 border border-transparent hover:border-gray-100 bg-white/70 backdrop-blur-sm mb-2 last:mb-0"
+                            class="group relative flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 border border-transparent hover:border-gray-100 bg-white/80 backdrop-blur-sm mb-2 last:mb-0"
                             style="cursor: grab;"
                             :class="draggingGroupIndex === gIdx && draggingItemIndex === iIdx ? 'opacity-40 border-dashed border-brand-400' : ''">
                             
-                            <div class="flex items-center gap-3 flex-1">
-                                <!-- Drag handler visual handle -->
-                                <div class="text-gray-400 hover:text-gray-600 transition-colors" style="cursor: grab;">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <div class="flex items-center gap-3 flex-1 min-w-0">
+                                <div class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500 shrink-0 shadow-sm" style="cursor: grab;">
+                                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h.01M16 9h.01M8 15h.01M16 15h.01M12 9h.01M12 15h.01M12 12h.01M8 12h.01M16 12h.01" />
                                     </svg>
+                                    <span x-text="dragLabel"></span>
                                 </div>
-                                <div class="text-sm font-semibold text-gray-800" x-text="item['<?= esc($displayKey, 'js') ?>']"></div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-gray-800 truncate" x-text="item['<?= esc($displayKey, 'js') ?>'] || '#' + item.id"></div>
+                                    <?php if (!empty($subtitleKeys)): ?>
+                                    <div class="mt-1.5 text-xs text-gray-500">
+                                        <template x-for="(key, idx) in <?= esc(json_encode(array_values($subtitleKeys), JSON_THROW_ON_ERROR), 'attr') ?>" :key="key">
+                                            <span x-show="item[key] && String(item[key]).trim() !== ''" class="inline-flex items-center gap-1.5">
+                                                <span class="font-medium text-gray-400" x-text="subtitleLabels[key] || key"></span>
+                                                <span class="text-gray-600" x-text="String(item[key])"></span>
+                                                <span x-show="idx < <?= max(count($subtitleKeys) - 1, 0) ?>" class="text-gray-300">•</span>
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
-                            <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded" x-text="'#' + (iIdx + 1)"></span>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div class="flex items-center rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm">
+                                    <button type="button"
+                                        class="px-1.5 py-1 text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-25 disabled:cursor-not-allowed"
+                                        :disabled="iIdx === 0"
+                                        @click="moveItem(gIdx, iIdx, -1)">
+                                        <?= ui_icon('chevron-up', 'h-3.5 w-3.5') ?>
+                                    </button>
+                                    <button type="button"
+                                        class="px-1.5 py-1 text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-25 disabled:cursor-not-allowed border-l border-gray-200"
+                                        :disabled="iIdx === group.items.length - 1"
+                                        @click="moveItem(gIdx, iIdx, 1)">
+                                        <?= ui_icon('chevron-down', 'h-3.5 w-3.5') ?>
+                                    </button>
+                                </div>
+
+                                <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded-md" x-text="'#' + (iIdx + 1)"></span>
+                            </div>
                         </div>
                     </template>
                 </div>

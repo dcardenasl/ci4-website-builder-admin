@@ -7,12 +7,12 @@ namespace Config;
 use CodeIgniter\Config\BaseConfig;
 
 /**
- * Enable/disable backward compatibility breaking features.
+ * Enable/disable features that may change existing behavior.
  */
 class Feature extends BaseConfig
 {
     /**
-     * Use improved new auto routing instead of the legacy version.
+     * Use improved auto routing instead of the previous version.
      */
     public bool $autoRoutesImproved = true;
 

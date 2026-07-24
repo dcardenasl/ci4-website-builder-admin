@@ -6,18 +6,26 @@ namespace App\Modules\Iam\Services;
 
 use App\Services\ResourceApiService;
 
-class RoleApiService extends ResourceApiService implements RoleApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class RoleApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {
         return '/api/v1/iam/roles';
     }
 
+    /** @return ApiResponse */
     public function listPermissions(int|string $id): array
     {
         return $this->apiClient->get($this->resourcePath() . '/' . $id . '/permissions');
     }
 
+    /**
+     * @param list<int> $permissionIds
+     * @return ApiResponse
+     */
     public function attachPermissions(int|string $id, array $permissionIds): array
     {
         return $this->apiClient->post(
@@ -26,6 +34,7 @@ class RoleApiService extends ResourceApiService implements RoleApiServiceInterfa
         );
     }
 
+    /** @return ApiResponse */
     public function detachPermission(int|string $id, int|string $permissionId): array
     {
         return $this->apiClient->delete($this->resourcePath() . '/' . $id . '/permissions/' . $permissionId);

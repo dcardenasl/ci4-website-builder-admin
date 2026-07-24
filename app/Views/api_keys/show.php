@@ -1,7 +1,3 @@
-<div class="mb-4">
-    <a href="<?= route_to('admin.api_keys') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= lang('ApiKeys.back_to_list') ?></a>
-</div>
-
 <?php if (! empty($error)): ?>
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <p class="text-sm text-red-600"><?= esc($error) ?></p>
@@ -13,25 +9,18 @@
     $generatedApiKeyName = (string) (session('generatedApiKeyName') ?? ($apiKey['name'] ?? ''));
     ?>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900"><?= lang('ApiKeys.details') ?></h3>
-                <div class="flex items-center gap-2">
-                    <?php if (has_permission('apikeys.write')): ?>
-                        <a href="<?= route_to('admin.api_keys.edit', $id) ?>" class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><?= lang('App.edit') ?></a>
-                        <form method="post" action="<?= route_to('admin.api_keys.delete', $id) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(lang('ApiKeys.confirm_delete'), 'js') ?>', () => $el.submit())">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"><?= lang('App.delete') ?></button>
-                        </form>
-                    <?php else: ?>
-                        <span class="inline-flex items-center gap-2 rounded-md bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 text-xs">
-                            <?= lang('ApiKeys.read_only_badge') ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
-            </div>
+    <?= view('components/display/admin_page_header', [
+        'backUrl' => route_to('admin.api_keys'),
+        'backLabel' => 'ApiKeys.back_to_list',
+        'eyebrow' => 'ApiKeys.details',
+        'title' => (string) ($apiKey['name'] ?? '—'),
+        'subtitle' => (string) ($apiKey['key_prefix'] ?? ''),
+        'badge' => '<span class="inline-flex rounded-full px-2 py-1 text-xs ' . (! empty($apiKey['is_active']) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700') . '">' . (! empty($apiKey['is_active']) ? lang('ApiKeys.active') : lang('ApiKeys.inactive')) . '</span>',
+    ]) ?>
 
+    <?php ob_start(); ?>
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <h3 class="text-lg font-semibold text-gray-900"><?= lang('ApiKeys.details') ?></h3>
             <dl class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                 <div>
                     <dt class="text-gray-500"><?= lang('ApiKeys.name') ?></dt>
@@ -50,43 +39,52 @@
                         </span>
                     </dd>
                 </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.rate_limit_requests') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc((string) ($apiKey['rate_limit_requests'] ?? '-')) ?></dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.rate_limit_window') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc((string) ($apiKey['rate_limit_window'] ?? '-')) ?></dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.user_rate_limit') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc((string) ($apiKey['user_rate_limit'] ?? '-')) ?></dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.ip_rate_limit') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc((string) ($apiKey['ip_rate_limit'] ?? '-')) ?></dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.created_at') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc(format_date($apiKey['created_at'] ?? null)) ?></dd>
-                </div>
-                <div>
-                    <dt class="text-gray-500"><?= lang('ApiKeys.updated_at') ?></dt>
-                    <dd class="mt-1 text-gray-900"><?= esc(format_date($apiKey['updated_at'] ?? null)) ?></dd>
-                </div>
             </dl>
         </section>
+    <?php $mainContent = ob_get_clean(); ?>
 
-        <?php if (has_permission('apikeys.write')): ?>
-            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-                <h3 class="text-lg font-semibold text-gray-900"><?= lang('ApiKeys.quick_actions') ?></h3>
-                <div class="mt-4 space-y-3">
-                    <a href="<?= route_to('admin.api_keys.edit', $id) ?>" class="block w-full text-center rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><?= lang('App.edit') ?></a>
-                    <a href="<?= route_to('admin.api_keys.create') ?>" class="block w-full text-center rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><?= lang('ApiKeys.create') ?></a>
-                </div>
-            </section>
-        <?php endif; ?>
-    </div>
+    <?php ob_start(); ?>
+    <?= view('components/display/admin_meta_panel', [
+        'title' => 'ApiKeys.quick_actions',
+        'items' => [
+            ['label' => 'ApiKeys.rate_limit_requests', 'value' => (string) ($apiKey['rate_limit_requests'] ?? '-')],
+            ['label' => 'ApiKeys.rate_limit_window', 'value' => (string) ($apiKey['rate_limit_window'] ?? '-')],
+            ['label' => 'ApiKeys.user_rate_limit', 'value' => (string) ($apiKey['user_rate_limit'] ?? '-')],
+            ['label' => 'ApiKeys.ip_rate_limit', 'value' => (string) ($apiKey['ip_rate_limit'] ?? '-')],
+            ['label' => 'ApiKeys.created_at', 'value' => format_date($apiKey['created_at'] ?? null)],
+            ['label' => 'ApiKeys.updated_at', 'value' => format_date($apiKey['updated_at'] ?? null)],
+        ],
+    ]) ?>
+
+    <?php if (has_permission('apikeys.write')): ?>
+        <?php ob_start(); ?>
+        <a href="<?= route_to('admin.api_keys.edit', $id) ?>" class="<?= esc(action_button_class('primary')) ?> w-full justify-center text-center"><?= lang('App.edit') ?></a>
+        <a href="<?= route_to('admin.api_keys.create') ?>" class="<?= esc(action_button_class()) ?> w-full justify-center text-center"><?= lang('ApiKeys.create') ?></a>
+        <?php $actionsContent = ob_get_clean(); ?>
+
+        <?php ob_start(); ?>
+        <form method="post" action="<?= route_to('admin.api_keys.delete', $id) ?>" x-data @submit.prevent="$store.confirm.show('<?= esc(confirm_delete_message($apiKey['name'] ?? null), 'js') ?>', () => $el.submit())">
+            <?= csrf_field() ?>
+            <button type="submit" class="<?= esc(action_button_class('danger')) ?> w-full justify-center"><?= lang('App.delete') ?></button>
+        </form>
+        <?php $dangerContent = ob_get_clean(); ?>
+
+        <?= view('components/display/admin_actions_panel', [
+            'title' => 'ApiKeys.quick_actions',
+            'content' => $actionsContent,
+            'dangerContent' => $dangerContent,
+        ]) ?>
+    <?php else: ?>
+        <span class="inline-flex items-center gap-2 rounded-md bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1.5 text-xs">
+            <?= lang('ApiKeys.read_only_badge') ?>
+        </span>
+    <?php endif; ?>
+    <?php $asideContent = ob_get_clean(); ?>
+
+    <?= view('components/display/admin_resource_layout', [
+        'main' => $mainContent,
+        'aside' => $asideContent,
+    ]) ?>
 
     <?php if ($generatedApiKey !== ''): ?>
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"

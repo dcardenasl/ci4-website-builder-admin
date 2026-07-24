@@ -33,10 +33,15 @@ class ApiClient extends BaseConfig
 
         // Support both CodeIgniter dotted .env keys (apiClient.*)
         // and uppercase env vars (API_*) for compatibility across deployments.
-        $baseUrl = env('apiClient.baseUrl') ?: env('API_BASE_URL');
-        if (is_string($baseUrl) && trim($baseUrl) !== '') {
-            $this->baseUrl = $baseUrl;
+        $baseUrl = env('apiClient.baseUrl') ?: env('API_BASE_URL') ?: $this->baseUrl;
+        if (! is_string($baseUrl) || trim($baseUrl) === '') {
+            throw new \LogicException(
+                'Missing API_BASE_URL in .env. '
+                . 'Set apiClient.baseUrl or API_BASE_URL to your API server URL. '
+                . 'Example: API_BASE_URL=http://localhost:8180'
+            );
         }
+        $this->baseUrl = $baseUrl;
 
         $timeout = env('apiClient.timeout') ?: env('API_TIMEOUT');
         if ($timeout !== false && $timeout !== null && $timeout !== '') {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Profile\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Files\Services\FileApiServiceInterface;
+use App\Modules\Files\Services\FileApiService;
 use App\Modules\Profile\Requests\ProfileUpdateRequest;
-use App\Modules\Profile\Services\ProfileApiServiceInterface;
+use App\Modules\Profile\Services\ProfileApiService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,8 +15,8 @@ use Psr\Log\LoggerInterface;
 
 class ProfileController extends BaseWebController
 {
-    protected ProfileApiServiceInterface $profileService;
-    protected FileApiServiceInterface $fileService;
+    protected ProfileApiService $profileService;
+    protected FileApiService $fileService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -75,6 +75,7 @@ class ProfileController extends BaseWebController
         $response = $this->safeApiCall(fn () => $this->profileService->forgotPassword(
             $email,
             $this->clientBaseUrl(),
+            $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es'
         ));
 
         if (! $response['ok']) {
@@ -88,6 +89,7 @@ class ProfileController extends BaseWebController
     {
         $response = $this->safeApiCall(fn () => $this->profileService->resendVerification([
             'client_base_url' => $this->clientBaseUrl(),
+            'locale' => $this->viewData['currentLocale'] ?? $this->session->get('locale') ?? 'es',
         ]));
 
         if (! $response['ok']) {

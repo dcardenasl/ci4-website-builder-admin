@@ -22,7 +22,7 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 # ---------- Stage 2: Frontend assets (Tailwind + vendored Alpine/Lucide) ----------
-FROM node:20-alpine AS asset-build
+FROM node:22-alpine AS asset-build
 
 WORKDIR /app
 
@@ -34,11 +34,10 @@ RUN npm ci --no-audit --no-fund
 #   - src/css/app.css        (entry stylesheet)
 #   - app/Views/**/*.php     (content scan)
 #   - public/assets/js/**.js (content scan + the vendor target dir)
-#   - tailwind.config.js     (config)
 COPY src ./src
+COPY scripts ./scripts
 COPY app ./app
 COPY public ./public
-COPY tailwind.config.js ./
 
 RUN npm run build:all
 
@@ -48,8 +47,11 @@ FROM php:8.2-fpm-alpine
 LABEL maintainer="CodeIgniter 4 Admin Starter"
 LABEL description="Production-ready CI4 admin (FPM) — pairs with nginx in a sibling container"
 
-# System dependencies + PHP extensions in one layer.
-RUN apk add --no-cache \
+# System dependencies + PHP extensions in one layer. `apk upgrade` first so
+# transitive OS packages (e.g. c-ares) pick up any patch released after this
+# base image tag was last rebuilt, instead of trusting whatever was baked in.
+RUN apk update && apk upgrade --no-cache \
+    && apk add --no-cache \
         curl \
         libpng-dev \
         libzip-dev \

@@ -58,3 +58,16 @@ Si el modulo agrega helpers o transformaciones de presentacion reutilizables, cu
 
 - [CodeIgniter 4 Testing Guide](https://codeigniter.com/user_guide/testing/index.html)
 - [PHPUnit Documentation](https://phpunit.de/documentation.html)
+## Fixture policy
+
+Admin feature tests should build API payloads through
+`tests/_support/Fixtures/AdminFixtureFactory`. IDs, locale codes and translated
+values are then derived from the fixture instead of representing starter data.
+Seeder contracts belong in the `Contract` suite; Admin tests do not execute
+Domain database seeders.
+
+```bash
+composer test:dynamic
+composer test:seed-contracts
+composer test:fixture-policy
+```

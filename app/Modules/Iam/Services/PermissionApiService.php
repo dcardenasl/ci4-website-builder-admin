@@ -6,7 +6,7 @@ namespace App\Modules\Iam\Services;
 
 use App\Services\ResourceApiService;
 
-class PermissionApiService extends ResourceApiService implements PermissionApiServiceInterface
+class PermissionApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {

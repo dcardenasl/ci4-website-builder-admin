@@ -59,7 +59,9 @@
                 <p class="mt-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"><?= esc($user['email'] ?? '') ?></p>
                 <p class="mt-1 text-xs text-gray-500"><?= lang('Profile.email_immutable_help') ?></p>
             </div>
-            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"><?= lang('Profile.save_changes') ?></button>
+            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                <?= lang('Profile.save_changes') ?>
+            </button>
         </form>
     </section>
 
@@ -68,7 +70,9 @@
         <p class="mt-3 text-sm text-gray-600"><?= lang('Profile.password_reset_help') ?></p>
         <form method="post" action="<?= site_url('profile/request-password-reset') ?>" class="mt-4">
             <?= csrf_field() ?>
-            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"><?= lang('Profile.send_password_reset') ?></button>
+            <button type="submit" class="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                <?= lang('Profile.send_password_reset') ?>
+            </button>
         </form>
 
         <div class="mt-6 pt-6 border-t border-gray-200">

@@ -28,7 +28,7 @@ Tokens live **only** in the server-side PHP session — never in cookies, `local
 2. **Server-Rendered Views:** Uses PHP views with Tailwind CSS and Alpine.js for interactivity. No frontend build pipeline required for production.
 3. **Centralized API Communication:** All HTTP requests go through `app/Libraries/ApiClient.php`, which handles token refresh, error handling, and response normalization.
 4. **Service Layer Pattern:** Controllers call Services, which use the ApiClient. Keeps code organized and testable.
-5. **FormRequest Validation:** Form validation is centralized in `app/Requests/` classes, keeping controllers thin.
+5. **FormRequest Validation:** Form validation is centralized in `app/Modules/{ModuleName}/Requests/` classes, keeping controllers thin.
 
 ## ⚡ Quick Start
 
@@ -46,6 +46,11 @@ npm run dev:css                # Terminal 2
 # 3. Open in browser
 # http://localhost:8182
 ```
+
+Open the admin with `http://localhost:8182`, matching `app.baseURL`.
+Do not use `http://127.0.0.1:8182` for the browser session: CodeIgniter CSRF/session
+state is host-sensitive, and mixing `127.0.0.1` with `localhost` can produce
+`SecurityException #403` on login.
 
 ## 📚 Documentation
 
@@ -112,7 +117,7 @@ The `ApiClient` normalizes all API responses to this structure:
 
 ## ✅ Form Validation & Request Layer
 
-All form validation is handled through `app/Requests/*Request.php` classes:
+All form validation is handled through `app/Modules/{ModuleName}/Requests/*Request.php` classes (e.g. `app/Modules/Auth/Requests/RegisterRequest.php`):
 
 - **rules():** UI-level validation rules (`required`, `valid_email`, `max_length`)
 - **payload():** Normalization to API-expected format
@@ -203,6 +208,10 @@ Start both servers in separate terminal windows:
 php spark serve --port 8182
 # Application available at http://localhost:8182
 ```
+
+Use that exact `localhost` URL in the browser. `127.0.0.1` is fine for database
+connections, but the admin frontend should use the same host configured in
+`app.baseURL`.
 
 **Terminal 2 — Tailwind CSS Watcher:**
 ```bash

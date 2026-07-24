@@ -82,8 +82,17 @@ return [
     'permissions_help_create'               => 'Selecciona los permisos que otorgará este rol. Podrás cambiarlos luego.',
     'permissions_help_edit'                 => 'Marca los permisos que este rol debe otorgar. Al guardar se reemplaza el conjunto completo.',
     'permissions_none_grantable'            => 'No posees ningún permiso que se pueda otorgar desde aquí.',
+    'permissions_none_available'            => 'Aún no hay permisos disponibles.',
     'permissions_some_locked'               => 'Este rol tiene permisos que no puedes modificar; se conservarán al guardar.',
+    'permissions_locked_tooltip'            => 'Puedes ver este permiso, pero la API no permitirá otorgarlo.',
     'permissions_edit_link'                 => 'Editar',
+    'role_permissions_title'                => 'Roles × permisos',
+    'role_permissions_help'                 => 'Administra las asignaciones de permisos por rol.',
+    'role_permissions_hint'                 => 'Marca los permisos que debe tener este rol y guarda para aplicar los cambios.',
+    'role_permissions_selected_label'       => 'permisos seleccionados',
+    'role_permissions_load_failed'          => 'No se pudo cargar la matriz de roles y permisos.',
+    'role_permissions_save_failed'          => 'No se pudieron guardar los permisos del rol.',
+    'role_permissions_save_success'         => 'Permisos del rol actualizados correctamente.',
 
     // Membership ↔ Role M2M
     'roles_assigned'                  => 'Roles asignados',

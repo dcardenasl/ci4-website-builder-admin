@@ -40,6 +40,21 @@ if (! function_exists('format_date')) {
 // Authentication helpers are in app/Helpers/auth_helper.php
 // See: is_email_verified(), has_permission()
 
+if (! function_exists('safe_lang')) {
+    /**
+     * Resolve a language key, falling back to a default string when the
+     * key has no translation (CI4's lang() echoes the key itself in that
+     * case). Consolidated here from 6 duplicate inline declarations across
+     * view partials (audit finding H-014, 2026-07-10).
+     */
+    function safe_lang(string $key, string $fallback): string
+    {
+        $value = lang($key);
+
+        return $value === $key ? $fallback : (string) $value;
+    }
+}
+
 if (! function_exists('filter_label_class')) {
     function filter_label_class(): string
     {
@@ -58,6 +73,18 @@ if (! function_exists('filter_panel_class')) {
     function filter_panel_class(): string
     {
         return 'mt-4 rounded-xl border border-gray-200 bg-white p-4';
+    }
+}
+
+if (! function_exists('confirm_delete_message')) {
+    function confirm_delete_message(?string $itemLabel = null): string
+    {
+        $label = trim((string) $itemLabel);
+        if ($label === '') {
+            return lang('App.confirm_delete');
+        }
+
+        return lang('App.confirm_delete_named', [$label]);
     }
 }
 
@@ -147,6 +174,34 @@ if (! function_exists('has_active_filters')) {
         }
 
         return false;
+    }
+}
+
+if (! function_exists('section_heading_class')) {
+    /**
+     * Consistent page-section heading. Use for H2/H3 inside cards or
+     * section dividers — always `text-lg font-semibold text-gray-900`.
+     */
+    function section_heading_class(): string
+    {
+        return 'text-lg font-semibold text-gray-900';
+    }
+}
+
+if (! function_exists('card_class')) {
+    /**
+     * Surface card wrapper — mirrors the `.card` CSS component class.
+     * Optional $padding follows: 'sm' = p-4, 'md' = p-5 (default), 'none' = no padding.
+     */
+    function card_class(string $padding = 'md'): string
+    {
+        $pad = match ($padding) {
+            'sm'   => ' p-4',
+            'none' => '',
+            default => ' p-5',
+        };
+
+        return 'bg-white border border-gray-200 rounded-xl shadow-sm' . $pad;
     }
 }
 
@@ -269,6 +324,7 @@ if (! function_exists('ui_icon')) {
             'image'           => 'image',
             'layers'          => 'layers',
             'help-circle'     => 'circle-help',
+            'info'            => 'info',
             'alert-circle'    => 'circle-alert',
             'triangle-alert'  => 'triangle-alert',
             'cart'            => 'shopping-cart',
@@ -287,6 +343,22 @@ if (! function_exists('ui_icon')) {
             'tag'             => 'tag',
             'ticket'          => 'ticket',
             'store'           => 'store',
+            'cms-page'        => 'file-text',
+            'cms-menu'        => 'navigation',
+            'cms-block-type'  => 'layout-template',
+            'cms-entry'       => 'newspaper',
+            'cms-language'    => 'globe',
+            'cms-redirect'    => 'corner-up-right',
+            'cms-collection'  => 'archive',
+            'languages'       => 'languages',
+            'chevron-up'      => 'chevron-up',
+            'chevron-down'    => 'chevron-down',
+            'chevron-right'   => 'chevron-right',
+            'grip-vertical'   => 'grip-vertical',
+            'external-link'   => 'external-link',
+            'copy'            => 'copy',
+            'clipboard-list'  => 'clipboard-list',
+            'circle-check'    => 'circle-check',
         ];
 
         if (! isset($icons[$name])) {
@@ -298,5 +370,16 @@ if (! function_exists('ui_icon')) {
         }
 
         return '<i data-lucide="' . esc($icon) . '" class="' . esc($class) . '" aria-hidden="true"></i>';
+    }
+}
+
+if (! function_exists('cms_status_badge')) {
+    function cms_status_badge(string $status): string
+    {
+        return match ($status) {
+            'published' => '<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">published</span>',
+            'archived'  => '<span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">archived</span>',
+            default     => '<span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">draft</span>',
+        };
     }
 }

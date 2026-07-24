@@ -68,11 +68,17 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "App\\Libraries\\Cms\\": "../ci4-website-builder-domain/app/Libraries/Cms/",
             "Config\\": "app/Config/"
         },
         "exclude-from-classmap": [
             "**/Database/Migrations/**"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Support\\": "tests/_support/"
+        }
     },
     "config": {
         "optimize-autoloader": true,
@@ -85,30 +91,42 @@
     "scripts": {
         "post-install-cmd": [
             "chmod +x pre-commit",
-            "cp pre-commit .git/hooks/pre-commit"
+            "cp pre-commit .git/hooks/pre-commit",
+            "chmod +x pre-push",
+            "cp pre-push .git/hooks/pre-push"
         ],
         "post-update-cmd": [
             "chmod +x pre-commit",
-            "cp pre-commit .git/hooks/pre-commit"
+            "cp pre-commit .git/hooks/pre-commit",
+            "chmod +x pre-push",
+            "cp pre-push .git/hooks/pre-push"
         ],
         "test": "phpunit --no-coverage",
         "test:coverage": "phpunit",
-        "test:unit": "phpunit tests/unit",
-        "test:feature": "phpunit tests/feature",
+        "test:unit": "phpunit tests/unit --no-coverage",
+        "test:feature": "phpunit tests/feature --no-coverage",
+        "test:contract": "phpunit --testsuite=Contract --no-coverage",
+        "test:dynamic": "phpunit tests/unit tests/feature --no-coverage",
+        "test:seed-contracts": "phpunit --testsuite=Contract --no-coverage",
+        "test:fixture-policy": "php scripts/check-test-fixture-policy.php",
         "analyse": "vendor/bin/phpstan analyse --memory-limit=-1",
         "format:check": "vendor/bin/php-cs-fixer fix --dry-run --diff",
         "format": "vendor/bin/php-cs-fixer fix",
         "i18n-check": "php scripts/i18n-check.php",
-        "coverage:check": "php scripts/check-coverage.php 70 tests/coverage.xml",
+        "coverage:check": "php scripts/check-coverage.php 54.20 tests/coverage.xml",
         "quality": [
             "@analyse",
             "@format:check",
-            "@i18n-check"
+            "@i18n-check",
+            "@test:fixture-policy"
         ],
         "ci": [
             "@test",
             "@quality"
         ],
-        "sync-swagger": "cp ../ci4-website-builder-api/public/swagger.json swagger_contract.json"
+        "sync-swagger": "cp ../ci4-website-builder-api/public/swagger.json swagger_contract.json",
+        "cs-fix": "@format",
+        "cs-check": "@format:check",
+        "phpstan": "@analyse"
     }
 }

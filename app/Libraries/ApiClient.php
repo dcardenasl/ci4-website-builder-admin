@@ -46,6 +46,9 @@ class ApiClient implements ApiClientInterface
     /** @param array<string, mixed> $query */
     public function get(string $path, array $query = []): array
     {
+        if (isset($query['limit']) && ! isset($query['per_page'])) {
+            $query['per_page'] = $query['limit'];
+        }
         return $this->request('GET', $path, ['query' => $query], true);
     }
 
@@ -81,6 +84,9 @@ class ApiClient implements ApiClientInterface
     /** @param array<string, mixed> $query */
     public function publicGet(string $path, array $query = []): array
     {
+        if (isset($query['limit']) && ! isset($query['per_page'])) {
+            $query['per_page'] = $query['limit'];
+        }
         return $this->request('GET', $path, ['query' => $query], false);
     }
 
@@ -150,8 +156,11 @@ class ApiClient implements ApiClientInterface
             }
         }
 
-        // Retry up to 2 times on 5xx errors with exponential backoff (250ms, 500ms).
-        $maxRetries = 2;
+        // Reads can be retried safely. Do not retry writes: a slow or
+        // unavailable upstream must fail within the configured request
+        // timeout instead of multiplying latency and exceeding PHP's global
+        // max_execution_time while the user is saving a form.
+        $maxRetries = in_array($method, ['GET', 'HEAD'], true) ? 2 : 0;
         $attempt    = 0;
         do {
             if ($attempt > 0) {
@@ -195,7 +204,7 @@ class ApiClient implements ApiClientInterface
             ));
         }
 
-        return [
+        $result = [
             'ok'          => $status >= 200 && $status < 300,
             'status'      => $status,
             'data'        => is_array($payload) ? $payload : [],
@@ -204,6 +213,19 @@ class ApiClient implements ApiClientInterface
             'messages'    => $this->extractMessages($payload, $status),
             'fieldErrors' => $this->extractFieldErrors($payload),
         ];
+
+        if (ENVIRONMENT === 'development') {
+            \App\Debug\ApiCallsCollector::collect([
+                'method'    => $method,
+                'url'       => rtrim($this->config->baseUrl, '/') . $uri,
+                'status'    => $status,
+                'latency'   => $latency,
+                'requestId' => RequestIdHolder::get() ?? '',
+                'body'      => $body,
+            ]);
+        }
+
+        return $result;
     }
 
     public function attemptTokenRefresh(): bool
@@ -456,6 +478,14 @@ class ApiClient implements ApiClientInterface
             return [(string) $payload['message']];
         }
 
+        if (isset($payload['detail']) && is_scalar($payload['detail'])) {
+            return [(string) $payload['detail']];
+        }
+
+        if (isset($payload['title']) && is_scalar($payload['title'])) {
+            return [(string) $payload['title']];
+        }
+
         if (isset($payload['messages']) && is_array($payload['messages'])) {
             $messages = array_values(array_filter($payload['messages'], 'is_scalar'));
             return array_map('strval', $messages);
@@ -475,37 +505,40 @@ class ApiClient implements ApiClientInterface
             return [];
         }
 
-        $errors = $payload['errors'] ?? [];
-
-        if (! is_array($errors)) {
-            return [];
-        }
-
         $fieldErrors = [];
 
-        foreach ($errors as $key => $value) {
-            if (! is_string($key) || $key === 'general') {
-                continue;
-            }
+        $sources = [];
+        if (isset($payload['fieldErrors']) && is_array($payload['fieldErrors'])) {
+            $sources[] = $payload['fieldErrors'];
+        }
+        if (isset($payload['errors']) && is_array($payload['errors'])) {
+            $sources[] = $payload['errors'];
+        }
 
-            if (is_scalar($value)) {
-                $fieldErrors[$key] = (string) $value;
-                continue;
-            }
+        foreach ($sources as $errors) {
+            foreach ($errors as $key => $value) {
+                if (! is_string($key) || $key === 'general') {
+                    continue;
+                }
 
-            if (is_array($value)) {
-                // If it's an array of errors, take the first one that is a string
-                foreach ($value as $entry) {
-                    if (is_scalar($entry)) {
-                        $fieldErrors[$key] = (string) $entry;
-                        break;
-                    }
-                    if (is_array($entry)) {
-                        // Nested array, try one more level or skip
-                        foreach ($entry as $subEntry) {
-                            if (is_scalar($subEntry)) {
-                                $fieldErrors[$key] = (string) $subEntry;
-                                break 2;
+                if (is_scalar($value)) {
+                    $fieldErrors[$key] = (string) $value;
+                    continue;
+                }
+
+                if (is_array($value)) {
+                    // If it's an array of errors, take the first string we can find.
+                    foreach ($value as $entry) {
+                        if (is_scalar($entry)) {
+                            $fieldErrors[$key] = (string) $entry;
+                            break;
+                        }
+                        if (is_array($entry)) {
+                            foreach ($entry as $subEntry) {
+                                if (is_scalar($subEntry)) {
+                                    $fieldErrors[$key] = (string) $subEntry;
+                                    break 2;
+                                }
                             }
                         }
                     }

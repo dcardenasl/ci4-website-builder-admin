@@ -3,15 +3,20 @@
 $applications = $applications ?? [];
 $selectedApp  = (int) old('application_id', $applications[0]['id'] ?? 0);
 ?>
-<div class="mb-4">
-    <a href="<?= route_to('admin.iam.permissions') ?>" class="text-sm text-brand-600 hover:text-brand-700">&larr; <?= esc(lang('App.back')) ?></a>
-</div>
+<?= view('components/display/admin_page_header', [
+    'backUrl' => route_to('admin.iam.permissions'),
+    'backLabel' => 'App.back',
+    'eyebrow' => 'Iam.permissions_title',
+    'title' => 'Iam.permissions_create',
+]) ?>
 
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 max-w-3xl">
-    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Iam.permissions_create')) ?></h3>
+<form method="post" action="<?= route_to('admin.iam.permissions.store') ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <?= csrf_field() ?>
 
-    <form method="post" action="<?= route_to('admin.iam.permissions.store') ?>" class="mt-4 space-y-4">
-        <?= csrf_field() ?>
+    <div class="lg:col-span-2">
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Iam.permissions_create')) ?></h3>
+            <div class="mt-4 space-y-4">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -64,9 +69,14 @@ $selectedApp  = (int) old('application_id', $applications[0]['id'] ?? 0);
             <?= render_field_error('description') ?>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="<?= esc(action_button_class('primary')) ?>" <?= $applications === [] ? 'disabled' : '' ?>><?= esc(lang('App.create')) ?></button>
-            <a href="<?= route_to('admin.iam.permissions') ?>" class="<?= esc(action_button_class()) ?>"><?= esc(lang('App.cancel')) ?></a>
-        </div>
-    </form>
-</section>
+            </div>
+        </section>
+    </div>
+
+    <aside class="space-y-6">
+        <?= view('components/display/admin_actions_panel', [
+            'content' => '<button type="submit" class="' . esc(action_button_class('primary'), 'attr') . '"' . ($applications === [] ? ' disabled' : '') . '>' . esc(lang('App.create')) . '</button>'
+                . '<a href="' . esc(route_to('admin.iam.permissions'), 'attr') . '" class="' . esc(action_button_class(), 'attr') . '">' . esc(lang('App.cancel')) . '</a>',
+        ]) ?>
+    </aside>
+</form>

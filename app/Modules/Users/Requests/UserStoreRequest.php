@@ -30,6 +30,7 @@ class UserStoreRequest extends BaseFormRequest
             'last_name'  => $this->postString('last_name'),
             'email'      => $this->postString('email'),
             'role_ids'   => $this->normalizedRoleIds(),
+            'locale'     => $this->request->getLocale(),
         ];
     }
 

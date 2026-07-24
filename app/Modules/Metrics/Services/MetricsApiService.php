@@ -6,8 +6,15 @@ namespace App\Modules\Metrics\Services;
 
 use App\Services\BaseApiService;
 
-class MetricsApiService extends BaseApiService implements MetricsApiServiceInterface
+/**
+ * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
+ */
+class MetricsApiService extends BaseApiService
 {
+    /**
+     * @param array<string, mixed> $filters
+     * @return ApiResponse
+     */
     public function summary(array $filters = []): array
     {
         return $this->apiClient->get('/metrics', $filters);
@@ -15,6 +22,7 @@ class MetricsApiService extends BaseApiService implements MetricsApiServiceInter
 
     /**
      * @return array{ok: bool, status: int, data: array<string, mixed>|list<array<string, mixed>>, raw: string, headers: array<string, string>, messages: list<string>, fieldErrors: array<string, string>}
+     * @param array<string, mixed> $filters
      */
     public function timeseries(array $filters = []): array
     {
@@ -24,8 +32,13 @@ class MetricsApiService extends BaseApiService implements MetricsApiServiceInter
             return $response;
         }
 
-        // Transform parallel arrays (dates, requests, etc.) to a list of point objects
-        $data = $response['data'] ?? [];
+        // ApiClient::request() stores the full decoded response envelope
+        // ({status, data, ...}) under $response['data'], so the actual
+        // payload is one level deeper — same shape extractData() unwraps
+        // for every other endpoint. Transform the parallel arrays (dates,
+        // requests, etc.) into a list of point objects at that inner level.
+        $envelope = $response['data'] ?? [];
+        $data = is_array($envelope) ? ($envelope['data'] ?? []) : [];
         if (is_array($data) && isset($data['dates']) && is_array($data['dates'])) {
             $points = [];
             foreach ($data['dates'] as $i => $date) {
@@ -36,7 +49,8 @@ class MetricsApiService extends BaseApiService implements MetricsApiServiceInter
                     'latency' => $data['latency'][$i] ?? 0,
                 ];
             }
-            $response['data'] = $points;
+            $envelope['data'] = $points;
+            $response['data'] = $envelope;
         }
 
         return $response;

@@ -3,6 +3,7 @@
         apiUrl: '<?= route_to('admin.users.data') ?>',
         pageUrl: '<?= route_to('admin.users') ?>',
         mode: 'users',
+        defaultSort: '-created_at',
         routes: {
             showBase: '<?= route_to('admin.users') ?>',
             editBase: '<?= route_to('admin.users') ?>'
@@ -28,9 +29,13 @@
         'submitLabel' => lang('App.search'),
     ]) ?>
 
-    <div class="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600" x-show="loading">
-        <?= lang('Users.loading') ?>
-    </div>
+    <template x-if="loading && rows.length === 0">
+        <?= view('components/display/loading_state', [
+            'title'       => 'Users.loading',
+            'description' => 'App.loading_refreshing',
+            'icon'        => 'users',
+        ]) ?>
+    </template>
     <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-show="error" x-text="errorMessage"></div>
 
     <template x-if="!loading && !error && rows.length === 0">
@@ -40,8 +45,14 @@
             'actionLabel' => 'App.create',
         ]) ?>
     </template>
-    <template x-if="!loading && !error && rows.length > 0">
-        <div class="<?= esc(table_wrapper_class()) ?>">
+    <template x-if="!error && rows.length > 0">
+        <div class="<?= esc(table_wrapper_class()) ?> relative">
+            <div x-show="loading" class="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center transition-all duration-200" x-cloak>
+                <div class="flex items-center gap-2 rounded-lg bg-white/95 px-4 py-2 shadow-sm border border-gray-100">
+                    <?= ui_icon('refresh-ccw', 'h-4 w-4 animate-spin text-brand-600') ?>
+                    <span class="text-xs font-semibold text-gray-700"><?= esc(lang('App.loading_refreshing')) ?></span>
+                </div>
+            </div>
             <div class="<?= esc(table_scroll_class()) ?>">
             <table class="<?= esc(table_class()) ?>">
                 <thead class="<?= esc(table_head_class()) ?>">

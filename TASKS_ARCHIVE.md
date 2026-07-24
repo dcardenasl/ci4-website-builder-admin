@@ -1,7 +1,27 @@
 # TASKS_ARCHIVE — ci4-admin-starter
 
 > Historial de tareas completadas.
-> Última actualización: 2026-05-15
+> Última actualización: 2026-07-22
+
+---
+
+## ✅ Escalabilidad de colecciones — COL-001/002/003 (2026-07-22)
+
+- **COL-001** — `collection_type` libre (`create.php`/`edit.php`, `<datalist>` con sugerencias).
+  Corregidos 2 bugs reales encontrados al implementar: `CollectionController::update()` siempre
+  sobreescribía el valor posteado con el actual (el campo nunca hubiera podido editarse), y
+  `CollectionResponseDTO` (domain) no exponía `collection_type` en absoluto. Tests nuevos en
+  ambos repos.
+- **COL-002** — CTA label editable por colección (`entry_cta_label`, nuevo campo por idioma en
+  "Detalles de la colección"). Bug real encontrado: `CollectionStoreRequest::normalizeTranslations()`
+  reconstruye cada fila de traducción desde una lista explícita de campos — el valor se veía en
+  el formulario pero se descartaba antes de llegar a la API. Corregido agregando el campo a esa
+  lista. Verificado end-to-end en navegador (admin → domain → API pública → web).
+- **COL-003** — `CmsPresetCatalog::filterAvailablePresets()` pasa de todo-o-nada a filtrar bloque
+  por bloque; nuevo campo `missing_blocks` + mensaje en el Wizard de estructura cuando un preset
+  queda parcial. Verificado desactivando temporalmente un tipo de bloque en el catálogo.
+- `composer test`/`analyse`/`format:check`/`i18n-check` y `npm run test:js`/`lint:js`/`build:all`
+  en verde. Detalle completo en `../ARCHIVE.md`.
 
 ---
 
@@ -66,3 +86,43 @@
 ---
 
 *TASKS_ARCHIVE · ci4-admin-starter · 2026-05-08*
+
+---
+
+## 📦 Migrado desde `TASKS.md` — 2026-07-21
+
+### Flujo editorial de traducciones
+
+- **TRN-001..005** — contrato común, auditoría/workbench, paneles de estado, copia de idioma base,
+  navegación contextual y árbol de menús.
+- **TRN-007** — tests PHP/JS, i18n, rendimiento, documentación y validación browser.
+- **TRN-008** — badges de traducción por idioma en bloques de páginas y entradas, navegación por
+  `focus_lang` y cobertura de tests.
+
+### Integración CMS admin
+
+- **CMS-019..020**, **CMS-012..018** y **CMS-020b** — módulos de Language, Setting, Page, Menu,
+  BlockType, Collection, Entry, Category, Tag y Redirect; CRUD, filtros, traducciones, permisos,
+  import/export y suites de calidad.
+- **WIZ-STEPS-EDITOR-01** — editor visual de pasos del Wizard con catálogo de campos válido,
+  validación server-side y persistencia round-trip.
+- **WIZ-UNIFY-01** — pasos nativos y de bloques unificados, progreso único y soporte de media
+  reference en el flujo guiado.
+- **MEDIA-001** — selector dual de biblioteca/URL externa para imágenes destacadas y SEO en
+  entradas y páginas.
+- **MEDIA-002** — cerrada sin trabajo adicional (2026-07-22): verificado en código que
+  `blockContentFieldsFor()`/`buildBlockContentConfig()` (`entryPublish.js`) ya capturan y persisten
+  `media_reference` dentro de `config_fields` a `block_config`, separado de `block_data`, con
+  cobertura en `entryPublish.test.js` — resuelta por **WIZ-UNIFY-01** (línea de arriba), la nota
+  de "diseño pendiente" que quedó en MEDIA-001 estaba desactualizada.
+- **DASH-001** — dashboard contextual, responsive, con widgets gateados por permisos.
+- **AUD-001** — cierre de la auditoría de filtros y buscador.
+- **DEEP-WIZ-01..05** y **DEEP-ADM-01..07** — refactor profundo del Wizard y hardening de módulos
+  y dependencias.
+- **ADM-010**, **ADM-009**, **FAQ-010**, **ADM-008**, **ADM-007** y **ADM-006** — import/export,
+  scaffolding relation-aware, empty states, diccionario de iconos, hooks y alcance de módulos.
+
+### Notas de archivo
+
+Los bloques completos se retiraron del tracker activo para que solo queden decisiones pendientes,
+backlog real y el contrato de calidad del repositorio.

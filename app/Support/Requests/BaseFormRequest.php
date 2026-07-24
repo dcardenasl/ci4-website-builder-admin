@@ -109,6 +109,17 @@ abstract class BaseFormRequest implements FormRequestInterface
         return $default;
     }
 
+    protected function postNullableInt(string $field): ?int
+    {
+        $value = $this->request->getPost($field);
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return is_numeric($value) ? (int) $value : null;
+    }
+
     /**
      * Return a POST field as bool.
      * Truthy values: '1', 'true', 'on', 'yes' (case-insensitive).

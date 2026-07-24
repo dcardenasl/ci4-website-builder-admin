@@ -24,3 +24,7 @@
         <?= esc(session('warning')) ?>
     </div>
 <?php endif; ?>
+
+<?php if (ENVIRONMENT === 'development' && session()->has('devApiError')): ?>
+    <?= view('layouts/partials/dev_api_error_panel', ['devErr' => session('devApiError')]) ?>
+<?php endif; ?>

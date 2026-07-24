@@ -6,7 +6,7 @@ namespace App\Modules\ApiKeys\Services;
 
 use App\Services\ResourceApiService;
 
-class ApiKeyApiService extends ResourceApiService implements ApiKeyApiServiceInterface
+class ApiKeyApiService extends ResourceApiService
 {
     protected function resourcePath(): string
     {

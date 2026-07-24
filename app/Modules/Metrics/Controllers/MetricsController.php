@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Metrics\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Modules\Metrics\Services\MetricsApiServiceInterface;
+use App\Modules\Metrics\Services\MetricsApiService;
 use App\Support\CatalogOptions;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class MetricsController extends BaseWebController
 {
-    protected MetricsApiServiceInterface $metricsService;
+    protected MetricsApiService $metricsService;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
@@ -46,6 +46,9 @@ class MetricsController extends BaseWebController
 
         $summaryResponse = $this->safeApiCall(fn () => $this->metricsService->summary($apiParams));
         $timeseriesResponse = $this->safeApiCall(fn () => $this->metricsService->timeseries($apiParams));
+
+        $this->maybeFlashDevError($summaryResponse);
+        $this->maybeFlashDevError($timeseriesResponse);
 
         $summaryData = $this->extractData($summaryResponse);
         $timeseriesData = $this->extractData($timeseriesResponse);

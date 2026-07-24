@@ -206,7 +206,7 @@ Toda la documentación está actualizada con la última versión estable.
 
 1. Abre un issue en [GitHub](https://github.com/dcardenasl/ci4-admin-starter/issues)
 2. Envía un pull request con mejoras
-3. Ver [CONTRIBUTING.md](../CONTRIBUTING.md) para directrices
+3. Ver [CONTRIBUTING.md](../../CONTRIBUTING.md) para directrices
 
 ---
 

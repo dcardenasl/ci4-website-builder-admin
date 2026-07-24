@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Support\SessionKeys;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
@@ -22,6 +23,10 @@ class AdminFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         helper('auth');
+
+        if (is_string(session(SessionKeys::ACCESS_TOKEN->value))) {
+            service('permissionsSessionRefresher')->refreshIfStale(60);
+        }
 
         $allowedPermissions = config('AdminAccess')->permissions;
 

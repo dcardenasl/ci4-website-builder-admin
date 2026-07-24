@@ -1,6 +1,11 @@
 <?php
 /**
- * Health card body partial.
+ * Health card body partial — one compact row per service, collapsed by
+ * default and expandable on click to inspect that service's
+ * database/disk/writable breakdown. The status dot still pulses when a
+ * service needs attention (state != 'up', or any check in
+ * warning/critical/unhealthy) even while collapsed, so problems stay
+ * visible without forcing the detail open.
  *
  * Expected variables:
  *   $health  array — result from HealthApiService::check()
@@ -10,36 +15,59 @@
 /** @var array<string, mixed> $health */
 /** @var string $name */
 
-$healthTone    = health_tone_badge($health['state'] ?? 'down');
+$state         = (string) ($health['state'] ?? 'down');
+$healthTone    = health_tone_badge($state);
 $healthData    = is_array($health['data'] ?? null) ? $health['data'] : [];
 $healthChecks  = is_array($healthData['checks'] ?? null) ? $healthData['checks'] : [];
 $healthTimestamp = $healthData['timestamp'] ?? null;
 $dbCheck       = is_array($healthChecks['database'] ?? null) ? $healthChecks['database'] : null;
 $diskCheck     = is_array($healthChecks['disk'] ?? null) ? $healthChecks['disk'] : null;
 $writableCheck = is_array($healthChecks['writable'] ?? null) ? $healthChecks['writable'] : null;
+
+$unhealthyStatuses = ['warning', 'critical', 'unhealthy'];
+$needsAttention = $state !== 'up'
+    || in_array((string) ($dbCheck['status'] ?? 'healthy'), $unhealthyStatuses, true)
+    || in_array((string) ($diskCheck['status'] ?? 'healthy'), $unhealthyStatuses, true)
+    || in_array((string) ($writableCheck['status'] ?? 'healthy'), $unhealthyStatuses, true);
+
+$hasDetail = $healthTimestamp !== null || $dbCheck !== null || $diskCheck !== null || $writableCheck !== null;
+$rowTag    = $hasDetail ? 'button' : 'div';
 ?>
 
-<!-- Estado general -->
-<div class="flex items-center gap-3 p-3 rounded-lg <?= esc($healthTone['bg']) ?>">
-    <span class="flex h-3 w-3 relative">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full <?= esc($healthTone['dot']) ?> opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-3 w-3 <?= esc($healthTone['dot']) ?>"></span>
-    </span>
-    <span class="text-sm font-medium <?= esc($healthTone['text']) ?>">
-        <?= esc(lang('Dashboard.status_' . ($health['state'] ?? 'down'))) ?>
-        (<?= esc((string) ($health['latency_ms'] ?? 0)) ?>ms)
-    </span>
-</div>
+<div<?php if ($hasDetail): ?> x-data="{ open: false }"<?php endif; ?>>
+    <<?= $rowTag ?>
+        <?php if ($hasDetail): ?>type="button" @click="open = !open" :aria-expanded="open"<?php endif; ?>
+        class="w-full flex items-center justify-between gap-3 py-2.5<?= $hasDetail ? ' -mx-1 rounded-lg px-1 text-left transition-colors hover:bg-gray-50' : '' ?>"
+    >
+        <div class="flex items-center gap-2.5 min-w-0">
+            <span class="flex h-2.5 w-2.5 relative shrink-0">
+                <?php if ($needsAttention): ?>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full <?= esc($healthTone['dot']) ?> opacity-75"></span>
+                <?php endif; ?>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 <?= esc($healthTone['dot']) ?>"></span>
+            </span>
+            <span class="text-sm font-medium text-gray-700 truncate"><?= esc($name) ?></span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs font-medium <?= esc($healthTone['text']) ?>">
+                <?= esc(lang('Dashboard.status_' . $state)) ?> &middot; <?= esc((string) ($health['latency_ms'] ?? 0)) ?>ms
+            </span>
+            <?php if ($hasDetail): ?>
+                <span class="inline-flex items-center justify-center text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': open }">
+                    <?= ui_icon('chevron-down', 'h-3.5 w-3.5') ?>
+                </span>
+            <?php endif; ?>
+        </div>
+    </<?= $rowTag ?>>
 
-<?php if ($healthTimestamp !== null): ?>
-    <p class="mt-2 text-xs text-gray-500">
-        <?= esc(lang('Dashboard.last_check')) ?>: <?= esc((string) $healthTimestamp) ?>
-    </p>
-<?php endif; ?>
+    <?php if ($hasDetail): ?>
+    <div x-show="open" x-cloak class="pb-3 space-y-2 border-t border-gray-100 pt-3">
 
-<!-- Detalle por componente -->
-<?php if ($dbCheck !== null || $diskCheck !== null || $writableCheck !== null): ?>
-    <div class="mt-4 space-y-2 border-t border-gray-100 pt-4">
+        <?php if ($healthTimestamp !== null): ?>
+            <p class="text-xs text-gray-500">
+                <?= esc(lang('Dashboard.last_check')) ?>: <?= esc((string) $healthTimestamp) ?>
+            </p>
+        <?php endif; ?>
 
         <?php if ($dbCheck !== null): ?>
             <?php $tone = check_tone_badge((string) ($dbCheck['status'] ?? 'unknown')); ?>
@@ -83,7 +111,7 @@ $writableCheck = is_array($healthChecks['writable'] ?? null) ? $healthChecks['wr
                         <span class="inline-block h-2 w-2 rounded-full <?= esc($tone['dot']) ?>"></span>
                         <span class="text-xs font-medium <?= esc($tone['text']) ?>">
                             <?php if (is_numeric($usedPct)): ?>
-                                <?= esc(number_format((float) $usedPct, 0)) ?>%<?php if ($freeLabel !== ''): ?> · <?= esc($freeLabel) ?> <?= esc(lang('Dashboard.disk_free_suffix')) ?><?php endif; ?>
+                                <?= esc(number_format((float) $usedPct, 0)) ?>%<?php if ($freeLabel !== ''): ?> &middot; <?= esc($freeLabel) ?> <?= esc(lang('Dashboard.disk_free_suffix')) ?><?php endif; ?>
                             <?php else: ?>
                                 <?= esc(lang('Dashboard.check_status_' . ($diskCheck['status'] ?? 'unknown'))) ?>
                             <?php endif; ?>
@@ -131,4 +159,5 @@ $writableCheck = is_array($healthChecks['writable'] ?? null) ? $healthChecks['wr
             </div>
         <?php endif; ?>
     </div>
-<?php endif; ?>
+    <?php endif; ?>
+</div>
