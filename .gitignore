@@ -71,7 +71,7 @@ public/writable/
 #-------------------------
 # CodeIgniter System (managed by Composer)
 #-------------------------
-system/
+/system/
 
 #-------------------------
 # IDE / Editor
