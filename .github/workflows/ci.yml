@@ -80,7 +80,11 @@ jobs:
         run: composer i18n-check
 
       - name: Run test suite
-        run: vendor/bin/phpunit ${{ matrix.php-version == '8.2' && '' || '--no-coverage' }}
+        # GH Actions' `cond && A || B` collapses to B whenever A is falsy —
+        # and '' *is* falsy — so this can't branch to "no extra flag" via an
+        # empty string; use an explicit, non-empty flag for the 8.2/coverage
+        # branch instead.
+        run: vendor/bin/phpunit ${{ matrix.php-version == '8.2' && '--coverage-clover=tests/coverage.xml' || '--no-coverage' }}
 
       - name: Coverage gate (>= 54.20% line coverage)
         if: matrix.php-version == '8.2'
