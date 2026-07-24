@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-07-23
+
 ### Added
 - **Free-form `collection_type` with suggestions (COL-001)** — `create.php`/`edit.php` replace the fixed collection-type dropdown with a free-text field backed by a `<datalist>` (`CollectionController::collectionTypeSuggestions()`) listing the 5 starter presets plus any custom type already in use, so a new collection can adopt any type name without touching code. Fixed a real bug found along the way: `CollectionController::update()` always overwrote the posted `collection_type` with the API's current value, so the field could never actually be changed through the edit form.
 - **Editable entry CTA label per collection (COL-002)** — new `entry_cta_label` per-language field in "Detalles de la colección", consumed by the public web app's collection listing instead of a hardcoded `news`/`portfolio` label. Fixed a real bug found along the way: `CollectionStoreRequest::normalizeTranslations()` rebuilds each translation row from an explicit field list, so the new field rendered in the form but was silently dropped before reaching the API until added to that list.
