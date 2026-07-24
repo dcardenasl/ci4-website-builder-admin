@@ -21,6 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout ci4-website-builder-domain (App\Libraries\Cms\ PSR-4 dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: dcardenasl/ci4-website-builder-domain
+          ref: dev
+          path: ../ci4-website-builder-domain
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
