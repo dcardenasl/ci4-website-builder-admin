@@ -47,8 +47,11 @@ FROM php:8.2-fpm-alpine
 LABEL maintainer="CodeIgniter 4 Admin Starter"
 LABEL description="Production-ready CI4 admin (FPM) — pairs with nginx in a sibling container"
 
-# System dependencies + PHP extensions in one layer.
-RUN apk add --no-cache \
+# System dependencies + PHP extensions in one layer. `apk upgrade` first so
+# transitive OS packages (e.g. c-ares) pick up any patch released after this
+# base image tag was last rebuilt, instead of trusting whatever was baked in.
+RUN apk update && apk upgrade --no-cache \
+    && apk add --no-cache \
         curl \
         libpng-dev \
         libzip-dev \
