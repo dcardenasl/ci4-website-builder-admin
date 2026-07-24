@@ -55,6 +55,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Prepare writable directories
+        run: chmod -R 777 writable
+
       - name: Install frontend dependencies
         run: npm ci
 
