@@ -251,4 +251,15 @@ final class ComponentsTest extends CIUnitTestCase
 
         $this->assertStringContainsString('<title>' . lang('App.components_title') . '</title>', $html);
     }
+
+    public function testHeadPartialPublishesStarterIconSet(): void
+    {
+        $html = view('layouts/partials/head', ['title' => 'Starter'], ['saveData' => false]);
+
+        $this->assertStringContainsString('rel="icon" type="image/svg+xml"', $html);
+        $this->assertStringContainsString('favicon-96x96.png', $html);
+        $this->assertStringContainsString('apple-touch-icon.png', $html);
+        $this->assertStringContainsString('site.webmanifest', $html);
+        $this->assertStringContainsString('name="theme-color" content="#0f172a"', $html);
+    }
 }

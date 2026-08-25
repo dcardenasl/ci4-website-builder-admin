@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   status screen, manual invalidation action, and system.public-cache.* permission contracts.
 
 ### Fixed
+- **Starter favicon set** — added neutral SVG/PNG app icons, manifest links, and guarded
+  Apache cache headers without copying product-specific branding.
 - **Language namespace ownership** — consolidated the six CMS/Auth/Profile language
   namespaces under their module catalogs, moved the keys used by the current forms and
   collection wizard, and added an architecture regression for root/module collisions.
