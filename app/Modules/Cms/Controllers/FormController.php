@@ -321,7 +321,13 @@ class FormController extends BaseWebController
     {
         if ($this->request instanceof \CodeIgniter\HTTP\IncomingRequest) {
             $json = $this->request->getJSON(true);
-            if (is_array($json)) {
+            // A non-empty top-level JSON array (a list) has no field names
+            // and can never satisfy the string-keyed shape this method
+            // promises — fall through to getPost() the same as if no JSON
+            // body existed. An empty array (`{}` or `[]`, indistinguishable
+            // after decoding) is still a valid empty payload.
+            if (is_array($json) && ($json === [] || ! array_is_list($json))) {
+                /** @var array<string, mixed> $json */
                 return $json;
             }
         }

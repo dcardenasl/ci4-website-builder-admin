@@ -433,7 +433,15 @@ abstract class BaseWebController extends BaseController
             ? ($this->request->getJSON(true) ?? [])
             : [];
 
-        return is_array($raw) ? $raw : [];
+        // A top-level JSON array (a list, e.g. `[1,2,3]`) has no field names
+        // and can never satisfy the string-keyed shape this method promises
+        // its callers — treat it the same as no body at all.
+        if (! is_array($raw) || array_is_list($raw)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $raw */
+        return $raw;
     }
 
     /**
