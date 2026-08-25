@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   status screen, manual invalidation action, and system.public-cache.* permission contracts.
 
 ### Fixed
+- **Language namespace ownership** — consolidated the six CMS/Auth/Profile language
+  namespaces under their module catalogs, moved the keys used by the current forms and
+  collection wizard, and added an architecture regression for root/module collisions.
 - **Dashboard session locking** — dashboard widget requests now release the CI4 session lock
   after their API calls complete, while token invalidation tolerates an already-closed session;
   parallel widgets no longer serialize or crash during failed refreshes.
