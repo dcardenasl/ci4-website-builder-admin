@@ -70,6 +70,7 @@ class PageController extends BaseWebController
         $blocksResp = $this->safeApiCall(
             fn () => service('blockInstanceApiService')->list($id, 'page')
         );
+        $qualityResp = $this->safeApiCall(fn () => $this->pageService->quality($id));
         $allBlocks = $blocksResp['ok'] ? $this->extractItems($blocksResp) : [];
         $blocks    = array_values(
             array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id']))
@@ -85,6 +86,7 @@ class PageController extends BaseWebController
             'blockTypes'    => $this->fetchBlockTypesIndexed(),
             'languages'     => $this->getLanguages(),
             'blockTranslationStatus'  => $this->ownerBlockTranslationStatus('page', $id),
+            'quality'       => $qualityResp['ok'] ? $this->extractData($qualityResp) : null,
         ]);
     }
 

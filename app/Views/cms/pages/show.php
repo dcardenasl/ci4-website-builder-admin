@@ -5,6 +5,7 @@ $blocks        = $blocks        ?? [];
 $blockTypes    = $blockTypes    ?? [];
 $languages     = $languages     ?? [];
 $collections   = $collections   ?? [];
+$quality       = $quality       ?? null;
 
 // Build preview URL from the first translation slug
 $previewSlug = '';
@@ -37,6 +38,51 @@ foreach ($languages as $l) {
 <?php elseif (! empty($page)): ?>
     <?php $itemId = (string) ($page['id'] ?? ''); ?>
     <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $page['translations'] ?? [], 'requiredFields' => ['slug', 'title'], 'sourceFields' => $page, 'sourceUpdatedAt' => $page['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.pages.edit', $itemId)]) ?>
+
+    <?php if (is_array($quality)): ?>
+        <?php
+        $qualityStatus = (string) ($quality['status'] ?? 'blocked');
+        $qualityStatusClass = match ($qualityStatus) {
+            'ready' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+            'warning' => 'bg-amber-50 text-amber-700 ring-amber-600/20',
+            default => 'bg-red-50 text-red-700 ring-red-600/20',
+        };
+        $qualitySummary = is_array($quality['summary'] ?? null) ? $quality['summary'] : [];
+        $qualityChecks = is_array($quality['checks'] ?? null) ? $quality['checks'] : [];
+        $qualityChecks = array_values(array_filter(
+            $qualityChecks,
+            static fn (mixed $check): bool => is_array($check) && in_array($check['status'] ?? '', ['fail', 'warning'], true)
+        ));
+        ?>
+        <section class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm" data-page-quality>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900"><?= esc(lang('Pages.quality_title')) ?></h3>
+                    <p class="mt-0.5 text-xs text-gray-500"><?= esc(lang('Pages.quality_description')) ?></p>
+                </div>
+                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <?= esc($qualityStatusClass) ?>">
+                    <?= esc(lang('Pages.quality_status_' . $qualityStatus)) ?>
+                </span>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div class="rounded-lg bg-gray-50 p-3"><p class="text-xs text-gray-500"><?= esc(lang('Pages.quality_score')) ?></p><p class="mt-1 text-xl font-bold text-gray-900"><?= esc((string) ($quality['score'] ?? 0)) ?>%</p></div>
+                <div class="rounded-lg bg-gray-50 p-3"><p class="text-xs text-gray-500"><?= esc(lang('Pages.quality_errors')) ?></p><p class="mt-1 text-xl font-bold text-red-700"><?= esc((string) ($qualitySummary['errors'] ?? 0)) ?></p></div>
+                <div class="rounded-lg bg-gray-50 p-3"><p class="text-xs text-gray-500"><?= esc(lang('Pages.quality_warnings')) ?></p><p class="mt-1 text-xl font-bold text-amber-700"><?= esc((string) ($qualitySummary['warnings'] ?? 0)) ?></p></div>
+                <div class="rounded-lg bg-gray-50 p-3"><p class="text-xs text-gray-500"><?= esc(lang('Pages.quality_passed')) ?></p><p class="mt-1 text-xl font-bold text-emerald-700"><?= esc((string) ($qualitySummary['passed'] ?? 0)) ?></p></div>
+            </div>
+            <?php if ($qualityChecks !== []): ?>
+                <ul class="mt-4 space-y-2 text-sm">
+                    <?php foreach ($qualityChecks as $check): ?>
+                        <?php $checkStatus = (string) ($check['status'] ?? 'warning'); ?>
+                        <li class="flex items-start gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                            <span class="mt-0.5 <?= $checkStatus === 'fail' ? 'text-red-600' : 'text-amber-600' ?>">●</span>
+                            <span class="text-gray-700"><?= esc(lang('Pages.quality_check_' . (string) ($check['message_key'] ?? 'unknown')) === 'Pages.quality_check_' . (string) ($check['message_key'] ?? 'unknown') ? lang('Pages.quality_unknown_issue') : lang('Pages.quality_check_' . (string) $check['message_key'])) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm p-5">

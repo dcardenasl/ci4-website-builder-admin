@@ -29,6 +29,12 @@ class PageApiService extends ResourceApiService
         return $this->apiClient->put($this->resourcePath() . '/' . $id, ['status' => 'archived']);
     }
 
+    /** @return ApiResponse */
+    public function quality(int|string $id): array
+    {
+        return $this->apiClient->get($this->resourcePath() . '/' . $id . '/quality');
+    }
+
 
 
     /**
