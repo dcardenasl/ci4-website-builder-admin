@@ -64,6 +64,8 @@ return [
     'yes'             => 'Sí',
     'no'              => 'No',
     'loading'         => 'Cargando...',
+    'show_password'   => 'Mostrar contraseña',
+    'hide_password'   => 'Ocultar contraseña',
     'loading_refreshing' => 'Actualizando resultados...',
     'error'           => 'Error',
     'success'         => 'Éxito',

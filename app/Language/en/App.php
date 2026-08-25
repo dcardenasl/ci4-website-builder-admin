@@ -64,6 +64,8 @@ return [
     'yes'             => 'Yes',
     'no'              => 'No',
     'loading'         => 'Loading...',
+    'show_password'   => 'Show password',
+    'hide_password'   => 'Hide password',
     'loading_refreshing' => 'Refreshing results...',
     'error'           => 'Error',
     'success'         => 'Success',

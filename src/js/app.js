@@ -14,6 +14,7 @@ import { appShell } from './components/appShell.js';
 import { remoteTableFactory } from './components/remoteTable.js';
 import { formFieldBuilderFactory } from './components/formFieldBuilder.js';
 import { filePickerField } from './components/filePickerField.js';
+import { fileGalleryField } from './components/fileGalleryField.js';
 import { translatableFileField } from './components/translatableFileField.js';
 import { mediaReferenceField } from './components/mediaReferenceField.js';
 import { blockRepeaterField } from './components/blockRepeaterField.js';
@@ -29,6 +30,8 @@ import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
 import { handleGoogleCredentialResponse } from './components/googleAuth.js';
 import { richTextEditor } from './components/richTextEditor.js';
+import { bootAdminFormFieldErrors, adminFormFieldErrors } from './components/serverFieldErrors.js';
+import { passwordToggle } from './components/passwordToggle.js';
 import {
     copyLangTabsFileFieldToAll,
     copyLangTabsFileFieldToTargets,
@@ -46,6 +49,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('remoteTable', remoteTableFactory);
     Alpine.data('formFieldBuilder', formFieldBuilderFactory);
     Alpine.data('filePickerField', filePickerField);
+    Alpine.data('fileGalleryField', fileGalleryField);
     Alpine.data('translatableFileField', translatableFileField);
     Alpine.data('mediaReferenceField', mediaReferenceField);
     Alpine.data('blockRepeaterField', blockRepeaterField);
@@ -60,6 +64,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('blockSorter', blockSorter);
     Alpine.data('wizard', wizard);
     Alpine.data('structureWizard', structureWizard);
+    Alpine.data('passwordToggle', passwordToggle);
 
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
@@ -74,6 +79,7 @@ document.addEventListener('alpine:init', () => {
     window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
     window.copyLangTabsMediaReferenceFieldToAll = copyLangTabsMediaReferenceFieldToAll;
     window.blockInstanceConfigFactory = blockInstanceConfig;
+    window.AdminFormFieldErrors = adminFormFieldErrors;
 });
 
 // Must be on window before the Google GSI script fires
@@ -91,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const config = window.__componentConfig || {};
     bootSessionExpiryWatcher({ expiringMessage: config.sessionExpiringMessage });
 });
+
+bootAdminFormFieldErrors();
 
 window.addEventListener('load', () => {
     if (!lucideBootstrapped) { bootLucideIcons(); lucideBootstrapped = true; }
