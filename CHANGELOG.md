@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dashboard session locking** — dashboard widget requests now release the CI4 session lock
   after their API calls complete, while token invalidation tolerates an already-closed session;
   parallel widgets no longer serialize or crash during failed refreshes.
+- **Filter panel UX** — non-reactive panels no longer render Alpine loading or active-filter
+  bindings that cannot run without a `remoteTable` consumer.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and

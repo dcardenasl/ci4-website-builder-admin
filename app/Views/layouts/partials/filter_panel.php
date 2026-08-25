@@ -102,13 +102,15 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
         <?php endif; ?>
     <?php endif; ?>
 
-    <p
-        class="mt-2 text-xs text-gray-500"
-        x-cloak
-        x-show="loading"
-    >
-        <?= esc(lang('App.loading_refreshing')) ?>
-    </p>
+    <?php if ($reactiveHasFilters): ?>
+        <p
+            class="mt-2 text-xs text-gray-500"
+            x-cloak
+            x-show="loading"
+        >
+            <?= esc(lang('App.loading_refreshing')) ?>
+        </p>
+    <?php endif; ?>
 
     <?php if (is_string($fieldsView) && $fieldsView !== ''): ?>
         <?= view($fieldsView, is_array($fieldsData) ? $fieldsData : []) ?>
