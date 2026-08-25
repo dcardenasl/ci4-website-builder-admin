@@ -38,6 +38,33 @@ final class AdminRouteAuthorizationTest extends CIUnitTestCase
 
     private const BROAD_ADMIN_GATE_PATTERN = "/'filter'\\s*=>\\s*\\[\\s*'auth'\\s*,\\s*'admin'/";
 
+    /**
+     * Every Files route must opt into the permission matching its read/write
+     * operation. The map also makes adding a new route an explicit review
+     * point instead of silently inheriting the broad auth-only group gate.
+     *
+     * @var array<string, string>
+     */
+    private const FILES_ROUTE_PERMISSIONS = [
+        'files'             => 'files.read',
+        'files.data'        => 'files.read',
+        'files.trash'       => 'files.read',
+        'files.trash.data'  => 'files.read',
+        'files.upload'      => 'files.write',
+        'files.picker.data' => 'files.read',
+        'files.picker.info' => 'files.read',
+        'files.download'   => 'files.read',
+        'files.view'        => 'files.read',
+        'files.show'        => 'files.read',
+        'files.usages'      => 'files.read',
+        'files.metadata'    => 'files.write',
+        'files.restore'     => 'files.write',
+        'files.force'       => 'files.write',
+        'files.regenerate'  => 'files.write',
+        'files.bulk'        => 'files.write',
+        'files.delete'      => 'files.write',
+    ];
+
     /** @return array<string, string> module name => route file relative path */
     private static function discoverModulesUsingBroadAdminGate(): array
     {
@@ -107,5 +134,77 @@ final class AdminRouteAuthorizationTest extends CIUnitTestCase
         }
 
         $this->assertSame([], $violations, implode("\n", $violations));
+    }
+
+    public function testFilesRoutesDeclareExpectedPermissionOnEveryRoute(): void
+    {
+        $root = rtrim((string) ROOTPATH, DIRECTORY_SEPARATOR);
+        $relativePath = 'app/Modules/Files/Config/Routes.php';
+        $source = file_get_contents($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
+
+        $this->assertIsString($source, "Unable to read {$relativePath}");
+        if (! is_string($source)) {
+            return;
+        }
+
+        $discovered = [];
+        $violations = [];
+
+        foreach (preg_split('/\R/', $source) ?: [] as $lineNumber => $line) {
+            if (! preg_match('/\$routes->(?:get|post)\s*\(/', $line)) {
+                continue;
+            }
+
+            if (! preg_match("/'as'\\s*=>\\s*'([^']+)'/", $line, $routeMatch)) {
+                $violations[] = sprintf('%s:%d has no route name', $relativePath, $lineNumber + 1);
+                continue;
+            }
+
+            $routeName = $routeMatch[1];
+            if (! array_key_exists($routeName, self::FILES_ROUTE_PERMISSIONS)) {
+                $violations[] = sprintf('%s:%d contains unreviewed route %s', $relativePath, $lineNumber + 1, $routeName);
+                continue;
+            }
+
+            if (! preg_match("/'filter'\\s*=>\\s*'permission:([^']+)'/", $line, $permissionMatch)) {
+                $violations[] = sprintf('%s:%d route %s has no explicit permission filter', $relativePath, $lineNumber + 1, $routeName);
+                continue;
+            }
+
+            $discovered[$routeName] = $permissionMatch[1];
+            if ($permissionMatch[1] !== self::FILES_ROUTE_PERMISSIONS[$routeName]) {
+                $violations[] = sprintf(
+                    '%s:%d route %s uses %s instead of %s',
+                    $relativePath,
+                    $lineNumber + 1,
+                    $routeName,
+                    $permissionMatch[1],
+                    self::FILES_ROUTE_PERMISSIONS[$routeName],
+                );
+            }
+        }
+
+        ksort($discovered);
+        $expected = self::FILES_ROUTE_PERMISSIONS;
+        ksort($expected);
+
+        $this->assertSame([], $violations, implode("\n", $violations));
+        $this->assertSame($expected, $discovered, 'The Files route inventory changed without updating this authorization guard.');
+    }
+
+    public function testUniversalCrudSurfaceAndDeadAutoloadMappingAreAbsent(): void
+    {
+        $root = rtrim((string) ROOTPATH, DIRECTORY_SEPARATOR);
+
+        $this->assertFalse(file_exists($root . DIRECTORY_SEPARATOR . 'app/Modules/Universal/Config/Routes.php'));
+        $this->assertFalse(file_exists($root . DIRECTORY_SEPARATOR . 'app/Modules/Universal/Controllers/UniversalController.php'));
+        $this->assertFalse(file_exists($root . DIRECTORY_SEPARATOR . 'app/Views/admin/universal/form.php'));
+        $this->assertFalse(file_exists($root . DIRECTORY_SEPARATOR . 'app/Views/admin/universal/index.php'));
+
+        $autoload = file_get_contents($root . DIRECTORY_SEPARATOR . 'app/Config/Autoload.php');
+        $this->assertIsString($autoload, 'Unable to read app/Config/Autoload.php');
+        if (is_string($autoload)) {
+            $this->assertStringNotContainsString('App\\Modules\\Catalog', $autoload);
+        }
     }
 }
