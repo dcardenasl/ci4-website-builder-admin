@@ -36,6 +36,10 @@
     progress {
         appearance: none;
     }
+
+    [x-cloak] {
+        display: none !important;
+    }
 }
 
 @layer components {
@@ -67,6 +71,19 @@
     .badge {
         @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
     }
+}
+
+/* Table density preferences override the server-rendered table utilities. */
+.density-sm th,
+.density-sm td {
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+}
+
+.density-lg th,
+.density-lg td {
+    padding-block: 1.25rem;
+    padding-inline: 1.5rem;
 }
 
 /* ─── Rich Text Editor (Tiptap) ─────────────────────────────────────────── */
