@@ -7,7 +7,19 @@
 
 ## 🔴 En progreso
 
-*(vacío; el backport quedó archivado en `TASKS_ARCHIVE.md`.)*
+### Remediación de huecos profundos (parte Admin)
+
+> Plan completo: [`../docs/plans/2026-08-25-plan-remediacion-huecos-profundos.md`](../docs/plans/2026-08-25-plan-remediacion-huecos-profundos.md).
+> Auditoría origen: [`../docs/audits/2026-08-25-auditoria-profunda-backport-git-history.md`](../docs/audits/2026-08-25-auditoria-profunda-backport-git-history.md).
+> Tracker cross-repo: [`../TASKS.md`](../TASKS.md).
+
+- [ ] **GAP-02-admin:** 13 ítems del plan §Fase 2, entre ellos:
+      `BlockTypeOptionsResolver.php` sin memoización (regresión de performance confirmada,
+      3-8s → ~1s en teatromuseo), `SessionCloseFilter` (bug de sesión bajo peticiones
+      paralelas), fixes de UX en `filter_panel.php`, guard array/objeto en componentes de
+      formulario, `fileUsages.js` no bloqueante, 6 módulos JS de lógica extraída, migración de
+      `TranslateController.php` a `Services::curlrequest()`, observabilidad perdida en
+      `PublicSiteCacheInvalidator.php`, limpieza de duplicados de idioma y componentes.
 
 ## 🟡 Próximo
 

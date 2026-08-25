@@ -5,6 +5,13 @@
 
 ---
 
+## ✅ Remediación de huecos profundos — Fase 0 (2026-08-25)
+
+- **GAP-00-admin** — eliminado el CRUD genérico `Universal`, retirada su configuración huérfana,
+  y protegidas todas las rutas de `Files` con `files.read`/`files.write`; regresiones de
+  autorización incluidas. Commit `d98e57c`; `composer quality`, PHPUnit completo y hook de commit
+  verificados.
+
 ## ✅ Backport de mejoras de Teatro Museo — Fase 3 (2026-08-25)
 
 - **BACKPORT-03-admin** — UI genérica de reordenamiento por lotes y pantalla de mantenimiento de
