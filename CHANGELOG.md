@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **CSP for Alpine and remote files** — moved `[x-cloak]` into the compiled stylesheet, stopped
+  applying automatic nonces to the inline Alpine-compatible policy, and allowlisted the configured
+  Hub API origin for file previews while retaining the required Alpine runtime directives.
 - **Alpine lifecycle** — removed redundant `x-init="init()"` hooks from Admin views and the
   generated module template, preventing double initialization and duplicate remote-table fetches.
 - **`register-sidebar.sh`** — template-defined `admin_sidebar` entries can now declare generic
