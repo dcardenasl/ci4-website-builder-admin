@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`SecondaryApiClient`** — `DomainApiClient`, `BffApiClient`, and `WebApiClient` now refresh their access token by delegating to the Hub client instead of calling `POST /auth/refresh` against their own base URL, an endpoint that doesn't exist there since only the Hub issues and refreshes JWTs.
+- **`filter_panel.php`** — the active-filter chip block is now wrapped in the `$reactiveHasFilters` guard, so non-reactive panels stop rendering dead Alpine bindings.
+
+### Security
+- **`codeigniter4/framework`** — bumped to v4.7.4, closing CVE-2026-63221 (critical, SQLi in `deleteBatch()`), CVE-2026-63222 (high, path traversal in `UploadedFile::move()`), and CVE-2026-63220 (medium, header spoofing in `isSecure()`). None of the three code paths are exercised by this app; verified via `composer audit`. A stricter `getJSON()` stub in 4.7.4 surfaced two real PHPStan gaps, fixed with `array_is_list()` guards in `BaseWebController::jsonRequestPayload()` and `FormController::jsonOrPost()`.
+
 ## [1.0.0] — 2026-07-23
 
 ### Added
