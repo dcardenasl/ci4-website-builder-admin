@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CMS Alpine components** — extracted the block instance builder, collection template builder,
   menu item form, and generic confirmation action into the compiled JavaScript entrypoint while
   preserving the existing view consumers and language-aware form data.
+- **Translation proxy transport** — routed Google Translate requests through CodeIgniter's shared
+  `curlrequest` service, retaining the existing response contract and failure statuses.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
