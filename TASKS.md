@@ -13,13 +13,12 @@
 > Auditoría origen: [`../docs/audits/2026-08-25-auditoria-profunda-backport-git-history.md`](../docs/audits/2026-08-25-auditoria-profunda-backport-git-history.md).
 > Tracker cross-repo: [`../TASKS.md`](../TASKS.md).
 
-- [ ] **GAP-02-admin:** 13 ítems del plan §Fase 2, entre ellos:
-      `BlockTypeOptionsResolver.php` sin memoización (regresión de performance confirmada,
-      3-8s → ~1s en teatromuseo), `SessionCloseFilter` (bug de sesión bajo peticiones
-      paralelas), fixes de UX en `filter_panel.php`, guard array/objeto en componentes de
-      formulario, `fileUsages.js` no bloqueante, 6 módulos JS de lógica extraída, migración de
-      `TranslateController.php` a `Services::curlrequest()`, observabilidad perdida en
-      `PublicSiteCacheInvalidator.php`, limpieza de duplicados de idioma y componentes.
+- [ ] **GAP-02-admin:** queda 1 ítem pendiente del plan §Fase 2: paginación de la auditoría de
+      traducciones. El endpoint Domain actual todavía devuelve el informe completo sin `meta`,
+      por lo que Admin no debe enviar `page`/`limit` hasta que exista ese consumidor real; se
+      retomará junto con la fase Domain. El resto de los 12 ítems aplicables quedó cerrado en
+      commits separados. `components/forms/` fue verificado como consumidor real del wizard y
+      no es un duplicado muerto.
 
 ## 🟡 Próximo
 
