@@ -124,6 +124,53 @@ final class FileUploadFlowTest extends CIUnitTestCase
         @unlink($tmpFile);
     }
 
+    public function testFileDetailsDefersUsageVerificationUntilTheClientFetchesIt(): void
+    {
+        $mock = $this->createMock(FileApiService::class);
+        $mock->expects($this->once())
+            ->method('getInfo')
+            ->with('7')
+            ->willReturn($this->apiOkResponse([
+                'id'             => 7,
+                'original_name'  => 'image.jpg',
+                'variants'       => [],
+            ]));
+        $mock->expects($this->never())->method('usages');
+        Services::injectMock('fileApiService', $mock);
+
+        $result = $this->withSession($this->authSession)->get('/files/7/show');
+
+        $result->assertStatus(200);
+        $body = html_entity_decode($result->getBody(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $this->assertStringContainsString('data-file-usages', $body);
+        $this->assertStringNotContainsString('action="/files/7/delete"', $body);
+    }
+
+    public function testFileUsagesEndpointDecoratesUsagesForTheDeferredView(): void
+    {
+        $mock = $this->createMock(FileApiService::class);
+        $mock->expects($this->once())
+            ->method('usages')
+            ->with('7')
+            ->willReturn($this->apiOkResponse([
+                'complete' => true,
+                'data'     => [[
+                    'resource'    => 'pages',
+                    'resource_id' => 12,
+                    'role'        => 'hero',
+                    'label'       => 'Home',
+                ]],
+            ]));
+        Services::injectMock('fileApiService', $mock);
+
+        $result = $this->withSession($this->authSession)->get('/files/7/usages');
+
+        $result->assertStatus(200);
+        $body = $result->getBody();
+        $this->assertStringContainsString('"complete": true', $body);
+        $this->assertStringContainsString('/admin/cms/pages/12/edit', $body);
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────
 
     private function createTempFile(string $content, string $name): string

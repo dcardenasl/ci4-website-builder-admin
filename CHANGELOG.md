@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bindings that cannot run without a `remoteTable` consumer.
 - **Structured form values** — display and text components now serialize array/object values
   before escaping, preventing PHP string-conversion errors when API payloads are mapped directly.
+- **File detail responsiveness** — usage verification now loads after the file detail shell,
+  keeping the cross-domain read and delete decision out of the server-rendered request.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
