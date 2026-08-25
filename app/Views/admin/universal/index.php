@@ -24,7 +24,7 @@
         pageUrl: '<?= route_to('admin.universal.index', $resource) ?>',
         mode: '<?= esc($resource) ?>',
         limitOptions: [10, 25, 50, 100]
-    })" x-init="init()">
+    })">
     
     <div class="flex items-center justify-between gap-4 border-b border-gray-200 pb-4 mb-6">
         <div>

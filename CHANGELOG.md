@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Alpine lifecycle** — removed redundant `x-init="init()"` hooks from Admin views and the
+  generated module template, preventing double initialization and duplicate remote-table fetches.
 - **`register-sidebar.sh`** — template-defined `admin_sidebar` entries can now declare generic
   collapsible sub-groups with active-route expansion and persisted open state, while retaining
   the original flat-list format.

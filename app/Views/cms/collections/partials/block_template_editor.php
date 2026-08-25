@@ -196,7 +196,7 @@ $wizardFieldCatalog = [
 $wizardFieldCatalogJson = json_encode($wizardFieldCatalog, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 ?>
 
-<div x-data="collectionBlockTemplateBuilder(<?= esc($blockTypesJson, 'attr') ?>, <?= esc($initialJson, 'attr') ?>, <?= esc($collectionPresetsJson, 'attr') ?>, <?= esc($initialWizardConfigJson, 'attr') ?>, <?= esc($wizardFieldCatalogJson, 'attr') ?>)" x-init="init()" class="space-y-6">
+<div x-data="collectionBlockTemplateBuilder(<?= esc($blockTypesJson, 'attr') ?>, <?= esc($initialJson, 'attr') ?>, <?= esc($collectionPresetsJson, 'attr') ?>, <?= esc($initialWizardConfigJson, 'attr') ?>, <?= esc($wizardFieldCatalogJson, 'attr') ?>)" class="space-y-6">
     <input type="hidden" name="block_template" x-ref="blockTemplateInput" :value="json">
     <input type="hidden" name="wizard_config" x-ref="wizardConfigInput" :value="wizardConfigJson">
 

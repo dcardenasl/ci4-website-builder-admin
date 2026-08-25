@@ -233,7 +233,6 @@ $translationPanel = is_array($translationPanel ?? null) ? $translationPanel : []
                                 accept: '<?= esc($fpAccept, 'js') ?>',
                                 filterType: '<?= esc($fpFilter, 'js') ?>'
                             })"
-                             x-init="init()"
                              <?= $isReadonly ? 'data-readonly="true"' : '' ?>>
 
                             <input type="hidden" :name="fieldName" :value="fileId">
