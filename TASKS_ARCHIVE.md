@@ -11,6 +11,11 @@
   caché del sitio público, con i18n, permisos y pruebas. Commit `e50889d`; calidad PHP/JS completa
   en verde.
 
+## ✅ Backport de mejoras de Teatro Museo — Fase 5 (2026-08-25)
+
+- **BACKPORT-05-admin** — documentación de contratos UI genéricos y alineación de defaults de
+  API/Domain para clones nuevos; verificado con la suite de calidad del repo.
+
 ---
 
 ## ✅ Backport de mejoras de Teatro Museo — Fase 0 y CVE (2026-08-25)

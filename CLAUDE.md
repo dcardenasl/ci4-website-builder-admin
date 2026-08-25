@@ -20,7 +20,7 @@ For cross-repo context (current milestone, blocked tasks), read `../TASKS.md`.
 
 **Architecture flow:**
 ```
-Browser → CI4 Admin Starter (port 8182) → ci4-website-builder-api API (port 8080)
+Browser → CI4 Admin Starter (port 8182) → ci4-website-builder-api API (port 8180)
 ```
 
 **Current state:** Fully implemented. All modules are active: authentication, dashboard, profile, file management, and admin panel (users, audit logs, API keys, metrics). See `docs/INDEX.md` for detailed architectural documentation.
@@ -175,6 +175,20 @@ Reference implementations for this contract:
 - `App\Modules\Cms\Requests\MenuItemStoreRequest`
 - `App\Controllers\BaseWebController`
 
+### Generic UI contracts
+
+Reusable admin behavior added to the starter includes:
+
+- table preferences (page size, visible columns, density, and sort) persist
+  remotely only when the API contract is available; otherwise the table remains
+  usable with local defaults;
+- sidebar groups are collapsible and preserve their state without embedding any
+  site-specific navigation;
+- shared form primitives own labels, hints, errors, and responsive layout;
+- nested API validation errors are normalized once in the base controller path;
+- CSP-compatible Alpine initialization and nonce-based inline styles keep the
+  admin safe without requiring `unsafe-inline`.
+
 ### ApiClient: Central HTTP Communication Layer
 
 The `app/Libraries/ApiClient.php` class is the heart of all API communication. It handles:
@@ -189,7 +203,7 @@ The `app/Libraries/ApiClient.php` class is the heart of all API communication. I
 
 When the admin drives both a hub (`ci4-website-builder-api`) and a domain app (`ci4-domain-starter`) in parallel — e.g. SubscriptionKit, where hub owns auth/users/IAM and a domain app owns projects/subscribers — wire the domain modules to `App\Libraries\DomainApiClient` instead of `ApiClient`.
 
-- **Config:** `app/Config/DomainApiClient.php` reads `domainApiClient.*` / `DOMAIN_API_*` env vars (default base URL `http://localhost:8090`). Extends `Config\ApiClient`, so the contract and PHPStan types stay aligned.
+- **Config:** `app/Config/DomainApiClient.php` reads `domainApiClient.*` / `DOMAIN_API_*` env vars (default base URL `http://localhost:8190`). Extends `Config\ApiClient`, so the contract and PHPStan types stay aligned.
 - **Library:** `App\Libraries\DomainApiClient extends ApiClient implements DomainApiClientInterface`. Inherits all refresh / header / upload logic from `ApiClient`.
 - **Service factory:** `Services::domainApiClient()` is the parallel of `Services::apiClient()`. Returns `DomainApiClientInterface`.
 - **Scaffolding:** `bash bin/make-module.sh <Resource> <Module> /path --service=domain` generates a module wired to `static::domainApiClient()`. Default remains `--service=hub`.
