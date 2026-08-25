@@ -17,9 +17,6 @@
 
 ### Backport de mejoras de Teatro Museo — fases posteriores (parte Admin)
 
-- [ ] **BACKPORT-03-admin — Fase 3:** componente de UI para reordenamiento atómico por lotes
-      (sort-orders), consumiendo el endpoint que agrega Fase 3 en domain. Ver plan §Fase 3.
-
 ### TRN-006 — Estados editoriales, permisos y controles de publicación
 
 - [ ] Decidir el modelo de estados por idioma (`in_review`, `approved`, `published`).

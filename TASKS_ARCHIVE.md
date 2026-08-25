@@ -1,7 +1,15 @@
 # TASKS_ARCHIVE — ci4-admin-starter
 
 > Historial de tareas completadas.
-> Última actualización: 2026-07-22
+> Última actualización: 2026-08-25
+
+---
+
+## ✅ Backport de mejoras de Teatro Museo — Fase 3 (2026-08-25)
+
+- **BACKPORT-03-admin** — UI genérica de reordenamiento por lotes y pantalla de mantenimiento de
+  caché del sitio público, con i18n, permisos y pruebas. Commit `e50889d`; calidad PHP/JS completa
+  en verde.
 
 ---
 
