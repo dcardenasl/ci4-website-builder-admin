@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   parallel widgets no longer serialize or crash during failed refreshes.
 - **Filter panel UX** — non-reactive panels no longer render Alpine loading or active-filter
   bindings that cannot run without a `remoteTable` consumer.
+- **Structured form values** — display and text components now serialize array/object values
+  before escaping, preventing PHP string-conversion errors when API payloads are mapped directly.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and

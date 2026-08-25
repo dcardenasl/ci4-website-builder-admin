@@ -37,6 +37,27 @@ final class ComponentsTest extends CIUnitTestCase
         $this->assertStringContainsString('aria-required="true"', $html);
     }
 
+    public function testTextComponentSerializesStructuredValuesBeforeEscaping(): void
+    {
+        $html = view('components/form/text', [
+            'name'  => 'metadata',
+            'label' => 'App.name',
+            'value' => ['kind' => 'image', 'id' => 7],
+        ], ['saveData' => false]);
+
+        $this->assertStringContainsString('value="{&quot;kind&quot;:&quot;image&quot;,&quot;id&quot;:7}"', $html);
+    }
+
+    public function testFieldRowSerializesStructuredValuesBeforeEscaping(): void
+    {
+        $html = view('components/display/field_row', [
+            'label' => 'App.name',
+            'value' => ['kind' => 'image', 'id' => 7],
+        ], ['saveData' => false]);
+
+        $this->assertStringContainsString('{&quot;kind&quot;:&quot;image&quot;,&quot;id&quot;:7}', $html);
+    }
+
     public function testPasswordComponentRendersAccessibleVisibilityToggle(): void
     {
         $html = view('components/form/password', [
