@@ -42,6 +42,12 @@ final class PublicSiteCacheInvalidator
         }
 
         if ($this->baseUrl === '' || $this->invalidateKey === '') {
+            log_message(
+                'warning',
+                '[PublicSiteCacheInvalidator] Missing PUBLIC_SITE_URL or CACHE_INVALIDATE_KEY. '
+                . 'Skipping cache invalidation for scopes: ' . implode(', ', $normalizedScopes)
+            );
+
             return ['ok' => false, 'status' => 0, 'invalidated' => [], 'deleted' => 0, 'message' => 'Cache invalidation is not configured.'];
         }
 
@@ -56,12 +62,30 @@ final class PublicSiteCacheInvalidator
                 'json' => ['scopes' => $normalizedScopes],
             ]);
         } catch (\Throwable $e) {
-            log_message('warning', '[PublicSiteCacheInvalidator] Request failed: ' . $e->getMessage());
+            log_message(
+                'warning',
+                '[PublicSiteCacheInvalidator] Cache invalidation request failed: ' . $e->getMessage()
+            );
 
             return ['ok' => false, 'status' => 0, 'invalidated' => [], 'deleted' => 0, 'message' => $e->getMessage()];
         }
 
         $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300) {
+            $body = trim((string) $response->getBody());
+            log_message(
+                'warning',
+                '[PublicSiteCacheInvalidator] Public cache invalidation failed with HTTP ' . $status
+                . ' for scopes: ' . implode(', ', $normalizedScopes)
+                . ($body !== '' ? '. Body: ' . $this->compactBody($body) : '')
+            );
+        } else {
+            log_message(
+                'info',
+                '[PublicSiteCacheInvalidator] Invalidated scopes: ' . implode(', ', $normalizedScopes)
+            );
+        }
+
         $decoded = json_decode((string) $response->getBody(), true);
         $decoded = is_array($decoded) ? $decoded : [];
         if ($status < 200 || $status >= 300) {
@@ -95,10 +119,21 @@ final class PublicSiteCacheInvalidator
                 'headers' => ['Accept' => 'application/json', 'X-Invalidate-Key' => $this->invalidateKey],
             ]);
         } catch (\Throwable $e) {
+            log_message('warning', '[PublicSiteCacheInvalidator] Cache status request failed: ' . $e->getMessage());
+
             return ['ok' => false, 'status' => 0, 'data' => [], 'message' => $e->getMessage()];
         }
 
         $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300) {
+            $body = trim((string) $response->getBody());
+            log_message(
+                'warning',
+                '[PublicSiteCacheInvalidator] Public cache status failed with HTTP ' . $status
+                . ($body !== '' ? '. Body: ' . $this->compactBody($body) : '')
+            );
+        }
+
         $decoded = json_decode((string) $response->getBody(), true);
         $decoded = is_array($decoded) ? $decoded : [];
 
@@ -131,10 +166,21 @@ final class PublicSiteCacheInvalidator
             $scope = trim((string) $scope);
             if ($scope !== '' && in_array($scope, self::VALID_SCOPES, true)) {
                 $normalized[$scope] = true;
+            } elseif ($scope !== '') {
+                log_message('warning', '[PublicSiteCacheInvalidator] Invalid scope omitted: ' . $scope);
             }
         }
 
         return array_keys($normalized);
+    }
+
+    private function compactBody(string $body): string
+    {
+        if (strlen($body) <= 500) {
+            return $body;
+        }
+
+        return substr($body, 0, 500) . '...';
     }
 
     /** @return list<string> */

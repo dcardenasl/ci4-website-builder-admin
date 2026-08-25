@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preserving the existing view consumers and language-aware form data.
 - **Translation proxy transport** — routed Google Translate requests through CodeIgniter's shared
   `curlrequest` service, retaining the existing response contract and failure statuses.
+- **Public cache invalidation diagnostics** — logged skipped configuration, invalid scopes, remote
+  failures, compact upstream bodies, status failures, and successful invalidation scopes without
+  changing the best-effort result contract.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
