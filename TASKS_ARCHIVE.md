@@ -12,6 +12,15 @@
 - **BACKPORT-CVE-admin** — CI4 4.7.4 y guards de tipo en payloads JSON; verificado con
   `composer quality`.
 
+## ✅ Backport de mejoras de Teatro Museo — Fase 1 (2026-08-25)
+
+- **BACKPORT-01-admin** — remote-table/list response, subgrupos colapsables, componentes de
+  formulario, eliminación de `x-init` redundante, CSP, normalización anidada de errores y
+  `AdminRouteAuthorizationTest`. `DownloadResponse` ya estaba implementado y probado en el base;
+  `createFetchQueue()` no existe en el código real de Teatro Museo (solo quedó documentado en su
+  changelog), por lo que ambos hallazgos se cerraron como falsos positivos. Verificado con build
+  JS, Vitest (92 tests), ESLint, PHPStan, CS-Fixer, i18n y PHPUnit (652 tests).
+
 ---
 
 ## ✅ Escalabilidad de colecciones — COL-001/002/003 (2026-07-22)

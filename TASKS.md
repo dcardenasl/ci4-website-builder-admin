@@ -13,13 +13,6 @@
 > [`../docs/plans/2026-08-24-plan-backport-teatromuseo.md`](../docs/plans/2026-08-24-plan-backport-teatromuseo.md).
 > Tracker cross-repo: [`../TASKS.md`](../TASKS.md).
 
-- [ ] **BACKPORT-01-admin — Fase 1:** toggle de vista/densidad en remote-table +
-      `listResponse.js`, sub-grupos colapsables en `bin/register-sidebar.sh`, componentes de
-      formulario nuevos (`password.php`, `server_field_errors.php`, `file_gallery.php`,
-      `text_input.php`), fix de doble-fetch por `x-init`, fixes de CSP, aplanado de
-      `fieldErrors`/`errors` anidados, `DownloadResponse` en streaming,
-      `AdminRouteAuthorizationTest`. Ver plan §Fase 1.
-
 ## 🟡 Próximo
 
 ### Backport de mejoras de Teatro Museo — fases posteriores (parte Admin)
