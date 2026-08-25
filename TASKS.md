@@ -13,14 +13,6 @@
 > [`../docs/plans/2026-08-24-plan-backport-teatromuseo.md`](../docs/plans/2026-08-24-plan-backport-teatromuseo.md).
 > Tracker cross-repo: [`../TASKS.md`](../TASKS.md).
 
-- [x] **BACKPORT-00-admin — Fase 0:** `SecondaryApiClient` (fix real: `Domain/Bff/WebApiClient`
-      refrescaban token contra su propio host en vez del Hub), `ApiClientInterface` +
-      `Config/Services.php` actualizados, fix de guard en `filter_panel.php`. Código y tests
-      (`tests/unit/Libraries/SecondaryApiClientTest.php`) verificados en verde; **pendiente de
-      commit**. Ver plan §Fase 0.
-- [x] **BACKPORT-CVE-admin:** bump `codeigniter4/framework` → v4.7.4; 2 fixes de tipo en
-      `BaseWebController::jsonRequestPayload()` y `FormController::jsonOrPost()` expuestos por el
-      bump. Verificado; pendiente de commit. Ver plan §Remediación de CVEs.
 - [ ] **BACKPORT-01-admin — Fase 1:** toggle de vista/densidad en remote-table +
       `listResponse.js`, sub-grupos colapsables en `bin/register-sidebar.sh`, componentes de
       formulario nuevos (`password.php`, `server_field_errors.php`, `file_gallery.php`,

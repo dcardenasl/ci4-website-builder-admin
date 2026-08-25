@@ -5,6 +5,15 @@
 
 ---
 
+## ✅ Backport de mejoras de Teatro Museo — Fase 0 y CVE (2026-08-25)
+
+- **BACKPORT-00-admin** — `SecondaryApiClient`, wiring del Hub, contrato de refresh y guard del
+  panel de filtros; cobertura unitaria incluida y verificada con `composer quality`.
+- **BACKPORT-CVE-admin** — CI4 4.7.4 y guards de tipo en payloads JSON; verificado con
+  `composer quality`.
+
+---
+
 ## ✅ Escalabilidad de colecciones — COL-001/002/003 (2026-07-22)
 
 - **COL-001** — `collection_type` libre (`create.php`/`edit.php`, `<datalist>` con sugerencias).
