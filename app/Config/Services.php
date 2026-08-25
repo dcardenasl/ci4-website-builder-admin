@@ -97,7 +97,7 @@ class Services extends BaseService
             return static::getSharedInstance('domainApiClient');
         }
 
-        return new DomainApiClient(config('DomainApiClient'));
+        return new DomainApiClient(config('DomainApiClient'), static::apiClient());
     }
 
     public static function bffApiClient(bool $getShared = true): BffApiClientInterface
@@ -107,7 +107,7 @@ class Services extends BaseService
             return static::getSharedInstance('bffApiClient');
         }
 
-        return new BffApiClient(config('BffApiClient'));
+        return new BffApiClient(config('BffApiClient'), static::apiClient());
     }
 
     public static function authApiService(bool $getShared = true): AuthApiService
@@ -216,7 +216,7 @@ class Services extends BaseService
             return static::getSharedInstance('webApiClient');
         }
 
-        return new WebApiClient(config('WebApiClient'));
+        return new WebApiClient(config('WebApiClient'), static::apiClient());
     }
 
     public static function webHealthApiService(bool $getShared = true): HealthApiService

@@ -11,11 +11,13 @@ use Config\WebApiClient as WebApiClientConfig;
  *
  * Reuses all behaviour of {@see ApiClient} but reads from the `WebApiClient`
  * config so the admin can monitor the public site's health independently.
+ * Token refresh is delegated to the Hub client via {@see SecondaryApiClient}
+ * — the public web app never exposes its own `/auth/refresh` endpoint.
  */
-class WebApiClient extends ApiClient implements WebApiClientInterface
+class WebApiClient extends SecondaryApiClient implements WebApiClientInterface
 {
-    public function __construct(?WebApiClientConfig $config = null)
+    public function __construct(?WebApiClientConfig $config = null, ?ApiClientInterface $hubClient = null)
     {
-        parent::__construct($config ?? config(WebApiClientConfig::class));
+        parent::__construct($config ?? config(WebApiClientConfig::class), $hubClient ?? service('apiClient'));
     }
 }

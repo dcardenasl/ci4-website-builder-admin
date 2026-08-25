@@ -11,12 +11,14 @@ use Config\DomainApiClient as DomainApiClientConfig;
  *
  * Reuses every behaviour of {@see ApiClient} (auth header injection,
  * token refresh, app-key forwarding, upload handling) but defaults to the
- * `DomainApiClient` config instead of `ApiClient`.
+ * `DomainApiClient` config instead of `ApiClient`. Token refresh is
+ * delegated to the Hub client via {@see SecondaryApiClient} — a domain app
+ * never exposes its own `/auth/refresh` endpoint.
  */
-class DomainApiClient extends ApiClient implements DomainApiClientInterface
+class DomainApiClient extends SecondaryApiClient implements DomainApiClientInterface
 {
-    public function __construct(?DomainApiClientConfig $config = null)
+    public function __construct(?DomainApiClientConfig $config = null, ?ApiClientInterface $hubClient = null)
     {
-        parent::__construct($config ?? config(DomainApiClientConfig::class));
+        parent::__construct($config ?? config(DomainApiClientConfig::class), $hubClient ?? service('apiClient'));
     }
 }

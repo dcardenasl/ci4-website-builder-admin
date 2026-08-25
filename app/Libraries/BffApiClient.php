@@ -11,12 +11,14 @@ use Config\BffApiClient as BffApiClientConfig;
  *
  * Reuses every behaviour of {@see ApiClient} (auth header injection,
  * token refresh, app-key forwarding, upload handling) but defaults to the
- * `BffApiClient` config instead of `ApiClient`.
+ * `BffApiClient` config instead of `ApiClient`. Token refresh is delegated
+ * to the Hub client via {@see SecondaryApiClient} — the BFF is stateless
+ * and never exposes its own `/auth/refresh` endpoint.
  */
-class BffApiClient extends ApiClient implements BffApiClientInterface
+class BffApiClient extends SecondaryApiClient implements BffApiClientInterface
 {
-    public function __construct(?BffApiClientConfig $config = null)
+    public function __construct(?BffApiClientConfig $config = null, ?ApiClientInterface $hubClient = null)
     {
-        parent::__construct($config ?? config(BffApiClientConfig::class));
+        parent::__construct($config ?? config(BffApiClientConfig::class), $hubClient ?? service('apiClient'));
     }
 }
