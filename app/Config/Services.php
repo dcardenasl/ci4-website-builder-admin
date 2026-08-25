@@ -11,6 +11,7 @@ use App\Libraries\BffApiClientInterface;
 use App\Libraries\DomainApiClient;
 use App\Libraries\DomainApiClientInterface;
 use App\Libraries\PermissionsSessionRefresher;
+use App\Libraries\PublicSiteCacheInvalidator;
 use App\Libraries\WebApiClient;
 use App\Libraries\WebApiClientInterface;
 use App\Modules\ApiKeys\Services\ApiKeyApiService;
@@ -60,6 +61,20 @@ use InvalidArgumentException;
  */
 class Services extends BaseService
 {
+    public static function publicSiteCacheInvalidator(bool $getShared = true): PublicSiteCacheInvalidator
+    {
+        if ($getShared) {
+            /** @var PublicSiteCacheInvalidator */
+            return static::getSharedInstance('publicSiteCacheInvalidator');
+        }
+
+        return new PublicSiteCacheInvalidator(
+            rtrim((string) env('PUBLIC_SITE_URL', ''), '/'),
+            (string) env('CACHE_INVALIDATE_KEY', ''),
+            5,
+        );
+    }
+
     public static function formRequest(string $class, bool $getShared = true): FormRequestInterface
     {
         if ($getShared) {
@@ -355,6 +370,15 @@ class Services extends BaseService
             return static::getSharedInstance('collectionApiService');
         }
         return new CollectionApiService(static::domainApiClient());
+    }
+
+    public static function sortOrderApiService(bool $getShared = true): \App\Services\SortOrderApiService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('sortOrderApiService');
+        }
+
+        return new \App\Services\SortOrderApiService(static::domainApiClient());
     }
     public static function entryApiService(bool $getShared = true): EntryApiService
     {

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Generic collection ordering — added a permission-gated reorder screen and
+  SortOrderApiService client for atomic Domain sort-order batches.
+- Public-site cache maintenance — added the generic PublicSiteCacheInvalidator bridge,
+  status screen, manual invalidation action, and system.public-cache.* permission contracts.
+
 ### Fixed
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.

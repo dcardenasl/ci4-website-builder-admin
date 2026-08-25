@@ -48,6 +48,7 @@ class AdminAccess extends BaseConfig
         'cms.redirects.read',
         'cms.forms.read',
         'cms.submissions.read',
+        'system.public-cache.read',
     ];
 
     public function __construct()

@@ -29,6 +29,13 @@ return [
     'collections_search_placeholder' => 'Search by name...',
     'collections_loading'            => 'Loading collections...',
     'collections_no_results'         => 'No collections found.',
+    'collections_reorder'             => 'Reorder collections',
+    'collections_reorder_help'        => 'Move collections into the public order and save the complete batch atomically.',
+    'collections_reorder_save'        => 'Save order',
+    'collections_reorder_success'     => 'Collection order saved successfully.',
+    'collections_reorder_failed'      => 'Could not save the collection order.',
+    'collections_move_up'             => 'Move collection up',
+    'collections_move_down'           => 'Move collection down',
 
     // Collection — form fields
     'field_name'                        => 'Name',

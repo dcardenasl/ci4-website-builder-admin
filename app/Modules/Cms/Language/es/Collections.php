@@ -29,6 +29,13 @@ return [
     'collections_search_placeholder' => 'Buscar por nombre...',
     'collections_loading'            => 'Cargando colecciones...',
     'collections_no_results'         => 'No se encontraron colecciones.',
+    'collections_reorder'             => 'Reordenar colecciones',
+    'collections_reorder_help'        => 'Mueve las colecciones al orden público y guarda todo el lote de forma atómica.',
+    'collections_reorder_save'        => 'Guardar orden',
+    'collections_reorder_success'     => 'Orden de colecciones guardado exitosamente.',
+    'collections_reorder_failed'      => 'No se pudo guardar el orden de las colecciones.',
+    'collections_move_up'             => 'Mover colección arriba',
+    'collections_move_down'           => 'Mover colección abajo',
 
     // Collection — form fields
     'field_name'                        => 'Nombre',

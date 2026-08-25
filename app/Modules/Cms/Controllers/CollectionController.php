@@ -42,6 +42,53 @@ class CollectionController extends BaseWebController
         );
     }
 
+    public function reorder(): string|RedirectResponse
+    {
+        $response = $this->safeApiCall(fn () => $this->collectionService->list([
+            'limit' => 500,
+            'sort' => 'sort_order',
+        ]));
+        if (! $response['ok']) {
+            $this->maybeFlashDevError($response);
+            return $this->withError(lang('Collections.collections_not_found'), route_to('admin.cms.collections'));
+        }
+
+        return $this->render('cms/collections/reorder', [
+            'title' => lang('Collections.collections_reorder'),
+            'items' => $this->extractItems($response),
+        ]);
+    }
+
+    public function saveOrder(): RedirectResponse
+    {
+        $rawItems = $this->request->getPost('items');
+        $items = [];
+        if (is_array($rawItems)) {
+            foreach ($rawItems as $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+                $id = filter_var($item['id'] ?? null, FILTER_VALIDATE_INT);
+                if ($id === false || $id < 1) {
+                    continue;
+                }
+                $items[] = ['id' => (int) $id, 'sort_order' => count($items)];
+            }
+        }
+
+        if ($items === []) {
+            return $this->withError(lang('Collections.collections_reorder_failed'), route_to('admin.cms.collections.reorder'));
+        }
+
+        $response = $this->safeApiCall(fn () => service('sortOrderApiService')->cms('collections', $items));
+        if (! $response['ok']) {
+            return $this->failApi($response, lang('Collections.collections_reorder_failed'), route_to('admin.cms.collections.reorder'));
+        }
+
+        return redirect()->to(route_to('admin.cms.collections.reorder'))
+            ->with('success', lang('Collections.collections_reorder_success'));
+    }
+
     public function show(string $id): string
     {
         $response = $this->safeApiCall(fn () => $this->collectionService->get($id));

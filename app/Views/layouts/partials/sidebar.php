@@ -295,6 +295,13 @@ $navSubItemActiveClass = 'bg-brand-50 text-brand-700 shadow-sm';
             </div>
             <?php endif; ?>
         <?php endif; ?>
+        <?php if (has_permission('system.public-cache.read')): ?>
+            <div class="<?= $navSectionLabelClass ?> mt-2 border-t border-gray-800 pt-4"><?= lang('System.maintenance') ?></div>
+            <a href="<?= route_to('admin.system.cache') ?>" class="<?= $navItemClass ?> <?= active_nav('admin/system/cache*', $navItemActiveClass) ?> <?= url_is('admin/system/cache*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navItemIdleClass ?>">
+                <?= ui_icon('refresh-cw') ?>
+                <span><?= lang('System.cache_title') ?></span>
+            </a>
+        <?php endif; ?>
         <!-- [DYNAMIC_MODULES_ANCHOR] -->
     </nav>
 </aside>
