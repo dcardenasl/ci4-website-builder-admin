@@ -463,7 +463,10 @@ class ApiClient implements ApiClientInterface
             SessionKeys::EXPIRES_AT->value,
             SessionKeys::USER->value,
         ]);
-        $this->session->regenerate(true);
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $this->session->regenerate(true);
+        }
     }
 
     /**

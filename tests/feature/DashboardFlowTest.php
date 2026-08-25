@@ -106,6 +106,36 @@ final class DashboardFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('99.9%', $body);
     }
 
+    public function testWidgetStatsReleasesTheSessionAfterApiCallsComplete(): void
+    {
+        $metricsService = $this->createMock(MetricsApiService::class);
+        $metricsService->expects($this->once())
+            ->method('summary')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => [], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+        $fileService = $this->createMock(FileApiService::class);
+        $fileService->expects($this->once())
+            ->method('list')
+            ->willReturn([
+                'ok' => true, 'status' => 200,
+                'data' => ['meta' => ['total' => 0], 'data' => []],
+                'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+            ]);
+
+        Services::injectMock('metricsApiService', $metricsService);
+        Services::injectMock('fileApiService', $fileService);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user'         => ['id' => 1, 'first_name' => 'Admin', 'permissions' => []],
+        ])->get('/dashboard/widgets/stats');
+
+        $result->assertStatus(200);
+        $this->assertSame(PHP_SESSION_NONE, session_status());
+    }
+
     public function testWidgetStatsStillRendersWhenUserSummaryFails(): void
     {
         $userService = $this->createMock(UserApiService::class);

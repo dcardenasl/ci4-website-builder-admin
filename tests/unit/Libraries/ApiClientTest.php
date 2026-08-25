@@ -548,6 +548,23 @@ final class ApiClientTest extends CIUnitTestCase
         $this->assertNull(session()->get(SessionKeys::USER->value));
     }
 
+    public function testClearSessionAuthDoesNotRegenerateAClosedSession(): void
+    {
+        session()->set(SessionKeys::ACCESS_TOKEN->value, 'token');
+        session()->set(SessionKeys::REFRESH_TOKEN->value, 'refresh');
+        session()->set(SessionKeys::EXPIRES_AT->value, time() + 3600);
+        session()->set(SessionKeys::USER->value, ['id' => 1]);
+        session()->close();
+
+        $client = new ApiClient(new ApiClientConfig());
+        $client->clearSessionAuth();
+
+        $this->assertNull(session()->get(SessionKeys::ACCESS_TOKEN->value));
+        $this->assertNull(session()->get(SessionKeys::REFRESH_TOKEN->value));
+        $this->assertNull(session()->get(SessionKeys::EXPIRES_AT->value));
+        $this->assertNull(session()->get(SessionKeys::USER->value));
+    }
+
     protected function tearDown(): void
     {
         session()->destroy();
