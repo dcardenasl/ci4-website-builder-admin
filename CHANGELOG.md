@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **`register-sidebar.sh`** — template-defined `admin_sidebar` entries can now declare generic
+  collapsible sub-groups with active-route expansion and persisted open state, while retaining
+  the original flat-list format.
 - **`SecondaryApiClient`** — `DomainApiClient`, `BffApiClient`, and `WebApiClient` now refresh their access token by delegating to the Hub client instead of calling `POST /auth/refresh` against their own base URL, an endpoint that doesn't exist there since only the Hub issues and refreshes JWTs.
 - **`filter_panel.php`** — the active-filter chip block is now wrapped in the `$reactiveHasFilters` guard, so non-reactive panels stop rendering dead Alpine bindings.
 
@@ -137,4 +140,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [CMS-019] Language admin module to list, create, edit, delete, and set default languages.
 - [CMS-020] Setting admin module to manage translatable system configuration variables.
 - Transversal CMS sidebar section header and Lucide icons in navigation.
-

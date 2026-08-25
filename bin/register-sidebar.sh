@@ -63,13 +63,49 @@ with open(sidebar_file, 'r') as f:
 # Build mapping of resources for quick lookup
 admin_modules = {m['resource']: m for m in data.get('admin_modules', [])}
 
+def resolve_item(module, icon, item):
+    """Resolve one admin_sidebar item against admin_modules."""
+    m_info = admin_modules.get(item)
+    if not m_info:
+        print(f"Warning: Resource {item} listed in sidebar but not found in admin_modules.")
+        return None
+
+    route_seg = m_info.get('route_segment')
+    if not route_seg:
+        res_snake = to_snake(item)
+        route_seg = pluralize(res_snake).replace('_', '-')
+
+    route_seg_underscore = route_seg.replace('-', '_')
+    route_module = m_info.get('module', module)
+    route_module_lower = route_module.lower()
+    route_name = f"admin.{route_module_lower}.{route_seg_underscore}"
+    route_pattern = f"admin/{route_module_lower}/{route_seg}"
+    res_plural = pluralize(to_snake(item))
+    lang_key = f"{route_module}.{res_plural}_title"
+
+    return route_name, route_pattern, lang_key, m_info.get('icon', icon)
+
+def to_php_ident(s):
+    return re.sub(r'[^a-z0-9_]', '_', s.lower())
+
+def link_lines(indent, route_name, route_pattern, lang_key, icon, sub_item=False):
+    if sub_item:
+        cls = f"<?= $navSubItemClass ?> <?= active_nav('{route_pattern}*', $navSubItemActiveClass) ?> <?= url_is('{route_pattern}*') ? 'bg-brand-50 text-brand-700 shadow-sm' : $navSubItemIdleClass ?>"
+    else:
+        cls = f"flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('{route_pattern}*') ?>"
+    return [
+        f"{indent}<a href=\"<?= route_to('{route_name}') ?>\" class=\"{cls}\">",
+        f"{indent}    <?= ui_icon('{icon}') ?>",
+        f"{indent}    <span><?= lang('{lang_key}') ?></span>",
+        f"{indent}</a>",
+    ]
+
 for group in data['admin_sidebar']:
     module = group['module']
     label = group['label']
     icon = group['icon']
     permission = group['permission']
-    items = group['items']
-    
+
     # 1. Build sidebar HTML block
     block_lines = [
         f"        <!-- START {module} -->",
@@ -77,32 +113,43 @@ for group in data['admin_sidebar']:
         f"            <div class=\"pt-3 mt-3 border-t border-gray-800 text-xs uppercase text-gray-500\"><?= lang('{label}') ?></div>"
     ]
     
-    for item in items:
-        m_info = admin_modules.get(item)
-        if not m_info:
-            print(f"Warning: Resource {item} listed in sidebar but not found in admin_modules.")
-            continue
-            
-        route_seg = m_info.get('route_segment')
-        if not route_seg:
-            res_snake = to_snake(item)
-            res_plural = pluralize(res_snake)
-            route_seg = res_plural.replace('_', '-')
-            
-        route_seg_underscore = route_seg.replace('-', '_')
-        module_lower = module.lower()
-        
-        route_name = f"admin.{module_lower}.{route_seg_underscore}"
-        route_pattern = f"admin/{module_lower}/{route_seg}"
-        res_snake = to_snake(item)
-        res_plural = pluralize(res_snake)
-        lang_key = f"{module}.{res_plural}_title"
-        
-        block_lines.append(f"            <a href=\"<?= route_to('{route_name}') ?>\" class=\"flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 <?= active_nav('{route_pattern}*') ?>\">")
-        block_lines.append(f"                <?= ui_icon('{icon}') ?>")
-        block_lines.append(f"                <span><?= lang('{lang_key}') ?></span>")
-        block_lines.append(f"            </a>")
-        
+    if 'groups' in group and group['groups']:
+        # Nested groups are data-driven and preserve their open state per module.
+        for sub in group['groups']:
+            gkey = sub['key']
+            glabel = sub['label']
+            resolved = [resolve_item(module, icon, item) for item in sub['items']]
+            resolved = [item for item in resolved if item is not None]
+            if not resolved:
+                continue
+
+            active_var = f"$sidebarActive_{to_php_ident(module)}_{to_php_ident(gkey)}"
+            active_expr = " || ".join(f"url_is('{item[1]}*')" for item in resolved)
+            storage_key = f"{to_php_ident(module)}-g-{to_php_ident(gkey)}"
+            block_lines.append(f"            <?php {active_var} = {active_expr}; ?>")
+            block_lines.append(f"            <div x-data=\"{{ open: <?= {active_var} ? 'true' : \"localStorage.getItem('{storage_key}') !== 'false'\" ?> }}\" class=\"space-y-1\">")
+            block_lines.append("                <button type=\"button\"")
+            block_lines.append(f"                        @click=\"open = !open; localStorage.setItem('{storage_key}', open)\"")
+            block_lines.append("                        class=\"<?= $navGroupButtonClass ?>\"")
+            block_lines.append("                        :aria-expanded=\"open\">")
+            block_lines.append(f"                    <span class=\"text-xs font-medium uppercase tracking-wide text-gray-500\"><?= lang('{glabel}') ?></span>")
+            block_lines.append("                    <span class=\"inline-flex items-center justify-center transition-transform duration-200\" :class=\"{ 'rotate-180': open }\">")
+            block_lines.append("                        <?= ui_icon('chevron-down', 'h-3 w-3 text-gray-500') ?>")
+            block_lines.append("                    </span>")
+            block_lines.append("                </button>")
+            block_lines.append("                <div x-show=\"open\" x-cloak class=\"<?= $navGroupBodyClass ?>\">")
+            for route_name, route_pattern, lang_key, item_icon in resolved:
+                block_lines.extend(link_lines("                    ", route_name, route_pattern, lang_key, item_icon, sub_item=True))
+            block_lines.append("                </div>")
+            block_lines.append("            </div>")
+    else:
+        for item in group['items']:
+            resolved = resolve_item(module, icon, item)
+            if resolved is None:
+                continue
+            route_name, route_pattern, lang_key, item_icon = resolved
+            block_lines.extend(link_lines("            ", route_name, route_pattern, lang_key, item_icon))
+
     block_lines.append(f"        <?php endif; ?>")
     block_lines.append(f"        <!-- END {module} -->")
     

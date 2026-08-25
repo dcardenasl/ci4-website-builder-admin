@@ -184,6 +184,36 @@ class ScaffoldingScriptsTest extends CIUnitTestCase
         $this->assertStringNotContainsString('static::domainApiClient()', $output);
     }
 
+    public function testRegisterSidebarSupportsCollapsibleDataDrivenGroups(): void
+    {
+        $templatePath = self::$sandbox . '/grouped-template.json';
+        file_put_contents($templatePath, json_encode([
+            'admin_modules' => [
+                ['resource' => 'FaqCategory', 'module' => 'Faq', 'route_segment' => 'faq-categories'],
+                ['resource' => 'Faq', 'module' => 'Faq', 'route_segment' => 'faqs'],
+            ],
+            'admin_sidebar' => [[
+                'module' => 'Faq',
+                'label' => 'Faq.sidebar_label',
+                'icon' => 'help-circle',
+                'permission' => 'faq.read',
+                'groups' => [[
+                    'key' => 'content',
+                    'label' => 'Faq.content_group',
+                    'items' => ['FaqCategory', 'Faq'],
+                ]],
+            ]],
+        ], JSON_THROW_ON_ERROR));
+
+        $output = self::runScript('bin/register-sidebar.sh ' . escapeshellarg($templatePath));
+        $sidebar = (string) file_get_contents(self::$sandbox . '/app/Views/layouts/partials/sidebar.php');
+
+        $this->assertStringContainsString("localStorage.getItem('faq-g-content')", $sidebar);
+        $this->assertStringContainsString("route_to('admin.faq.faq_categories')", $sidebar);
+        $this->assertStringContainsString("route_to('admin.faq.faqs')", $sidebar);
+        $this->assertStringContainsString('Injected sidebar menu group for Faq', $output);
+    }
+
     public function testMakeModuleRejectsInvalidServiceFlag(): void
     {
         $cwd = getcwd();
