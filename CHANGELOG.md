@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
   `errors` under dot-notated form keys across controllers and the API client.
+- **Admin route authorization regression test** — route coverage is discovered from module files
+  and checks fine-grained permissions without carrying Teatro Museo's business-module allowlist.
 - **CSP for Alpine and remote files** — moved `[x-cloak]` into the compiled stylesheet, stopped
   applying automatic nonces to the inline Alpine-compatible policy, and allowlisted the configured
   Hub API origin for file previews while retaining the required Alpine runtime directives.
