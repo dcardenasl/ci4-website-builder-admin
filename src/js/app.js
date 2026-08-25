@@ -25,6 +25,10 @@ import { jsonEditor } from './components/jsonEditor.js';
 import { blockPreview } from './components/blockPreview.js';
 import { blockTypeDesigner } from './components/blockTypeDesigner.js';
 import { blockInstanceConfig } from './components/blockInstanceConfig.js';
+import { collectionBlockTemplateBuilder } from './components/collectionBlockTemplateBuilder.js';
+import { blockInstanceBuilder } from './components/blockInstanceBuilder.js';
+import { menuItemForm } from './components/menuItemForm.js';
+import { bootConfirmAction } from './components/confirmAction.js';
 import { schemaEditor } from './components/schemaEditor.js';
 import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
@@ -61,6 +65,9 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('blockPreview', blockPreview);
     Alpine.data('blockTypeDesigner', blockTypeDesigner);
     Alpine.data('blockInstanceConfig', blockInstanceConfig);
+    Alpine.data('collectionBlockTemplateBuilder', collectionBlockTemplateBuilder);
+    Alpine.data('blockInstanceBuilder', blockInstanceBuilder);
+    Alpine.data('menuItemForm', menuItemForm);
     Alpine.data('schemaEditor', schemaEditor);
     Alpine.data('blockSorter', blockSorter);
     Alpine.data('wizard', wizard);
@@ -94,6 +101,7 @@ let lastActionButtonClick = null;
 document.addEventListener('DOMContentLoaded', () => {
     if (!lucideBootstrapped) { bootLucideIcons(); lucideBootstrapped = true; }
     bootSlugFields();
+    bootConfirmAction();
     bootGlobalSubmitGuard();
     const config = window.__componentConfig || {};
     bootSessionExpiryWatcher({ expiringMessage: config.sessionExpiringMessage });

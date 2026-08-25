@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before escaping, preventing PHP string-conversion errors when API payloads are mapped directly.
 - **File detail responsiveness** — usage verification now loads after the file detail shell,
   keeping the cross-domain read and delete decision out of the server-rendered request.
+- **CMS Alpine components** — extracted the block instance builder, collection template builder,
+  menu item form, and generic confirmation action into the compiled JavaScript entrypoint while
+  preserving the existing view consumers and language-aware form data.
 - **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
   components plus their Alpine registrations, including accessible password visibility controls.
 - **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
