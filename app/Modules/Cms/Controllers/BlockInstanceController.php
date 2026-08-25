@@ -143,7 +143,9 @@ class BlockInstanceController extends BaseWebController
         // Only show top-level blocks in the page editor (children managed via their parent's UI)
         $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
 
-        $typesIndexed = $this->blockTypeOptions->resolve();
+        // This list renders static block metadata only; avoid hydrating all
+        // dynamic editor options for forms, collections, pages and entries.
+        $typesIndexed = $this->blockTypeOptions->rawIndexed();
         $routes = BlockOwnerRouting::routes($ownerType);
         $previewUrl = BlockOwnerRouting::previewUrl($ownerType, $page, $this->activeLanguages());
 
@@ -186,7 +188,8 @@ class BlockInstanceController extends BaseWebController
             return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
-        $typesIndexed = $this->blockTypeOptions->resolve();
+        // Children list renders static metadata only; use the cheap catalog.
+        $typesIndexed = $this->blockTypeOptions->rawIndexed();
         $types = array_values($typesIndexed);
 
         $languages = $this->activeLanguages();
