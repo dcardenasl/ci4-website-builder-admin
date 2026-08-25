@@ -129,6 +129,23 @@ final class ApiClientTest extends CIUnitTestCase
         ], $result);
     }
 
+    public function testExtractFieldErrorsFlattensNestedTranslations(): void
+    {
+        $client = new ApiClient(new ApiClientConfig());
+
+        $result = $this->invokeMethod($client, 'extractFieldErrors', [[
+            'errors' => [
+                'translations' => [
+                    0 => ['excerpt' => ['The excerpt may not exceed 500 characters.']],
+                ],
+            ],
+        ]]);
+
+        $this->assertSame([
+            'translations.0.excerpt' => 'The excerpt may not exceed 500 characters.',
+        ], $result);
+    }
+
     public function testExtractMessagesReadsDetailTitleAndGeneralErrors(): void
     {
         $client = new ApiClient(new ApiClientConfig());

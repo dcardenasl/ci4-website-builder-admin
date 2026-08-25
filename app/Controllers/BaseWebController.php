@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\ApiClientInterface;
+use App\Support\FieldErrorNormalizer;
 use App\Support\Requests\FormRequestInterface;
 use App\Support\SessionKeys;
 use App\Traits\TableResponseTrait;
@@ -183,13 +184,17 @@ abstract class BaseWebController extends BaseController
     private function normalizeDevErr(array $response): array
     {
         $messages = is_array($response['messages'] ?? null) ? $response['messages'] : [];
-        $errors   = is_array($response['fieldErrors'] ?? null) ? $response['fieldErrors'] : [];
+        $errors   = FieldErrorNormalizer::normalize($response['fieldErrors'] ?? []);
+
+        foreach (FieldErrorNormalizer::normalize($response['errors'] ?? []) as $key => $message) {
+            $errors[$key] ??= $message;
+        }
 
         return [
             'status'   => (int) ($response['status'] ?? 0),
             'body'     => (string) ($response['raw'] ?? ''),
             'messages' => array_values(array_map(static fn (mixed $m): string => (string) $m, $messages)),
-            'errors'   => array_map(static fn (mixed $e): string => (string) $e, $errors),
+            'errors'   => $errors,
         ];
     }
 
@@ -286,26 +291,12 @@ abstract class BaseWebController extends BaseController
      */
     protected function getFieldErrors(array $response): array
     {
-        if (! isset($response['fieldErrors'])) {
-            return [];
-        }
-
-        $fieldErrors = $response['fieldErrors'];
-
-        if (! is_array($fieldErrors)) {
-            log_message('warning', '[BaseWebController] Unexpected fieldErrors type: ' . gettype($fieldErrors));
-
-            return [];
-        }
-
         $normalized = [];
 
-        foreach ($fieldErrors as $key => $value) {
-            if (! is_string($key) || ! is_scalar($value)) {
-                continue;
+        foreach (['fieldErrors', 'errors'] as $source) {
+            foreach (FieldErrorNormalizer::normalize($response[$source] ?? []) as $key => $message) {
+                $normalized[$key] ??= $this->localizeApiMessage($message);
             }
-
-            $normalized[$key] = $this->localizeApiMessage((string) $value);
         }
 
         return $normalized;
