@@ -45,7 +45,7 @@ class PageController extends BaseWebController
         return $this->tableDataResponse(
             ['parent_id'],
             ['name', 'created_at'],
-            fn (array $params) => $this->pageService->list([...$params, 'include_translations' => 1]),
+            fn (array $params) => $this->pageService->list([...$params, 'projection' => 'list']),
         );
     }
 

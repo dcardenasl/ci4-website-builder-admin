@@ -51,19 +51,18 @@ final class MenuFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
     }
 
-    public function testDataInjectsMenuItemCounts(): void
+    public function testDataRequestsListProjectionWithMenuItemCounts(): void
     {
         $fixtures = new AdminFixtureFactory(__METHOD__);
         $headerMenu = $fixtures->menu('header');
         $footerMenu = $fixtures->menu('footer');
-        $headerItems = [
-            $fixtures->menuItem($headerMenu['id'], 1),
-            $fixtures->menuItem($headerMenu['id'], 2),
-        ];
-        $footerItems = [$fixtures->menuItem($footerMenu['id'])];
+        $headerMenu['items_count'] = 2;
+        $footerMenu['items_count'] = 1;
 
         $mock = $this->createMock(MenuApiService::class);
-        $mock->method('list')
+        $mock->expects($this->once())
+            ->method('list')
+            ->with($this->callback(static fn (array $params): bool => ($params['projection'] ?? null) === 'list'))
             ->willReturn([
                 'ok' => true,
                 'status' => 200,
@@ -87,27 +86,7 @@ final class MenuFlowTest extends CIUnitTestCase
                 'messages' => [],
                 'fieldErrors' => [],
             ]);
-        $mock->method('listItems')
-            ->willReturn([
-                'ok' => true,
-                'status' => 200,
-                'data' => [
-                    'status' => 'success',
-                    'data' => [
-                        ...$headerItems,
-                        ...$footerItems,
-                    ],
-                    'meta' => [
-                        'total' => count([...$headerItems, ...$footerItems]),
-                        'page' => 1,
-                        'per_page' => 100,
-                    ],
-                ],
-                'raw' => '{"status":"success","data":{"data":[]}}',
-                'headers' => [],
-                'messages' => [],
-                'fieldErrors' => [],
-            ]);
+        $mock->expects($this->never())->method('listItems');
 
         Services::injectMock('menuApiService', $mock);
 
