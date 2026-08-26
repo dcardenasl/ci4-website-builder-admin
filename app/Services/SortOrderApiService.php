@@ -11,7 +11,7 @@ use App\Libraries\DomainApiClientInterface;
  *
  * @phpstan-import-type ApiResponse from \App\Libraries\ApiClientInterface
  */
-final class SortOrderApiService
+final class SortOrderApiService implements SortOrderApiServiceInterface
 {
     public function __construct(private readonly DomainApiClientInterface $domainClient)
     {
@@ -21,11 +21,12 @@ final class SortOrderApiService
      * @param list<array{id: int|string, sort_order: int}> $items
      * @return ApiResponse
      */
-    public function cms(string $resource, array $items): array
+    public function cms(string $resource, array $items, array $scope = []): array
     {
-        return $this->domainClient->post('/cms/' . trim($resource, '/') . '/sort-orders', [
+        return $this->domainClient->post('/cms/sort-orders', [
             'resource' => $resource,
             'items' => $items,
+            'scope' => $scope,
         ]);
     }
 }

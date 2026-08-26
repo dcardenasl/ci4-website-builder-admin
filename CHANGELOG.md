@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - CMS server-driven tables now request Domain's explicit list projection; menu item counts arrive in that response instead of triggering a second item-list query.
+- CMS reorder screens now send one scoped batch to Domain instead of issuing one update request per item.
 
 ### Fixed
 - **Starter favicon set** — added neutral SVG/PNG app icons, manifest links, and guarded

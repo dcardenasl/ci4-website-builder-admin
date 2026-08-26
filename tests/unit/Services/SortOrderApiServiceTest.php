@@ -27,15 +27,17 @@ final class SortOrderApiServiceTest extends CIUnitTestCase
             ['id' => 9, 'sort_order' => 0],
             ['id' => 4, 'sort_order' => 1],
         ];
+        $scope = ['collection_id' => 7];
 
         $client->expects($this->once())
             ->method('post')
-            ->with('/cms/collections/sort-orders', [
-                'resource' => 'collections',
+            ->with('/cms/sort-orders', [
+                'resource' => 'entries',
                 'items' => $items,
+                'scope' => $scope,
             ])
             ->willReturn($expected);
 
-        $this->assertSame($expected, (new SortOrderApiService($client))->cms('collections', $items));
+        $this->assertSame($expected, (new SortOrderApiService($client))->cms('entries', $items, $scope));
     }
 }

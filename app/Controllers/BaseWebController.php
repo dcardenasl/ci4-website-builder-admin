@@ -436,6 +436,70 @@ abstract class BaseWebController extends BaseController
     }
 
     /**
+     * Execute one bounded reorder request against its owning domain.
+     *
+     * @param list<array{id: int|string, sort_order: int}> $items
+     * @param array<string, int|string|null> $scope
+     * @return array<string, mixed>
+     */
+    protected function sortOrderApiCall(string $resource, array $items, array $scope = []): array
+    {
+        /** @var \App\Services\SortOrderApiServiceInterface $service */
+        $service = service('sortOrderApiService');
+
+        return $service->cms($resource, $items, $scope);
+    }
+
+    /**
+     * Read the shared JSON reorder payload and forward it in one request.
+     *
+     * @param array<string, int|string|null> $scope
+     */
+    protected function saveSortOrderFromJson(
+        string $resource,
+        array $scope = [],
+        string $successMessage = 'Order saved.',
+    ): ResponseInterface {
+        $payload = $this->jsonRequestPayload();
+        $items = $payload['items'] ?? null;
+        if (! is_array($items)) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid payload structure',
+            ])->setStatusCode(400);
+        }
+
+        $normalizedItems = [];
+        foreach ($items as $item) {
+            if (! is_array($item) || ! is_numeric($item['id'] ?? null) || ! is_numeric($item['sort_order'] ?? null)) {
+                return $this->response->setJSON([
+                    'ok' => false,
+                    'message' => 'Invalid payload structure',
+                ])->setStatusCode(400);
+            }
+            $normalizedItems[] = [
+                'id' => (int) $item['id'],
+                'sort_order' => (int) $item['sort_order'],
+            ];
+        }
+
+        $response = $this->safeApiCall(fn () => $this->sortOrderApiCall($resource, $normalizedItems, $scope));
+        if (! ($response['ok'] ?? false)) {
+            $this->maybeFlashDevError($response);
+
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => $this->firstMessage($response, lang('App.connection_error')),
+            ])->setStatusCode($this->normalizeUpstreamStatus($response));
+        }
+
+        return $this->response->setJSON([
+            'ok' => true,
+            'message' => $successMessage,
+        ]);
+    }
+
+    /**
      * Wrap an API call in a try/catch, returning a graceful error response on failure.
      *
      * @param callable $callback A closure that performs the API call and returns its result.

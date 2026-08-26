@@ -372,7 +372,7 @@ class Services extends BaseService
         return new CollectionApiService(static::domainApiClient());
     }
 
-    public static function sortOrderApiService(bool $getShared = true): \App\Services\SortOrderApiService
+    public static function sortOrderApiService(bool $getShared = true): \App\Services\SortOrderApiServiceInterface
     {
         if ($getShared) {
             return static::getSharedInstance('sortOrderApiService');

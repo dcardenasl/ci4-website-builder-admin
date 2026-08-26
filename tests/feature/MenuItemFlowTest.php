@@ -8,6 +8,7 @@ use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\MenuApiService;
 use App\Modules\Cms\Services\PageApiService;
+use App\Services\SortOrderApiServiceInterface;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
@@ -202,24 +203,19 @@ final class MenuItemFlowTest extends CIUnitTestCase
         $firstItem = $fixtures->menuItem($menu['id'], 1);
         $secondItem = $fixtures->menuItem($menu['id'], 0);
 
-        $menuMock = $this->createMock(MenuApiService::class);
-        $menuMock->method('listItems')
-            ->with($this->callback(static fn (array $filters): bool => ($filters['menu_id'] ?? null) === (string) $menu['id']))
-            ->willReturn($fixtures->response([
-                $firstItem + ['translations' => []],
-                $secondItem + ['translations' => []],
-            ]));
-        $menuMock->expects($this->exactly(2))
-            ->method('updateItem')
-            ->willReturnCallback(static function (string $id, array $payload) use ($secondItem, $firstItem): array {
-                if ($id === (string) $secondItem['id']) {
-                    self::assertSame(0, $payload['sort_order']);
-                } elseif ($id === (string) $firstItem['id']) {
-                    self::assertSame(1, $payload['sort_order']);
-                }
-                return ['ok' => true];
-            });
-        Services::injectMock('menuApiService', $menuMock);
+        $sortOrderMock = $this->createMock(SortOrderApiServiceInterface::class);
+        $sortOrderMock->expects($this->once())
+            ->method('cms')
+            ->with(
+                'menu_items',
+                [
+                    ['id' => $secondItem['id'], 'sort_order' => 0],
+                    ['id' => $firstItem['id'], 'sort_order' => 1],
+                ],
+                ['menu_id' => $menu['id']],
+            )
+            ->willReturn(['ok' => true, 'status' => 200]);
+        Services::injectMock('sortOrderApiService', $sortOrderMock);
 
         $result = $this->withSession([
             'access_token' => 'token',

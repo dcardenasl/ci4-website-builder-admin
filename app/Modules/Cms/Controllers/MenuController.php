@@ -455,56 +455,18 @@ class MenuController extends BaseWebController
 
     public function saveItemsOrder(string $menuId): ResponseInterface
     {
-        $request = $this->request;
-        if (! $request instanceof \CodeIgniter\HTTP\IncomingRequest) {
+        if (! is_numeric($menuId) || (int) $menuId < 1) {
             return $this->response->setJSON([
                 'ok' => false,
-                'message' => 'Invalid request type',
+                'message' => 'A menu scope is required.',
             ])->setStatusCode(400);
         }
 
-        $json = $request->getJSON(true);
-        $jsonArray = is_array($json) ? $json : [];
-        $items = $jsonArray['items'] ?? [];
-
-        if (! is_array($items)) {
-            return $this->response->setJSON([
-                'ok' => false,
-                'message' => 'Invalid payload structure',
-            ])->setStatusCode(400);
-        }
-
-        $itemsResponse = $this->menuService->listItems(['menu_id' => $menuId, 'limit' => 1000]);
-        $existingItems = $this->extractItems($itemsResponse);
-        $itemsById = [];
-        foreach ($existingItems as $existingItem) {
-            $itemsById[(string) ($existingItem['id'] ?? '')] = $existingItem;
-        }
-
-        foreach ($items as $item) {
-            $id = (string) ($item['id'] ?? '');
-            $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
-
-            if ($id !== '' && isset($itemsById[$id])) {
-                $payload = [
-                    'sort_order'   => $value,
-                    'translations' => $itemsById[$id]['translations'] ?? [],
-                ];
-                // Call updateItem directly with partial payload and validate response
-                $response = $this->menuService->updateItem($id, $payload);
-                if (! isset($response['ok']) || ! $response['ok']) {
-                    return $this->response->setJSON([
-                        'ok' => false,
-                        'message' => $response['messages'][0] ?? $response['message'] ?? 'Error al guardar el orden del elemento #' . $id,
-                    ])->setStatusCode(400);
-                }
-            }
-        }
-
-        return $this->response->setJSON([
-            'ok' => true,
-            'message' => lang('Files.gallery_save_success') ?? 'Order saved successfully.',
-        ]);
+        return $this->saveSortOrderFromJson(
+            'menu_items',
+            ['menu_id' => (int) $menuId],
+            lang('Files.gallery_save_success') ?? 'Order saved successfully.',
+        );
     }
 
     public function getCategoryUrlOptions(): ResponseInterface
