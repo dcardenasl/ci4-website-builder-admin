@@ -7,6 +7,53 @@
 
 ## 🔴 En progreso
 
+### Backport selectivo desde `teatromuseo-admin`
+
+> Plan detallado (v2, verificado contra el código): [`../docs/plans/2026-08-31-plan-backport-admin-teatromuseo.md`](../docs/plans/2026-08-31-plan-backport-admin-teatromuseo.md).
+> Origen fijado a `teatromuseo-admin@44c0e6c`. Un commit por tarea, con sus tests y el cierre
+> aquí mismo, siempre vía `/commit-flow`.
+>
+> **Antes de diseñar cualquier tarea de la suite, leer §1 del plan**: R1–R6 de fronteras de
+> módulo, `ViewSecurityRulesTest` (escapado y `json_for_script()`), los dos guardarraíles de
+> idioma y la prohibición de CDNs por CSP. Son cuatro puertas que fallan el build y ya costaron
+> un rediseño a mitad de tarea el 2026-08-31.
+>
+> **Orden recomendado por valor y riesgo** (§2): 04 → 02 → 05/03/06 → 01.
+
+- [ ] **TM-BLD-04 — Dashboard agregado mediante BFF.** Portar `BffApiClientInterface`,
+      `BffApiClient`, `DashboardDataService`, lock y configuración. `getAdminDashboard()` contra
+      `GET /api/v1/me/admin-dashboard`. **Validar el BFF del Builder contra el contrato de
+      teatromuseo antes de activar el flujo nuevo.** Rutas antiguas como wrappers.
+
+- [ ] **TM-BLD-02 — Proyección configurable de listados.** Igual contrato que la suite; además
+      adaptar el lector público en `ci4-website-builder-web` y, si hace falta, el resolver del
+      Domain. Mantener compatibilidad con `collection_listing` y `collection_grid`.
+
+- [ ] **TM-BLD-05 — Observabilidad de invalidación automática de cache.** Productor en
+      `ci4-website-builder-web` + `cacheElapsed` en el admin.
+
+- [ ] **TM-BLD-03 — Panel de calidad SEO en edición.** Parcial reutilizable + `PageQuality.php`
+      en es/en; panel de `show` usando el mismo parcial.
+
+- [ ] **TM-BLD-08 — Vista HTML legible de la configuración del Wizard.**
+
+- [ ] **TM-BLD-01 — Tipos de archivo y densidad visual.** Aquí **sí** se conserva la lectura de
+      `filesViewMode` como compatibilidad, sin volver a escribirla.
+
+- [ ] **TM-BLD-06 — Internacionalización de previews de bloques.** Copiar
+      `app/Language/{en,es}/BlockPreview.php` y adaptar las vistas. Test que detecte textos
+      visibles hardcodeados. No aplica a la suite, que ya los tiene localizados.
+
+- [ ] **TM-BLD-07 — Desacoplamiento local de `CmsFieldEnums`.** Copiar al Builder, cambiar
+      imports, eliminar el mapeo Composer al sibling si no quedan consumidores, y **ejecutar sin
+      `ci4-website-builder-domain` disponible**. No aplica a la suite.
+
+- [ ] **TM-BLD-09 — `password_label` en inglés dentro del fichero español.** *(nueva, salida de
+      la verificación)* `app/Modules/Auth/Language/es/Auth.php:7` define
+      `'password_label' => 'Password'`, el mismo defecto que la suite ya corrigió. Conviene
+      arrastrar también el guardarraíl `LanguageParityTest`.
+
+
 ### Remediación de huecos profundos (parte Admin)
 
 > Plan completo: [`../docs/plans/2026-08-25-plan-remediacion-huecos-profundos.md`](../docs/plans/2026-08-25-plan-remediacion-huecos-profundos.md).
