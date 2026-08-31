@@ -25,7 +25,7 @@ final class PublicSiteCacheInvalidatorTest extends CIUnitTestCase
         $client->expects($this->never())->method('request');
         Services::injectMock('curlrequest', $client);
 
-        $result = new PublicSiteCacheInvalidator('', '')->invalidateWithResult(['pages']);
+        $result = (new PublicSiteCacheInvalidator('', ''))->invalidateWithResult(['pages']);
 
         $this->assertFalse($result['ok']);
         $this->assertSame(0, $result['status']);
@@ -45,7 +45,7 @@ final class PublicSiteCacheInvalidatorTest extends CIUnitTestCase
             ->willReturn($response);
         Services::injectMock('curlrequest', $client);
 
-        $result = new PublicSiteCacheInvalidator('http://public.test', 'secret')
+        $result = (new PublicSiteCacheInvalidator('http://public.test', 'secret'))
             ->invalidateWithResult(['pages', 'invalid-scope']);
 
         $this->assertFalse($result['ok']);
