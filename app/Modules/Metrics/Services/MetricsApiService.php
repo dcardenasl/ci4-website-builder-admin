@@ -26,12 +26,6 @@ class MetricsApiService extends BaseApiService
      */
     public function timeseries(array $filters = []): array
     {
-        $response = $this->apiClient->get('/metrics/timeseries', $filters);
-
-        if (! ($response['ok'] ?? false)) {
-            return $response;
-        }
-
-        return $response;
+        return $this->apiClient->get('/metrics/timeseries', $filters);
     }
 }
