@@ -4,6 +4,7 @@
 $status = is_array($status ?? null) ? $status : [];
 $lastInvalidation = is_string($status['last_invalidation_at'] ?? null) ? $status['last_invalidation_at'] : null;
 $scopes = is_array($status['last_invalidation_scopes'] ?? null) ? $status['last_invalidation_scopes'] : [];
+$lastAutomatic = is_string($status['last_automatic_invalidation_at'] ?? null) ? $status['last_automatic_invalidation_at'] : null;
 ?>
 
 <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -16,7 +17,12 @@ $scopes = is_array($status['last_invalidation_scopes'] ?? null) ? $status['last_
         <div class="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><?= esc($statusError) ?></div>
     <?php endif; ?>
 
-    <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <article class="rounded-xl border border-gray-200 bg-gray-50 p-4" x-data="cacheElapsed('<?= esc((string) ($lastAutomatic ?? ''), 'attr') ?>', <?= esc(json_encode(['calculating' => lang('System.cache_calculating'), 'elapsedPrefix' => lang('System.cache_elapsed_prefix')], JSON_THROW_ON_ERROR), 'attr') ?>)" x-init="start()">
+            <p class="text-sm text-gray-500"><?= esc(lang('System.cache_last_automatic')) ?></p>
+            <p class="mt-2 text-lg font-semibold text-gray-900"><?= $lastAutomatic !== null ? esc(format_date($lastAutomatic)) : esc(lang('System.cache_not_available')) ?></p>
+            <p class="mt-1 text-xs text-gray-500" x-text="label"></p>
+        </article>
         <article class="rounded-xl border border-gray-200 bg-gray-50 p-4">
             <p class="text-sm text-gray-500"><?= esc(lang('System.cache_last_operation')) ?></p>
             <p class="mt-2 text-lg font-semibold text-gray-900"><?= $lastInvalidation !== null ? esc(format_date($lastInvalidation)) : esc(lang('System.cache_not_available')) ?></p>
