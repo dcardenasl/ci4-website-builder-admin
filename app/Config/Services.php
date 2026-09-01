@@ -33,6 +33,8 @@ use App\Modules\Cms\Services\RedirectApiService;
 use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\TagApiService;
 use App\Modules\Cms\Services\TranslationAuditApiService;
+use App\Modules\Dashboard\Services\DashboardDataService;
+use App\Modules\Dashboard\Services\FileDashboardLock;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Files\Services\FileApiService;
 use App\Modules\Iam\Services\ApplicationApiService;
@@ -61,6 +63,25 @@ use InvalidArgumentException;
  */
 class Services extends BaseService
 {
+    public static function dashboardDataService(bool $getShared = true): DashboardDataService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('dashboardDataService');
+        }
+
+        $config = config('Dashboard');
+
+        return new DashboardDataService(
+            static::bffApiClient(),
+            service('cache'),
+            new FileDashboardLock(WRITEPATH . 'cache/dashboard-locks', $config->lockMaxAge, $config->lockWaitMs),
+            $config->freshTtl,
+            $config->staleTtl,
+            $config->failureCooldownTtl,
+            $config->upstreamMaxRetries,
+        );
+    }
+
     public static function publicSiteCacheInvalidator(bool $getShared = true): PublicSiteCacheInvalidator
     {
         if ($getShared) {

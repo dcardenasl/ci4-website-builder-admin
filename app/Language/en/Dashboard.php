@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'title'            => 'Dashboard',
+    'user_fallback'   => 'User',
+    'source_unavailable' => 'This dashboard source is temporarily unavailable.',
     'welcome_title'    => 'Welcome, %s!',
     'welcome_subtitle' => 'Here is an overview of your platform activity.',
     'edit_profile'     => 'Edit profile',

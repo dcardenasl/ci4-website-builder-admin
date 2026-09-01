@@ -1,4 +1,9 @@
-<?php foreach ($stats as $stat): ?>
+<?php if (($sourceState ?? 'unavailable') === 'unavailable'): ?>
+    <div class="col-span-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <?= esc(lang('Dashboard.source_unavailable')) ?>
+    </div>
+<?php endif; ?>
+<?php foreach ($stats ?? [] as $stat): ?>
     <?= view('dashboard/partials/stat_card', [
         'label'  => $stat['label'],
         'value'  => $stat['value'],

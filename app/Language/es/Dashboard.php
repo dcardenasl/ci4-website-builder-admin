@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'title'            => 'Escritorio',
+    'user_fallback'   => 'Usuario',
+    'source_unavailable' => 'Esta fuente del escritorio no está disponible temporalmente.',
     'welcome_title'    => '¡Bienvenido, %s!',
     'welcome_subtitle' => 'Aquí tienes un resumen de la actividad de tu plataforma.',
     'edit_profile'     => 'Editar perfil',
