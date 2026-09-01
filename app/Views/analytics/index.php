@@ -48,34 +48,7 @@ $totalViews     = (int) ($overview['total_views']     ?? 0);
     </article>
 </section>
 
-<!-- Traffic Trend -->
-<?php if (! empty($timeseries)): ?>
-<section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-    <h3 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.trend_title') ?></h3>
-    <div class="<?= esc(table_wrapper_class()) ?>">
-        <div class="<?= esc(table_scroll_class()) ?>">
-            <table class="<?= esc(table_class()) ?>">
-                <thead class="<?= esc(table_head_class()) ?>">
-                    <tr>
-                        <th class="<?= esc(table_th_class()) ?>"><?= lang('TableColumns.period') ?></th>
-                        <th class="<?= esc(table_th_class()) ?>"><?= lang('Analytics.col_views') ?></th>
-                        <th class="<?= esc(table_th_class()) ?>"><?= lang('Analytics.col_visitors') ?></th>
-                    </tr>
-                </thead>
-                <tbody class="<?= esc(table_body_class()) ?>">
-                    <?php foreach ($timeseries as $point): ?>
-                        <tr class="<?= esc(table_row_class()) ?>">
-                            <td class="<?= esc(table_td_class()) ?>"><?= esc((string) ($point['label'] ?? '-')) ?></td>
-                            <td class="<?= esc(table_td_class('primary')) ?>"><?= esc(number_format((int) ($point['views'] ?? 0))) ?></td>
-                            <td class="<?= esc(table_td_class('muted')) ?>"><?= esc(number_format((int) ($point['unique_visitors'] ?? 0))) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
+<?= view('components/time_series_chart', ['chart' => $timeSeriesChart]) ?>
 
 <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
 
