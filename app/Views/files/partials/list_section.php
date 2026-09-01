@@ -45,7 +45,7 @@ $currentCategory = (string) request()->getGet('category');
     }))">
 
     <div class="flex items-center justify-between gap-3">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Files.my_files') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Files.my_files') ?></h2>
         <div class="flex items-center gap-2">
             <a href="<?= route_to('files.trash') ?>" class="<?= esc(action_button_class()) ?>" title="<?= esc(lang('Files.trash_title')) ?>">
                 <?= ui_icon('trash', 'h-3.5 w-3.5') ?>

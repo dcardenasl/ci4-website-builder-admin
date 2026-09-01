@@ -55,8 +55,9 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
     data-filter-defaults="<?= esc($defaultsJson) ?>"
     data-filter-ignored="<?= esc($ignoredJson) ?>"
 >
-    <div class="flex items-center justify-between gap-3">
-        <h4 class="text-sm font-semibold text-gray-800"><?= esc($title) ?></h4>
+    <fieldset>
+        <legend class="text-sm font-semibold text-gray-800"><?= esc($title) ?></legend>
+        <div class="flex items-center justify-end gap-3">
         <?php if ($reactiveHasFilters || $hasFilters): ?>
             <a
                 href="<?= esc($clearUrl) ?>"
@@ -67,7 +68,7 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
                 <?php endif; ?>
             ><?= lang('App.clear_filters') ?></a>
         <?php endif; ?>
-    </div>
+        </div>
 
     <?php if ($reactiveHasFilters || $hasFilters): ?>
         <p
@@ -122,4 +123,5 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
             <?= esc($submitLabel) ?>
         </button>
     </div>
+    </fieldset>
 </form>

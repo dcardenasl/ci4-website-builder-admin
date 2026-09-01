@@ -58,7 +58,7 @@
 
 <?php if (! empty($metrics['slow_requests'])): ?>
     <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.slow_requests') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.slow_requests') ?></h2>
         <div class="<?= esc(table_wrapper_class()) ?>">
             <div class="<?= esc(table_scroll_class()) ?>">
             <table class="<?= esc(table_class()) ?>">
@@ -89,7 +89,7 @@
                         
                         <?php if (! empty($metrics['slo'])): ?>
                             <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-                                <h3 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.slo') ?></h3>
+                                <h2 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.slo') ?></h2>
                                 <div class="<?= esc(table_wrapper_class()) ?>">
                                     <div class="<?= esc(table_scroll_class()) ?>">
                                     <table class="<?= esc(table_class()) ?>">
@@ -150,7 +150,7 @@
 
 <?php if (! empty($metrics['users_by_status'])): ?>
     <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.users_by_status') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.users_by_status') ?></h2>
         <div class="<?= esc(table_wrapper_class()) ?>">
             <div class="<?= esc(table_scroll_class()) ?>">
             <table class="<?= esc(table_class()) ?>">
@@ -180,7 +180,7 @@
 
 <?php if (! empty($metrics['recent_activity'])): ?>
     <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.recent_activity') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.recent_activity') ?></h2>
         <div class="<?= esc(table_wrapper_class()) ?>">
             <div class="<?= esc(table_scroll_class()) ?>">
             <table class="<?= esc(table_class()) ?>">

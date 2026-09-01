@@ -54,7 +54,7 @@ $totalViews     = (int) ($overview['total_views']     ?? 0);
 
     <!-- Top Pages -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_pages_title') ?></h3>
+        <h2 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_pages_title') ?></h2>
         <?php if (! empty($pages)): ?>
             <div class="<?= esc(table_wrapper_class()) ?>">
                 <div class="<?= esc(table_scroll_class()) ?>">
@@ -96,7 +96,7 @@ $totalViews     = (int) ($overview['total_views']     ?? 0);
 
     <!-- Top Referrers -->
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_referrers_title') ?></h3>
+        <h2 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_referrers_title') ?></h2>
         <?php if (! empty($referrers)): ?>
             <div class="<?= esc(table_wrapper_class()) ?>">
                 <div class="<?= esc(table_scroll_class()) ?>">
@@ -142,7 +142,7 @@ $deviceMap = [
     }
     ?>
 <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-    <h3 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.device_title') ?></h3>
+    <h2 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.device_title') ?></h2>
     <?php if ($deviceTotal > 0): ?>
         <div class="space-y-3">
             <?php foreach ($deviceMap as $key => $label): ?>

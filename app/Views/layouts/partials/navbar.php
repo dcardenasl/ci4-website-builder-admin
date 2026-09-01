@@ -6,7 +6,7 @@
             :aria-expanded="sidebarOpen ? 'true' : 'false'"
             aria-controls="app-sidebar"
         ><?= lang('App.menu') ?></button>
-        <h2 class="text-sm text-gray-500"><?= esc($title ?? lang('App.panel')) ?></h2>
+        <p class="text-sm text-gray-500"><?= esc($title ?? lang('App.panel')) ?></p>
     </div>
 
     <div class="flex items-center gap-4">

@@ -1,6 +1,8 @@
+<h1 class="mb-5 text-xl font-bold text-gray-900"><?= esc(lang('Profile.title')) ?></h1>
+
 <!-- Avatar -->
 <section class="mb-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Profile.avatar') ?></h3>
+    <h2 class="text-lg font-semibold text-gray-900"><?= lang('Profile.avatar') ?></h2>
     <p class="mt-1 text-sm text-gray-500"><?= lang('Profile.avatar_help') ?></p>
     <div class="mt-4 flex items-center gap-5" x-data="{
         preview: '<?= esc((string) ($user['avatar_url'] ?? '')) ?>',
@@ -37,7 +39,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Profile.personal_info') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Profile.personal_info') ?></h2>
         <form method="post" action="<?= route_to('profile.update') ?>" class="mt-4 space-y-4">
             <?= csrf_field() ?>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -66,7 +68,7 @@
     </section>
 
     <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-        <h3 class="text-lg font-semibold text-gray-900"><?= lang('Profile.security') ?></h3>
+        <h2 class="text-lg font-semibold text-gray-900"><?= lang('Profile.security') ?></h2>
         <p class="mt-3 text-sm text-gray-600"><?= lang('Profile.password_reset_help') ?></p>
         <form method="post" action="<?= site_url('profile/request-password-reset') ?>" class="mt-4">
             <?= csrf_field() ?>

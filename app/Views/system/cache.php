@@ -42,7 +42,7 @@ $lastAutomatic = is_string($status['last_automatic_invalidation_at'] ?? null) ? 
 
     <div class="mt-6 flex flex-col gap-4 rounded-xl border border-gray-200 p-4 md:flex-row md:items-center md:justify-between">
         <div>
-            <h4 class="font-semibold text-gray-900"><?= esc(lang('System.cache_manual_title')) ?></h4>
+            <h2 class="font-semibold text-gray-900"><?= esc(lang('System.cache_manual_title')) ?></h2>
             <p class="mt-1 text-sm text-gray-500"><?= esc(lang('System.cache_manual_help')) ?></p>
             <?php if ($scopes !== []): ?>
                 <p class="mt-2 text-xs text-gray-500"><?= esc(lang('System.cache_scopes')) ?>: <?= esc(implode(', ', array_map('strval', $scopes))) ?></p>
