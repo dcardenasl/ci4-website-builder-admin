@@ -43,6 +43,42 @@ final class AnalyticsTimeSeriesAdapterTest extends CIUnitTestCase
         $this->assertSame(7.0, $chart->series[1]->points[1]->value);
     }
 
+    public function testMapsLiveApiClientEnvelopeToTwoAlignedSeries(): void
+    {
+        $chart = $this->adapter->fromResponse([
+            'ok' => true,
+            'data' => [
+                'status' => 'success',
+                'data' => [
+                    'data' => [
+                        ['label' => '2026-01-01', 'views' => 3, 'unique_visitors' => 2],
+                    ],
+                    'period' => '7d',
+                ],
+            ],
+        ]);
+
+        $this->assertSame(TimeSeriesChartDTO::READY, $chart->state);
+        $this->assertSame('2026-01-01', $chart->series[0]->points[0]->label);
+        $this->assertSame(2.0, $chart->series[1]->points[0]->value);
+    }
+
+    public function testMapsLiveApiClientEmptyEnvelopeToEmptyState(): void
+    {
+        $chart = $this->adapter->fromResponse([
+            'ok' => true,
+            'data' => [
+                'status' => 'success',
+                'data' => [
+                    'data' => [],
+                    'period' => '7d',
+                ],
+            ],
+        ]);
+
+        $this->assertSame(TimeSeriesChartDTO::EMPTY, $chart->state);
+    }
+
     public function testNullMetricRowsAreAbsentFromBothSeries(): void
     {
         $chart = $this->adapter->fromResponse([

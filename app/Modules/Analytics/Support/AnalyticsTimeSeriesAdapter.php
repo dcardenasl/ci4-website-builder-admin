@@ -28,7 +28,15 @@ final class AnalyticsTimeSeriesAdapter
         }
 
         $rows = $response['data'] ?? null;
-        if (is_array($rows) && isset($rows['data'])) {
+        // ApiClient stores the complete JSON envelope under `data`, while
+        // this endpoint returns its series under a second `data` key. Accept
+        // both the direct service shape and the live ApiClient shape without
+        // weakening validation for malformed associative payloads.
+        for ($depth = 0; $depth < 2; $depth++) {
+            if (! is_array($rows) || ! array_key_exists('data', $rows)) {
+                break;
+            }
+
             $rows = $rows['data'];
         }
 
