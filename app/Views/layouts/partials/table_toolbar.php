@@ -4,7 +4,7 @@ $subtitle ??= null;
 $actionsView ??= null;
 $showViewToggle = (bool) ($showViewToggle ?? false);
 $showDensityToggle = (bool) ($showDensityToggle ?? false);
-$toggleButtonClass = 'inline-flex items-center justify-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-500';
+$toggleButtonClass = 'inline-flex min-h-10 min-w-10 items-center justify-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500';
 ?>
 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div>

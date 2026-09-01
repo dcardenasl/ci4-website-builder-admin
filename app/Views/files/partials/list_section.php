@@ -51,12 +51,12 @@ $currentCategory = (string) request()->getGet('category');
                 <?= ui_icon('trash', 'h-3.5 w-3.5') ?>
                 <span class="hidden md:inline"><?= esc(lang('Files.trash_title')) ?></span>
             </a>
-            <div class="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-                <button type="button" @click="setViewMode('table')" :class="viewMode === 'table' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'" :aria-pressed="viewMode === 'table'" class="px-3 py-1.5 text-sm transition-colors">
+            <div class="inline-flex rounded-lg border border-gray-200 overflow-hidden" role="group" aria-label="<?= esc(lang('App.table_view')) ?>">
+                <button type="button" @click="setViewMode('table')" :class="viewMode === 'table' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'" :aria-pressed="viewMode === 'table'" class="inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-inset" title="<?= esc(lang('App.view_table')) ?>" aria-label="<?= esc(lang('App.view_table')) ?>">
                     <span class="sr-only"><?= esc(lang('App.view_table')) ?></span>
                     <?= ui_icon('list', 'h-4 w-4') ?>
                 </button>
-                <button type="button" @click="setViewMode('grid')" :class="viewMode === 'grid' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'" :aria-pressed="viewMode === 'grid'" class="px-3 py-1.5 text-sm transition-colors">
+                <button type="button" @click="setViewMode('grid')" :class="viewMode === 'grid' ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'" :aria-pressed="viewMode === 'grid'" class="inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-inset" title="<?= esc(lang('App.view_grid')) ?>" aria-label="<?= esc(lang('App.view_grid')) ?>">
                     <span class="sr-only"><?= esc(lang('App.view_grid')) ?></span>
                     <?= ui_icon('grid', 'h-4 w-4') ?>
                 </button>
@@ -67,7 +67,7 @@ $currentCategory = (string) request()->getGet('category');
                             @click="setDensity('<?= esc($density) ?>')"
                             :class="density === '<?= esc($density) ?>' ? 'border-brand-600 bg-brand-600 text-white' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'"
                             :aria-pressed="density === '<?= esc($density) ?>'"
-                            class="inline-flex items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md border px-2.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                             title="<?= esc(lang($labelKey)) ?>"
                             aria-label="<?= esc(lang($labelKey)) ?>">
                         <?= esc(strtoupper($density)) ?>
