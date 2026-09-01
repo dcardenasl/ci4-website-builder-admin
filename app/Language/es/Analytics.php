@@ -24,6 +24,12 @@ return [
 
     // Sections
     'trend_title'         => 'Tendencia de Tráfico',
+    'trend_description'   => 'Visitas diarias y visitantes únicos del período seleccionado.',
+    'trend_table_caption' => 'Datos de tendencia de tráfico',
+    'views_unit'          => 'visitas',
+    'visitors_unit'       => 'visitantes',
+    'chart_empty'         => 'No hay datos de tráfico disponibles para este período.',
+    'chart_error'         => 'No se pudo cargar la tendencia de tráfico.',
     'top_pages_title'     => 'Páginas Más Visitadas',
     'top_referrers_title' => 'Principales Referrers',
     'device_title'        => 'Dispositivos',
