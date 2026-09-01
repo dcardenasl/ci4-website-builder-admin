@@ -46,6 +46,9 @@ return [
     'listing_projection_add_filter' => 'Add filter',
     'listing_projection_filter_operator_equals' => 'Equals',
     'listing_projection_filter_operator_contains' => 'Contains',
+    'listing_projection_filter_operator_before' => 'Before',
+    'listing_projection_filter_operator_after' => 'After',
+    'listing_projection_filter_operator_in' => 'One of',
     'listing_projection_filter_label_placeholder' => 'Filter label',
     'listing_projection_filters_empty' => 'No public filters configured.',
 

@@ -44,4 +44,36 @@ describe('listingProjectionEditor', () => {
         expect(serialized.extras).toEqual([{ source: 'entry.title', label: 'Title', operator: 'equals' }]);
         expect(serialized).not.toHaveProperty('extras[0].id');
     });
+
+    it('limits public filters to the API matrix and keeps operators compatible with their field', () => {
+        const editor = listingProjectionEditor(catalog, {
+            filters: [
+                { source: 'entry.published_at', label: 'Published', operator: 'contains' },
+                { source: 'entry.excerpt', label: 'Excerpt', operator: 'equals' },
+                { source: 'entry.secret', label: 'Secret', operator: 'equals' },
+            ],
+        }, 'noticias', {
+            filter_operator_before: 'Before',
+            filter_operator_after: 'After',
+        });
+        editor.init();
+
+        expect(editor.availableFields({ filterable: true, publicFilter: true }).map((field) => field.value)).toEqual([
+            'entry.title',
+            'entry.published_at',
+            'taxonomy.tags',
+        ]);
+        expect(editor.projection.filters).toHaveLength(2);
+        expect(editor.projection.filters[0].operator).toBe('equals');
+        expect(editor.operatorOptions('entry.published_at').map((option) => option.value)).toEqual(['equals', 'before', 'after']);
+
+        editor.setFilterSource(editor.projection.filters[0], 'taxonomy.tags');
+        expect(editor.projection.filters[0].operator).toBe('equals');
+        editor.projection.filters[0].operator = 'in';
+        expect(JSON.parse(editor.serialized()).filters[0]).toEqual({
+            source: 'taxonomy.tags',
+            label: 'Published',
+            operator: 'in',
+        });
+    });
 });

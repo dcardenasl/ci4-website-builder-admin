@@ -4,6 +4,19 @@ const DEFAULT_LABELS = {
     slot_summary: 'Summary', slot_summary_hint: 'Quick read',
     slot_date: 'Date or time value', slot_date_hint: 'Metadata',
     slot_image: 'Image', slot_image_hint: 'Visual',
+    filter_operator_equals: 'Equals', filter_operator_contains: 'Contains',
+    filter_operator_before: 'Before', filter_operator_after: 'After',
+    filter_operator_in: 'One of',
+};
+
+const PUBLIC_FILTER_OPERATORS = {
+    'entry.title': ['equals', 'contains'],
+    'entry.excerpt': ['equals', 'contains'],
+    'entry.slug': ['equals', 'contains'],
+    'entry.published_at': ['equals', 'before', 'after'],
+    'entry.created_at': ['equals', 'before', 'after'],
+    'taxonomy.categories': ['equals', 'in'],
+    'taxonomy.tags': ['equals', 'in'],
 };
 
 const normalizeInitial = (value) => {
@@ -26,6 +39,21 @@ const normalizeItems = (items) => Array.isArray(items)
     }))
     : [];
 
+const normalizeFilter = (item) => {
+    const source = String(item?.source || '');
+    const operators = PUBLIC_FILTER_OPERATORS[source] || ['equals'];
+    const requestedOperator = String(item?.operator || 'equals').toLowerCase();
+
+    return {
+        id: item?.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        source,
+        label: String(item?.label || ''),
+        operator: operators.includes(requestedOperator) ? requestedOperator : operators[0],
+    };
+};
+
+const normalizeFilters = (items) => Array.isArray(items) ? items.map(normalizeFilter) : [];
+
 export function listingProjectionEditor(catalog, initial = {}, initialCollection = '', labels = {}) {
     const raw = normalizeInitial(initial);
     const direction = String(raw.order?.direction || 'desc').toLowerCase();
@@ -44,7 +72,7 @@ export function listingProjectionEditor(catalog, initial = {}, initialCollection
             direction: ['asc', 'desc'].includes(direction) ? direction : 'desc',
             public: raw.order?.public === true || raw.order?.public === '1' || raw.order?.public === 1,
         },
-        filters: normalizeItems(raw.filters),
+        filters: normalizeFilters(raw.filters),
     };
 
     return {
@@ -76,7 +104,12 @@ export function listingProjectionEditor(catalog, initial = {}, initialCollection
             });
             if (this.projection.order.field && !valid.has(this.projection.order.field)) this.projection.order.field = '';
             this.projection.extras = this.projection.extras.filter((item) => !item.source || valid.has(item.source));
-            this.projection.filters = this.projection.filters.filter((item) => !item.source || valid.has(item.source));
+            this.projection.filters = this.projection.filters
+                .filter((item) => !item.source || (valid.has(item.source) && this.isPublicFilterSource(item.source)))
+                .map((item) => {
+                    this.normalizeFilter(item);
+                    return item;
+                });
         },
 
         fields() {
@@ -87,9 +120,27 @@ export function listingProjectionEditor(catalog, initial = {}, initialCollection
             return this.fields().filter((field) => {
                 if (criteria.sortable === true && field.sortable !== true) return false;
                 if (criteria.filterable === true && field.filterable !== true) return false;
+                if (criteria.publicFilter === true && !Object.hasOwn(PUBLIC_FILTER_OPERATORS, field.value)) return false;
                 if (Array.isArray(criteria.types) && !criteria.types.includes(field.type)) return false;
                 return true;
             });
+        },
+
+        isPublicFilterSource(source) { return Object.hasOwn(PUBLIC_FILTER_OPERATORS, source); },
+        operatorOptions(source) {
+            return (PUBLIC_FILTER_OPERATORS[source] || ['equals']).map((value) => ({
+                value,
+                label: this.labels[`filter_operator_${value}`] || value,
+            }));
+        },
+        normalizeFilter(item) {
+            const normalized = normalizeFilter(item);
+            item.source = normalized.source;
+            item.operator = normalized.operator;
+        },
+        setFilterSource(item, source) {
+            item.source = String(source || '');
+            item.operator = this.operatorOptions(item.source)[0].value;
         },
 
         setSlot(key, value) { this.projection.slots[key] = String(value || ''); },
@@ -103,7 +154,11 @@ export function listingProjectionEditor(catalog, initial = {}, initialCollection
                 slots: this.projection.slots,
                 extras: this.projection.extras.map(({ source, label, operator }) => ({ source, label, operator })),
                 order: this.projection.order,
-                filters: this.projection.filters.map(({ source, label, operator }) => ({ source, label, operator })),
+                filters: this.projection.filters.map(({ source, label, operator }) => ({
+                    source,
+                    label,
+                    operator: this.operatorOptions(source).some((option) => option.value === operator) ? operator : 'equals',
+                })),
             });
         },
     };

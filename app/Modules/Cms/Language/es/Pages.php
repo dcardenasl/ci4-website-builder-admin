@@ -46,6 +46,9 @@ return [
     'listing_projection_add_filter' => 'Añadir filtro',
     'listing_projection_filter_operator_equals' => 'Igual a',
     'listing_projection_filter_operator_contains' => 'Contiene',
+    'listing_projection_filter_operator_before' => 'Antes de',
+    'listing_projection_filter_operator_after' => 'Después de',
+    'listing_projection_filter_operator_in' => 'Uno de',
     'listing_projection_filter_label_placeholder' => 'Etiqueta del filtro',
     'listing_projection_filters_empty' => 'No hay filtros públicos configurados.',
 
