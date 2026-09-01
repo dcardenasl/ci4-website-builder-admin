@@ -1,6 +1,7 @@
 import { bootLucideIcons } from './utils/lucide.js';
 import { bootSlugFields } from './utils/slug.js';
 import { bestFilePreviewUrl, resolveTranslatableFilePreviewUrl } from './utils/fileUrl.js';
+import { fileTypePresentation } from './utils/fileType.js';
 import { formValuesToObject } from './utils/formSerialization.js';
 import { buildConfirmDeleteMessage } from './utils/labels.js';
 import { resolveCmsTranslationEditUrl } from './utils/translationNavigation.js';
@@ -26,9 +27,11 @@ import { blockPreview } from './components/blockPreview.js';
 import { blockTypeDesigner } from './components/blockTypeDesigner.js';
 import { blockInstanceConfig } from './components/blockInstanceConfig.js';
 import { collectionBlockTemplateBuilder } from './components/collectionBlockTemplateBuilder.js';
+import { listingProjectionEditor } from './components/listingProjectionEditor.js';
 import { blockInstanceBuilder } from './components/blockInstanceBuilder.js';
 import { menuItemForm } from './components/menuItemForm.js';
 import { bootConfirmAction } from './components/confirmAction.js';
+import { cacheElapsed } from './components/cacheElapsed.js';
 import { schemaEditor } from './components/schemaEditor.js';
 import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
@@ -66,6 +69,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('blockTypeDesigner', blockTypeDesigner);
     Alpine.data('blockInstanceConfig', blockInstanceConfig);
     Alpine.data('collectionBlockTemplateBuilder', collectionBlockTemplateBuilder);
+    Alpine.data('listingProjectionEditor', listingProjectionEditor);
     Alpine.data('blockInstanceBuilder', blockInstanceBuilder);
     Alpine.data('menuItemForm', menuItemForm);
     Alpine.data('schemaEditor', schemaEditor);
@@ -73,12 +77,14 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('wizard', wizard);
     Alpine.data('structureWizard', structureWizard);
     Alpine.data('passwordToggle', passwordToggle);
+    Alpine.data('cacheElapsed', cacheElapsed);
 
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
     window.formFieldBuilder = formFieldBuilderFactory;
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
     window.bestFilePreviewUrl = bestFilePreviewUrl;
+    window.filePresentation = fileTypePresentation;
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
     window.resolveCmsTranslationEditUrl = resolveCmsTranslationEditUrl;
     window.copyDefaultToAll = copyDefaultToAll;

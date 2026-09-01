@@ -4,6 +4,7 @@ import { statusBadgeClass, auditActionBadgeClass, auditResultBadgeClass, auditSe
 import { statusLabel, auditActionLabel, auditResultLabel, auditSeverityLabel } from '../utils/labels.js';
 import { formatDate } from '../utils/date.js';
 import { bootLucideIcons } from '../utils/lucide.js';
+import { fileTypePresentation } from '../utils/fileType.js';
 import { devError } from '../utils/dev.js';
 import { extractListItems, extractListSummary, extractListPagination } from '../utils/listResponse.js';
 
@@ -34,12 +35,15 @@ export const remoteTableFactory = (config = {}) => {
     const mode = String(config.mode || 'generic');
     const viewStorageKey = `admin_table_view_${mode}`;
     const densityStorageKey = `admin_table_density_${mode}`;
+    const legacyViewMode = config.legacyViewStorageKey
+        ? readSessionPreference(config.legacyViewStorageKey, VIEW_MODES, '')
+        : '';
 
     return {
         apiUrl: config.apiUrl || window.location.pathname,
         pageUrl: config.pageUrl || window.location.pathname,
         mode,
-        viewMode: readSessionPreference(viewStorageKey, VIEW_MODES, 'table'),
+        viewMode: readSessionPreference(viewStorageKey, VIEW_MODES, legacyViewMode || 'table'),
         density: readSessionPreference(densityStorageKey, DENSITIES, 'md'),
         routes: config.routes || {},
         csrf: config.csrf || { name: '', hash: '' },
@@ -65,6 +69,7 @@ export const remoteTableFactory = (config = {}) => {
             if (!VIEW_MODES.has(viewMode)) return;
             this.viewMode = viewMode;
             writeSessionPreference(viewStorageKey, viewMode);
+            if (typeof this.$nextTick === 'function') this.$nextTick(() => bootLucideIcons());
         },
 
         setDensity(density) {
@@ -72,6 +77,8 @@ export const remoteTableFactory = (config = {}) => {
             this.density = density;
             writeSessionPreference(densityStorageKey, density);
         },
+
+        filePresentation: fileTypePresentation,
 
         init() {
             this.form = this.$el.querySelector('form[data-table-filter-form="1"]');
