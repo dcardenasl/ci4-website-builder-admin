@@ -6,6 +6,7 @@ namespace App\Modules\Metrics\Controllers;
 
 use App\Controllers\BaseWebController;
 use App\Modules\Metrics\Services\MetricsApiService;
+use App\Modules\Metrics\Support\MetricsTimeSeriesAdapter;
 use App\Support\CatalogOptions;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,10 +16,13 @@ class MetricsController extends BaseWebController
 {
     protected MetricsApiService $metricsService;
 
+    protected MetricsTimeSeriesAdapter $timeSeriesAdapter;
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->metricsService = service('metricsApiService');
+        $this->timeSeriesAdapter = new MetricsTimeSeriesAdapter();
     }
 
     public function index(): string
@@ -51,12 +55,12 @@ class MetricsController extends BaseWebController
         $this->maybeFlashDevError($timeseriesResponse);
 
         $summaryData = $this->extractData($summaryResponse);
-        $timeseriesData = $this->extractData($timeseriesResponse);
+        $timeSeriesChart = $this->timeSeriesAdapter->fromResponse($timeseriesResponse);
 
         return $this->render('metrics/index', [
             'title'          => lang('Metrics.title'),
             'metrics'        => $summaryData,
-            'timeseries'     => $timeseriesData,
+            'timeSeriesChart' => $timeSeriesChart,
             'filters'        => $viewFilters,
             'defaultFilters' => $defaultFilters,
             'hasFilters'     => has_active_filters(is_array($this->request->getGet()) ? $this->request->getGet() : null, $defaultFilters),

@@ -85,35 +85,7 @@
 <?php endif; ?>
 
 
-<?php if (! empty($timeseries)): ?>
-<section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Metrics.trends') ?></h3>
-    <div class="<?= esc(table_wrapper_class()) ?>">
-        <div class="<?= esc(table_scroll_class()) ?>">
-        <table class="<?= esc(table_class()) ?>">
-            <thead class="<?= esc(table_head_class()) ?>">
-                <tr>
-                    <th class="<?= esc(table_th_class()) ?>"><?= lang('TableColumns.period') ?></th>
-                    <th class="<?= esc(table_th_class()) ?>"><?= lang('TableColumns.value') ?></th>
-                </tr>
-            </thead>
-            <tbody class="<?= esc(table_body_class()) ?>">
-                <?php foreach ($timeseries as $point): ?>
-                    <tr class="<?= esc(table_row_class()) ?>">
-                                                    <td class="<?= esc(table_td_class()) ?>">
-                                                        <?= esc((string) ($point['period'] ?? $point['date'] ?? $point['label'] ?? $point['timestamp'] ?? $point['group_by'] ?? '-')) ?>
-                                                    </td>
-                                                    <td class="<?= esc(table_td_class('primary')) ?>">
-                                                        <?= esc((string) ($point['value'] ?? $point['count'] ?? $point['total'] ?? $point['avg'] ?? '-')) ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                    </div>
-                                </div>
-                            </section>
-                        <?php endif; ?>
+<?= view('components/time_series_chart', ['chart' => $timeSeriesChart]) ?>
                         
                         <?php if (! empty($metrics['slo'])): ?>
                             <section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5">

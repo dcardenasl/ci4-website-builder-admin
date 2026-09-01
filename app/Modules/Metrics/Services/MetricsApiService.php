@@ -32,27 +32,6 @@ class MetricsApiService extends BaseApiService
             return $response;
         }
 
-        // ApiClient::request() stores the full decoded response envelope
-        // ({status, data, ...}) under $response['data'], so the actual
-        // payload is one level deeper — same shape extractData() unwraps
-        // for every other endpoint. Transform the parallel arrays (dates,
-        // requests, etc.) into a list of point objects at that inner level.
-        $envelope = $response['data'] ?? [];
-        $data = is_array($envelope) ? ($envelope['data'] ?? []) : [];
-        if (is_array($data) && isset($data['dates']) && is_array($data['dates'])) {
-            $points = [];
-            foreach ($data['dates'] as $i => $date) {
-                $points[] = [
-                    'period'  => $date,
-                    'value'   => $data['requests'][$i] ?? 0,
-                    'errors'  => $data['errors'][$i] ?? 0,
-                    'latency' => $data['latency'][$i] ?? 0,
-                ];
-            }
-            $envelope['data'] = $points;
-            $response['data'] = $envelope;
-        }
-
         return $response;
     }
 }
