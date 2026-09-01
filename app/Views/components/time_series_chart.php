@@ -6,7 +6,7 @@ use App\Support\TimeSeries\TimeSeriesChartDTO;
 $titleId = $chart->id . '-title';
 $descriptionId = $chart->id . '-description';
 ?>
-<section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-time-series="<?= esc($chart->id) ?>" data-state="<?= esc($chart->state) ?>" aria-labelledby="<?= esc($titleId) ?>">
+<section class="mt-6 min-w-0 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-time-series="<?= esc($chart->id) ?>" data-state="<?= esc($chart->state) ?>" aria-labelledby="<?= esc($titleId) ?>">
     <h2 id="<?= esc($titleId) ?>" class="text-lg font-semibold text-gray-900"><?= esc($chart->title) ?></h2>
     <p id="<?= esc($descriptionId) ?>" class="mt-1 text-sm text-gray-500"><?= esc($chart->description) ?></p>
 

@@ -208,14 +208,14 @@ if (! function_exists('card_class')) {
 if (! function_exists('table_wrapper_class')) {
     function table_wrapper_class(): string
     {
-        return 'mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-100';
+        return 'mt-4 min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-100';
     }
 }
 
 if (! function_exists('table_scroll_class')) {
     function table_scroll_class(): string
     {
-        return 'overflow-x-auto';
+        return 'min-w-0 overflow-x-auto';
     }
 }
 

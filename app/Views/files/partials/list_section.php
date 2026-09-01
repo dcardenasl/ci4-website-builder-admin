@@ -10,7 +10,7 @@ $categoryOptions = $categoryOptions ?? [
 ];
 $currentCategory = (string) request()->getGet('category');
 ?>
-<section class="mt-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5"
+<section class="mt-6 min-w-0 bg-white border border-gray-200 rounded-xl shadow-sm p-5"
     x-data="Object.assign({
         selectedIds: [],
         isSelected(id) { return this.selectedIds.includes(String(id)); },

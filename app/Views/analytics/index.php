@@ -53,7 +53,7 @@ $totalViews     = (int) ($overview['total_views']     ?? 0);
 <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
 
     <!-- Top Pages -->
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+    <section class="min-w-0 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <h2 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_pages_title') ?></h2>
         <?php if (! empty($pages)): ?>
             <div class="<?= esc(table_wrapper_class()) ?>">
@@ -95,7 +95,7 @@ $totalViews     = (int) ($overview['total_views']     ?? 0);
     </section>
 
     <!-- Top Referrers -->
-    <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+    <section class="min-w-0 bg-white border border-gray-200 rounded-xl shadow-sm p-5">
         <h2 class="text-base font-semibold text-gray-900 mb-4"><?= lang('Analytics.top_referrers_title') ?></h2>
         <?php if (! empty($referrers)): ?>
             <div class="<?= esc(table_wrapper_class()) ?>">
