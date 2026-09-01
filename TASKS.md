@@ -90,8 +90,8 @@
 
 ### ADM-DEP-002 — lint-staged 16 → 17
 
-- [ ] Esperar el baseline Node 22 (`>=22.22.1`), actualizar `lint-staged`, ejecutar `npm audit` y
-  verificar el hook `pre-commit`.
+- [x] Baseline Node 22 verificado (`22.22.3`), `lint-staged` en `17.0.5`, `npm audit` sin
+  vulnerabilidades, `npm test` (103/103), lint/build y hook `pre-commit` verificados.
 
 ## 🏗️ Contratos de arquitectura
 
