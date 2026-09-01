@@ -1,4 +1,4 @@
-<section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+<section>
     <?= view('layouts/partials/table_toolbar', [
         'title' => lang('Metrics.title'),
     ]) ?>
@@ -13,6 +13,8 @@
             'filters' => $filters,
             'periodOptions' => $periodOptions ?? [],
         ],
+        'panelClass' => filter_panel_class() . ' w-full md:w-fit',
+        'submitInline' => true,
         'submitLabel' => lang('Metrics.apply_filters'),
     ]) ?>
 </section>

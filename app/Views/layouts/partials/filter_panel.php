@@ -5,6 +5,8 @@ $method ??= 'get';
 $title ??= lang('App.filters');
 $submitLabel ??= lang('App.search');
 $submitFullWidth ??= false;
+$submitInline ??= false;
+$panelClass ??= filter_panel_class();
 $hasFilters ??= has_active_filters();
 $fieldsView ??= null;
 $fieldsData ??= [];
@@ -49,7 +51,7 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
 <form
     method="<?= esc($method) ?>"
     action="<?= esc($actionUrl) ?>"
-    class="<?= esc(filter_panel_class()) ?>"
+    class="<?= esc($panelClass) ?>"
     data-table-filter-form="1"
     data-reactive-has-filters="<?= $reactiveHasFilters ? '1' : '0' ?>"
     data-filter-defaults="<?= esc($defaultsJson) ?>"
@@ -113,15 +115,30 @@ if (! is_string($ignoredJson) || $ignoredJson === '') {
         </p>
     <?php endif; ?>
 
-    <?php if (is_string($fieldsView) && $fieldsView !== ''): ?>
-        <?= view($fieldsView, is_array($fieldsData) ? $fieldsData : []) ?>
-    <?php endif; ?>
+    <?php if ($submitInline): ?>
+        <div class="flex flex-col gap-3 md:flex-row md:items-end">
+            <?php if (is_string($fieldsView) && $fieldsView !== ''): ?>
+                <div class="w-full md:w-64"><?= view($fieldsView, is_array($fieldsData) ? $fieldsData : []) ?></div>
+            <?php endif; ?>
 
-    <div class="mt-3 flex items-center justify-end gap-2">
-        <button type="submit" class="<?= esc(filter_submit_button_class((bool) $submitFullWidth)) ?>">
-            <?= ui_icon('search', 'h-3.5 w-3.5') ?>
-            <?= esc($submitLabel) ?>
-        </button>
-    </div>
+            <div class="flex items-center justify-start gap-2">
+                <button type="submit" class="<?= esc(filter_submit_button_class((bool) $submitFullWidth)) ?>">
+                    <?= ui_icon('search', 'h-3.5 w-3.5') ?>
+                    <?= esc($submitLabel) ?>
+                </button>
+            </div>
+        </div>
+    <?php else: ?>
+        <?php if (is_string($fieldsView) && $fieldsView !== ''): ?>
+            <?= view($fieldsView, is_array($fieldsData) ? $fieldsData : []) ?>
+        <?php endif; ?>
+
+        <div class="mt-3 flex items-center justify-end gap-2">
+            <button type="submit" class="<?= esc(filter_submit_button_class((bool) $submitFullWidth)) ?>">
+                <?= ui_icon('search', 'h-3.5 w-3.5') ?>
+                <?= esc($submitLabel) ?>
+            </button>
+        </div>
+    <?php endif; ?>
     </fieldset>
 </form>
