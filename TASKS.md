@@ -20,38 +20,49 @@
 >
 > **Orden recomendado por valor y riesgo** (§2): 04 → 02 → 05/03/06 → 01.
 
-- [ ] **TM-BLD-04 — Dashboard agregado mediante BFF.** Portar `BffApiClientInterface`,
+- [x] **TM-BLD-04 — Dashboard agregado mediante BFF.** Portar `BffApiClientInterface`,
       `BffApiClient`, `DashboardDataService`, lock y configuración. `getAdminDashboard()` contra
       `GET /api/v1/me/admin-dashboard`. **Validar el BFF del Builder contra el contrato de
-      teatromuseo antes de activar el flujo nuevo.** Rutas antiguas como wrappers.
+      teatromuseo antes de activar el flujo nuevo.** Rutas antiguas como wrappers. Cerrada
+      2026-09-01: snapshot server-rendered, caché fresh/stale/unavailable por permisos, single
+      flight, fallback visible y contrato BFF validado.
 
-- [ ] **TM-BLD-02 — Proyección configurable de listados.** Igual contrato que la suite; además
+- [x] **TM-BLD-02 — Proyección configurable de listados.** Igual contrato que la suite; además
       adaptar el lector público en `ci4-website-builder-web` y, si hace falta, el resolver del
-      Domain. Mantener compatibilidad con `collection_listing` y `collection_grid`.
+      Domain. Mantener compatibilidad con `collection_listing` y `collection_grid`. Cerrada
+      2026-09-01: DTO normalizado, catálogo cerrado, frontera compartida para ambos bloques y
+      regresión contra campos desconocidos.
 
-- [ ] **TM-BLD-05 — Observabilidad de invalidación automática de cache.** Productor en
-      `ci4-website-builder-web` + `cacheElapsed` en el admin.
+- [x] **TM-BLD-05 — Observabilidad de invalidación automática de cache.** Productor en
+      `ci4-website-builder-web` + `cacheElapsed` en el admin. Cerrada 2026-09-01: fuentes
+      automática/manual separadas, estado persistente acotado y UI degradable.
 
-- [ ] **TM-BLD-03 — Panel de calidad SEO en edición.** Parcial reutilizable + `PageQuality.php`
-      en es/en; panel de `show` usando el mismo parcial.
+- [x] **TM-BLD-03 — Panel de calidad SEO en edición.** Parcial reutilizable + `PageQuality.php`
+      en es/en; panel de `show` usando el mismo parcial. Cerrada 2026-09-01: estados y caída
+      del servicio visibles sin fatal.
 
-- [ ] **TM-BLD-08 — Vista HTML legible de la configuración del Wizard.**
+- [x] **TM-BLD-08 — Vista HTML legible de la configuración del Wizard.** Cerrada 2026-09-01:
+      negociación explícita HTML para navegador, JSON por defecto y valores escapados.
 
-- [ ] **TM-BLD-01 — Tipos de archivo y densidad visual.** Aquí **sí** se conserva la lectura de
-      `filesViewMode` como compatibilidad, sin volver a escribirla.
+- [x] **TM-BLD-01 — Tipos de archivo y densidad visual.** Aquí **sí** se conserva la lectura de
+      `filesViewMode` como compatibilidad, sin volver a escribirla. Cerrada 2026-09-01:
+      resolución fija MIME/extensión/categoría, densidades sm/md/lg y presentación segura en
+      tabla, grid y picker.
 
-- [ ] **TM-BLD-06 — Internacionalización de previews de bloques.** Copiar
+- [x] **TM-BLD-06 — Internacionalización de previews de bloques.** Copiar
       `app/Language/{en,es}/BlockPreview.php` y adaptar las vistas. Test que detecte textos
-      visibles hardcodeados. No aplica a la suite, que ya los tiene localizados.
+      visibles hardcodeados. No aplica a la suite, que ya los tiene localizados. Cerrada
+      2026-09-01: paridad es/en y guardarraíl estático sobre todas las previews.
 
-- [ ] **TM-BLD-07 — Desacoplamiento local de `CmsFieldEnums`.** Copiar al Builder, cambiar
+- [x] **TM-BLD-07 — Desacoplamiento local de `CmsFieldEnums`.** Copiar al Builder, cambiar
       imports, eliminar el mapeo Composer al sibling si no quedan consumidores, y **ejecutar sin
-      `ci4-website-builder-domain` disponible**. No aplica a la suite.
+      `ci4-website-builder-domain` disponible**. No aplica a la suite. Cerrada 2026-09-01:
+      enums locales, autoload sibling eliminado y guardrail arquitectónico añadido.
 
-- [ ] **TM-BLD-09 — `password_label` en inglés dentro del fichero español.** *(nueva, salida de
+- [x] **TM-BLD-09 — `password_label` en inglés dentro del fichero español.** *(nueva, salida de
       la verificación)* `app/Modules/Auth/Language/es/Auth.php:7` define
       `'password_label' => 'Password'`, el mismo defecto que la suite ya corrigió. Conviene
-      arrastrar también el guardarraíl `LanguageParityTest`.
+      arrastrar también el guardarraíl `LanguageParityTest`. Cerrada 2026-09-01.
 
 
 ### Remediación de huecos profundos (parte Admin)
