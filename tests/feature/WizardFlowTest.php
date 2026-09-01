@@ -591,7 +591,6 @@ final class WizardFlowTest extends CIUnitTestCase
         };
 
         $ref = new \ReflectionMethod($controller, 'validateImageFile');
-        $ref->setAccessible(true);
         $error = $ref->invoke($controller, $fakeFile);
 
         $this->assertIsString($error);
@@ -615,7 +614,6 @@ final class WizardFlowTest extends CIUnitTestCase
         };
 
         $ref = new \ReflectionMethod($controller, 'validateImageFile');
-        $ref->setAccessible(true);
         $error = $ref->invoke($controller, $fakeFile);
 
         $this->assertIsString($error);
@@ -639,7 +637,6 @@ final class WizardFlowTest extends CIUnitTestCase
         };
 
         $ref = new \ReflectionMethod($controller, 'validateImageFile');
-        $ref->setAccessible(true);
         $error = $ref->invoke($controller, $fakeFile);
 
         $this->assertNull($error);

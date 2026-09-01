@@ -114,6 +114,53 @@ final class BlockTypeOptionsResolver
     }
 
     /**
+     * Return the fields that the public collection readers can project.
+     *
+     * Keep this catalogue deliberately aligned with the public entry payload:
+     * offering a field that the reader cannot resolve would create a silent
+     * blank card. The map is indexed by both collection id and key so the
+     * legacy collection_listing and collection_grid contracts share one UI.
+     *
+     * @return array<int|string, list<array{value: string, label: string, group: string, type: string, sortable: bool, filterable: bool}>>
+     */
+    public function listingFieldCatalog(): array
+    {
+        $fields = [
+            $this->listingField('entry.title', lang('Pages.listing_catalog_entry_title'), lang('Pages.listing_catalog_group_entry'), 'text', true, true),
+            $this->listingField('entry.excerpt', lang('Pages.listing_catalog_entry_excerpt'), lang('Pages.listing_catalog_group_entry'), 'text', false, true),
+            $this->listingField('entry.slug', lang('Pages.listing_catalog_entry_slug'), lang('Pages.listing_catalog_group_entry'), 'string', true, true),
+            $this->listingField('entry.featured_image', lang('Pages.listing_catalog_entry_featured_image'), lang('Pages.listing_catalog_group_entry'), 'media_reference', false, false),
+            $this->listingField('entry.published_at', lang('Pages.listing_catalog_entry_published_at'), lang('Pages.listing_catalog_group_entry'), 'date', true, true),
+            $this->listingField('entry.created_at', lang('Pages.listing_catalog_entry_created_at'), lang('Pages.listing_catalog_group_entry'), 'date', true, true),
+            $this->listingField('entry.sort_order', lang('Pages.listing_catalog_entry_sort_order'), lang('Pages.listing_catalog_group_entry'), 'number', true, false),
+            $this->listingField('taxonomy.categories', lang('Pages.listing_catalog_taxonomy_categories'), lang('Pages.listing_catalog_group_taxonomy'), 'taxonomy', false, true),
+            $this->listingField('taxonomy.tags', lang('Pages.listing_catalog_taxonomy_tags'), lang('Pages.listing_catalog_group_taxonomy'), 'taxonomy', false, true),
+        ];
+
+        $catalog = [];
+        foreach ($this->activeCollections() as $collection) {
+            $id = (int) ($collection['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+
+            $catalog[$id] = $fields;
+            $key = trim((string) ($collection['collection_key'] ?? ''));
+            if ($key !== '') {
+                $catalog[$key] = $fields;
+            }
+        }
+
+        return $catalog;
+    }
+
+    /** @return array{value: string, label: string, group: string, type: string, sortable: bool, filterable: bool} */
+    private function listingField(string $value, string $label, string $group, string $type, bool $sortable, bool $filterable): array
+    {
+        return compact('value', 'label', 'group', 'type', 'sortable', 'filterable');
+    }
+
+    /**
      * @return array<int, array{value: string, label: string}>
      */
     public function entriesForCollection(int $collectionId): array

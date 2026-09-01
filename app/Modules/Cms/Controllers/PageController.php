@@ -86,7 +86,7 @@ class PageController extends BaseWebController
             'blockTypes'    => $this->fetchBlockTypesIndexed(),
             'languages'     => $this->getLanguages(),
             'blockTranslationStatus'  => $this->ownerBlockTranslationStatus('page', $id),
-            'quality'       => $qualityResp['ok'] ? $this->extractData($qualityResp) : null,
+            'quality'       => $qualityResp['ok'] ? $this->extractData($qualityResp) : ['status' => 'unavailable'],
         ]);
     }
 
@@ -133,7 +133,6 @@ class PageController extends BaseWebController
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
-
         return $this->render('cms/pages/create', [
             'title' => lang('Pages.pages_create'),
             'pages' => $this->pagesOptions(),
@@ -191,6 +190,7 @@ class PageController extends BaseWebController
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
+        $qualityResp = $this->safeApiCall(fn () => $this->pageService->quality($id));
 
         return $this->render('cms/pages/edit', [
             'title' => lang('Pages.pages_edit'),
@@ -205,6 +205,7 @@ class PageController extends BaseWebController
             'translateTargets' => $translateTargets,
             'pageTypes' => $this->pageTypeOptions(),
             'returnTo' => $this->incomingReturnTo(),
+            'quality' => $qualityResp['ok'] ? $this->extractData($qualityResp) : ['status' => 'unavailable'],
         ]);
     }
 

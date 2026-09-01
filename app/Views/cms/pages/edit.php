@@ -82,6 +82,8 @@ if (!empty($languages)) {
         </div>
     <?php endif; ?>
 
+    <?= view('cms/pages/partials/quality_panel', ['quality' => $quality ?? null]) ?>
+
     <?php ob_start(); ?>
     <form method="post" action="<?= route_to('admin.cms.pages.update', $itemIdStr) ?>" class="grid grid-cols-1 gap-6 lg:grid-cols-3" x-data="{ expandedSections: { basic: true, translations: true, publishing: false, seo: false, advanced: false } }">
         <?= csrf_field() ?>

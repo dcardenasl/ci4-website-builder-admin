@@ -409,6 +409,7 @@ $isImageAccept = static function (string $accept): bool {
                                 <input type="text" :name="`block_config[${key}]`"
                                        :value="field.default || ''"
                                        :placeholder="field.default || ''"
+                                       @input="key === 'collection_key' && $dispatch('listing-projection-collection', { value: $event.target.value })"
                                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500">
                             </template>
 
@@ -416,6 +417,14 @@ $isImageAccept = static function (string $accept): bool {
                         </div>
                     </template>
                 </div>
+            </div>
+
+            <div x-show="selectedBlockType && ['collection_listing', 'collection_grid'].includes(selectedBlockType.block_key)" x-cloak>
+                <?= view('cms/pages/blocks/_listing_projection', [
+                    'listingFieldCatalog' => $listingFieldCatalog ?? [],
+                    'blockConfig' => [],
+                    'submittedBlockConfig' => [],
+                ]) ?>
             </div>
 
             <div x-show="contentFields && Object.keys(contentFields).length > 0" x-cloak>

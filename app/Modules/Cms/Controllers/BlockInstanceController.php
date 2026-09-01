@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsEnums;
 use App\Modules\Cms\Services\BlockInstanceApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Services\TranslationAuditApiService;
 use App\Modules\Cms\Support\BlockOwnerRouting;
+use App\Support\CmsFieldEnums;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -222,6 +222,7 @@ class BlockInstanceController extends BaseWebController
             'blockTypes'        => $types,
             'languages'         => $languages,
             'entryOptionsUrl'   => route_to('admin.cms.blocks.entries'),
+            'listingFieldCatalog' => $this->blockTypeOptions->listingFieldCatalog(),
             'translateUrl'      => route_to('admin.cms.translate'),
             'defaultLangCode'   => $languageContext['defaultLangCode'],
             'defaultLangId'     => $languageContext['defaultLangId'],
@@ -401,7 +402,7 @@ class BlockInstanceController extends BaseWebController
         $translatableFieldNames = [];
         foreach ($allFields as $fieldKey => $field) {
             $fieldType = $field['type'] ?? 'string';
-            if (!in_array($fieldType, CmsEnums::NON_TRANSLATABLE_TYPES, true)) {
+            if (! in_array($fieldType, CmsFieldEnums::NON_TRANSLATABLE_TYPES, true)) {
                 $translatableFieldNames[] = "block_data][{$fieldKey}";
             }
         }
@@ -425,6 +426,7 @@ class BlockInstanceController extends BaseWebController
             'blockType'    => $blockType,
             'languages'    => $languages,
             'entryOptionsUrl' => route_to('admin.cms.blocks.entries'),
+            'listingFieldCatalog' => $this->blockTypeOptions->listingFieldCatalog(),
             'defaultLangId' => $languageContext['defaultLangId'],
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],

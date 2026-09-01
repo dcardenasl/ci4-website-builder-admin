@@ -227,6 +227,7 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                             <input type="<?= $cfType === 'url' ? 'url' : ($cfType === 'integer' ? 'number' : 'text') ?>"
                                    name="<?= esc($cfFieldName, 'attr') ?>"
                                    value="<?= esc((string) $cfVal) ?>"
+                                   <?= $cfKey === 'collection_key' ? '@input="$dispatch(\'listing-projection-collection\', { value: $event.target.value })"' : '' ?>
                                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                                    <?= $cfReq ? 'required' : '' ?>>
                         <?php endif; ?>
@@ -720,6 +721,14 @@ $entryOptionsUrlJs = json_encode((string) ($entryOptionsUrl ?? ''), JSON_UNESCAP
                 </div>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
+
+            <?php if (in_array($blockKey, ['collection_listing', 'collection_grid'], true)): ?>
+                <?= view('cms/pages/blocks/_listing_projection', [
+                    'listingFieldCatalog' => $listingFieldCatalog ?? [],
+                    'blockConfig' => $blockConfig,
+                    'submittedBlockConfig' => $submittedBlockConfig,
+                ]) ?>
             <?php endif; ?>
 
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
