@@ -36,7 +36,10 @@ final class TimeSeriesChartViewTest extends CIUnitTestCase
         $this->assertStringContainsString('data-state="ready"', $html);
         $this->assertStringContainsString('<svg', $html);
         $this->assertStringContainsString('role="img"', $html);
+        $this->assertStringContainsString('<title id="traffic-svg-title">Traffic Trend</title>', $html);
+        $this->assertStringContainsString('<desc id="traffic-svg-description">Daily traffic.</desc>', $html);
         $this->assertStringContainsString('<caption class="sr-only">Traffic data</caption>', $html);
+        $this->assertStringContainsString('Views (views)', $html);
         $this->assertStringContainsString('2026-01-02', $html);
         $this->assertStringContainsString('12', $html);
         $this->assertStringNotContainsString('<script', $html);

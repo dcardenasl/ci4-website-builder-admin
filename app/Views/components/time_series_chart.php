@@ -5,6 +5,8 @@ use App\Support\TimeSeries\TimeSeriesChartDTO;
 /** @var TimeSeriesChartDTO $chart */
 $titleId = $chart->id . '-title';
 $descriptionId = $chart->id . '-description';
+$svgTitleId = $chart->id . '-svg-title';
+$svgDescriptionId = $chart->id . '-svg-description';
 ?>
 <section class="mt-6 min-w-0 overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-time-series="<?= esc($chart->id) ?>" data-state="<?= esc($chart->state) ?>" aria-labelledby="<?= esc($titleId) ?>">
     <h2 id="<?= esc($titleId) ?>" class="text-lg font-semibold text-gray-900"><?= esc($chart->title) ?></h2>
@@ -48,7 +50,9 @@ $descriptionId = $chart->id . '-description';
         }
         ?>
         <figure class="mt-5" aria-describedby="<?= esc($descriptionId) ?>">
-            <svg class="block h-auto w-full" viewBox="0 0 <?= esc((string) $width) ?> <?= esc((string) $height) ?>" role="img" aria-labelledby="<?= esc($titleId) ?>" aria-describedby="<?= esc($descriptionId) ?>">
+            <svg class="block h-auto w-full" viewBox="0 0 <?= esc((string) $width) ?> <?= esc((string) $height) ?>" role="img" aria-labelledby="<?= esc($svgTitleId) ?>" aria-describedby="<?= esc($svgDescriptionId) ?>">
+                <title id="<?= esc($svgTitleId) ?>"><?= esc($chart->title) ?></title>
+                <desc id="<?= esc($svgDescriptionId) ?>"><?= esc($chart->description) ?></desc>
                 <line x1="<?= esc((string) $paddingLeft) ?>" y1="<?= esc((string) ($paddingTop + $plotHeight)) ?>" x2="<?= esc((string) ($width - $paddingRight)) ?>" y2="<?= esc((string) ($paddingTop + $plotHeight)) ?>" stroke="currentColor" stroke-opacity="0.15" aria-hidden="true"></line>
                 <line x1="<?= esc((string) $paddingLeft) ?>" y1="<?= esc((string) $paddingTop) ?>" x2="<?= esc((string) $paddingLeft) ?>" y2="<?= esc((string) ($paddingTop + $plotHeight)) ?>" stroke="currentColor" stroke-opacity="0.15" aria-hidden="true"></line>
                 <?php foreach ($svgPoints as $index => $seriesPoints): ?>
@@ -72,8 +76,8 @@ $descriptionId = $chart->id . '-description';
                     <thead class="<?= esc(table_head_class()) ?>">
                         <tr>
                             <th scope="col" class="<?= esc(table_th_class()) ?>"><?= esc($chart->table->labelHeader) ?></th>
-                            <?php foreach ($chart->table->valueHeaders as $header): ?>
-                                <th scope="col" class="<?= esc(table_th_class()) ?>"><?= esc($header) ?></th>
+                            <?php foreach ($chart->table->valueHeaders as $headerIndex => $header): ?>
+                                <th scope="col" class="<?= esc(table_th_class()) ?>"><?= esc($header) ?> (<?= esc($chart->series[$headerIndex]->unit) ?>)</th>
                             <?php endforeach; ?>
                         </tr>
                     </thead>
