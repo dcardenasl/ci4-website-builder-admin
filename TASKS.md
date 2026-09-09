@@ -80,6 +80,21 @@
 
 ## 🟡 Próximo
 
+### CNV-007 — Editor visual (canvas): port del panel
+
+> Verificación de arranque en
+> [`../ci4-website-suite/docs/plan/2026-09-09-editor-visual-canvas-port-f7.md`](../ci4-website-suite/docs/plan/2026-09-09-editor-visual-canvas-port-f7.md).
+> JS del panel medido contra la suite: 44 idénticos, 21 distintos, 13 solo allí (los del canvas).
+
+- [ ] **CNV-007-A1 — Shell del canvas.** `EditorController` sobre `DomainApiClient`, layout a sangre
+      completa y vistas en parciales.
+- [ ] **CNV-007-A2 — Módulos JS.** Portar `components/canvas/*` y `utils/canvas/*`. **El `state.js`
+      no se copia tal cual:** aquí `csrfProtection` es `session` con `regenerate = false`, así que
+      debe usar `csrfHeaders()` de `utils/wizard/adminFetch.js`; el `shared/js/csrf.js` de la suite
+      no existe en este repo y no debe introducirse solo por esto.
+- [ ] **CNV-007-A3 — Modo simple.** `ui_mode` en el shell y filtro de denegación por defecto sobre
+      `admin/*` con lista blanca, una vez el hub exponga la columna.
+
 ### TRN-006 — Estados editoriales, permisos y controles de publicación
 
 - [ ] Decidir el modelo de estados por idioma (`in_review`, `approved`, `published`).
