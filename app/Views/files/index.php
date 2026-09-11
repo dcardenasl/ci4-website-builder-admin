@@ -1,5 +1,7 @@
+<h1 class="mb-5 text-xl font-bold text-gray-900"><?= esc(lang('Files.title')) ?></h1>
+
 <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-    <h3 class="text-lg font-semibold text-gray-900"><?= lang('Files.upload_title') ?></h3>
+    <h2 class="text-lg font-semibold text-gray-900"><?= lang('Files.upload_title') ?></h2>
     <form method="post" action="<?= site_url('files/upload') ?>" enctype="multipart/form-data" class="mt-4 space-y-4" x-data="{
         dragging: false,
         selectedFileName: '',

@@ -91,7 +91,7 @@ if (! function_exists('confirm_delete_message')) {
 if (! function_exists('filter_submit_button_class')) {
     function filter_submit_button_class(bool $fullWidth = false): string
     {
-        $base = 'inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500';
+        $base = 'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500';
 
         return $fullWidth ? ('w-full ' . $base) : $base;
     }
@@ -208,14 +208,14 @@ if (! function_exists('card_class')) {
 if (! function_exists('table_wrapper_class')) {
     function table_wrapper_class(): string
     {
-        return 'mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-100';
+        return 'mt-4 min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ring-1 ring-gray-100';
     }
 }
 
 if (! function_exists('table_scroll_class')) {
     function table_scroll_class(): string
     {
-        return 'overflow-x-auto';
+        return 'min-w-0 overflow-x-auto';
     }
 }
 
@@ -309,6 +309,12 @@ if (! function_exists('ui_icon')) {
             'trash'     => 'trash-2',
             'x'         => 'x',
             'file'        => 'file',
+            'file-text'   => 'file-text',
+            'file-spreadsheet' => 'file-spreadsheet',
+            'file-archive' => 'file-archive',
+            'file-code'   => 'file-code',
+            'file-image'  => 'file-image',
+            'file-type'   => 'file-type',
             'file-plus'   => 'file-plus',
             'database'    => 'database',
             'hard-drive'  => 'hard-drive',
@@ -319,9 +325,14 @@ if (! function_exists('ui_icon')) {
             'upload'        => 'upload',
             'upload-cloud'  => 'upload-cloud',
             'refresh-ccw'   => 'refresh-ccw',
+            'refresh-cw'    => 'refresh-cw',
             'check'         => 'check',
+            'eye-off'       => 'eye-off',
             'folder-open'     => 'folder-open',
             'image'           => 'image',
+            'music-2'         => 'music-2',
+            'film'            => 'film',
+            'presentation'    => 'presentation',
             'layers'          => 'layers',
             'help-circle'     => 'circle-help',
             'info'            => 'info',
@@ -359,6 +370,7 @@ if (! function_exists('ui_icon')) {
             'copy'            => 'copy',
             'clipboard-list'  => 'clipboard-list',
             'circle-check'    => 'circle-check',
+            'bar-chart-2'     => 'bar-chart-2',
         ];
 
         if (! isset($icons[$name])) {

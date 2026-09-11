@@ -60,6 +60,8 @@ final class MetricsFlowTest extends CIUnitTestCase
         $result->assertStatus(200);
         $this->assertStringContainsString('321', $result->getBody());
         $this->assertStringContainsString('10:00', $result->getBody());
+        $this->assertStringContainsString('data-state="ready"', $result->getBody());
+        $this->assertStringContainsString('<svg', $result->getBody());
     }
 
     public function testMetricsPageFallsBackToDefaultPeriodWhenFilterIsInvalid(): void

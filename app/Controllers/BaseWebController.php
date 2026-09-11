@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\ApiClientInterface;
+use App\Support\FieldErrorNormalizer;
 use App\Support\Requests\FormRequestInterface;
 use App\Support\SessionKeys;
+use App\Support\UiMode;
 use App\Traits\TableResponseTrait;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -46,6 +48,13 @@ abstract class BaseWebController extends BaseController
             // client-side JS can show a warning before the session lapses,
             // instead of users getting a confusing 401 mid-action.
             'sessionExpiresAt'    => $this->session->get(SessionKeys::EXPIRES_AT->value),
+            // The API supplies the effective role mode. This only selects the
+            // shell; SimpleUiFilter enforces the server-side UI boundary.
+            'uiMode'              => UiMode::fromMixed(
+                is_array($this->session->get(SessionKeys::USER->value))
+                    ? ($this->session->get(SessionKeys::USER->value)['ui_mode'] ?? null)
+                    : null,
+            )->value,
         ];
     }
 
@@ -183,13 +192,17 @@ abstract class BaseWebController extends BaseController
     private function normalizeDevErr(array $response): array
     {
         $messages = is_array($response['messages'] ?? null) ? $response['messages'] : [];
-        $errors   = is_array($response['fieldErrors'] ?? null) ? $response['fieldErrors'] : [];
+        $errors   = FieldErrorNormalizer::normalize($response['fieldErrors'] ?? []);
+
+        foreach (FieldErrorNormalizer::normalize($response['errors'] ?? []) as $key => $message) {
+            $errors[$key] ??= $message;
+        }
 
         return [
             'status'   => (int) ($response['status'] ?? 0),
             'body'     => (string) ($response['raw'] ?? ''),
             'messages' => array_values(array_map(static fn (mixed $m): string => (string) $m, $messages)),
-            'errors'   => array_map(static fn (mixed $e): string => (string) $e, $errors),
+            'errors'   => $errors,
         ];
     }
 
@@ -286,26 +299,12 @@ abstract class BaseWebController extends BaseController
      */
     protected function getFieldErrors(array $response): array
     {
-        if (! isset($response['fieldErrors'])) {
-            return [];
-        }
-
-        $fieldErrors = $response['fieldErrors'];
-
-        if (! is_array($fieldErrors)) {
-            log_message('warning', '[BaseWebController] Unexpected fieldErrors type: ' . gettype($fieldErrors));
-
-            return [];
-        }
-
         $normalized = [];
 
-        foreach ($fieldErrors as $key => $value) {
-            if (! is_string($key) || ! is_scalar($value)) {
-                continue;
+        foreach (['fieldErrors', 'errors'] as $source) {
+            foreach (FieldErrorNormalizer::normalize($response[$source] ?? []) as $key => $message) {
+                $normalized[$key] ??= $this->localizeApiMessage($message);
             }
-
-            $normalized[$key] = $this->localizeApiMessage((string) $value);
         }
 
         return $normalized;
@@ -433,7 +432,79 @@ abstract class BaseWebController extends BaseController
             ? ($this->request->getJSON(true) ?? [])
             : [];
 
-        return is_array($raw) ? $raw : [];
+        // A top-level JSON array (a list, e.g. `[1,2,3]`) has no field names
+        // and can never satisfy the string-keyed shape this method promises
+        // its callers — treat it the same as no body at all.
+        if (! is_array($raw) || array_is_list($raw)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $raw */
+        return $raw;
+    }
+
+    /**
+     * Execute one bounded reorder request against its owning domain.
+     *
+     * @param list<array{id: int|string, sort_order: int}> $items
+     * @param array<string, int|string|null> $scope
+     * @return array<string, mixed>
+     */
+    protected function sortOrderApiCall(string $resource, array $items, array $scope = []): array
+    {
+        /** @var \App\Services\SortOrderApiServiceInterface $service */
+        $service = service('sortOrderApiService');
+
+        return $service->cms($resource, $items, $scope);
+    }
+
+    /**
+     * Read the shared JSON reorder payload and forward it in one request.
+     *
+     * @param array<string, int|string|null> $scope
+     */
+    protected function saveSortOrderFromJson(
+        string $resource,
+        array $scope = [],
+        string $successMessage = 'Order saved.',
+    ): ResponseInterface {
+        $payload = $this->jsonRequestPayload();
+        $items = $payload['items'] ?? null;
+        if (! is_array($items)) {
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Invalid payload structure',
+            ])->setStatusCode(400);
+        }
+
+        $normalizedItems = [];
+        foreach ($items as $item) {
+            if (! is_array($item) || ! is_numeric($item['id'] ?? null) || ! is_numeric($item['sort_order'] ?? null)) {
+                return $this->response->setJSON([
+                    'ok' => false,
+                    'message' => 'Invalid payload structure',
+                ])->setStatusCode(400);
+            }
+            $normalizedItems[] = [
+                'id' => (int) $item['id'],
+                'sort_order' => (int) $item['sort_order'],
+            ];
+        }
+
+        $response = $this->safeApiCall(fn () => $this->sortOrderApiCall($resource, $normalizedItems, $scope));
+        if (! ($response['ok'] ?? false)) {
+            $this->maybeFlashDevError($response);
+
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => $this->firstMessage($response, lang('App.connection_error')),
+            ])->setStatusCode($this->normalizeUpstreamStatus($response));
+        }
+
+        return $this->response->setJSON([
+            'ok' => true,
+            'message' => $successMessage,
+        ]);
     }
 
     /**

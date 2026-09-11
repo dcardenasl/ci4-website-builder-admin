@@ -1,7 +1,51 @@
 # TASKS_ARCHIVE — ci4-admin-starter
 
 > Historial de tareas completadas.
-> Última actualización: 2026-07-22
+> Última actualización: 2026-08-25
+
+## ✅ CNV-007-F9 — Reconciliación de alcance — 2026-09-11
+
+La autorización por recurso queda centralizada en Domain (`729aa89`). Admin no duplica ownership
+ni ACL: adapta envelopes, refleja permisos efectivos y deja que Domain imponga el 404 anti-
+enumeración. No hay implementación local pendiente.
+
+---
+
+## ✅ Remediación de huecos profundos — Fase 0 (2026-08-25)
+
+- **GAP-00-admin** — eliminado el CRUD genérico `Universal`, retirada su configuración huérfana,
+  y protegidas todas las rutas de `Files` con `files.read`/`files.write`; regresiones de
+  autorización incluidas. Commit `d98e57c`; `composer quality`, PHPUnit completo y hook de commit
+  verificados.
+
+## ✅ Backport de mejoras de Teatro Museo — Fase 3 (2026-08-25)
+
+- **BACKPORT-03-admin** — UI genérica de reordenamiento por lotes y pantalla de mantenimiento de
+  caché del sitio público, con i18n, permisos y pruebas. Commit `e50889d`; calidad PHP/JS completa
+  en verde.
+
+## ✅ Backport de mejoras de Teatro Museo — Fase 5 (2026-08-25)
+
+- **BACKPORT-05-admin** — documentación de contratos UI genéricos y alineación de defaults de
+  API/Domain para clones nuevos; verificado con la suite de calidad del repo.
+
+---
+
+## ✅ Backport de mejoras de Teatro Museo — Fase 0 y CVE (2026-08-25)
+
+- **BACKPORT-00-admin** — `SecondaryApiClient`, wiring del Hub, contrato de refresh y guard del
+  panel de filtros; cobertura unitaria incluida y verificada con `composer quality`.
+- **BACKPORT-CVE-admin** — CI4 4.7.4 y guards de tipo en payloads JSON; verificado con
+  `composer quality`.
+
+## ✅ Backport de mejoras de Teatro Museo — Fase 1 (2026-08-25)
+
+- **BACKPORT-01-admin** — remote-table/list response, subgrupos colapsables, componentes de
+  formulario, eliminación de `x-init` redundante, CSP, normalización anidada de errores y
+  `AdminRouteAuthorizationTest`. `DownloadResponse` ya estaba implementado y probado en el base;
+  `createFetchQueue()` no existe en el código real de Teatro Museo (solo quedó documentado en su
+  changelog), por lo que ambos hallazgos se cerraron como falsos positivos. Verificado con build
+  JS, Vitest (92 tests), ESLint, PHPStan, CS-Fixer, i18n y PHPUnit (652 tests).
 
 ---
 
@@ -126,3 +170,29 @@
 
 Los bloques completos se retiraron del tracker activo para que solo queden decisiones pendientes,
 backlog real y el contrato de calidad del repositorio.
+
+## ✅ Reconciliación para CNV-007 — 2026-09-11
+
+- **TM-BLD-01..09:** backport de TeatroMuseo cerrado con tests/build/i18n/guardrails aplicables:
+  seguridad de vistas, proyecciones, observabilidad, SEO, Wizard, media, previews, enums locales y
+  paridad de idiomas.
+- **ADM-DEP-002:** actualización de `lint-staged` a 17 y verificación de Node 22, audit, tests,
+  lint, build y hook de pre-commit.
+
+El trabajo activo se reduce al smoke de integración; TRN-006 queda como backlog de producto.
+
+## ✅ CNV-007-A1/A2/A3 y GAP-02 — 2026-09-11
+
+- **CNV-007-A1/A2:** commits `7ca7dc5` y `97eabe9`; shell del canvas, módulos JS, bridge,
+  contratos de error y CSRF local adaptado.
+- **CNV-007-A3:** commit `28d32ab`; modo `full/simple`, allowlist server-side, sidebar reducido,
+  formularios de roles y pruebas de seguridad/presentación.
+- **GAP-02-admin:** commit `ee30cfb`; consumo paginado de auditoría con `items/meta`, filtros,
+  totales y pruebas de integración del controlador.
+
+Gates verificados: 711 tests, 2.562 aserciones, PHPStan, CS-Fixer, i18n, Vitest, lint y builds.
+
+## ✅ CNV-007-F6 — Smoke real — 2026-09-11
+
+Editor visual verificado en navegador con preview firmado ES/EN, selección raíz/hijo, renovación de
+token, CORS/CSP, bridge y consola limpia en carga fresca.

@@ -6,6 +6,7 @@ namespace App\Modules\Analytics\Controllers;
 
 use App\Controllers\BaseWebController;
 use App\Modules\Analytics\Services\AnalyticsApiService;
+use App\Modules\Analytics\Support\AnalyticsTimeSeriesAdapter;
 use App\Support\CatalogOptions;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -15,10 +16,13 @@ class AnalyticsController extends BaseWebController
 {
     protected AnalyticsApiService $analyticsService;
 
+    protected AnalyticsTimeSeriesAdapter $timeSeriesAdapter;
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
         parent::initController($request, $response, $logger);
         $this->analyticsService = service('analyticsApiService');
+        $this->timeSeriesAdapter = new AnalyticsTimeSeriesAdapter();
     }
 
     public function index(): string
@@ -57,19 +61,17 @@ class AnalyticsController extends BaseWebController
         $pages     = $this->extractData($pagesResponse);
         $referrers = $this->extractData($referrersResponse);
         $devices   = $this->extractData($devicesResponse);
-        $timeseries = $this->extractData($timeseriesResponse);
+        $timeSeriesChart = $this->timeSeriesAdapter->fromResponse($timeseriesResponse);
 
         $pagesData      = isset($pages['data']) && is_array($pages['data']) ? $pages['data'] : [];
         $referrersData  = isset($referrers['data']) && is_array($referrers['data']) ? $referrers['data'] : [];
-        $timeseriesData = isset($timeseries['data']) && is_array($timeseries['data']) ? $timeseries['data'] : [];
-
         return $this->render('analytics/index', [
             'title'          => lang('Analytics.title'),
             'overview'       => $overview,
             'pages'          => $pagesData,
             'referrers'      => $referrersData,
             'devices'        => $devices,
-            'timeseries'     => $timeseriesData,
+            'timeSeriesChart' => $timeSeriesChart,
             'filters'        => ['period' => $period],
             'defaultFilters' => $defaultFilters,
             'hasFilters'     => $period !== $defaultFilters['period'],

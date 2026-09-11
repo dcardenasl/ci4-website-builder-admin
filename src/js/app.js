@@ -1,6 +1,7 @@
 import { bootLucideIcons } from './utils/lucide.js';
 import { bootSlugFields } from './utils/slug.js';
 import { bestFilePreviewUrl, resolveTranslatableFilePreviewUrl } from './utils/fileUrl.js';
+import { fileTypePresentation } from './utils/fileType.js';
 import { formValuesToObject } from './utils/formSerialization.js';
 import { buildConfirmDeleteMessage } from './utils/labels.js';
 import { resolveCmsTranslationEditUrl } from './utils/translationNavigation.js';
@@ -14,6 +15,7 @@ import { appShell } from './components/appShell.js';
 import { remoteTableFactory } from './components/remoteTable.js';
 import { formFieldBuilderFactory } from './components/formFieldBuilder.js';
 import { filePickerField } from './components/filePickerField.js';
+import { fileGalleryField } from './components/fileGalleryField.js';
 import { translatableFileField } from './components/translatableFileField.js';
 import { mediaReferenceField } from './components/mediaReferenceField.js';
 import { blockRepeaterField } from './components/blockRepeaterField.js';
@@ -24,11 +26,20 @@ import { jsonEditor } from './components/jsonEditor.js';
 import { blockPreview } from './components/blockPreview.js';
 import { blockTypeDesigner } from './components/blockTypeDesigner.js';
 import { blockInstanceConfig } from './components/blockInstanceConfig.js';
+import { collectionBlockTemplateBuilder } from './components/collectionBlockTemplateBuilder.js';
+import { listingProjectionEditor } from './components/listingProjectionEditor.js';
+import { blockInstanceBuilder } from './components/blockInstanceBuilder.js';
+import { menuItemForm } from './components/menuItemForm.js';
+import { bootConfirmAction } from './components/confirmAction.js';
+import { cacheElapsed } from './components/cacheElapsed.js';
 import { schemaEditor } from './components/schemaEditor.js';
 import { blockSorter } from './components/blockSorter.js';
 import { bootSessionExpiryWatcher } from './components/sessionWatcher.js';
+import { bootFileUsages } from './components/fileUsages.js';
 import { handleGoogleCredentialResponse } from './components/googleAuth.js';
 import { richTextEditor } from './components/richTextEditor.js';
+import { bootAdminFormFieldErrors, adminFormFieldErrors } from './components/serverFieldErrors.js';
+import { passwordToggle } from './components/passwordToggle.js';
 import {
     copyLangTabsFileFieldToAll,
     copyLangTabsFileFieldToTargets,
@@ -36,6 +47,7 @@ import {
 } from './components/langTabs.js';
 import { wizard } from './components/wizard/index.js';
 import { structureWizard } from './components/wizard/structureIndex.js';
+import canvasEditor from './components/canvas/index.js';
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
@@ -46,6 +58,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('remoteTable', remoteTableFactory);
     Alpine.data('formFieldBuilder', formFieldBuilderFactory);
     Alpine.data('filePickerField', filePickerField);
+    Alpine.data('fileGalleryField', fileGalleryField);
     Alpine.data('translatableFileField', translatableFileField);
     Alpine.data('mediaReferenceField', mediaReferenceField);
     Alpine.data('blockRepeaterField', blockRepeaterField);
@@ -56,16 +69,24 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('blockPreview', blockPreview);
     Alpine.data('blockTypeDesigner', blockTypeDesigner);
     Alpine.data('blockInstanceConfig', blockInstanceConfig);
+    Alpine.data('collectionBlockTemplateBuilder', collectionBlockTemplateBuilder);
+    Alpine.data('listingProjectionEditor', listingProjectionEditor);
+    Alpine.data('blockInstanceBuilder', blockInstanceBuilder);
+    Alpine.data('menuItemForm', menuItemForm);
     Alpine.data('schemaEditor', schemaEditor);
     Alpine.data('blockSorter', blockSorter);
     Alpine.data('wizard', wizard);
     Alpine.data('structureWizard', structureWizard);
+    Alpine.data('passwordToggle', passwordToggle);
+    Alpine.data('cacheElapsed', cacheElapsed);
+    Alpine.data('canvasEditor', canvasEditor);
 
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
     window.formFieldBuilder = formFieldBuilderFactory;
     window.confirmDeleteMessage = buildConfirmDeleteMessage;
     window.bestFilePreviewUrl = bestFilePreviewUrl;
+    window.filePresentation = fileTypePresentation;
     window.resolveTranslatableFilePreviewUrl = resolveTranslatableFilePreviewUrl;
     window.resolveCmsTranslationEditUrl = resolveCmsTranslationEditUrl;
     window.copyDefaultToAll = copyDefaultToAll;
@@ -74,6 +95,7 @@ document.addEventListener('alpine:init', () => {
     window.copyLangTabsFileFieldToAll = copyLangTabsFileFieldToAll;
     window.copyLangTabsMediaReferenceFieldToAll = copyLangTabsMediaReferenceFieldToAll;
     window.blockInstanceConfigFactory = blockInstanceConfig;
+    window.AdminFormFieldErrors = adminFormFieldErrors;
 });
 
 // Must be on window before the Google GSI script fires
@@ -87,10 +109,14 @@ let lastActionButtonClick = null;
 document.addEventListener('DOMContentLoaded', () => {
     if (!lucideBootstrapped) { bootLucideIcons(); lucideBootstrapped = true; }
     bootSlugFields();
+    bootConfirmAction();
     bootGlobalSubmitGuard();
     const config = window.__componentConfig || {};
     bootSessionExpiryWatcher({ expiringMessage: config.sessionExpiringMessage });
+    bootFileUsages();
 });
+
+bootAdminFormFieldErrors();
 
 window.addEventListener('load', () => {
     if (!lucideBootstrapped) { bootLucideIcons(); lucideBootstrapped = true; }

@@ -630,6 +630,25 @@ echo config('ApiClient')->baseUrl;
 
 ---
 
+## Editor visual: preview cross-origin
+
+El canvas del editor carga el render real del Web en `http://localhost:8186` dentro del Admin
+`http://localhost:8182`. Si el iframe muestra `previewUnavailable`, `404` o un bloqueo CSP:
+
+1. Confirma que `CMS_PREVIEW_SECRET` sea idéntico en Admin, Domain y Web.
+2. En Web configura `EDITOR_PANEL_ORIGIN = 'http://localhost:8182'`; no uses `127.0.0.1`, una
+   ruta ni `*`.
+3. Reinicia los tres procesos para que CI4 vuelva a construir `Config\App`.
+4. Ejecuta `./START_SERVERS.sh` desde la raíz: el launcher valida el contrato y falla antes de
+   levantar procesos si falta un valor.
+5. En Network confirma `POST /{locale}/_editor/preview` `200`, `Content-Security-Policy` con
+   `frame-ancestors http://localhost:8182`, `Cache-Control: no-store` y bridge local cargado.
+
+La selección se transporta por `postMessage` con origin, source, canal y secuencia validados. Un
+mensaje rechazado debe quedar sin efecto; no se debe desactivar CSP, CORS o el sandbox para “hacerlo
+funcionar”. El smoke reproducible está en
+[`../../docs/runbooks/2026-09-11-modular-stack-smoke.md`](../../docs/runbooks/2026-09-11-modular-stack-smoke.md).
+
 ## Still Having Issues?
 
 1. Check the [FAQ.md](./FAQ.md) for other common questions

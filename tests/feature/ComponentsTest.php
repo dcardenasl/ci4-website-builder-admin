@@ -37,6 +37,50 @@ final class ComponentsTest extends CIUnitTestCase
         $this->assertStringContainsString('aria-required="true"', $html);
     }
 
+    public function testTextComponentSerializesStructuredValuesBeforeEscaping(): void
+    {
+        $html = view('components/form/text', [
+            'name'  => 'metadata',
+            'label' => 'App.name',
+            'value' => ['kind' => 'image', 'id' => 7],
+        ], ['saveData' => false]);
+
+        $this->assertStringContainsString('value="{&quot;kind&quot;:&quot;image&quot;,&quot;id&quot;:7}"', $html);
+    }
+
+    public function testFieldRowSerializesStructuredValuesBeforeEscaping(): void
+    {
+        $html = view('components/display/field_row', [
+            'label' => 'App.name',
+            'value' => ['kind' => 'image', 'id' => 7],
+        ], ['saveData' => false]);
+
+        $this->assertStringContainsString('{&quot;kind&quot;:&quot;image&quot;,&quot;id&quot;:7}', $html);
+    }
+
+    public function testPasswordComponentRendersAccessibleVisibilityToggle(): void
+    {
+        $html = view('components/form/password', [
+            'name' => 'password',
+            'label' => 'Auth.password_label',
+            'autocomplete' => 'current-password',
+            'required' => true,
+            'attributes' => ['x-model' => 'password'],
+        ], ['saveData' => false]);
+        $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5);
+
+        $this->assertStringContainsString('x-data="passwordToggle()"', $decoded);
+        $this->assertStringContainsString('type="password"', $decoded);
+        $this->assertStringContainsString(":type=\"visible ? 'text' : 'password'\"", $decoded);
+        $this->assertStringContainsString('x-model="password"', $decoded);
+        $this->assertStringContainsString('aria-label="' . lang('App.show_password') . '"', $decoded);
+        $this->assertStringContainsString(':aria-label="visible ?', $decoded);
+        $this->assertStringContainsString('aria-pressed="false"', $decoded);
+        $this->assertStringContainsString('aria-controls="password"', $decoded);
+        $this->assertStringContainsString('data-lucide="eye"', $decoded);
+        $this->assertStringContainsString('data-lucide="eye-off"', $decoded);
+    }
+
     public function testNumberComponentHandlesMinMaxStep(): void
     {
         $html = view('components/form/number', [
@@ -206,5 +250,16 @@ final class ComponentsTest extends CIUnitTestCase
         ], ['saveData' => false]);
 
         $this->assertStringContainsString('<title>' . lang('App.components_title') . '</title>', $html);
+    }
+
+    public function testHeadPartialPublishesStarterIconSet(): void
+    {
+        $html = view('layouts/partials/head', ['title' => 'Starter'], ['saveData' => false]);
+
+        $this->assertStringContainsString('rel="icon" type="image/svg+xml"', $html);
+        $this->assertStringContainsString('favicon-96x96.png', $html);
+        $this->assertStringContainsString('apple-touch-icon.png', $html);
+        $this->assertStringContainsString('site.webmanifest', $html);
+        $this->assertStringContainsString('name="theme-color" content="#0f172a"', $html);
     }
 }

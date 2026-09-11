@@ -364,6 +364,8 @@ When `mirror_to_hub: true` is set in the template, those codes also appear in th
 1. Gates the entire section on `has_permission('{permission}')` — the section is invisible if the user lacks the permission.
 2. Adds a visual separator (`border-t`) and a section label to distinguish domain modules from hub modules.
 3. Links to the module route gated individually per resource.
+4. Supports optional `groups` with collapsible Alpine sections whose open state is persisted in
+   `localStorage`; active child routes force their group open.
 
 Example of a generated FAQ sidebar block:
 

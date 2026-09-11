@@ -10,6 +10,7 @@ use App\Filters\LocaleFilter;
 use App\Filters\MaintenanceFilter;
 use App\Filters\RateLimitFilter;
 use App\Filters\SecurityHeadersFilter;
+use App\Filters\SimpleUiFilter;
 use App\Filters\SuperAdminFilter;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
@@ -49,6 +50,7 @@ class Filters extends BaseFilters
         'ratelimit'     => RateLimitFilter::class,
         'securityheaders' => SecurityHeadersFilter::class,
         'maintenance'   => MaintenanceFilter::class,
+        'simpleui'      => SimpleUiFilter::class,
     ];
 
     /**
@@ -139,6 +141,11 @@ class Filters extends BaseFilters
                 'admin/*',
                 'language/*',
             ],
+        ],
+        // The simplified shell has a server-side default-deny allowlist. It
+        // only narrows presentation; route permissions still decide access.
+        'simpleui' => [
+            'before' => ['admin/*'],
         ],
     ];
 }

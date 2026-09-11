@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Modules\Cms\Services\BlockCatalogServiceInterface;
+use App\Modules\Cms\Services\BlockInstanceApiService;
+use App\Modules\Cms\Services\CollectionApiService;
 use App\Modules\Cms\Services\LanguageApiService;
 use App\Modules\Cms\Services\PageApiService;
+use App\Modules\Cms\Services\TranslationAuditApiService;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
@@ -56,6 +60,69 @@ final class PageFlowTest extends CIUnitTestCase
         ])->get('/admin/cms/pages');
 
         $result->assertStatus(200);
+    }
+
+    public function testShowRendersPageQualityReportFromDomain(): void
+    {
+        $pageService = $this->createMock(PageApiService::class);
+        $pageService->method('get')->with('1')->willReturn([
+            'ok' => true,
+            'status' => 200,
+            'data' => [
+                'id' => '1',
+                'page_type' => 'generic',
+                'status' => 'published',
+                'is_in_sitemap' => true,
+                'translations' => [['language_id' => 1, 'title' => 'Inicio', 'slug' => 'inicio']],
+            ],
+            'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+        ]);
+        $pageService->method('quality')->with('1')->willReturn([
+            'ok' => true,
+            'status' => 200,
+            'data' => [
+                'status' => 'warning',
+                'score' => 86,
+                'summary' => ['errors' => 0, 'warnings' => 1, 'passed' => 6],
+                'checks' => [['status' => 'warning', 'message_key' => 'meta_description_missing']],
+            ],
+            'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
+        ]);
+        $pageService->method('pages')->willReturn(['ok' => true, 'status' => 200, 'data' => [], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => []]);
+        Services::injectMock('pageApiService', $pageService);
+
+        $blockService = $this->createMock(BlockInstanceApiService::class);
+        $blockService->method('list')->willReturn(['ok' => true, 'status' => 200, 'data' => [], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => []]);
+        Services::injectMock('blockInstanceApiService', $blockService);
+
+        $collectionService = $this->createMock(CollectionApiService::class);
+        $collectionService->method('list')->willReturn(['ok' => true, 'status' => 200, 'data' => [], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => []]);
+        Services::injectMock('collectionApiService', $collectionService);
+
+        $languageService = $this->createMock(LanguageApiService::class);
+        $languageService->method('list')->willReturn(['ok' => true, 'status' => 200, 'data' => [], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => []]);
+        Services::injectMock('languageApiService', $languageService);
+
+        $translationService = $this->createMock(TranslationAuditApiService::class);
+        $translationService->method('auditOwnerBlocks')->willReturn(['ok' => true, 'status' => 200, 'data' => ['blocks' => []], 'raw' => '', 'headers' => [], 'messages' => [], 'fieldErrors' => []]);
+        Services::injectMock('translationAuditApiService', $translationService);
+
+        $catalogService = $this->createMock(BlockCatalogServiceInterface::class);
+        $catalogService->method('indexed')->willReturn([]);
+        Services::injectMock('blockCatalogService', $catalogService);
+
+        $result = $this->withSession([
+            'access_token' => 'token',
+            'user' => ['permissions' => ['cms.pages.read']],
+        ])->get('/admin/cms/pages/1');
+
+        $result->assertStatus(200);
+        $this->assertStringContainsString('data-page-quality', $result->getBody());
+        $this->assertStringContainsString('86%', $result->getBody());
+        $this->assertStringContainsString(
+            lang('Pages.quality_check_meta_description_missing'),
+            html_entity_decode($result->getBody(), ENT_QUOTES | ENT_HTML5)
+        );
     }
 
     public function testStoreValidationFailureRedirectsBack(): void

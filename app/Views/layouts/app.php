@@ -8,7 +8,7 @@
         <?= lang('App.skip_to_content') ?>
     </a>
     <div class="min-h-screen md:flex">
-        <?= $this->include('layouts/partials/sidebar') ?>
+        <?= $this->include(($uiMode ?? 'full') === 'simple' ? 'layouts/partials/sidebar_simple' : 'layouts/partials/sidebar') ?>
 
         <div class="flex-1 min-w-0">
             <?= $this->include('layouts/partials/navbar') ?>

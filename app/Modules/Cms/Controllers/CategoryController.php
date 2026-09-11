@@ -39,7 +39,7 @@ class CategoryController extends BaseWebController
         return $this->tableDataResponse(
             ['collection_id', 'parent_id'],
             ['name', 'created_at'],
-            fn (array $params) => $this->categoryService->list([...$params, 'include_translations' => 1]),
+            fn (array $params) => $this->categoryService->list([...$params, 'projection' => 'list']),
         );
     }
 
@@ -219,38 +219,11 @@ class CategoryController extends BaseWebController
             ])->setStatusCode(403);
         }
 
-        $request = $this->request;
-        if (! $request instanceof \CodeIgniter\HTTP\IncomingRequest) {
-            return $this->response->setJSON([
-                'ok' => false,
-                'message' => 'Invalid request type',
-            ])->setStatusCode(400);
-        }
-
-        $json = $request->getJSON(true);
-        $jsonArray = is_array($json) ? $json : [];
-        $items = $jsonArray['items'] ?? [];
-
-        if (! is_array($items)) {
-            return $this->response->setJSON([
-                'ok' => false,
-                'message' => 'Invalid payload structure',
-            ])->setStatusCode(400);
-        }
-
-        foreach ($items as $item) {
-            $id = (string) ($item['id'] ?? '');
-            $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
-
-            if ($id !== '') {
-                $this->categoryService->update($id, ['sort_order' => $value]);
-            }
-        }
-
-        return $this->response->setJSON([
-            'ok' => true,
-            'message' => lang('Files.gallery_save_success') ?? 'Order saved.',
-        ]);
+        return $this->saveSortOrderFromJson(
+            'categories',
+            [],
+            lang('Files.gallery_save_success') ?? 'Order saved.',
+        );
     }
 
 

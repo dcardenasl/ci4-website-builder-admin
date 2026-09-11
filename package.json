@@ -14,15 +14,16 @@
         "build:all": "npm run build:css && npm run build:js && npm run build:vendor",
         "lint:js": "eslint 'src/js/**/*.js'",
         "lint:all": "eslint 'src/js/**/*.js'",
+        "test": "npm run test:js",
         "test:js": "vitest run",
         "test:js:watch": "vitest",
         "prepare": "husky"
     },
     "dependencies": {
-        "@tiptap/core": "^3.27.1",
-        "@tiptap/extension-link": "^3.27.1",
-        "@tiptap/extension-placeholder": "^3.27.1",
-        "@tiptap/starter-kit": "^3.27.1",
+        "@tiptap/core": "^3.31.3",
+        "@tiptap/extension-link": "^3.31.3",
+        "@tiptap/extension-placeholder": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
         "alpinejs": "^3.14.9",
         "lucide": "^1.16.0",
         "sortablejs": "^1.15.2"
@@ -32,10 +33,11 @@
         "@tailwindcss/cli": "^4.3.0",
         "esbuild": "^0.28.1",
         "eslint": "^10.4.0",
+        "happy-dom": "^20.12.0",
         "husky": "^9.1.7",
         "lint-staged": "^17.0.5",
         "tailwindcss": "^4.3.0",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     },
     "lint-staged": {
         "src/js/**/*.js": [

@@ -55,15 +55,15 @@ $dataUrl = route_to('admin.cms.form_submissions.data') . ($activeStatus !== '' ?
         defaultSort: '-created_at',
         routes: { showBase: '<?= route_to('admin.cms.form_submissions') ?>' },
         limitOptions: <?= esc(json_encode(array_map('strval', $limitOptions ?? [10, 25, 50]))) ?>
-    })" x-init="init()">
+    })">
 
     <?= view('layouts/partials/table_toolbar', [
-        'title' => lang('FormSubmissions.title'),
+        'title' => lang('FormSubmissions.submissions_title'),
     ]) ?>
 
     <template x-if="loading && rows.length === 0">
         <?= view('components/display/loading_state', [
-            'title'       => 'FormSubmissions.title',
+            'title'       => 'FormSubmissions.submissions_title',
             'description' => 'App.loading_refreshing',
             'icon'        => 'mail',
         ]) ?>

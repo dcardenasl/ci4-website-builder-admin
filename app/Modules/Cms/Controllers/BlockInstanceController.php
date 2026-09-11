@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Cms\Controllers;
 
 use App\Controllers\BaseWebController;
-use App\Libraries\Cms\CmsEnums;
 use App\Modules\Cms\Services\BlockInstanceApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Services\TranslationAuditApiService;
 use App\Modules\Cms\Support\BlockOwnerRouting;
+use App\Support\CmsFieldEnums;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -143,7 +143,9 @@ class BlockInstanceController extends BaseWebController
         // Only show top-level blocks in the page editor (children managed via their parent's UI)
         $blocks = array_values(array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id'])));
 
-        $typesIndexed = $this->blockTypeOptions->resolve();
+        // This list renders static block metadata only; avoid hydrating all
+        // dynamic editor options for forms, collections, pages and entries.
+        $typesIndexed = $this->blockTypeOptions->rawIndexed();
         $routes = BlockOwnerRouting::routes($ownerType);
         $previewUrl = BlockOwnerRouting::previewUrl($ownerType, $page, $this->activeLanguages());
 
@@ -186,7 +188,8 @@ class BlockInstanceController extends BaseWebController
             return redirect()->to(BlockOwnerRouting::listRoute($ownerType))->with('error', BlockOwnerRouting::notFoundMessage($ownerType));
         }
 
-        $typesIndexed = $this->blockTypeOptions->resolve();
+        // Children list renders static metadata only; use the cheap catalog.
+        $typesIndexed = $this->blockTypeOptions->rawIndexed();
         $types = array_values($typesIndexed);
 
         $languages = $this->activeLanguages();
@@ -219,6 +222,7 @@ class BlockInstanceController extends BaseWebController
             'blockTypes'        => $types,
             'languages'         => $languages,
             'entryOptionsUrl'   => route_to('admin.cms.blocks.entries'),
+            'listingFieldCatalog' => $this->blockTypeOptions->listingFieldCatalog(),
             'translateUrl'      => route_to('admin.cms.translate'),
             'defaultLangCode'   => $languageContext['defaultLangCode'],
             'defaultLangId'     => $languageContext['defaultLangId'],
@@ -398,7 +402,7 @@ class BlockInstanceController extends BaseWebController
         $translatableFieldNames = [];
         foreach ($allFields as $fieldKey => $field) {
             $fieldType = $field['type'] ?? 'string';
-            if (!in_array($fieldType, CmsEnums::NON_TRANSLATABLE_TYPES, true)) {
+            if (! in_array($fieldType, CmsFieldEnums::NON_TRANSLATABLE_TYPES, true)) {
                 $translatableFieldNames[] = "block_data][{$fieldKey}";
             }
         }
@@ -422,6 +426,7 @@ class BlockInstanceController extends BaseWebController
             'blockType'    => $blockType,
             'languages'    => $languages,
             'entryOptionsUrl' => route_to('admin.cms.blocks.entries'),
+            'listingFieldCatalog' => $this->blockTypeOptions->listingFieldCatalog(),
             'defaultLangId' => $languageContext['defaultLangId'],
             'defaultLangCode' => $languageContext['defaultLangCode'],
             'defaultLangIndex' => $languageContext['defaultLangIndex'],
@@ -564,30 +569,10 @@ class BlockInstanceController extends BaseWebController
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
         $ownerType = $this->ownerTypeFromRequest();
-        $failed    = [];
-
-        foreach ($orders as $id => $order) {
-            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
-            if (!$blockResponse['ok']) {
-                $failed[] = $id;
-                continue;
-            }
-
-            $block          = $this->extractData($blockResponse);
-            $updateResponse = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
-                'block_id'     => (int) $block['block_id'],
-                'owner_type'   => $ownerType,
-                'owner_id'     => (int) $ownerId,
-                'sort_order'   => (int) $order,
-                'is_active'    => (bool) ($block['is_active'] ?? true),
-                'block_config' => $block['block_config'] ?? [],
-                'translations' => $block['translations'] ?? []
-            ]));
-
-            if (!$updateResponse['ok']) {
-                $failed[] = $id;
-            }
-        }
+        $response = $this->blockSortOrderResponse($ownerId, $ownerType, $orders);
+        $failed = ($response['ok'] ?? false)
+            ? []
+            : array_values(array_map(static fn (int|string $id): string => (string) $id, array_keys($orders)));
 
         if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
             return $this->response
@@ -614,31 +599,10 @@ class BlockInstanceController extends BaseWebController
         $orders    = is_array($ordersRaw) ? $ordersRaw : [];
 
         $ownerType = $this->ownerTypeFromRequest();
-        $failed    = [];
-
-        foreach ($orders as $id => $order) {
-            $blockResponse = $this->safeApiCall(fn () => $this->blockInstanceService->get($ownerId, $ownerType, $id));
-            if (!$blockResponse['ok']) {
-                $failed[] = $id;
-                continue;
-            }
-
-            $block          = $this->extractData($blockResponse);
-            $updateResponse = $this->safeApiCall(fn () => $this->blockInstanceService->update($ownerId, $ownerType, $id, [
-                'block_id'           => (int) $block['block_id'],
-                'owner_type'         => $ownerType,
-                'owner_id'           => (int) $ownerId,
-                'parent_instance_id' => (int) $instanceId,
-                'sort_order'         => (int) $order,
-                'is_active'          => (bool) ($block['is_active'] ?? true),
-                'block_config'       => $block['block_config'] ?? [],
-                'translations'       => $block['translations'] ?? [],
-            ]));
-
-            if (!$updateResponse['ok']) {
-                $failed[] = $id;
-            }
-        }
+        $response = $this->blockSortOrderResponse($ownerId, $ownerType, $orders, $instanceId);
+        $failed = ($response['ok'] ?? false)
+            ? []
+            : array_values(array_map(static fn (int|string $id): string => (string) $id, array_keys($orders)));
 
         if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
             return $this->response
@@ -652,6 +616,47 @@ class BlockInstanceController extends BaseWebController
         }
 
         return redirect()->to(route_to(BlockOwnerRouting::routes($ownerType)['children'], $ownerId, $instanceId))->with('success', lang('Pages.child_reorder_success'));
+    }
+
+    /**
+     * Reorder blocks without fetching/updating each full block payload.
+     *
+     * @param array<int|string, mixed> $orders
+     * @return array<string, mixed>
+     */
+    private function blockSortOrderResponse(
+        string $ownerId,
+        string $ownerType,
+        array $orders,
+        ?string $parentInstanceId = null,
+    ): array {
+        $items = [];
+        foreach ($orders as $id => $order) {
+            if (! is_numeric($id) || ! is_numeric($order)) {
+                return [
+                    'ok' => false,
+                    'status' => 400,
+                    'data' => [],
+                    'raw' => '',
+                    'headers' => [],
+                    'messages' => ['Invalid payload structure'],
+                    'fieldErrors' => [],
+                ];
+            }
+            $items[] = ['id' => (int) $id, 'sort_order' => (int) $order];
+        }
+
+        $scope = [
+            'owner_type' => $ownerType,
+            'owner_id' => (int) $ownerId,
+        ];
+        if ($parentInstanceId !== null) {
+            $scope['parent_instance_id'] = (int) $parentInstanceId;
+        }
+
+        return $this->safeApiCall(
+            fn () => $this->sortOrderApiCall('block_instances', $items, $scope)
+        );
     }
 
     public function entryOptions(): ResponseInterface

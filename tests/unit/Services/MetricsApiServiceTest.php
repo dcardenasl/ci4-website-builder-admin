@@ -46,7 +46,7 @@ final class MetricsApiServiceTest extends CIUnitTestCase
         $this->assertSame(404, $result['status']);
     }
 
-    public function testTimeseriesTransformsParallelArraysToPointObjects(): void
+    public function testTimeseriesPreservesParallelArraysForTheTypedAdapter(): void
     {
         $mock = $this->createMock(ApiClientInterface::class);
 
@@ -74,11 +74,10 @@ final class MetricsApiServiceTest extends CIUnitTestCase
         $result = $service->timeseries(['period' => '24h']);
 
         $this->assertTrue($result['ok']);
-        $points = $result['data']['data'];
-        $this->assertCount(2, $points);
-        $this->assertSame('2026-01-01', $points[0]['period']);
-        $this->assertSame(100, $points[0]['value']);
-        $this->assertSame(2, $points[0]['errors']);
-        $this->assertSame(45, $points[0]['latency']);
+        $data = $result['data']['data'];
+        $this->assertSame(['2026-01-01', '2026-01-02'], $data['dates']);
+        $this->assertSame([100, 200], $data['requests']);
+        $this->assertSame([2, 5], $data['errors']);
+        $this->assertSame([45, 50], $data['latency']);
     }
 }

@@ -45,7 +45,7 @@ class PageController extends BaseWebController
         return $this->tableDataResponse(
             ['parent_id'],
             ['name', 'created_at'],
-            fn (array $params) => $this->pageService->list([...$params, 'include_translations' => 1]),
+            fn (array $params) => $this->pageService->list([...$params, 'projection' => 'list']),
         );
     }
 
@@ -70,6 +70,7 @@ class PageController extends BaseWebController
         $blocksResp = $this->safeApiCall(
             fn () => service('blockInstanceApiService')->list($id, 'page')
         );
+        $qualityResp = $this->safeApiCall(fn () => $this->pageService->quality($id));
         $allBlocks = $blocksResp['ok'] ? $this->extractItems($blocksResp) : [];
         $blocks    = array_values(
             array_filter($allBlocks, static fn (array $b) => empty($b['parent_instance_id']))
@@ -85,6 +86,7 @@ class PageController extends BaseWebController
             'blockTypes'    => $this->fetchBlockTypesIndexed(),
             'languages'     => $this->getLanguages(),
             'blockTranslationStatus'  => $this->ownerBlockTranslationStatus('page', $id),
+            'quality'       => $qualityResp['ok'] ? $this->extractData($qualityResp) : ['status' => 'unavailable'],
         ]);
     }
 
@@ -131,7 +133,6 @@ class PageController extends BaseWebController
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
-
         return $this->render('cms/pages/create', [
             'title' => lang('Pages.pages_create'),
             'pages' => $this->pagesOptions(),
@@ -189,6 +190,7 @@ class PageController extends BaseWebController
         $translateTargets = ($defaultLangId > 0 && !empty($languages))
             ? $this->buildTranslateTargets($languages, $fieldMap, $defaultLangId)
             : [];
+        $qualityResp = $this->safeApiCall(fn () => $this->pageService->quality($id));
 
         return $this->render('cms/pages/edit', [
             'title' => lang('Pages.pages_edit'),
@@ -203,6 +205,7 @@ class PageController extends BaseWebController
             'translateTargets' => $translateTargets,
             'pageTypes' => $this->pageTypeOptions(),
             'returnTo' => $this->incomingReturnTo(),
+            'quality' => $qualityResp['ok'] ? $this->extractData($qualityResp) : ['status' => 'unavailable'],
         ]);
     }
 
@@ -333,38 +336,11 @@ class PageController extends BaseWebController
             ])->setStatusCode(403);
         }
 
-        $request = $this->request;
-        if (! $request instanceof \CodeIgniter\HTTP\IncomingRequest) {
-            return $this->response->setJSON([
-                'ok' => false,
-                'message' => 'Invalid request type',
-            ])->setStatusCode(400);
-        }
-
-        $json = $request->getJSON(true);
-        $jsonArray = is_array($json) ? $json : [];
-        $items = $jsonArray['items'] ?? [];
-
-        if (! is_array($items)) {
-            return $this->response->setJSON([
-                'ok' => false,
-                'message' => 'Invalid payload structure',
-            ])->setStatusCode(400);
-        }
-
-        foreach ($items as $item) {
-            $id = (string) ($item['id'] ?? '');
-            $value = isset($item['sort_order']) ? (int) $item['sort_order'] : 0;
-
-            if ($id !== '') {
-                $this->pageService->update($id, ['sort_order' => $value]);
-            }
-        }
-
-        return $this->response->setJSON([
-            'ok' => true,
-            'message' => lang('Files.gallery_save_success') ?? 'Order saved.',
-        ]);
+        return $this->saveSortOrderFromJson(
+            'pages',
+            [],
+            lang('Files.gallery_save_success') ?? 'Order saved.',
+        );
     }
 
 

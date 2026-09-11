@@ -37,7 +37,7 @@ $renderLabel = static fn (string $value): string => lang($value) !== $value ? la
                 <p class="text-xs font-semibold uppercase tracking-wider text-gray-400"><?= esc($renderLabel($eyebrow)) ?></p>
             <?php endif; ?>
             <div class="mt-1 flex flex-wrap items-center gap-2">
-                <h2 class="text-xl font-bold text-gray-900"><?= esc($renderLabel($title)) ?></h2>
+                <h1 class="text-xl font-bold text-gray-900"><?= esc($renderLabel($title)) ?></h1>
                 <?php if ($badge): ?>
                     <?= $badge ?>
                 <?php endif; ?>

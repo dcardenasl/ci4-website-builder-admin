@@ -11,6 +11,7 @@ use App\Libraries\BffApiClientInterface;
 use App\Libraries\DomainApiClient;
 use App\Libraries\DomainApiClientInterface;
 use App\Libraries\PermissionsSessionRefresher;
+use App\Libraries\PublicSiteCacheInvalidator;
 use App\Libraries\WebApiClient;
 use App\Libraries\WebApiClientInterface;
 use App\Modules\ApiKeys\Services\ApiKeyApiService;
@@ -23,6 +24,7 @@ use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Services\CategoryApiService;
 use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\EditorDocumentApiService;
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\FileTranslationApiService;
 use App\Modules\Cms\Services\LanguageApiService;
@@ -32,6 +34,8 @@ use App\Modules\Cms\Services\RedirectApiService;
 use App\Modules\Cms\Services\SettingApiService;
 use App\Modules\Cms\Services\TagApiService;
 use App\Modules\Cms\Services\TranslationAuditApiService;
+use App\Modules\Dashboard\Services\DashboardDataService;
+use App\Modules\Dashboard\Services\FileDashboardLock;
 use App\Modules\Dashboard\Services\HealthApiService;
 use App\Modules\Files\Services\FileApiService;
 use App\Modules\Iam\Services\ApplicationApiService;
@@ -60,6 +64,39 @@ use InvalidArgumentException;
  */
 class Services extends BaseService
 {
+    public static function dashboardDataService(bool $getShared = true): DashboardDataService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('dashboardDataService');
+        }
+
+        $config = config('Dashboard');
+
+        return new DashboardDataService(
+            static::bffApiClient(),
+            service('cache'),
+            new FileDashboardLock(WRITEPATH . 'cache/dashboard-locks', $config->lockMaxAge, $config->lockWaitMs),
+            $config->freshTtl,
+            $config->staleTtl,
+            $config->failureCooldownTtl,
+            $config->upstreamMaxRetries,
+        );
+    }
+
+    public static function publicSiteCacheInvalidator(bool $getShared = true): PublicSiteCacheInvalidator
+    {
+        if ($getShared) {
+            /** @var PublicSiteCacheInvalidator */
+            return static::getSharedInstance('publicSiteCacheInvalidator');
+        }
+
+        return new PublicSiteCacheInvalidator(
+            rtrim((string) env('PUBLIC_SITE_URL', ''), '/'),
+            (string) env('CACHE_INVALIDATE_KEY', ''),
+            5,
+        );
+    }
+
     public static function formRequest(string $class, bool $getShared = true): FormRequestInterface
     {
         if ($getShared) {
@@ -97,7 +134,7 @@ class Services extends BaseService
             return static::getSharedInstance('domainApiClient');
         }
 
-        return new DomainApiClient(config('DomainApiClient'));
+        return new DomainApiClient(config('DomainApiClient'), static::apiClient());
     }
 
     public static function bffApiClient(bool $getShared = true): BffApiClientInterface
@@ -107,7 +144,7 @@ class Services extends BaseService
             return static::getSharedInstance('bffApiClient');
         }
 
-        return new BffApiClient(config('BffApiClient'));
+        return new BffApiClient(config('BffApiClient'), static::apiClient());
     }
 
     public static function authApiService(bool $getShared = true): AuthApiService
@@ -216,7 +253,7 @@ class Services extends BaseService
             return static::getSharedInstance('webApiClient');
         }
 
-        return new WebApiClient(config('WebApiClient'));
+        return new WebApiClient(config('WebApiClient'), static::apiClient());
     }
 
     public static function webHealthApiService(bool $getShared = true): HealthApiService
@@ -356,6 +393,15 @@ class Services extends BaseService
         }
         return new CollectionApiService(static::domainApiClient());
     }
+
+    public static function sortOrderApiService(bool $getShared = true): \App\Services\SortOrderApiServiceInterface
+    {
+        if ($getShared) {
+            return static::getSharedInstance('sortOrderApiService');
+        }
+
+        return new \App\Services\SortOrderApiService(static::domainApiClient());
+    }
     public static function entryApiService(bool $getShared = true): EntryApiService
     {
         if ($getShared) {
@@ -363,6 +409,16 @@ class Services extends BaseService
             return static::getSharedInstance('entryApiService');
         }
         return new EntryApiService(static::domainApiClient());
+    }
+
+    public static function editorDocumentApiService(bool $getShared = true): EditorDocumentApiService
+    {
+        if ($getShared) {
+            /** @var EditorDocumentApiService */
+            return static::getSharedInstance('editorDocumentApiService');
+        }
+
+        return new EditorDocumentApiService(static::domainApiClient());
     }
     public static function categoryApiService(bool $getShared = true): CategoryApiService
     {

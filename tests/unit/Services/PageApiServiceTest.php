@@ -97,4 +97,18 @@ final class PageApiServiceTest extends CIUnitTestCase
         $service = new PageApiService($mock);
         $this->assertSame($expected, $service->archive('uuid-5'));
     }
+
+    public function testQualityCallsCorrectEndpoint(): void
+    {
+        $mock     = $this->createMock(ApiClientInterface::class);
+        $expected = ['ok' => true, 'status' => 200, 'data' => ['status' => 'ready', 'score' => 100]];
+
+        $mock->expects($this->once())
+            ->method('get')
+            ->with('/cms/pages/uuid-6/quality')
+            ->willReturn($expected);
+
+        $service = new PageApiService($mock);
+        $this->assertSame($expected, $service->quality('uuid-6'));
+    }
 }

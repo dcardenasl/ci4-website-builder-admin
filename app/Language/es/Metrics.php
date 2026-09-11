@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 return [
+    'trends_description'  => 'Solicitudes registradas durante el período seleccionado.',
+    'trends_table_caption' => 'Datos de tendencia de solicitudes',
+    'requests'            => 'Solicitudes',
+    'requests_unit'       => 'solicitudes',
+    'chart_empty'         => 'No hay datos de solicitudes disponibles para este período.',
+    'chart_error'         => 'No se pudo cargar la tendencia de solicitudes.',
     'title'             => 'Métricas y Salud',
     'overview'          => 'Vista General',
     'system_health'     => 'Salud del Sistema',

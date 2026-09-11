@@ -31,7 +31,7 @@ $fpFilter = $filterType ?? '';
         accept: '<?= esc($fpAccept, 'js') ?>',
         filterType: '<?= esc($fpFilter, 'js') ?>'
     })"
-     x-init="init()">
+     >
 
     <input type="hidden" :name="fieldName" :value="fileId">
 

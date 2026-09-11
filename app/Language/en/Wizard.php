@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 return [
+    'config_preview_title'   => 'Wizard configuration',
+    'config_preview_intro'   => 'This endpoint is showing the resolved wizard configuration for human inspection. JSON clients continue to receive the machine-readable response.',
+    'config_preview_payload' => 'Resolved configuration',
+    'config_preview_back'    => 'Back to wizard',
+
     // General
     'title'                  => 'Content assistant',
     'structure_title'        => 'Structure assistant',

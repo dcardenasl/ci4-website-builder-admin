@@ -9,6 +9,20 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (RouteCollection $routes): void {
+    // Visual editor shell and document protocol. These routes intentionally
+    // precede the classic page/entry segment routes.
+    $routes->get('editor', '\\App\\Modules\\Cms\\Controllers\\EditorController::hub', ['as' => 'admin.cms.editor']);
+    $routes->get('editor/pages/(:num)', '\\App\\Modules\\Cms\\Controllers\\EditorController::index/page/$1', ['as' => 'admin.cms.editor.pages', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('editor/entries/(:num)', '\\App\\Modules\\Cms\\Controllers\\EditorController::index/entry/$1', ['as' => 'admin.cms.editor.entries', 'filter' => 'permission:cms.entries.write']);
+    $routes->get('editor/pages/(:num)/document', '\\App\\Modules\\Cms\\Controllers\\EditorController::document/page/$1', ['as' => 'admin.cms.editor.pages.document', 'filter' => 'permission:cms.pages.write']);
+    $routes->get('editor/entries/(:num)/document', '\\App\\Modules\\Cms\\Controllers\\EditorController::document/entry/$1', ['as' => 'admin.cms.editor.entries.document', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('editor/pages/(:num)/document', '\\App\\Modules\\Cms\\Controllers\\EditorController::save/page/$1', ['as' => 'admin.cms.editor.pages.save', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('editor/entries/(:num)/document', '\\App\\Modules\\Cms\\Controllers\\EditorController::save/entry/$1', ['as' => 'admin.cms.editor.entries.save', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('editor/pages/(:num)/preview/renew', '\\App\\Modules\\Cms\\Controllers\\EditorController::renewPreview/page/$1', ['as' => 'admin.cms.editor.pages.preview_renew', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('editor/entries/(:num)/preview/renew', '\\App\\Modules\\Cms\\Controllers\\EditorController::renewPreview/entry/$1', ['as' => 'admin.cms.editor.entries.preview_renew', 'filter' => 'permission:cms.entries.write']);
+    $routes->post('editor/pages/(:num)/publish', '\\App\\Modules\\Cms\\Controllers\\EditorController::publish/page/$1', ['as' => 'admin.cms.editor.pages.publish', 'filter' => 'permission:cms.pages.write']);
+    $routes->post('editor/entries/(:num)/publish', '\\App\\Modules\\Cms\\Controllers\\EditorController::publish/entry/$1', ['as' => 'admin.cms.editor.entries.publish', 'filter' => 'permission:cms.entries.write']);
+
     // Wizard — content creation assistant (must be before any (:segment) routes)
     $routes->get('wizard', '\App\Modules\Cms\Controllers\WizardController::index', ['as' => 'admin.cms.wizard',        'filter' => 'permission:cms.entries.read']);
     $routes->get('wizard/config', '\App\Modules\Cms\Controllers\WizardController::config', ['as' => 'admin.cms.wizard.config',  'filter' => 'permission:cms.entries.read']);
@@ -163,6 +177,8 @@ $routes->group('admin/cms', ['filter' => ['auth', 'admin']], static function (Ro
     $routes->get('collections', '\App\Modules\Cms\Controllers\CollectionController::index', ['as' => 'admin.cms.collections', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/data', '\App\Modules\Cms\Controllers\CollectionController::data', ['as' => 'admin.cms.collections.data', 'filter' => 'permission:cms.collections.read']);
     $routes->get('collections/create', '\App\Modules\Cms\Controllers\CollectionController::create', ['as' => 'admin.cms.collections.create', 'filter' => 'permission:cms.collections.write']);
+    $routes->get('collections/reorder', '\App\Modules\Cms\Controllers\CollectionController::reorder', ['as' => 'admin.cms.collections.reorder', 'filter' => 'permission:cms.collections.write']);
+    $routes->post('collections/reorder', '\App\Modules\Cms\Controllers\CollectionController::saveOrder', ['as' => 'admin.cms.collections.save_order', 'filter' => 'permission:cms.collections.write']);
     $routes->get('collections/check-slug', '\App\Modules\Cms\Controllers\CollectionController::checkSlug', ['as' => 'admin.cms.collections.check_slug', 'filter' => 'permission:cms.collections.read']);
     $routes->post('collections', '\App\Modules\Cms\Controllers\CollectionController::store', ['as' => 'admin.cms.collections.store', 'filter' => 'permission:cms.collections.write']);
     $routes->get('collections/(:segment)', '\App\Modules\Cms\Controllers\CollectionController::show/$1', ['as' => 'admin.cms.collections.show', 'filter' => 'permission:cms.collections.read']);

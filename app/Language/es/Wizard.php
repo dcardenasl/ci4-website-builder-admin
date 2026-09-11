@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 return [
+    'config_preview_title'   => 'Configuración del asistente',
+    'config_preview_intro'   => 'Este endpoint muestra la configuración resuelta del asistente para inspección humana. Los clientes JSON siguen recibiendo la respuesta legible por máquinas.',
+    'config_preview_payload' => 'Configuración resuelta',
+    'config_preview_back'    => 'Volver al asistente',
+
     // General
     'title'                  => 'Asistente de contenido',
     'structure_title'        => 'Asistente de estructura',

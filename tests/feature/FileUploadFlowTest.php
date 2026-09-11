@@ -20,7 +20,7 @@ final class FileUploadFlowTest extends CIUnitTestCase
 
     private array $authSession = [
         'access_token' => 'test-token',
-        'user'         => ['id' => 1, 'email' => 'user@test.com', 'permissions' => []],
+        'user'         => ['id' => 1, 'email' => 'user@test.com', 'permissions' => ['files.read', 'files.write']],
     ];
 
     protected function tearDown(): void
@@ -40,6 +40,9 @@ final class FileUploadFlowTest extends CIUnitTestCase
         $this->assertStringContainsString('name="file"', $body);
         $this->assertStringContainsString('onFileChange(event)', $body);
         $this->assertStringContainsString(lang('Files.file_ready'), $body);
+        $this->assertStringContainsString('file-grid', $body);
+        $this->assertStringContainsString('file-type-visual', $body);
+        $this->assertStringContainsString('filePresentation(row).theme', $body);
     }
 
     public function testIndexRedirectsToLoginWithoutSession(): void
@@ -122,6 +125,53 @@ final class FileUploadFlowTest extends CIUnitTestCase
 
         $this->assertTrue($result['ok']);
         @unlink($tmpFile);
+    }
+
+    public function testFileDetailsDefersUsageVerificationUntilTheClientFetchesIt(): void
+    {
+        $mock = $this->createMock(FileApiService::class);
+        $mock->expects($this->once())
+            ->method('getInfo')
+            ->with('7')
+            ->willReturn($this->apiOkResponse([
+                'id'             => 7,
+                'original_name'  => 'image.jpg',
+                'variants'       => [],
+            ]));
+        $mock->expects($this->never())->method('usages');
+        Services::injectMock('fileApiService', $mock);
+
+        $result = $this->withSession($this->authSession)->get('/files/7/show');
+
+        $result->assertStatus(200);
+        $body = html_entity_decode($result->getBody(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $this->assertStringContainsString('data-file-usages', $body);
+        $this->assertStringNotContainsString('action="/files/7/delete"', $body);
+    }
+
+    public function testFileUsagesEndpointDecoratesUsagesForTheDeferredView(): void
+    {
+        $mock = $this->createMock(FileApiService::class);
+        $mock->expects($this->once())
+            ->method('usages')
+            ->with('7')
+            ->willReturn($this->apiOkResponse([
+                'complete' => true,
+                'data'     => [[
+                    'resource'    => 'pages',
+                    'resource_id' => 12,
+                    'role'        => 'hero',
+                    'label'       => 'Home',
+                ]],
+            ]));
+        Services::injectMock('fileApiService', $mock);
+
+        $result = $this->withSession($this->authSession)->get('/files/7/usages');
+
+        $result->assertStatus(200);
+        $body = $result->getBody();
+        $this->assertStringContainsString('"complete": true', $body);
+        $this->assertStringContainsString('/admin/cms/pages/12/edit', $body);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────

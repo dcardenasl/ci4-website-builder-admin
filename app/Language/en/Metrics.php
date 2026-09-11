@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 return [
+    'trends_description'  => 'Requests recorded during the selected period.',
+    'trends_table_caption' => 'Request trend data',
+    'requests'            => 'Requests',
+    'requests_unit'       => 'requests',
+    'chart_empty'         => 'No request data is available for this period.',
+    'chart_error'         => 'The request trend could not be loaded.',
     'title'             => 'Metrics & Health',
     'overview'          => 'Overview',
     'system_health'     => 'System Health',

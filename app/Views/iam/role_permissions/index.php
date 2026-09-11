@@ -7,7 +7,7 @@ $activeRoleId = (string) ($activeRoleId ?? '');
 
 <div class="mb-4 flex items-center justify-between">
     <div>
-        <h2 class="text-xl font-semibold text-gray-900"><?= esc(lang('Iam.role_permissions_title')) ?></h2>
+        <h1 class="text-xl font-semibold text-gray-900"><?= esc(lang('Iam.role_permissions_title')) ?></h1>
         <p class="text-sm text-gray-500"><?= esc(lang('Iam.role_permissions_help')) ?></p>
     </div>
 </div>

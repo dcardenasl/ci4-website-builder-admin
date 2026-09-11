@@ -7,6 +7,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-09-11
+
+### Fixed
+- **Updated Tiptap to 3.31.3 and Vitest to 4.1.11**, including the generated editor bundle,
+  removing the current editor prototype-pollution/ReDoS and test-runner path-traversal advisories.
+
+### Added
+- **Visual editor protocol shell** — added authenticated editor routes, the Domain document
+  adapter, normalized document envelopes, signed preview boot data, no-store mutations and safe
+  boot serialization for pages and entries.
+- **Page quality panel** — the page detail now consumes the Domain's protected quality report and shows its readiness status, score, counters, and actionable warnings/errors.
+- **Block type option caching** — hydrate the dynamic editor catalog once per short cache window, reuse active form/collection lookups across block types, and keep list-only views on the raw catalog.
+- **Starter runtime contracts** — documented the generic remote-table, sidebar, form, validation,
+  CSP and API/Domain wiring expectations used by newly generated admin panels.
+- Generic collection ordering — added a permission-gated reorder screen and
+  SortOrderApiService client for atomic Domain sort-order batches.
+- Public-site cache maintenance — added the generic PublicSiteCacheInvalidator bridge,
+  status screen, manual invalidation action, and system.public-cache.* permission contracts.
+
+### Changed
+- Documented the cross-origin visual-editor smoke, preview secret parity, CSP/CORS checks and
+  the fail-fast root launcher diagnostics.
+- Regenerated the tracked API Swagger snapshot so the Admin contract includes `roles.ui_mode`,
+  the file picker manifest, and the API Hub development server.
+- CMS server-driven tables now request Domain's explicit list projection; menu item counts arrive in that response instead of triggering a second item-list query.
+- CMS reorder screens now send one scoped batch to Domain instead of issuing one update request per item.
+
+### Fixed
+- **Starter favicon set** — added neutral SVG/PNG app icons, manifest links, and guarded
+  Apache cache headers without copying product-specific branding.
+- **Language namespace ownership** — consolidated the six CMS/Auth/Profile language
+  namespaces under their module catalogs, moved the keys used by the current forms and
+  collection wizard, and added an architecture regression for root/module collisions.
+- **Dashboard session locking** — dashboard widget requests now release the CI4 session lock
+  after their API calls complete, while token invalidation tolerates an already-closed session;
+  parallel widgets no longer serialize or crash during failed refreshes.
+- **Filter panel UX** — non-reactive panels no longer render Alpine loading or active-filter
+  bindings that cannot run without a `remoteTable` consumer.
+- **Structured form values** — display and text components now serialize array/object values
+  before escaping, preventing PHP string-conversion errors when API payloads are mapped directly.
+- **File detail responsiveness** — usage verification now loads after the file detail shell,
+  keeping the cross-domain read and delete decision out of the server-rendered request.
+- **CMS Alpine components** — extracted the block instance builder, collection template builder,
+  menu item form, and generic confirmation action into the compiled JavaScript entrypoint while
+  preserving the existing view consumers and language-aware form data.
+- **Translation proxy transport** — routed Google Translate requests through CodeIgniter's shared
+  `curlrequest` service, retaining the existing response contract and failure statuses.
+- **Public cache invalidation diagnostics** — logged skipped configuration, invalid scopes, remote
+  failures, compact upstream bodies, status failures, and successful invalidation scopes without
+  changing the best-effort result contract.
+- **Reusable form fields** — added generic password, file-gallery, server-error, and text-input
+  components plus their Alpine registrations, including accessible password visibility controls.
+- **Nested API validation errors** — shared normalization now exposes nested `fieldErrors` and
+  `errors` under dot-notated form keys across controllers and the API client.
+- **Admin route authorization regression test** — route coverage is discovered from module files
+  and checks fine-grained permissions without carrying Teatro Museo's business-module allowlist.
+- **CSP for Alpine and remote files** — moved `[x-cloak]` into the compiled stylesheet, stopped
+  applying automatic nonces to the inline Alpine-compatible policy, and allowlisted the configured
+  Hub API origin for file previews while retaining the required Alpine runtime directives.
+- **Alpine lifecycle** — removed redundant `x-init="init()"` hooks from Admin views and the
+  generated module template, preventing double initialization and duplicate remote-table fetches.
+- **`register-sidebar.sh`** — template-defined `admin_sidebar` entries can now declare generic
+  collapsible sub-groups with active-route expansion and persisted open state, while retaining
+  the original flat-list format.
+- **`SecondaryApiClient`** — `DomainApiClient`, `BffApiClient`, and `WebApiClient` now refresh their access token by delegating to the Hub client instead of calling `POST /auth/refresh` against their own base URL, an endpoint that doesn't exist there since only the Hub issues and refreshes JWTs.
+- **`filter_panel.php`** — the active-filter chip block is now wrapped in the `$reactiveHasFilters` guard, so non-reactive panels stop rendering dead Alpine bindings.
+
+### Security
+- **Admin route authorization** — removed the unauthorised Universal CRUD surface and its dead
+  autoload/configuration entries, and gated every Files route with the appropriate
+  `files.read` or `files.write` permission. Added architecture regressions for both protections.
+- **`codeigniter4/framework`** — bumped to v4.7.4, closing CVE-2026-63221 (critical, SQLi in `deleteBatch()`), CVE-2026-63222 (high, path traversal in `UploadedFile::move()`), and CVE-2026-63220 (medium, header spoofing in `isSecure()`). None of the three code paths are exercised by this app; verified via `composer audit`. A stricter `getJSON()` stub in 4.7.4 surfaced two real PHPStan gaps, fixed with `array_is_list()` guards in `BaseWebController::jsonRequestPayload()` and `FormController::jsonOrPost()`.
+
 ## [1.0.0] — 2026-07-23
 
 ### Added
@@ -130,4 +203,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [CMS-019] Language admin module to list, create, edit, delete, and set default languages.
 - [CMS-020] Setting admin module to manage translatable system configuration variables.
 - Transversal CMS sidebar section header and Lucide icons in navigation.
-

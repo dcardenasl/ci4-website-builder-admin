@@ -82,6 +82,11 @@ class TranslationAuditController extends BaseWebController
             }
         }
 
+        $pageRaw = $this->request->getGet('page');
+        $limitRaw = $this->request->getGet('limit') ?? $this->request->getGet('per_page');
+        $filters['page'] = is_scalar($pageRaw) && (string) $pageRaw !== '' ? max(1, (int) $pageRaw) : 1;
+        $filters['limit'] = is_scalar($limitRaw) && (string) $limitRaw !== '' ? min(100, max(1, (int) $limitRaw)) : 25;
+
         $response = $this->safeApiCall(fn () => $this->auditService->getReport($filters));
 
         $drawRaw = $this->request->getGet('draw');
@@ -99,13 +104,24 @@ class TranslationAuditController extends BaseWebController
             ]);
         }
 
-        $data = $this->extractData($response);
+        $payload = $response['data'] ?? [];
+        $isPage = is_array($payload) && isset($payload['items'], $payload['meta'])
+            && is_array($payload['items']) && is_array($payload['meta']);
+        $data = $isPage ? $payload['items'] : $this->extractData($response);
+        $meta = $isPage ? $payload['meta'] : [
+            'page' => 1,
+            'per_page' => count($data),
+            'total_items' => count($data),
+            'last_page' => 1,
+        ];
+        $totalItems = max(0, (int) ($meta['total_items'] ?? count($data)));
 
         return $this->response->setJSON([
             'draw' => $draw,
-            'recordsTotal' => count($data),
-            'recordsFiltered' => count($data),
+            'recordsTotal' => $totalItems,
+            'recordsFiltered' => $totalItems,
             'data' => $data,
+            'meta' => $meta,
         ]);
     }
 }

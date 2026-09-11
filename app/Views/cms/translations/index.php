@@ -150,7 +150,7 @@
                 const row = this.rows.find((candidate) => ['missing', 'incomplete', 'mismatch'].includes(candidate.status));
                 return row ? this.editUrl(row) : '#';
             }
-        }" x-init="init()">
+        }">
         
         <div class="pb-5 border-b border-gray-200 space-y-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

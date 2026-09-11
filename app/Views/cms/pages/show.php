@@ -5,6 +5,7 @@ $blocks        = $blocks        ?? [];
 $blockTypes    = $blockTypes    ?? [];
 $languages     = $languages     ?? [];
 $collections   = $collections   ?? [];
+$quality       = $quality       ?? null;
 
 // Build preview URL from the first translation slug
 $previewSlug = '';
@@ -37,6 +38,8 @@ foreach ($languages as $l) {
 <?php elseif (! empty($page)): ?>
     <?php $itemId = (string) ($page['id'] ?? ''); ?>
     <?= view('components/table/translation_status_panel', ['languages' => $languages, 'translations' => $page['translations'] ?? [], 'requiredFields' => ['slug', 'title'], 'sourceFields' => $page, 'sourceUpdatedAt' => $page['updated_at'] ?? null, 'editUrlTemplate' => route_to('admin.cms.pages.edit', $itemId)]) ?>
+
+    <?= view('cms/pages/partials/quality_panel', ['quality' => $quality]) ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <section class="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm p-5">

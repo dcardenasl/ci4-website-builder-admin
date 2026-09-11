@@ -1,9 +1,7 @@
 # TASKS — ci4-website-builder-admin
 
-> Fuente de verdad para trabajo abierto en este repositorio.
-> Los entregables cerrados están en [`TASKS_ARCHIVE.md`](TASKS_ARCHIVE.md).
-> Seguimiento global: [`../TASKS.md`](../TASKS.md).
-> Tracker depurado el 2026-07-21; no se conservan notas de conversación ni bitácoras de participantes.
+> Trabajo abierto de este repositorio. Lo cerrado está en [`TASKS_ARCHIVE.md`](TASKS_ARCHIVE.md).
+> Plan cross-repo: [`../docs/plans/2026-09-11-plan-nivelacion-stack-modular-suite.md`](../docs/plans/2026-09-11-plan-nivelacion-stack-modular-suite.md).
 
 ## 🔴 En progreso
 
@@ -11,30 +9,32 @@
 
 ## 🟡 Próximo
 
-### TRN-006 — Estados editoriales, permisos y controles de publicación
+*(vacío; la autorización por recurso es Domain-owned y no se duplica en Admin)*
 
-- [ ] Decidir el modelo de estados por idioma (`in_review`, `approved`, `published`).
-- [ ] Definir la relación con `status` de páginas y entradas.
-- [ ] Definir roles/permisos de aprobación antes de implementar migraciones, servicios y UI.
+## ✅ Cerrado con evidencia
 
-## ⚪ Backlog
+- **CNV-007-A1/A2 — Canvas Admin.** Commits `7ca7dc5` y `97eabe9`; shell, layout, módulos JS,
+  bridge y adaptador CSRF local con PHPStan/PHPUnit/Vitest/build verdes.
+- **CNV-007-A3 — Modo simple.** Commit `28d32ab`; `UiMode`, filtro server-side deny-by-default,
+  sidebar reducido, contrato de roles y regresiones sin bypass de permisos.
+- **GAP-02-admin — Paginación.** Commit `ee30cfb`; consumidor `page/limit/meta`, DataTables
+  envelope, total estable y tests de filtros/página/límite.
+- **CNV-007-F6 — Smoke real.** Editor visual verificado en navegador: preview firmado ES/EN,
+  selección de bloque raíz e hijo, renovación de token, CORS/CSP y consola limpia en carga fresca.
+- **CNV-007-F9 — Reconciliación de alcance.** Admin consume el filtrado/404 seguro de Domain y no
+  mantiene una ACL paralela; ocultar UI no sustituye la autorización del servicio. Evidencia
+  Domain: `729aa89`.
 
-### ADM-DEP-002 — lint-staged 16 → 17
+## ⚪ Fuera del plan actual
 
-- [ ] Esperar el baseline Node 22 (`>=22.22.1`), actualizar `lint-staged`, ejecutar `npm audit` y
-  verificar el hook `pre-commit`.
+- [ ] **TRN-006** — estados editoriales y controles de publicación.
 
-## 🏗️ Contratos de arquitectura
+## 🏗️ Contratos
 
-- **DTO-First:** Controllers y Services intercambian DTOs con contratos explícitos.
-- **Controllers delgados:** delegar lógica de negocio a Services y usar `DomainApiClient`.
-- **Permisos:** usar códigos separados por punto, por ejemplo `cms.pages.read`.
-- **Componentes compartidos:** reutilizar helpers de traducción, estados, formularios y media.
-- **i18n:** mantener paridad en `app/Language/en` y `app/Language/es`.
-- **Calidad:** cerrar tareas solo con tests, PHPStan/CS-Fixer, i18n y build aplicables en verde.
+- Controllers delgados, `DomainApiClient`, DTO-first e i18n `en`/`es`.
+- Cada cambio requiere tests, build, guardrails de seguridad y evidencia antes de marcarlo cerrado.
 
 ## 🔧 Referencias
 
-- Plan editorial: [`../docs/plans/2026-07-20-translation-workbench-plan.es.md`](../docs/plans/2026-07-20-translation-workbench-plan.es.md)
-- Tracker global: [`../TASKS.md`](../TASKS.md)
+- Plan: [`../docs/plans/2026-09-11-plan-nivelacion-stack-modular-suite.md`](../docs/plans/2026-09-11-plan-nivelacion-stack-modular-suite.md)
 - Histórico: [`TASKS_ARCHIVE.md`](TASKS_ARCHIVE.md)

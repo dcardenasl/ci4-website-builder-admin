@@ -1,6 +1,7 @@
 import { devError } from '../utils/dev.js';
 import { isObject } from '../utils/url.js';
 import { uiLabels, localePrefix } from '../utils/labels.js';
+import { bootLucideIcons } from '../utils/lucide.js';
 
 export const filePickerStore = {
     open: false,
@@ -108,6 +109,7 @@ export const filePickerStore = {
                 total_items: Number(meta.total_items ?? meta.total ?? files.length),
                 per_page: Number(meta.per_page ?? meta.limit ?? 24),
             };
+            if (typeof window !== 'undefined' && window.lucide) bootLucideIcons();
         } catch (err) {
             devError('[filePicker] loadFiles error:', err);
             this.error = true;
