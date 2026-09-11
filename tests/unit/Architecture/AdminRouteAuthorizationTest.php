@@ -27,6 +27,7 @@ final class AdminRouteAuthorizationTest extends CIUnitTestCase
      */
     private const CONTROLLER_ENFORCED_ROUTES = [
         'Cms' => [
+            "'editor'",
             "'wizard/structure'",
             "'wizard/structure/config'",
             "'wizard/structure/create-collection'",

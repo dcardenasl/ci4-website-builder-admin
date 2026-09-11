@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Visual editor protocol shell** — added authenticated editor routes, the Domain document
+  adapter, normalized document envelopes, signed preview boot data, no-store mutations and safe
+  boot serialization for pages and entries.
 - **Page quality panel** — the page detail now consumes the Domain's protected quality report and shows its readiness status, score, counters, and actionable warnings/errors.
 - **Block type option caching** — hydrate the dynamic editor catalog once per short cache window, reuse active form/collection lookups across block types, and keep list-only views on the raw catalog.
 - **Starter runtime contracts** — documented the generic remote-table, sidebar, form, validation,

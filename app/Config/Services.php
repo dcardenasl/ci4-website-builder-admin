@@ -24,6 +24,7 @@ use App\Modules\Cms\Services\BlockTypeApiService;
 use App\Modules\Cms\Services\BlockTypeOptionsResolver;
 use App\Modules\Cms\Services\CategoryApiService;
 use App\Modules\Cms\Services\CollectionApiService;
+use App\Modules\Cms\Services\EditorDocumentApiService;
 use App\Modules\Cms\Services\EntryApiService;
 use App\Modules\Cms\Services\FileTranslationApiService;
 use App\Modules\Cms\Services\LanguageApiService;
@@ -408,6 +409,16 @@ class Services extends BaseService
             return static::getSharedInstance('entryApiService');
         }
         return new EntryApiService(static::domainApiClient());
+    }
+
+    public static function editorDocumentApiService(bool $getShared = true): EditorDocumentApiService
+    {
+        if ($getShared) {
+            /** @var EditorDocumentApiService */
+            return static::getSharedInstance('editorDocumentApiService');
+        }
+
+        return new EditorDocumentApiService(static::domainApiClient());
     }
     public static function categoryApiService(bool $getShared = true): CategoryApiService
     {
