@@ -9,8 +9,6 @@
 
 ## 🟡 Próximo
 
-- [ ] **CNV-007-F6 — Smoke real.** Validar selección, scope, preview, locale, renovación de token,
-      CSP/CORS y consola en navegador real.
 - [ ] **CNV-007-F9 — Autorización por recurso.** Solo después de la nivelación completa.
 
 ## ✅ Cerrado con evidencia
@@ -21,6 +19,8 @@
   sidebar reducido, contrato de roles y regresiones sin bypass de permisos.
 - **GAP-02-admin — Paginación.** Commit `ee30cfb`; consumidor `page/limit/meta`, DataTables
   envelope, total estable y tests de filtros/página/límite.
+- **CNV-007-F6 — Smoke real.** Editor visual verificado en navegador: preview firmado ES/EN,
+  selección de bloque raíz e hijo, renovación de token, CORS/CSP y consola limpia en carga fresca.
 
 ## ⚪ Fuera del plan actual
 

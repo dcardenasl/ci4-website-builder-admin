@@ -185,3 +185,8 @@ El trabajo activo se reduce al smoke de integración; TRN-006 queda como backlog
   totales y pruebas de integración del controlador.
 
 Gates verificados: 711 tests, 2.562 aserciones, PHPStan, CS-Fixer, i18n, Vitest, lint y builds.
+
+## ✅ CNV-007-F6 — Smoke real — 2026-09-11
+
+Editor visual verificado en navegador con preview firmado ES/EN, selección raíz/hijo, renovación de
+token, CORS/CSP, bridge y consola limpia en carga fresca.
