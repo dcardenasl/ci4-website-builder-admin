@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   status screen, manual invalidation action, and system.public-cache.* permission contracts.
 
 ### Changed
+- Documented the cross-origin visual-editor smoke, preview secret parity, CSP/CORS checks and
+  the fail-fast root launcher diagnostics.
 - Regenerated the tracked API Swagger snapshot so the Admin contract includes `roles.ui_mode`,
   the file picker manifest, and the API Hub development server.
 - CMS server-driven tables now request Domain's explicit list projection; menu item counts arrive in that response instead of triggering a second item-list query.
