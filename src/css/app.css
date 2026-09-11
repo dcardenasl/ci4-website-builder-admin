@@ -232,3 +232,78 @@
 
 .richtext-content hr,
 .ProseMirror hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+
+/* ─── Visual editor canvas ─────────────────────────────────────────────── */
+.editor-properties__header { border-bottom: 1px solid rgb(226 232 240); padding: 1rem 1rem 0.875rem; }
+.editor-properties__eyebrow,
+.editor-properties__group-title {
+    color: rgb(100 116 139);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+}
+.editor-properties__locale {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background: rgb(239 246 255);
+    color: var(--color-brand-700);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    padding: 0.125rem 0.375rem;
+}
+.editor-properties__empty {
+    border: 1px dashed rgb(203 213 225);
+    border-radius: 0.625rem;
+    background: rgb(248 250 252);
+    padding: 0.875rem;
+    color: rgb(71 85 105);
+    font-size: 0.875rem;
+    line-height: 1.375rem;
+}
+.editor-properties__selected {
+    margin-bottom: 1.25rem;
+    border: 1px solid rgb(226 232 240);
+    border-radius: 0.625rem;
+    background: rgb(248 250 252);
+    padding: 0.75rem;
+}
+.editor-properties__selected-name { color: rgb(15 23 42); font-size: 0.9375rem; font-weight: 700; line-height: 1.25rem; }
+.editor-properties__selected-key { margin-top: 0.25rem; color: rgb(100 116 139); font-family: var(--font-mono); font-size: 0.6875rem; line-height: 1rem; }
+.editor-properties__group { margin-bottom: 1.5rem; }
+.editor-properties__group-title { border-bottom: 1px solid rgb(226 232 240); padding-bottom: 0.5rem; }
+.editor-properties__field { margin-top: 1rem; }
+.editor-properties__label-row { display: flex; min-height: 1.5rem; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.editor-properties__label { color: rgb(51 65 85); font-size: 0.8125rem; font-weight: 600; line-height: 1.25rem; }
+.editor-properties__copy { min-height: 1.75rem; border-radius: 0.375rem; padding: 0.25rem 0.375rem; color: var(--color-brand-700); font-size: 0.6875rem; font-weight: 700; line-height: 1rem; text-align: right; }
+.editor-properties__copy:hover { background: rgb(239 246 255); text-decoration: underline; }
+.editor-properties__hint { margin-top: 0.25rem; color: rgb(100 116 139); font-size: 0.6875rem; line-height: 1rem; }
+.editor-properties__control { margin-top: 0.375rem; }
+.editor-properties__boolean,
+.editor-properties__color,
+.editor-properties__media { display: flex; min-height: 2.75rem; align-items: center; gap: 0.5rem; margin-top: 0.375rem; }
+.editor-properties__boolean { cursor: pointer; justify-content: space-between; }
+.editor-properties__checkbox { width: 1.25rem; height: 1.25rem; accent-color: var(--color-brand-600); }
+.editor-properties__color-value { color: rgb(71 85 105); font-family: var(--font-mono); font-size: 0.6875rem; }
+.editor-properties__media { align-items: stretch; flex-wrap: wrap; }
+.editor-properties__media-button { flex: 1 1 12rem; text-align: left; }
+.editor-properties__media-remove { min-width: 2.75rem; min-height: 2.75rem; border-radius: 0.5rem; color: rgb(100 116 139); font-size: 1.25rem; line-height: 1; }
+.editor-properties__media-remove:hover { background: rgb(254 242 242); color: rgb(220 38 38); }
+.editor-properties__unsupported { margin-top: 0.375rem; border: 1px solid rgb(226 232 240); border-radius: 0.5rem; background: rgb(248 250 252); padding: 0.75rem; color: rgb(71 85 105); font-size: 0.75rem; line-height: 1.25rem; }
+.editor-properties__richtext .richtext-content { min-height: 8rem; }
+.editor-properties__richtext .ProseMirror:focus { outline: none; }
+[data-richtext-toolbar] button:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; }
+.editor-properties__richtext .ProseMirror p.is-editor-empty:first-child::before {
+    float: left;
+    height: 0;
+    color: rgb(100 116 139);
+    content: attr(data-placeholder);
+    pointer-events: none;
+}
+
+@media (max-width: 47.999rem) {
+    [data-richtext-toolbar] > .flex-1 { flex: 0 0 100% !important; height: 0; margin: 0; padding: 0; }
+    [data-richtext-toolbar] > button[data-richtext-action="undo"] { margin-left: auto; }
+}

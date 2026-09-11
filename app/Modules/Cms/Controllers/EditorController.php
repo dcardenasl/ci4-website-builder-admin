@@ -133,14 +133,31 @@ final class EditorController extends BaseWebController
                 'origin' => $this->originOf($site),
             ],
             'csrf' => ['name' => csrf_token(), 'token' => csrf_hash()],
-            'strings' => [
-                'title' => lang('EditorUi.title'),
-                'saving' => lang('EditorUi.saving'),
-                'saved' => lang('EditorUi.saved'),
-                'conflict' => lang('EditorUi.conflict'),
-                'previewUnavailable' => lang('EditorUi.previewUnavailable'),
-            ],
+            'strings' => $this->editorStrings(),
         ];
+    }
+
+    /** @return array<string, string> */
+    private function editorStrings(): array
+    {
+        $keys = [
+            'title', 'saving', 'saved', 'unsaved', 'saveFailed', 'conflict', 'preview', 'editorPanels', 'retry', 'reload',
+            'undo', 'blockRemoved', 'copyFrom', 'usingFallback', 'untranslated', 'noBlocksYet', 'noBlocksHint', 'selectBlock',
+            'previewUnavailable', 'classicEditor', 'unsupportedField', 'saveRejected', 'sessionExpired', 'networkError', 'serverError',
+            'selectMedia', 'removeMedia', 'back', 'level', 'addChild', 'reorderHelp', 'blocks', 'properties', 'addBlock',
+            'removeBlock', 'required', 'locked', 'content', 'design', 'desktop', 'mobile', 'publish', 'publishing', 'publishSuccess',
+            'publishFailed', 'previewRenewFailed', 'translateAll', 'translateAllContent', 'translateAllHelp', 'translationLanguages',
+            'translationDefault', 'translationMissing', 'translationComplete', 'translationNoText', 'translationOverwrite',
+            'translationOverwriteHelp', 'translationOverwriteConfirm', 'translationStart', 'translationTranslating',
+            'translationNothingToDo', 'translationDone', 'translationFailed',
+        ];
+
+        $strings = [];
+        foreach ($keys as $key) {
+            $strings[$key] = lang('EditorUi.' . $key);
+        }
+
+        return $strings;
     }
 
     /**

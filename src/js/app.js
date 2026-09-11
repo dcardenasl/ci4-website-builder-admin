@@ -47,6 +47,7 @@ import {
 } from './components/langTabs.js';
 import { wizard } from './components/wizard/index.js';
 import { structureWizard } from './components/wizard/structureIndex.js';
+import canvasEditor from './components/canvas/index.js';
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('confirm', confirmStore());
@@ -78,6 +79,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('structureWizard', structureWizard);
     Alpine.data('passwordToggle', passwordToggle);
     Alpine.data('cacheElapsed', cacheElapsed);
+    Alpine.data('canvasEditor', canvasEditor);
 
     // Window globals expected by PHP views and other components
     window.remoteTable = remoteTableFactory;
