@@ -164,3 +164,14 @@
 
 Los bloques completos se retiraron del tracker activo para que solo queden decisiones pendientes,
 backlog real y el contrato de calidad del repositorio.
+
+## ✅ Reconciliación para CNV-007 — 2026-09-11
+
+- **TM-BLD-01..09:** backport de TeatroMuseo cerrado con tests/build/i18n/guardrails aplicables:
+  seguridad de vistas, proyecciones, observabilidad, SEO, Wizard, media, previews, enums locales y
+  paridad de idiomas.
+- **ADM-DEP-002:** actualización de `lint-staged` a 17 y verificación de Node 22, audit, tests,
+  lint, build y hook de pre-commit.
+
+El trabajo activo se reduce a `CNV-007-A1..A3`, `GAP-02-admin` y el smoke de integración; TRN-006
+queda como backlog de producto.
