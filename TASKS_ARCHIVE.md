@@ -3,6 +3,12 @@
 > Historial de tareas completadas.
 > Última actualización: 2026-08-25
 
+## ✅ CNV-007-F9 — Reconciliación de alcance — 2026-09-11
+
+La autorización por recurso queda centralizada en Domain (`729aa89`). Admin no duplica ownership
+ni ACL: adapta envelopes, refleja permisos efectivos y deja que Domain imponga el 404 anti-
+enumeración. No hay implementación local pendiente.
+
 ---
 
 ## ✅ Remediación de huecos profundos — Fase 0 (2026-08-25)

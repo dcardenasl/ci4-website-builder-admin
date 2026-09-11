@@ -9,7 +9,7 @@
 
 ## 🟡 Próximo
 
-- [ ] **CNV-007-F9 — Autorización por recurso.** Solo después de la nivelación completa.
+*(vacío; la autorización por recurso es Domain-owned y no se duplica en Admin)*
 
 ## ✅ Cerrado con evidencia
 
@@ -21,6 +21,9 @@
   envelope, total estable y tests de filtros/página/límite.
 - **CNV-007-F6 — Smoke real.** Editor visual verificado en navegador: preview firmado ES/EN,
   selección de bloque raíz e hijo, renovación de token, CORS/CSP y consola limpia en carga fresca.
+- **CNV-007-F9 — Reconciliación de alcance.** Admin consume el filtrado/404 seguro de Domain y no
+  mantiene una ACL paralela; ocultar UI no sustituye la autorización del servicio. Evidencia
+  Domain: `729aa89`.
 
 ## ⚪ Fuera del plan actual
 
