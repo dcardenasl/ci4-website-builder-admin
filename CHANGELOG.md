@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Updated Tiptap to 3.31.3 and Vitest to 4.1.11**, including the generated editor bundle,
+  removing the current editor prototype-pollution/ReDoS and test-runner path-traversal advisories.
+
 ### Added
 - **Visual editor protocol shell** — added authenticated editor routes, the Domain document
   adapter, normalized document envelopes, signed preview boot data, no-store mutations and safe

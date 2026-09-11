@@ -20,10 +20,10 @@
         "prepare": "husky"
     },
     "dependencies": {
-        "@tiptap/core": "^3.27.1",
-        "@tiptap/extension-link": "^3.27.1",
-        "@tiptap/extension-placeholder": "^3.27.1",
-        "@tiptap/starter-kit": "^3.27.1",
+        "@tiptap/core": "^3.31.3",
+        "@tiptap/extension-link": "^3.31.3",
+        "@tiptap/extension-placeholder": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
         "alpinejs": "^3.14.9",
         "lucide": "^1.16.0",
         "sortablejs": "^1.15.2"
@@ -37,7 +37,7 @@
         "husky": "^9.1.7",
         "lint-staged": "^17.0.5",
         "tailwindcss": "^4.3.0",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     },
     "lint-staged": {
         "src/js/**/*.js": [

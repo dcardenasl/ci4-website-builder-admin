@@ -109,7 +109,7 @@
         "test:seed-contracts": "phpunit --testsuite=Contract --no-coverage",
         "test:fixture-policy": "php scripts/check-test-fixture-policy.php",
         "analyse": "vendor/bin/phpstan analyse --memory-limit=-1",
-        "format:check": "vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "format:check": "vendor/bin/php-cs-fixer fix --dry-run --diff --sequential",
         "format": "vendor/bin/php-cs-fixer fix",
         "i18n-check": "php scripts/i18n-check.php",
         "coverage:check": "php scripts/check-coverage.php 54.20 tests/coverage.xml",
