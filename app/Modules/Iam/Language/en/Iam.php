@@ -116,6 +116,12 @@ return [
     'field_application'                 => 'Application',
     'field_application_id'              => 'Application ID',
     'field_status'                      => 'Status',
+    'field_ui_mode'                     => 'Panel this role sees',
+    'ui_mode_full'                      => 'Full administration',
+    'ui_mode_full_help'                 => 'The whole panel: tables, wizard and technical settings.',
+    'ui_mode_simple'                    => 'Simplified editor',
+    'ui_mode_simple_help'               => 'Only Home, Pages, Collections and Messages, with the visual editor.',
+    'ui_mode_help'                      => 'Changes only what the person sees. Permissions still decide what they may do.',
 
     // Lookup empty states
     'no_applications'                   => 'No applications available. Run the IAM seeder to create the default application.',

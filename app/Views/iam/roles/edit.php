@@ -80,6 +80,29 @@ $lockedAssignedIds  = array_values(array_diff($assignedIdsStr, $grantableIds));
         </div>
 
         <div class="pt-2 border-t border-gray-100">
+            <span class="block text-sm font-medium text-gray-700"><?= esc(lang('Iam.field_ui_mode')) ?></span>
+            <p class="text-xs text-gray-500 mt-1"><?= esc(lang('Iam.ui_mode_help')) ?></p>
+            <?php $currentUiMode = (string) old('ui_mode', (string) ($item['ui_mode'] ?? 'full')); ?>
+            <?php $uiModeOptions = [
+                'full' => [lang('Iam.ui_mode_full'), lang('Iam.ui_mode_full_help')],
+                'simple' => [lang('Iam.ui_mode_simple'), lang('Iam.ui_mode_simple_help')],
+            ]; ?>
+            <div class="mt-2 space-y-2">
+                <?php foreach ($uiModeOptions as $uiModeOption => [$uiModeLabel, $uiModeHelp]): ?>
+                    <label class="flex items-start gap-2 text-sm">
+                        <input type="radio" name="ui_mode" value="<?= esc($uiModeOption) ?>" class="mt-1"
+                            <?= $currentUiMode === $uiModeOption ? 'checked' : '' ?>>
+                        <span>
+                            <span class="font-medium text-gray-800"><?= esc($uiModeLabel) ?></span>
+                            <span class="block text-xs text-gray-500"><?= esc($uiModeHelp) ?></span>
+                        </span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+            <?= render_field_error('ui_mode') ?>
+        </div>
+
+        <div class="pt-2 border-t border-gray-100">
             <span class="block text-sm font-medium text-gray-700"><?= esc(lang('Iam.permissions_assigned')) ?></span>
             <p class="text-xs text-gray-500 mt-1"><?= esc(lang('Iam.permissions_help_edit')) ?></p>
 

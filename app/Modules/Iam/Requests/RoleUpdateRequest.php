@@ -15,6 +15,13 @@ class RoleUpdateRequest extends RoleStoreRequest
             'description'    => $this->postString('description'),
         ];
 
+        // Keep this optional for compatibility with older forms and callers.
+        // The current role form always posts it, while an omitted value leaves
+        // the API's existing ui_mode untouched.
+        if ($this->request->getPost('ui_mode') !== null) {
+            $payload['ui_mode'] = $this->postString('ui_mode');
+        }
+
         // Only forward `permission_ids` when the form actually posted it. This
         // mirrors UserUpdateRequest::payload() and lets the API distinguish
         // "no change" (omit) from "clear all" (empty array).

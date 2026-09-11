@@ -8,6 +8,7 @@ use App\Libraries\ApiClientInterface;
 use App\Support\FieldErrorNormalizer;
 use App\Support\Requests\FormRequestInterface;
 use App\Support\SessionKeys;
+use App\Support\UiMode;
 use App\Traits\TableResponseTrait;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
@@ -47,6 +48,13 @@ abstract class BaseWebController extends BaseController
             // client-side JS can show a warning before the session lapses,
             // instead of users getting a confusing 401 mid-action.
             'sessionExpiresAt'    => $this->session->get(SessionKeys::EXPIRES_AT->value),
+            // The API supplies the effective role mode. This only selects the
+            // shell; SimpleUiFilter enforces the server-side UI boundary.
+            'uiMode'              => UiMode::fromMixed(
+                is_array($this->session->get(SessionKeys::USER->value))
+                    ? ($this->session->get(SessionKeys::USER->value)['ui_mode'] ?? null)
+                    : null,
+            )->value,
         ];
     }
 

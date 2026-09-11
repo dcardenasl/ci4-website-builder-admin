@@ -10,7 +10,7 @@ class RoleStoreRequest extends BaseFormRequest
 {
     protected function fields(): array
     {
-        return ['application_id', 'code', 'name', 'description', 'permission_ids'];
+        return ['application_id', 'code', 'name', 'description', 'ui_mode', 'permission_ids'];
     }
 
     public function rules(): array
@@ -20,6 +20,7 @@ class RoleStoreRequest extends BaseFormRequest
             'code'           => 'required|min_length[2]|max_length[100]',
             'name'           => 'required|min_length[2]|max_length[100]',
             'description'    => 'permit_empty|max_length[500]',
+            'ui_mode'        => 'permit_empty|in_list[full,simple]',
             'permission_ids' => 'permit_empty',
         ];
     }
@@ -34,6 +35,7 @@ class RoleStoreRequest extends BaseFormRequest
             'code'           => $this->postString('code'),
             'name'           => $this->postString('name'),
             'description'    => $this->postString('description'),
+            'ui_mode'        => $this->postString('ui_mode'),
             'permission_ids' => $this->normalizedPermissionIds(),
         ];
     }

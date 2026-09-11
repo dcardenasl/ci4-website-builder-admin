@@ -57,6 +57,7 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
             ->with($this->callback(function (array $payload): bool {
                 return ($payload['code'] ?? '') === 'editor'
                     && ($payload['name'] ?? '') === 'Editor'
+                    && ($payload['ui_mode'] ?? '') === 'simple'
                     && ($payload['permission_ids'] ?? null) === [10, 20];
             }))
             ->willReturn([
@@ -71,6 +72,7 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
             'code'           => 'editor',
             'name'           => 'Editor',
             'description'    => '',
+            'ui_mode'        => 'simple',
             'permission_ids' => ['10', '20', '', '0', 'abc'],
         ]);
 
@@ -84,6 +86,7 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
             ->method('update')
             ->with('uuid-1', $this->callback(function (array $payload): bool {
                 return array_key_exists('permission_ids', $payload)
+                    && ($payload['ui_mode'] ?? '') === 'simple'
                     && $payload['permission_ids'] === [5, 7];
             }))
             ->willReturn([
@@ -98,6 +101,7 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
             'code'           => 'editor',
             'name'           => 'Editor',
             'description'    => '',
+            'ui_mode'        => 'simple',
             'permission_ids' => ['5', '7'],
         ]);
 
@@ -136,7 +140,7 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
         $roleMock->method('get')->with('uuid-3')->willReturn([
             'ok'          => true,
             'status'      => 200,
-            'data'        => ['id' => 'uuid-3', 'code' => 'qa', 'name' => 'QA', 'description' => '', 'is_system' => false],
+            'data'        => ['id' => 'uuid-3', 'code' => 'qa', 'name' => 'QA', 'description' => '', 'ui_mode' => 'simple', 'is_system' => false],
             'raw'         => '', 'headers' => [], 'messages' => [], 'fieldErrors' => [],
         ]);
         $roleMock->method('listPermissions')->with('uuid-3')->willReturn([
@@ -197,6 +201,11 @@ final class RolePermissionEditFlowTest extends CIUnitTestCase
             'Unassigned permission #33 must render unchecked.'
         );
         $this->assertStringContainsString('value="33"', $body, 'Permission #33 must be listed.');
+        $this->assertMatchesRegularExpression(
+            '/name="ui_mode" value="simple"[^>]+checked/',
+            $body,
+            'The role UI mode should be preselected from the API response.'
+        );
     }
 
     public function testShowPageIsReadOnly(): void

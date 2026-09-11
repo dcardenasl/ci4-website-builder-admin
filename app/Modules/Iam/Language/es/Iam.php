@@ -116,6 +116,12 @@ return [
     'field_application'                 => 'Aplicación',
     'field_application_id'              => 'ID de aplicación',
     'field_status'                      => 'Estado',
+    'field_ui_mode'                     => 'Panel que ve este rol',
+    'ui_mode_full'                      => 'Administración completa',
+    'ui_mode_full_help'                 => 'Todo el panel: tablas, wizard y configuración técnica.',
+    'ui_mode_simple'                    => 'Editor simplificado',
+    'ui_mode_simple_help'               => 'Solo Inicio, Páginas, Colecciones y Mensajes, con el editor visual.',
+    'ui_mode_help'                      => 'Solo cambia lo que la persona ve. Los permisos siguen decidiendo lo que puede hacer.',
 
     // Lookup empty states
     'no_applications'                   => 'No hay aplicaciones disponibles. Ejecuta el seeder de IAM para crear la aplicación por defecto.',
