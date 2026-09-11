@@ -173,5 +173,15 @@ backlog real y el contrato de calidad del repositorio.
 - **ADM-DEP-002:** actualización de `lint-staged` a 17 y verificación de Node 22, audit, tests,
   lint, build y hook de pre-commit.
 
-El trabajo activo se reduce a `CNV-007-A1..A3`, `GAP-02-admin` y el smoke de integración; TRN-006
-queda como backlog de producto.
+El trabajo activo se reduce al smoke de integración; TRN-006 queda como backlog de producto.
+
+## ✅ CNV-007-A1/A2/A3 y GAP-02 — 2026-09-11
+
+- **CNV-007-A1/A2:** commits `7ca7dc5` y `97eabe9`; shell del canvas, módulos JS, bridge,
+  contratos de error y CSRF local adaptado.
+- **CNV-007-A3:** commit `28d32ab`; modo `full/simple`, allowlist server-side, sidebar reducido,
+  formularios de roles y pruebas de seguridad/presentación.
+- **GAP-02-admin:** commit `ee30cfb`; consumo paginado de auditoría con `items/meta`, filtros,
+  totales y pruebas de integración del controlador.
+
+Gates verificados: 711 tests, 2.562 aserciones, PHPStan, CS-Fixer, i18n, Vitest, lint y builds.

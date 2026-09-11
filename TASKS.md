@@ -9,17 +9,18 @@
 
 ## 🟡 Próximo
 
-- [ ] **CNV-007-A1 — Shell del canvas.** `EditorController`, layout a sangre, vistas parciales y
-      contrato de navegación.
-- [ ] **CNV-007-A2 — Módulos JS.** Portar/adaptar canvas y utilidades usando `csrfHeaders()` local;
-      no introducir el helper de cookies de la suite.
-- [ ] **CNV-007-A3 — Modo simple.** Consumir `roles.ui_mode` del Hub y aplicar deny-by-default a
-      `admin/*` con allowlist, después de H1.
-- [ ] **GAP-02-admin — Paginación.** Integrar `page`/`limit`/`meta` del Domain, con estados de
-      carga/error/vacío y pruebas de límites; no duplicar la regla de paginación.
 - [ ] **CNV-007-F6 — Smoke real.** Validar selección, scope, preview, locale, renovación de token,
       CSP/CORS y consola en navegador real.
 - [ ] **CNV-007-F9 — Autorización por recurso.** Solo después de la nivelación completa.
+
+## ✅ Cerrado con evidencia
+
+- **CNV-007-A1/A2 — Canvas Admin.** Commits `7ca7dc5` y `97eabe9`; shell, layout, módulos JS,
+  bridge y adaptador CSRF local con PHPStan/PHPUnit/Vitest/build verdes.
+- **CNV-007-A3 — Modo simple.** Commit `28d32ab`; `UiMode`, filtro server-side deny-by-default,
+  sidebar reducido, contrato de roles y regresiones sin bypass de permisos.
+- **GAP-02-admin — Paginación.** Commit `ee30cfb`; consumidor `page/limit/meta`, DataTables
+  envelope, total estable y tests de filtros/página/límite.
 
 ## ⚪ Fuera del plan actual
 
